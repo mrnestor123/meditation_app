@@ -6,7 +6,7 @@ import 'package:meditation_app/interface/commonWidget/titleWidget.dart';
 
 class StageWidget extends StatelessWidget {
   final int selectedIndex;
-  StagesBloc bloc = new StagesBloc();
+  //StagesBloc bloc = new StagesBloc();
 
   StageWidget(this.selectedIndex);
 
@@ -18,7 +18,7 @@ class StageWidget extends StatelessWidget {
         context: context,
         child: ListView(children: <Widget>[
           DescriptionWidget('These are all the stages'),
-          StreamBuilder<List<Stage>>(
+          /**  StreamBuilder<List<Stage>>(
             stream: bloc.allStages,
             builder: (context, snapshot) {
               if (snapshot.hasError) {
@@ -46,7 +46,7 @@ class StageWidget extends StatelessWidget {
                 return Text('something happened');
               }
             },
-          )
+          )**/
         ]),
       ),
       bottomNavigationBar: BottomNavyBar(selectedIndex),

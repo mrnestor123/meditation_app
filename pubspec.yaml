@@ -21,6 +21,9 @@ dependencies:
   bloc_provider: ^0.7.0
   observable: ^0.22.2
   uuid: ^2.0.4
+  sqflite: ^1.2.1
+  path: ^1.6.4
+  path_provider: ^1.6.1
   flutter:
     sdk: flutter
 

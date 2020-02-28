@@ -1,6 +1,7 @@
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/blocs/meditationBloc.dart';
+import 'package:meditation_app/domain/services/database_Service.dart';
 import 'package:meditation_app/interface/feed/feedWidget.dart';
 import 'package:meditation_app/interface/learn/learnWidget.dart';
 import 'package:meditation_app/interface/meditation/meditationWidget.dart';
@@ -13,6 +14,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    DB.init();
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: '/feed',

@@ -4,13 +4,17 @@ import 'package:meditation_app/domain/model/userModel.dart';
 import 'package:observable/observable.dart';
 
 import 'lessonModel.dart';
-
+/**
 class Stage {
   //The stageNumber is used as a unique ID
   int stageNumber;
   String description;
-  ObservableList<Lesson> lessons = new ObservableList();
-  ObservableList<User> users = new ObservableList();
+
+  //this is for referencing the lessons. A list with their ids.
+  ObservableList<String> lessons = new ObservableList();
+
+  //this is for referencing the users. List with their ids
+  ObservableList<String> users = new ObservableList();
 
   Stage({@required this.stageNumber, description});
 
@@ -25,4 +29,4 @@ class Stage {
   ObservableList<Lesson> getLessons() => lessons;
 
   void addPerson(User u) => users.add(u);
-}
+}**/

@@ -13,7 +13,7 @@ class MeditationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _meditationBloc = BlocProvider.of<MeditationBloc>(context);
+    //final _meditationBloc = BlocProvider.of<MeditationBloc>(context);
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -26,16 +26,18 @@ class MeditationWidget extends StatelessWidget {
               alignment: Alignment.topCenter,
               padding: EdgeInsets.all(16),
               child: FloatingActionButton(
-                  backgroundColor: Colors.redAccent,
-                  child: Text('Start'),
-                  elevation: 0,
-                  onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              MeditationinProgress(_meditationBloc)))),
+                backgroundColor: Colors.redAccent,
+                child: Text('Start'),
+                elevation: 0,
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            MeditationinProgress(//_meditationBloc)
+                                ))),
+              ),
             ),
-          )
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavyBar(selectedIndex),
@@ -111,7 +113,7 @@ class _State extends State<TimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final _meditationBloc = BlocProvider.of<MeditationBloc>(context);
+    // final _meditationBloc = BlocProvider.of<MeditationBloc>(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -136,7 +138,7 @@ class _State extends State<TimePicker> {
                         hours = changedtimer.inSeconds ~/ 3600;
                         minutes = (changedtimer.inSeconds % 3600) ~/ 60;
                         seconds = (changedtimer.inSeconds % 3600) % 60;
-                        _meditationBloc.setDuration(changedtimer);
+                        //_meditationBloc.setDuration(changedtimer);
                       });
                     });
               }),

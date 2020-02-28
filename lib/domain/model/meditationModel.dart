@@ -5,11 +5,12 @@ import 'package:uuid/uuid.dart';
 import 'package:uuid/uuid_util.dart';
 
 import 'feedModel.dart';
-
+/**
 class Meditation {
   Duration totalduration, meditationtime;
   String ambientsong, id;
   bool completed;
+  //for referencing the user.
   int userId;
   int reminderBell;
   var uuid = new Uuid(options: {'grng': UuidUtil.cryptoRNG});
@@ -41,4 +42,4 @@ class NonGuidedMeditation extends Meditation {
           totalduration: duration,
           userId: userId,
         );
-}
+}**/

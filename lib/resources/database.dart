@@ -4,7 +4,7 @@ import 'package:meditation_app/domain/model/meditationModel.dart';
 import 'package:meditation_app/domain/model/stageModel.dart';
 import 'package:meditation_app/domain/model/userModel.dart';
 import 'package:observable/observable.dart';
-
+/** 
 class DataBase {
   //Stages DB
   static ObservableList<Stage> stages = new ObservableList();
@@ -105,4 +105,4 @@ class DataBase {
   static Stage getStage(int stageNumber) => stages[--stageNumber];
 
   static Feed getFeed() => feed;
-}
+} */

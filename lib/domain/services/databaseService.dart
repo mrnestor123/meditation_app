@@ -7,6 +7,7 @@ import 'package:meditation_app/resources/database.dart';
 import 'package:observable/observable.dart';
 
 //This class is for connecting with the database. Every request to the DB MUST pass from this class.
+/**
 class DataBaseConnection {
   static int userCount = 0;
 
@@ -52,4 +53,4 @@ class DataBaseConnection {
   }
 
   static Stage getStage(int number) => DataBase.getStage(number);
-}
+}**/

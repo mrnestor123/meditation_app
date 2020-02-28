@@ -5,15 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/blocs/meditationBloc.dart';
 
 class MeditationinProgress extends StatelessWidget {
-  final MeditationBloc _meditationBloc;
+  // final MeditationBloc _meditationBloc;
 
-  MeditationinProgress(this._meditationBloc);
+  //MeditationinProgress(this._meditationBloc);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(),
-        body: CountDownWidget(duration: _meditationBloc.getDuration()));
+    return Scaffold(appBar: AppBar());
+    // body: CountDownWidget(duration: _meditationBloc.getDuration()));
   }
 }
 
