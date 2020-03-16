@@ -1,9 +1,72 @@
-import 'package:meditation_app/domain/model/feedModel.dart';
-import 'package:meditation_app/domain/model/lessonModel.dart';
-import 'package:meditation_app/domain/model/meditationModel.dart';
-import 'package:meditation_app/domain/model/stageModel.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:observable/observable.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:sqflite/sqflite.dart';
+
+abstract class DB {
+  static Database _db;
+
+  static int get _version => 1;
+
+  static Future<void> init() async {
+    if (_db != null) {
+      print('DB is not null');
+      return;
+    }
+
+    try {
+      Directory documentsDirectory = await getApplicationDocumentsDirectory();
+      String _path = join(documentsDirectory.path, 'database4.db');
+      print('que pasa ');
+      print(_path);
+      _db = await openDatabase(_path,
+          version: _version, onCreate: onCreate, onConfigure: _onConfigure);
+    } catch (ex) {
+      print(ex);
+    }
+  }
+
+  static void onCreate(Database db, int version) async {
+    db.execute(
+        'CREATE TABLE Stage(stagenumber INTEGER PRIMARY KEY AUTOINCREMENT, description VARCHAR(255) NOT NULL)');
+    db.execute(
+        'CREATE TABLE User (coduser INTEGER  NOT NULL PRIMARY KEY AUTOINCREMENT, nombre VARCHAR(255) NOT NULL , mail VARCHAR(255) NOT NULL, usuario VARCHAR(15) NOT NULL,stagenumber INTEGER NOT NULL , FOREIGN KEY (stagenumber) REFERENCES Stage(stagenumber))');
+
+    db.execute(
+        'CREATE TABLE Meditation (codmed INTEGER PRIMARY KEY AUTOINCREMENT, duration DATETIME NOT NULL,recording VARCHAR(15), guided INTEGER NOT NULL )');
+
+    db.execute(
+        'CREATE TABLE Lesson(codlesson INTEGER PRIMARY KEY AUTOINCREMENT, slider VARCHAR(15) NOT NULL, description VARCHAR(50) NOT NULL, text TEXT ,stagenumber INTEGER NOT NULL, FOREIGN KEY (stagenumber) REFERENCES Stage (stagenumber))');
+
+    db.execute(
+        'CREATE TABLE MeditationsinProgress(cod_user INTEGER NOT NULL, codmed INTEGER NOT NULL, FOREIGN KEY (coduser) REFERENCES User(coduser), FOREIGN KEY (codmed) REFERENCES Meditation(codmed))');
+
+    db.execute(
+        'CREATE TABLE FinishedMeditation(coduser INTEGER NOT NULL, codmed INTEGER NOT NULL, FOREIGN KEY (coduser) REFERENCES User(coduser), FOREIGN KEY (codmed) REFERENCES Meditation(codmed))');
+
+    db.execute(
+        'CREATE TABLE LearnedLessons(codlesson INTEGER NOT NULL, coduser INTEGER NOT NULL,FOREIGN KEY (codlesson)  REFERENCES Lesson(codlesson), FOREIGN KEY(coduser) REFERENCES User(coduser))');
+  }
+
+  static Future _onConfigure(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  /**static Future<List<Map<String, dynamic>>> query(String table) async =>
+      _db.query(table);
+
+  static Future<int> insert(String table) async => 
+      //await _db.insert(table);
+
+  static Future<int> update(String table, Model model) async => await _db
+      //.update(table, model.toMap(), where: 'id = ?', whereArgs: [model.id]);
+
+  static Future<int> delete(String table, Model model) async =>
+      await _db.delete(table, where: 'id = ?', whereArgs: [model.id]);
+  **/
+}
+
 /** 
 class DataBase {
   //Stages DB

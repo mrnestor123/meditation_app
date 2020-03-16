@@ -1,9 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/model/stageModel.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:meditation_app/domain/services/databaseService.dart';
-import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
 /**
 // Lesson class for tracking the lessons. A lesson would be instantiated as Lesson(explanation:"the description");
 class Lesson {

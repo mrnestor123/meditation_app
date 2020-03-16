@@ -1,9 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/model/lessonModel.dart';
-import 'package:meditation_app/domain/model/meditationModel.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:meditation_app/domain/services/databaseService.dart';
-import 'package:observable/observable.dart';
 /** 
 class Feed {
   //Stores the users ids that are connected

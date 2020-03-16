@@ -1,10 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:meditation_app/domain/services/databaseService.dart';
-import 'package:uuid/uuid.dart';
-import 'package:uuid/uuid_util.dart';
-
-import 'feedModel.dart';
 /**
 class Meditation {
   Duration totalduration, meditationtime;

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>141053385105-odel3hgbuh4nlmggqlb0fnbvkh17ucaq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.141053385105-odel3hgbuh4nlmggqlb0fnbvkh17ucaq</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAToHv7qBwgVJnRZvaM6fTozSAm-pYVePY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>141053385105</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.meditationApp</string>
+	<key>PROJECT_ID</key>
+	<string>the-mind-illuminated</string>
+	<key>STORAGE_BUCKET</key>
+	<string>the-mind-illuminated.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:141053385105:ios:ae954c4b9318ed6678e230</string>
+	<key>DATABASE_URL</key>
+	<string>https://the-mind-illuminated.firebaseio.com</string>
+</dict>
+</plist>

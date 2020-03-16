@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "141053385105",
+    "firebase_url": "https://the-mind-illuminated.firebaseio.com",
+    "project_id": "the-mind-illuminated",
+    "storage_bucket": "the-mind-illuminated.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:141053385105:android:52818e7c84ed57d178e230",
+        "android_client_info": {
+          "package_name": "com.example.meditationApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "141053385105-nvbr1mo02pui9pmi9g7pa48gjfhmv6ct.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0NrZLXmyTfEzpkQiFiRbX9sOexx0WWNw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "141053385105-nvbr1mo02pui9pmi9g7pa48gjfhmv6ct.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "141053385105-odel3hgbuh4nlmggqlb0fnbvkh17ucaq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.meditationApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

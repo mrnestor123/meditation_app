@@ -1,12 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/model/feedModel.dart';
-import 'package:meditation_app/domain/model/lessonModel.dart';
-
-import 'package:meditation_app/domain/model/meditationModel.dart';
-import 'package:meditation_app/domain/model/stageModel.dart';
-import 'package:meditation_app/domain/services/databaseService.dart';
-import 'package:observable/observable.dart';
-import 'package:uuid/uuid.dart';
 /**
 enum UserState {
   available,

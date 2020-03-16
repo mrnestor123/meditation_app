@@ -1,9 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:observable/observable.dart';
-
-import 'lessonModel.dart';
 /**
 class Stage {
   //The stageNumber is used as a unique ID

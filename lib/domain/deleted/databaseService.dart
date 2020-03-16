@@ -1,10 +1,5 @@
 //This class is for simulating a DataBase. In the future, this class will access the database and handle all the operations in there.
-import 'package:meditation_app/domain/model/lessonModel.dart';
-import 'package:meditation_app/domain/model/meditationModel.dart';
-import 'package:meditation_app/domain/model/stageModel.dart';
-import 'package:meditation_app/domain/model/userModel.dart';
-import 'package:meditation_app/resources/database.dart';
-import 'package:observable/observable.dart';
+
 
 //This class is for connecting with the database. Every request to the DB MUST pass from this class.
 /**
