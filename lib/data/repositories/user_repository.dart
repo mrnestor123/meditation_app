@@ -5,15 +5,16 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
+import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   UserRemoteDataSource remoteDataSource;
   UserLocalDataSource localDataSource;
-  NetworkInfoImpl networkInfo;
+  NetworkInfo networkInfo;
 
   UserRepositoryImpl(
       {@required this.remoteDataSource,
@@ -29,14 +30,23 @@ class UserRepositoryImpl implements UserRepository {
     try {
       final localUser = await localDataSource.getUser();
       return Right(localUser);
-    } on ServerException {
+    } on Exception {
       if (await networkInfo.isConnected) {
         try {
           final newUser = await remoteDataSource.loginUser(
               usuario: usuario, password: password);
+
+          final l= await remoteDataSource.getUserData(userid: newUser.coduser);
+
+          newUser.setRemainingLessons(l.remaining);
+          newUser.setLearnedLessons(l.learned);
+          newUser.setMeditations(l.meditation);
+
           localDataSource.cacheUser(newUser);
           return Right(newUser);
-        } on ServerException {
+        }on LoginException{ 
+          return Left(LoginFailure());
+        }on ServerException {
           return Left(ServerFailure());
         }
       } else {
@@ -49,7 +59,6 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, User>> registerUser(
       {String nombre,
       String mail,
-      String nomuser,
       String password,
       String usuario,
       int stagenumber}) async {
@@ -59,10 +68,11 @@ class UserRepositoryImpl implements UserRepository {
         final newUser = await remoteDataSource.registerUser(
             nombre: nombre,
             mail: mail,
-            usuario: nomuser,
+            usuario: usuario,
             password: password,
             stagenumber: stagenumber);
         //Añadimos las lecciones
+        newUser.setRemainingLessons(await remoteDataSource.getStageLessons(stage:stagenumber));
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on ServerException {
@@ -73,7 +83,7 @@ class UserRepositoryImpl implements UserRepository {
         localDataSource.cacheUser(UserModel(
             nombre: nombre,
             mail: mail,
-            usuario: nomuser,
+            usuario: usuario,
             password: password,
             stagenumber: stagenumber));
         final localUser = await localDataSource.getUser();
@@ -84,16 +94,4 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, User>> setLessons(User u) async {
-
-     if (await networkInfo.isConnected) {
-      try {
-        final List<Lesson> 
-    
-   
-
-
-
-  }
 }

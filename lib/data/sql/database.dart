@@ -17,7 +17,7 @@ abstract class DB {
 
     try {
       Directory documentsDirectory = await getApplicationDocumentsDirectory();
-      String _path = join(documentsDirectory.path, 'database4.db');
+      String _path = join(documentsDirectory.path, 'database5.db');
       print('que pasa ');
       print(_path);
       _db = await openDatabase(_path,

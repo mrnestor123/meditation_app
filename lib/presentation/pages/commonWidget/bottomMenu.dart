@@ -70,7 +70,7 @@ class BottomNavyBarState extends State<BottomNavyBar> {
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: EdgeInsets.only(left: 8, top: 4, right: 8, bottom: 4),
-      height: 56,
+      height: MediaQuery.of(context).size.height*0.08,
       decoration: BoxDecoration(
           color: backgroundColor,
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black12)]),

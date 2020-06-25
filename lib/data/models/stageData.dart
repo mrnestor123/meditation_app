@@ -1,6 +1,8 @@
 import 'dart:convert';
 
-class StageModel {
+import 'package:meditation_app/domain/entities/stage_entity.dart';
+
+class StageModel extends Stage{
   final int stagenumber;
   final String description;
 

@@ -12,9 +12,9 @@ class LoginUseCase extends UseCase<User, UserParams> {
   LoginUseCase(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(UserParams params) {
+  Future<Either<Failure, User>> call(UserParams params) async{
     // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-    return repository.loginUser(
+    return await repository.loginUser(
       password: params.password,
       usuario: params.usuario,
     );

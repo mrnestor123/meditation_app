@@ -5,11 +5,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserModel extends User {
-  final int coduser, stagenumber;
-  final String nombre, mail, usuario, password;
+  final int stagenumber;
+  final String coduser,nombre, usuario, password;
+  final String mail;
 
   UserModel({
     this.coduser,

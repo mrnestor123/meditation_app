@@ -25,8 +25,9 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   //Añadimos el usuario a la cache.
   @override
   Future<void> cacheUser(UserModel userToCache) {
-    return sharedPreferences.setString(
-        CACHED_USER, json.encode(userToCache.toJson()));
+    // sharedPreferences.setString(
+    // CACHED_USER, json.encode(userToCache.toJson()));
+    return null;
   }
 
   @override
@@ -34,9 +35,10 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
 
     if (jsonUser != null) {
-      return Future.value(UserModel.fromJson(json.decode(jsonUser)));
+    return Future.value(UserModel.fromJson(json.decode(jsonUser)));
     } else {
-      throw CacheException();
+    throw CacheException();
     }
+    return null;
   }
 }

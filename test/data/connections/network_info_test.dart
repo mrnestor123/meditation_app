@@ -15,6 +15,7 @@ void main() {
   });
 
   group('isConnected', () {
+    
     test(
       'should forward the call to DataConnectionChecker.hasConnection',
       () async {
