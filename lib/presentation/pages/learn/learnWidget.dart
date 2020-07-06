@@ -38,7 +38,8 @@ class LessonView extends StatelessWidget {
         color: Colors.blueGrey,
         padding: EdgeInsets.all(16),
         margin: EdgeInsets.all(8),
-        child: Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
+        child: Column(
+          mainAxisSize: MainAxisSize.max, children: <Widget>[
           Text(text),
           Expanded(
             child: ListView.builder(

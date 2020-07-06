@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
 List<Map> sidebarItems = [
   {'icon': Icons.explore, 'text': 'Explore'},
@@ -17,7 +18,7 @@ class _SideBarState extends State<SideBar> {
   Widget build(BuildContext context) {
     return Container(
         padding: EdgeInsets.only(top:40,bottom:60,left:20),
-        color: Color.fromRGBO(163, 113, 190, 100),
+        color: Configuration.maincolor,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
