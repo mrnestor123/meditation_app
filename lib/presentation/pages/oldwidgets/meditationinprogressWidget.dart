@@ -1,18 +1,20 @@
 import 'dart:async';
 
-import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/blocs/meditationBloc.dart';
+import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:provider/provider.dart';
 
 class MeditationinProgress extends StatelessWidget {
   // final MeditationBloc _meditationBloc;
+  Duration duration;
 
+  MeditationinProgress({this.duration});
   //MeditationinProgress(this._meditationBloc);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar());
-    // body: CountDownWidget(duration: _meditationBloc.getDuration()));
+    return Scaffold(body: CountDownWidget(duration: duration));
   }
 }
 
@@ -37,6 +39,7 @@ class _CountDownWidgetState extends State<CountDownWidget> {
     icon = Icons.pause;
     _duration = widget.duration;
     _started = true;
+    print('starting timer with duration ' + _duration.toString());
     startTimer();
   }
 
@@ -53,6 +56,8 @@ class _CountDownWidgetState extends State<CountDownWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final _meditationstate = Provider.of<MeditationState>(context);
+    final _userstate = Provider.of<UserState>(context);
     return Column(
       children: <Widget>[
         Expanded(

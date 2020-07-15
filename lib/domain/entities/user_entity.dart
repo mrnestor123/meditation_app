@@ -51,4 +51,5 @@ class User extends Equatable {
     lessonslearned.add(l);
     remainingLessons.remove(l);
   }
+
 }

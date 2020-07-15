@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:meditation_app/interface/commonWidget/bottomMenu.dart';
-import 'package:meditation_app/interface/commonWidget/titleWidget.dart';
 
 class LearnWidget extends StatelessWidget {
   final int selectedIndex;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:meditation_app/interface/commonWidget/bottomMenu.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:provider/provider.dart';
 
 class ProfileWidget extends StatefulWidget {
   final int selectedIndex;
@@ -12,13 +14,14 @@ class ProfileWidget extends StatefulWidget {
 class _ProfileWidgetState extends State<ProfileWidget> {
   @override
   Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.more_vert),
+            icon: Icon(Icons.more_vert, color: Colors.black),
             onPressed: () {},
           )
         ],
@@ -42,7 +45,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               height: 25.0,
             ),
             Text(
-              'Jose García',
+                _userstate.user.nombre,
               style: TextStyle(
                   fontFamily: 'Montserrat',
                   fontSize: 20.0,
@@ -52,7 +55,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
               height: 4.0,
             ),
             Text(
-              'Valencia',
+              'Nivel 10',
               style: TextStyle(fontFamily: 'Montserrat', color: Colors.grey),
             ),
             Padding(
@@ -85,8 +88,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
             buildinfoDetail()
           ])
         ],
-      ),
-      bottomNavigationBar: BottomNavyBar(widget.selectedIndex),
+      )
     );
   }
 

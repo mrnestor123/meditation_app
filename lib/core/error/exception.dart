@@ -10,3 +10,5 @@ class LessonException implements Exception{}
 
 class DataException implements Exception{}
 
+class MeditationException implements Exception{}
+

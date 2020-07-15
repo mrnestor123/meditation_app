@@ -9,21 +9,38 @@ part of 'login_state.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$LoginState on _LoginState, Store {
-  final _$userAtom = Atom(name: '_LoginState.user');
+  final _$logAtom = Atom(name: '_LoginState.log');
 
   @override
-  dynamic get user {
-    _$userAtom.context.enforceReadPolicy(_$userAtom);
-    _$userAtom.reportObserved();
-    return super.user;
+  Either<Failure, User> get log {
+    _$logAtom.context.enforceReadPolicy(_$logAtom);
+    _$logAtom.reportObserved();
+    return super.log;
   }
 
   @override
-  set user(dynamic value) {
-    _$userAtom.context.conditionallyRunInAction(() {
-      super.user = value;
-      _$userAtom.reportChanged();
-    }, _$userAtom, name: '${_$userAtom.name}_set');
+  set log(Either<Failure, User> value) {
+    _$logAtom.context.conditionallyRunInAction(() {
+      super.log = value;
+      _$logAtom.reportChanged();
+    }, _$logAtom, name: '${_$logAtom.name}_set');
+  }
+
+  final _$loggeduserAtom = Atom(name: '_LoginState.loggeduser');
+
+  @override
+  User get loggeduser {
+    _$loggeduserAtom.context.enforceReadPolicy(_$loggeduserAtom);
+    _$loggeduserAtom.reportObserved();
+    return super.loggeduser;
+  }
+
+  @override
+  set loggeduser(User value) {
+    _$loggeduserAtom.context.conditionallyRunInAction(() {
+      super.loggeduser = value;
+      _$loggeduserAtom.reportChanged();
+    }, _$loggeduserAtom, name: '${_$loggeduserAtom.name}_set');
   }
 
   final _$_userFutureAtom = Atom(name: '_LoginState._userFuture');
@@ -87,7 +104,7 @@ mixin _$LoginState on _LoginState, Store {
   @override
   String toString() {
     final string =
-        'user: ${user.toString()},errorMessage: ${errorMessage.toString()},startedlogin: ${startedlogin.toString()}';
+        'log: ${log.toString()},loggeduser: ${loggeduser.toString()},errorMessage: ${errorMessage.toString()},startedlogin: ${startedlogin.toString()}';
     return '{$string}';
   }
 }

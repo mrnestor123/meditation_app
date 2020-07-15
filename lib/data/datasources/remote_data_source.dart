@@ -1,12 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/exception.dart';
-import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/structures/tupla.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/data/sql/database.dart';
-import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:observable/observable.dart';
@@ -34,10 +30,19 @@ abstract class UserRemoteDataSource {
       String usuario,
       int stagenumber});
 
-  //Given the user or the we get all the lessons in order to populate them
-  Future<List<LessonModel>> getStageLessons({int stage});
+  //Given the stage we get all the lessons of  it. We get the brain lessons
+  Future<List<LessonModel>> getBrainLessons({int stage});
+
+  
+  Future<List<LessonModel>> getMeditationLessons({int stage});
 
   Future<Tupla> getUserData({String userid});
+
+
+  Future<MeditationModel> meditate(Duration d, UserModel user);
+
+
+
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -63,7 +68,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   
     if(user != null){
-    return user;
+      return user;
     } else{
       throw LoginException();
      }
@@ -91,9 +96,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<List<LessonModel>> getStageLessons({int stage}) async{
+  Future<List<LessonModel>> getBrainLessons({int stage}) async{
      ObservableList<LessonModel> l = new ObservableList<LessonModel>();
-    CollectionReference lessons = collectionGet('lessons');
+    CollectionReference lessons = collectionGet('lessons').document(stage.toString()).collection("brain");
     // Query query = lessons.where("stagenumber",isEqualTo:"1");
     QuerySnapshot documents = await lessons.getDocuments();
     for (DocumentSnapshot document in documents.documents) {
@@ -145,5 +150,20 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }else {
       throw DataException();
     }
+  }
+
+  @override
+  Future<List<LessonModel>> getMeditationLessons({int stage}) {
+    // TODO: implement getMeditationLessons
+    throw UnimplementedError();
+  }
+
+// Faltaría añadirlo a la base de datos
+  @override
+  Future<MeditationModel> meditate(Duration d, UserModel user) async{
+    // TODO: implement meditate
+    MeditationModel res = new MeditationModel(duration: d.toString()); 
+    user.totalMeditations.add(res);
+    return res;
   }
 }

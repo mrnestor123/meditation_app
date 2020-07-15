@@ -21,7 +21,7 @@ class UserRepositoryImpl implements UserRepository {
       @required this.localDataSource,
       @required this.networkInfo});
 
-  /// Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
+  //Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
   @override
   Future<Either<Failure, User>> loginUser({
     String password,
@@ -36,7 +36,7 @@ class UserRepositoryImpl implements UserRepository {
           final newUser = await remoteDataSource.loginUser(
               usuario: usuario, password: password);
 
-          final l= await remoteDataSource.getUserData(userid: newUser.coduser);
+          final l = await remoteDataSource.getUserData(userid: newUser.coduser);
 
           newUser.setRemainingLessons(l.remaining);
           newUser.setLearnedLessons(l.learned);
@@ -44,14 +44,24 @@ class UserRepositoryImpl implements UserRepository {
 
           localDataSource.cacheUser(newUser);
           return Right(newUser);
-        }on LoginException{ 
+        } on LoginException {
           return Left(LoginFailure());
-        }on ServerException {
+        } on ServerException {
           return Left(ServerFailure());
         }
       } else {
         return Left(ServerFailure());
       }
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> islogged() async {
+    try {
+      final user = await localDataSource.getUser();
+      return Right(user);
+    } on Exception {
+      return Left(CacheFailure(error: ' User is not in cache'));
     }
   }
 
@@ -72,7 +82,8 @@ class UserRepositoryImpl implements UserRepository {
             password: password,
             stagenumber: stagenumber);
         //Añadimos las lecciones
-        newUser.setRemainingLessons(await remoteDataSource.getStageLessons(stage:stagenumber));
+        newUser.setRemainingLessons(
+            await remoteDataSource.getBrainLessons(stage: stagenumber));
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on ServerException {
@@ -93,5 +104,4 @@ class UserRepositoryImpl implements UserRepository {
       }
     }
   }
-
 }

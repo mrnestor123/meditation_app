@@ -11,4 +11,10 @@ abstract class LessonRepository {
 
   //in order to add a lesson to the database.
   Future<Either<Failure,void>> addLesson({Lesson lesson});
+
+  Future<Either<Failure,List<Lesson>>> getBrainLessons({int stage});
+
+    Future<Either<Failure,List<Lesson>>> getMeditationLessons({int stage});
+
+
 }

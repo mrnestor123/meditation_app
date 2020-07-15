@@ -7,7 +7,7 @@ class Meditation extends Equatable {
   //final String userId;
 
   Meditation(
-      {@required this.codmed,
+      {this.codmed,
       this.title,
       @required this.duration,
       this.recording,

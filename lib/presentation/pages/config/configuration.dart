@@ -4,52 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 class Configuration {
-  //the purple color
-  static Color maincolor = Color.fromRGBO(135, 61, 175, 100);
-  static TextStyle title = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.white,
-      letterSpacing: .5,
-      fontSize: 20
-    ),
-  );
-
-  static TextStyle paragraph = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: 15
-    ),
-  );
-
-  static TextStyle settings = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: 20,
-      fontWeight: FontWeight.bold
-    ),
-  );
-
-
-  static double iconSize;
-
-  static TextStyle subtitle = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: 25,
-    ),
-  );
-
-  
-
-
-  static List<Color> slidegradient = [
-    Colors.grey[300],
-    Colors.grey[400],
-    Colors.grey[600]
-  ];
   static MediaQueryData _mediaQueryData;
  
   static double width;
@@ -60,7 +14,117 @@ class Configuration {
   static double _safeAreaVertical;
   static double safeBlockHorizontal;
   static double safeBlockVertical;
-  
+
+
+
+  //the purple color
+  static Color maincolor = Color.fromRGBO(135, 61, 175, 100);
+  static TextStyle title = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+      letterSpacing: .5,
+      fontSize: safeBlockHorizontal*5
+    ),
+  );
+
+  static TextStyle modaltitle = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.black,
+      letterSpacing: .5,
+      fontSize: safeBlockHorizontal*6
+    ),
+  );
+
+  static TextStyle modalsubtitle = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      letterSpacing: .5,
+      fontSize: safeBlockHorizontal*4
+    ),
+  );
+
+  static TextStyle paragraph = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.bold,
+      letterSpacing: .5,
+    ),
+    fontSize: safeBlockHorizontal*5
+  );
+
+  static TextStyle settings = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      letterSpacing: .5,
+      fontSize: blockSizeHorizontal*6,
+      fontWeight: FontWeight.bold
+    ),
+  );
+
+
+  static TextStyle nombre = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+      letterSpacing: .5,
+      fontSize: blockSizeHorizontal*10
+    )
+  );
+
+
+  static double iconSize;
+
+  static TextStyle subtitle = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Color.fromRGBO(135, 61, 175, 100),
+      letterSpacing: .5,
+      fontSize: Configuration.safeBlockHorizontal*6,
+    ),
+  );
+
+   static TextStyle numbers = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+      letterSpacing: .5,
+    ),
+    fontSize: safeBlockHorizontal*15
+  );
+
+
+
+  static TextStyle lessontext = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color:Colors.white,
+      letterSpacing:.5,
+      fontWeight: FontWeight.bold
+    ),
+    fontSize: safeBlockHorizontal*3.5
+  );
+
+
+
+  static TextStyle infoCardnumber = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      letterSpacing: .5,
+      fontWeight: FontWeight.bold,
+    ),
+    fontSize: safeBlockHorizontal*5
+  );
+
+  static TextStyle infoCarddescription = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      letterSpacing: .5,
+    ),
+    fontSize: safeBlockHorizontal*3
+  );
+
+  static List<Color> slidegradient = [
+    Colors.grey[300],
+    Colors.grey[400],
+    Colors.grey[600]
+  ];
   
   void init(BuildContext context) {
     _mediaQueryData = MediaQuery.of(context);

@@ -38,10 +38,12 @@ dependencies:
   cloud_firestore: ^0.13.4+2
   cloud_firestore_mocks: ^0.4.2
   mock_cloud_firestore: ^0.0.20
+  collection: ^1.14.12
   shared_preferences: ^0.5.6+2
   auto_size_text: ^2.1.0
   http: any
   data_connection_checker: any
+  font_awesome_flutter: ^8.8.1
   flutter:
     sdk: flutter
 
@@ -76,6 +78,7 @@ flutter:
     - images/logo.jpg
     - images/sky.jpg
     - images/meditando.png
+    - images/drawing.jpg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

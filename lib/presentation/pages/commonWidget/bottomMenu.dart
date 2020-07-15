@@ -19,14 +19,14 @@ class BottomNavyBarState extends State<BottomNavyBar> {
 
   List<NavigationItem> items = [
     NavigationItem(
-        Icon(Icons.home), Text('Feed'), Colors.deepPurpleAccent, "/feed"),
+        Icon(Icons.home), Text('Feed'), Colors.deepPurpleAccent, ""),
     NavigationItem(
-        Icon(Icons.view_headline), Text('Stages'), Colors.pinkAccent, "/stage"),
-    NavigationItem(Icon(Icons.book), Text('Lessons'), Colors.blue, "/learn"),
+        Icon(Icons.view_headline), Text('Stages'), Colors.pinkAccent, ""),
+    NavigationItem(Icon(Icons.book), Text('Lessons'), Colors.blue, ""),
     NavigationItem(
-        Icon(Icons.school), Text('Meditation'), Colors.lightBlue, "/meditate"),
+        Icon(Icons.school), Text('Meditation'), Colors.lightBlue, ""),
     NavigationItem(
-        Icon(Icons.person), Text('Profile'), Colors.blueGrey, "/profile")
+        Icon(Icons.person), Text('Profile'), Colors.blueGrey, "")
   ];
 
   Widget _buildItem(NavigationItem item, bool isSelected) {

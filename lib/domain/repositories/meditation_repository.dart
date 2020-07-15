@@ -7,5 +7,5 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 
 abstract class MeditationRepository{
 
-  Future<Either<Failure,void>> meditate({Meditation meditation,User user});
+  Future<Either<Failure,Meditation>> meditate({Duration d,User user});
 }

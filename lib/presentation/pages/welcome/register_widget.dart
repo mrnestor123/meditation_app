@@ -9,6 +9,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/button.dart';
@@ -25,6 +26,7 @@ class RegisterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _registerstate = Provider.of<RegisterState>(context);
+    final _userstate = Provider.of<UserState>(context);
     // TODO: implement build
     return Scaffold(
         appBar: AppBar(

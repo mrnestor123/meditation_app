@@ -16,6 +16,7 @@ abstract class UserLocalDataSource {
 }
 
 const CACHED_USER = 'CACHED_USER';
+const CACHED_MEDITATIONS ='CACHED_MEDITATIONS';
 
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
@@ -25,20 +26,18 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   //Añadimos el usuario a la cache.
   @override
   Future<void> cacheUser(UserModel userToCache) {
-    // sharedPreferences.setString(
-    // CACHED_USER, json.encode(userToCache.toJson()));
-    return null;
+     return sharedPreferences.setString(
+    CACHED_USER, json.encode(userToCache.toJson())
+    );
   }
 
   @override
   Future<UserModel> getUser() {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
-
     if (jsonUser != null) {
     return Future.value(UserModel.fromJson(json.decode(jsonUser)));
     } else {
     throw CacheException();
     }
-    return null;
   }
 }

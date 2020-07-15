@@ -14,4 +14,8 @@ abstract class UserRepository {
       String password,
       String usuario,
       int stagenumber});
+
+
+  Future<Either<Failure,User>> islogged();
+
 }

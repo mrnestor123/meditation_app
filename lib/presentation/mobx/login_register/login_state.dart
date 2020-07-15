@@ -18,7 +18,10 @@ abstract class _LoginState with Store {
   LoginUseCase _loginusecase;
 
   @observable
-  var user;
+  Either<Failure,User> log;
+
+  @observable
+  User loggeduser;
 
   @observable
   Future<Either<Failure, User>> _userFuture;
@@ -57,10 +60,13 @@ abstract class _LoginState with Store {
       // Reset the possible previous error message.
       try {
         errorMessage = "";
-        _userFuture =
-            _loginusecase(UserParams(usuario: username, password: password));
-        user = await _userFuture;
-        print(user);
+        _userFuture =_loginusecase(UserParams(usuario: username, password: password));
+        log = await _userFuture;
+        log.fold(
+          (Failure f) => errorMessage = f.error, 
+          (User u ) => loggeduser = u
+        );
+        
       } on Failure {
         errorMessage = ' Could not log user';
       }
@@ -68,6 +74,7 @@ abstract class _LoginState with Store {
       errorMessage= 'Please fill user and password fields';
     }
   }
+
 
   String _mapFailureToMessage(Failure failure) {
     // Instead of a regular 'if (failure is ServerFailure)...'

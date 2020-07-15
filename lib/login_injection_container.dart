@@ -5,14 +5,26 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/firestore_mock.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
+import 'package:meditation_app/data/repositories/meditation_repository.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
+import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/domain/usecases/lesson/get_brain_lessons.dart';
+import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
+import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'data/repositories/lesson_repository.dart';
+import 'domain/repositories/lesson_repository.dart';
+import 'presentation/mobx/actions/lesson_state.dart';
+import 'presentation/mobx/actions/meditation_state.dart';
+import 'presentation/mobx/actions/menu_state.dart';
+import 'presentation/mobx/actions/user_state.dart';
 
 final sl = GetIt.instance;
 
@@ -26,14 +38,41 @@ Future<void> init() async {
     () => RegisterState(registerUseCase:sl()),
   );
 
+  sl.registerFactory(
+    () => MeditationState(),
+  );
 
-  //User-Register use case
+  sl.registerFactory(
+    () => UserState(cachedUseCase: sl(),meditate: sl()),
+  );
+
+  sl.registerFactory(
+    () => LessonState(brainlessonsUseCase: sl()),
+  );
+
+  sl.registerFactory(
+    () => MenuState(sidebarRoute: '/main',bottomenuindex: 1),
+  );
+
+
+  //Use cases
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
+  sl.registerLazySingleton(()=> CachedUserUseCase(sl()));
+  sl.registerLazySingleton(()=> GetBrainLessonsUseCase(sl()));
+  sl.registerLazySingleton(()=> MeditateUseCase(sl()));
 
-  //Repository
+
+  //Repositories
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
       remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
+
+   sl.registerLazySingleton<LessonRepository>(() => LessonRepositoryImpl(
+      remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
+
+   sl.registerLazySingleton<MeditationRepository>(() => MeditationRepositoryImpl(
+     localDataSource: sl(), remoteDataSource: sl(), networkInfo: sl())); 
+
 
    //Network info
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
@@ -44,7 +83,6 @@ Future<void> init() async {
   sl.registerLazySingleton<UserLocalDataSource>(
     () => UserLocalDataSourceImpl(sharedPreferences: sl()),
   );
-
 
   //External
   final sharedPreferences = await SharedPreferences.getInstance();

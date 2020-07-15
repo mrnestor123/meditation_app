@@ -6,6 +6,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:meditation_app/core/error/failures.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +20,7 @@ class LoginWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _loginstate = Provider.of<LoginState>(context);
+    final _userstate = Provider.of<UserState>(context);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -30,8 +34,7 @@ class LoginWidget extends StatelessWidget {
         body: Container(
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           padding: EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          child: ListView(
             children: <Widget>[
               WidgetTextField(
                   text: 'username',
@@ -45,8 +48,10 @@ class LoginWidget extends StatelessWidget {
                   controller: _passwordController),
               SizedBox(height: 12.0),
               Observer(
-                 builder: (context) => _loginstate.errorMessage =="" ? Container() : Text(_loginstate.errorMessage,
-                     style: Theme.of(context).textTheme.display1)),
+                  builder: (context) => _loginstate.errorMessage == ""
+                      ? Container()
+                      : Text(_loginstate.errorMessage,
+                          style: Theme.of(context).textTheme.display1)),
               GestureDetector(
                   child: Container(
                     child: Center(
@@ -58,10 +63,14 @@ class LoginWidget extends StatelessWidget {
                         color: Theme.of(context).accentColor,
                         borderRadius: new BorderRadius.circular(5)),
                   ),
-                  onTap: () {
-                     _loginstate.login(
+                  onTap: () async {
+                    await _loginstate.login(
                         _userController.text, _passwordController.text);
-                  })
+                    if (_loginstate.loggeduser != null) {
+                      _userstate.setUser(_loginstate.loggeduser);
+                      Navigator.pushNamed(context, '/main');
+                    }
+                  }),
             ],
           ),
         ));
