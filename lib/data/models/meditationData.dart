@@ -3,18 +3,22 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
 class MeditationModel extends Meditation {
-  final String codmed, duration, recording, title;
+  final String codmed,  recording, title;
+
+  final Duration duration;
+  final DateTime day;
 
   MeditationModel({
     this.codmed,
     this.title,
     this.duration,
     this.recording,
+    this.day
   }) : super(
           codmed: codmed,
-          title: title,
           duration: duration,
           recording: recording,
+          day:day
         );
 
   factory MeditationModel.fromRawJson(String str) =>

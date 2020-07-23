@@ -18,4 +18,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,User>> islogged();
 
+
+  Future<Either<Failure,Map>> getData();
+
 }

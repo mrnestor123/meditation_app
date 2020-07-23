@@ -86,78 +86,15 @@ class DatabaseString {
     "1":{
         "brain": {
           "1":{
-            "codlesson": 1,
-            "title": "Attention vs peripheral awareness",
-            "slider" : "new_slider.jpg",
+            "codlesson": 10,
+            "title": "The myth of multi-tasking",
             "group": "Attention",
+            "slider" : "new_slider.jpg",
             "description": "This lesson talks about the differences between attention and peripheral awareness",
             "text":"Peripheral awareness is x. Attention is y",
             "stagenumber":1
           },
           "2":{
-            "codlesson": 2,
-            "title": "Mindfulness, what it is",
-            "slider" : "new_slider.jpg",
-            "group": "Mindfulness",
-            "description": "Gives a general understanding of what mindfulness is",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "3":{
-            "codlesson": 3,
-            "title": "Benefits of mindfulness",
-            "group":"Mindfulness",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "4":{
-            "codlesson": 4,
-            "title": "Increasing mindfulness power",
-            "group": "Minfulness",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "5":{
-            "codlesson": 5,
-            "title": "Achieving stable attention",
-            "group" : "Mindfulness" ,
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "6":{
-            "codlesson": 6,
-            "title": "The five hindrances",
-            "group" : "Additional",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "7":{
-            "codlesson": 7,
-            "title": "Conscious experience",
-            "group": "Attention",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-          "8":{
-            "codlesson": 8,
-            "title": "Functions of attention and peripheral awareness",
-            "group": "Attention",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
-          },
-           "9":{
             "codlesson": 9,
             "title": "Directing and sustaining attention",
             "group":"Attention",
@@ -166,7 +103,90 @@ class DatabaseString {
             "text":"Peripheral awareness is x. Attention is y",
             "stagenumber":1
           },
+          "3":{
+            "codlesson": 8,
+            "title": "Functions of attention and peripheral awareness",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "4":{
+            "codlesson": 7,
+            "title": "Conscious experience",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "5":{
+            "codlesson": 6,
+            "title": "The five hindrances",
+            "group" : "Additional",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "6":{
+            "codlesson": 5,
+            "title": "Achieving stable attention",
+            "group" : "Mindfulness" ,
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "7":{
+            "codlesson": 4,
+            "title": "Increasing mindfulness power",
+            "group": "Mindfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "8":{
+            "codlesson": 2,
+            "title": "Mindfulness, what it is",
+            "slider" : "new_slider.jpg",
+            "group": "Mindfulness",
+            "description": "Gives a general understanding of what mindfulness is",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "9":{
+            "codlesson": 3,
+            "title": "Benefits of mindfulness",
+            "group":"Mindfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
           "10":{
+            "codlesson": 1,
+            "title": "Attention vs peripheral awareness",
+            "slider" : "images/peripheral.png",
+            "group": "Attention",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "11": {
+            "codlesson": 1,
+            "title": "Scope of attention",
+            "slider" : "images/peripheral.png",
+            "group": "Attention",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          }  
+        },
+        "meditation": {
+          "1":{
             "codlesson": 10,
             "title": "The myth of multi-tasking",
             "group": "Attention",
@@ -174,33 +194,276 @@ class DatabaseString {
             "description": "This lesson talks about the differences between attention and peripheral awareness",
             "text":"Peripheral awareness is x. Attention is y",
             "stagenumber":1
+          },
+          "2":{
+            "codlesson": 9,
+            "title": "Directing and sustaining attention",
+            "group":"Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "3":{
+            "codlesson": 8,
+            "title": "Functions of attention and peripheral awareness",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "4":{
+            "codlesson": 7,
+            "title": "Conscious experience",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "5":{
+            "codlesson": 6,
+            "title": "The five hindrances",
+            "group" : "Additional",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "6":{
+            "codlesson": 5,
+            "title": "Achieving stable attention",
+            "group" : "Mindfulness" ,
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "7":{
+            "codlesson": 4,
+            "title": "Increasing mindfulness power",
+            "group": "Minfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "8":{
+            "codlesson": 2,
+            "title": "Mindfulness, what it is",
+            "slider" : "new_slider.jpg",
+            "group": "Mindfulness",
+            "description": "Gives a general understanding of what mindfulness is",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "9":{
+            "codlesson": 3,
+            "title": "Benefits of mindfulness",
+            "group":"Mindfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "10":{
+            "codlesson": 1,
+            "title": "Attention vs peripheral awareness",
+            "slider" : "images/peripheral.png",
+            "group": "Attention",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
           }
         }
       },
     "2":{
-      "codlesson": "2",
-        "title": "The five hindrances",
-        "slider" : "new_slider.jpg",
-        "description": "This lesson talks about the differences between attention and peripheral awareness",
-        "text":"Peripheral awareness is x. Attention is y",
-        "stagenumber": 1
-    },
-    "3":{
-      "codlesson": "3",
-        "title": "Why start meditating",
-        "slider" : "new_slider.jpg",
-        "description": "This lesson talks about the differences between attention and peripheral awareness",
-        "text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-        "stagenumber": 1
-    },
-    "4":{
-      "codlesson": "4",
-      "title": "How to be a good meditator ",
-      "slider" : "new_slider.jpg",
-      "description": "This lesson talks about the differences between attention and peripheral awareness",
-      "text":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-      "stagenumber": 1
-    } 
+        "brain": {
+          "1":{
+            "codlesson": 10,
+            "title": "The myth of multi-tasking",
+            "group": "Mind",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "2":{
+            "codlesson": 9,
+            "title": "Directing and sustaining attention",
+            "group":"Mind",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "3":{
+            "codlesson": 8,
+            "title": "Functions of attention and peripheral awareness",
+            "group": "Mind",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "4":{
+            "codlesson": 7,
+            "title": "Conscious experience",
+            "group": "Mind",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "5":{
+            "codlesson": 6,
+            "title": "The five hindrances",
+            "group" : "Mind",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "6":{
+            "codlesson": 5,
+            "title": "Achieving stable attention",
+            "group" : "Functions" ,
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "7":{
+            "codlesson": 4,
+            "title": "Increasing mindfulness power",
+            "group": "Functions",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "8":{
+            "codlesson": 2,
+            "title": "Mindfulness, what it is",
+            "slider" : "new_slider.jpg",
+            "group": "Functions",
+            "description": "Gives a general understanding of what mindfulness is",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "9":{
+            "codlesson": 3,
+            "title": "Benefits of mindfulness",
+            "group":"Functions",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "10":{
+            "codlesson": 1,
+            "title": "Attention vs peripheral awareness",
+            "slider" : "images/peripheral.png",
+            "group": "Functions",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          }
+        }, 
+        "meditation": {
+          "1":{
+            "codlesson": 10,
+            "title": "The myth of multi-tasking",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "2":{
+            "codlesson": 9,
+            "title": "Directing and sustaining attention",
+            "group":"Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "3":{
+            "codlesson": 8,
+            "title": "Functions of attention and peripheral awareness",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "4":{
+            "codlesson": 7,
+            "title": "Conscious experience",
+            "group": "Attention",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "5":{
+            "codlesson": 6,
+            "title": "The five hindrances",
+            "group" : "Additional",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "6":{
+            "codlesson": 5,
+            "title": "Achieving stable attention",
+            "group" : "Mindfulness" ,
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+           "7":{
+            "codlesson": 4,
+            "title": "Increasing mindfulness power",
+            "group": "Minfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "8":{
+            "codlesson": 2,
+            "title": "Mindfulness, what it is",
+            "slider" : "new_slider.jpg",
+            "group": "Mindfulness",
+            "description": "Gives a general understanding of what mindfulness is",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "9":{
+            "codlesson": 3,
+            "title": "Benefits of mindfulness",
+            "group":"Mindfulness",
+            "slider" : "new_slider.jpg",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          },
+          "10":{
+            "codlesson": 1,
+            "title": "Attention vs peripheral awareness",
+            "slider" : "images/peripheral.png",
+            "group": "Attention",
+            "description": "This lesson talks about the differences between attention and peripheral awareness",
+            "text":"Peripheral awareness is x. Attention is y",
+            "stagenumber":1
+          }
+        } 
+      }
   }
 }
 """;

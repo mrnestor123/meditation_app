@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -98,7 +99,7 @@ class _SetMeditationState extends State<SetMeditation> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text('Meditate', style: Configuration.title),
+        Text('Meditate', style: Configuration.subtitle2),
         Container(
             height: Configuration.height * 0.08,
             width: Configuration.width,
@@ -136,6 +137,7 @@ class _SetMeditationState extends State<SetMeditation> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          Icon(FontAwesomeIcons.male,size: Configuration.blockSizeHorizontal*25),
           Text('Congrats',
               style: TextStyle(
                   color: Colors.white,

@@ -30,4 +30,12 @@ class RegisterFailure extends Failure{
   RegisterFailure({String error}) : super(error:error);
 }
 
+class MeditationFailure extends Failure {
+  MeditationFailure({String error}): super(error:error);
+}
+
+class ConnectionFailure extends Failure {
+  ConnectionFailure({String error}): super(error:error);
+}
+
 

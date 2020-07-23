@@ -3,9 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/login_injection_container.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/bottom_menu.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/learn/learn_widget.dart';
+import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/meditation/main_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation/meditation_lessons.dart';
 import 'package:provider/provider.dart';
@@ -43,11 +42,13 @@ class ContainerAnimated extends StatefulWidget {
 class _AnimatedState extends State<ContainerAnimated> {
   //bool showstages;
   bool sidebarOpen = false;
+  bool scrolled = false;
   double xOffset = 0;
   double yOffset = 0;
   double scaleFactor = 1;
   String currentRoute = '/main';
   String title = 'Time to wake up';
+  var _controller = ScrollController();
 
   Widget sidebar(_userstate) {
     return Container(
@@ -119,17 +120,36 @@ class _AnimatedState extends State<ContainerAnimated> {
         ));
   }
 
-  Widget switchMenu() {
+  Widget switchMenu(_controller) {
     switch (currentRoute) {
       case '/main':
-        return MainScreen();
+        return MainScreen(controller: _controller);
       case '/meditate':
-        return LearnMeditation();
+        return LearnMeditation(controller: _controller);
       case '/brain':
         return Provider(
-            create: (context) => sl<LessonState>(), child: LearnScreen());
+            create: (context) => sl<LessonState>(),
+            child: BrainScreen(controller: _controller));
     }
     return Container();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // set up listener here
+    _controller.addListener(() {
+      if (_controller.position.pixels < 50) {
+        setState(() {
+          scrolled = false;
+        });
+      } else {
+        setState(() {
+          scrolled = true;
+        });
+      }
+    });
   }
 
   @override
@@ -137,84 +157,143 @@ class _AnimatedState extends State<ContainerAnimated> {
     Configuration().init(context);
     // showstages = widget.menuindex =='Meditation'|| widget.menuindex == 'Brain';
     final _userstate = Provider.of<UserState>(context);
+
     return Scaffold(
       body: Stack(
         children: <Widget>[
           sidebar(_userstate),
-          AnimatedContainer(
-            decoration: BoxDecoration(
-                borderRadius: sidebarOpen
-                    ? BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        bottomLeft: Radius.circular(30))
-                    : null,
-                color: Colors.grey[500]),
-            transform: Matrix4.translationValues(xOffset, yOffset, 0)
-              ..scale(scaleFactor)
-              ..rotateY(sidebarOpen ? -0.1 : 0),
-            duration: Duration(milliseconds: 250),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  height: Configuration.height * 0.15,
-                  padding: EdgeInsets.all(6),
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      sidebarOpen
-                          ? IconButton(
-                              iconSize: Configuration.iconSize,
-                              color: Colors.white,
-                              icon: Icon(Icons.arrow_back),
-                              onPressed: () => {
-                                    setState(() {
-                                      xOffset = 0;
-                                      yOffset = 0;
-                                      scaleFactor = 1;
-                                      sidebarOpen = false;
+          GestureDetector(
+              onTap: () => sidebarOpen ? setState((){ xOffset = 0;yOffset = 0;scaleFactor = 1;sidebarOpen = false; }) : null,
+              child: AnimatedContainer(
+              decoration: BoxDecoration(
+                  borderRadius: sidebarOpen
+                      ? BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          bottomLeft: Radius.circular(30))
+                      : null,
+                  color: Colors.grey[500]),
+              transform: Matrix4.translationValues(xOffset, yOffset, 0)
+                ..scale(scaleFactor)
+                ..rotateY(sidebarOpen ? -0.1 : 0),
+              duration: Duration(milliseconds: 250),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: Configuration.height * 0.15,
+                    padding: EdgeInsets.all(6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        sidebarOpen
+                            ? IconButton(
+                                iconSize: Configuration.iconSize,
+                                color: Colors.white,
+                                icon: Icon(Icons.arrow_back),
+                                onPressed: () => {
+                                      setState(() {
+                                        xOffset = 0;
+                                        yOffset = 0;
+                                        scaleFactor = 1;
+                                        sidebarOpen = false;
+                                      })
                                     })
+                            : IconButton(
+                                icon: Icon(Icons.menu),
+                                color: Colors.white,
+                                iconSize: Configuration.iconSize,
+                                onPressed: () => {
+                                  setState(() {
+                                    xOffset =
+                                        Configuration.safeBlockHorizontal * 50;
+                                    yOffset =
+                                        Configuration.safeBlockVertical * 20;
+                                    scaleFactor = 0.6;
+                                    sidebarOpen = true;
                                   })
-                          : IconButton(
-                              icon: Icon(Icons.menu),
-                              color: Colors.white,
-                              iconSize: Configuration.iconSize,
-                              onPressed: () => {
-                                setState(() {
-                                  xOffset =
-                                      Configuration.safeBlockHorizontal * 50;
-                                  yOffset =
-                                      Configuration.safeBlockVertical * 20;
-                                  scaleFactor = 0.6;
-                                  sidebarOpen = true;
-                                })
-                              },
-                            ),
-                      Text(title, style: Configuration.title),
-                      GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/profile'),
-                          child: CircleAvatar(child: Text('ERN')))
-                    ],
+                                },
+                              ),
+                        Text(title, style: Configuration.title),
+                        GestureDetector(
+                            onTap: () => Navigator.pushNamed(context, '/profile'),
+                            child: CircleAvatar(child: Text('ERN')))
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                    child: Container(
-                  padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-                  alignment: Alignment.bottomCenter,
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.only(topLeft: Radius.circular(25))),
-                  child: switchMenu(),
-                )),
-                currentRoute == '/meditate ' || currentRoute == '/brain'
-                    ? BottomMenu(selectedindex: 1)
-                    : Container(),
-              ],
+                  Expanded(
+                      child: Container(
+                    padding: EdgeInsets.only(left: 16, right: 16),
+                    alignment: Alignment.bottomCenter,
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: scrolled
+                                ? Radius.circular(0)
+                                : Radius.circular(25))),
+                    child: switchMenu(_controller),
+                  )),
+                  currentRoute == '/meditate' || currentRoute == '/brain'
+                      ? BottomMenu(selectedindex: 1,controller: _controller)
+                      : Container(),
+                ],
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+//Variables for bottom menu
+List<BottomNavigationBarItem> menuitems = [
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceOne), title: Text("Stage 1")),
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceTwo), title: Text("Stage 2")),
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceThree), title: Text("Stage 3")),
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceFour), title: Text("Stage 4")),
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceFive), title: Text("Stage 5")),
+  BottomNavigationBarItem(
+      icon: Icon(FontAwesomeIcons.diceSix), title: Text("Stage 6")),
+];
+
+class BottomMenu extends StatefulWidget {
+  int selectedindex;
+  ScrollController controller;
+
+  BottomMenu({Key key, this.selectedindex,this.controller}) : super(key: key);
+
+  @override
+  _BottomMenuState createState() => _BottomMenuState();
+}
+
+class _BottomMenuState extends State<BottomMenu> {
+  int _selectedIndex;
+  static const TextStyle optionStyle =
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedindex;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+    return BottomNavigationBar(
+      unselectedItemColor: Colors.black,
+      items: menuitems,
+      currentIndex: _selectedIndex,
+      selectedItemColor: Configuration.maincolor,
+      onTap: (index) => setState(() {
+        widget.controller.animateTo(0, duration: Duration(milliseconds: 500), curve:Curves.ease);
+        _userstate.changeBottomMenu(index);
+        _selectedIndex = index;
+      }),
     );
   }
 }

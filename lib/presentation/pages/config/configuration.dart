@@ -19,13 +19,67 @@ class Configuration {
 
   //the purple color
   static Color maincolor = Color.fromRGBO(135, 61, 175, 100);
+
+  // TextStyles are title, subtitle, subtitle2,subtilte3, paragraph1,paragraph2,paragraph3
   static TextStyle title = GoogleFonts.montserrat(
     textStyle: TextStyle(
       color: Colors.white,
       letterSpacing: .5,
-      fontSize: safeBlockHorizontal*5
+      fontSize: safeBlockHorizontal*6
     ),
   );
+
+  
+  static TextStyle subtitle = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Color.fromRGBO(135, 61, 175, 100),
+      letterSpacing: .5,
+      fontSize: Configuration.safeBlockHorizontal*6,
+    ),
+  );
+
+
+ static TextStyle subtitle2 = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+
+      letterSpacing: .5,
+      fontSize: Configuration.safeBlockHorizontal*15,
+    ),
+  );
+
+    static TextStyle paragraph = GoogleFonts.montserrat(
+      textStyle: TextStyle(
+        color: Colors.grey,
+        fontWeight: FontWeight.bold,
+        letterSpacing: .5,
+      ),
+      fontSize: safeBlockHorizontal*5
+    );
+
+   static TextStyle paragraph2 = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      letterSpacing: .5,
+      fontSize: Configuration.safeBlockHorizontal*6,
+    ),
+  );
+
+   static TextStyle paragraph3 = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color:  Color.fromRGBO(135, 61, 175, 100),
+      letterSpacing: .5,
+      fontSize: Configuration.safeBlockHorizontal*5,
+    ),
+  );
+
+
+
+
+
+
+
+
 
   static TextStyle modaltitle = GoogleFonts.montserrat(
     textStyle: TextStyle(
@@ -44,15 +98,7 @@ class Configuration {
     ),
   );
 
-  static TextStyle paragraph = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      fontWeight: FontWeight.bold,
-      letterSpacing: .5,
-    ),
-    fontSize: safeBlockHorizontal*5
-  );
-
+  
   static TextStyle settings = GoogleFonts.montserrat(
     textStyle: TextStyle(
       color: Colors.black,
@@ -73,14 +119,6 @@ class Configuration {
 
 
   static double iconSize;
-
-  static TextStyle subtitle = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Color.fromRGBO(135, 61, 175, 100),
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal*6,
-    ),
-  );
 
    static TextStyle numbers = GoogleFonts.montserrat(
     textStyle: TextStyle(

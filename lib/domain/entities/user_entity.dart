@@ -13,6 +13,10 @@ class User extends Equatable {
   final int stagenumber;
   final double experience;
 
+  //May be a string with 1 hour, 30 sec, 20 min ...
+  final String timeMeditated;
+  int minutesMeditated,secondsMeditated,hoursMeditated;
+
   //A list with the meditations
   final ObservableList<Meditation> totalMeditations = new ObservableList();
 
@@ -21,13 +25,14 @@ class User extends Equatable {
   final ObservableList<Lesson> remainingLessons = new ObservableList();
 
   User({
-    @required this.coduser,
+    this.coduser,
     this.nombre,
     this.experience,
     @required this.mail,
     @required this.usuario,
     @required this.password,
     @required this.stagenumber,
+    this.timeMeditated
   });
 
   @override
@@ -51,5 +56,13 @@ class User extends Equatable {
     lessonslearned.add(l);
     remainingLessons.remove(l);
   }
+
+  void takeMeditation(Meditation m){
+    totalMeditations.add(m);
+    hoursMeditated = m.duration.inHours;
+    minutesMeditated =  m.duration.inMinutes - m.duration.inHours * 60;
+    secondsMeditated = m.duration.inSeconds - m.duration.inMinutes*60 - m.duration.inHours*3600;
+  }
+
 
 }

@@ -97,19 +97,12 @@ class ProfileScreen extends StatelessWidget {
               child: Container(
                 height: Configuration.safeBlockVertical*12,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     ProfileInfoCard(firstText: "54%", secondText: "Progress"),
                     SizedBox(
-                      width: 10,
-                    ),
-                    ProfileInfoCard(
-                      hasImage: true,
-                      imagePath: "assets/icons/pulse.png",
-                    ),
-                    SizedBox(
-                      width: 10,
+                      width: Configuration.safeBlockHorizontal*5,
                     ),
                     ProfileInfoCard(firstText: "152", secondText: "Level"),
                   ],
@@ -131,10 +124,10 @@ class MyInfo extends StatelessWidget {
         children: [
           RadialProgress(
             width: Configuration.safeBlockHorizontal * 1,
-            goalCompleted: 0.9,
+            goalCompleted: 0.5,
             child: RoundedImage(
               imagePath: "images/sky.jpg",
-              size: Configuration.safeBlockHorizontal * 25,
+              size: Size.fromWidth(Configuration.blockSizeHorizontal*12),
             ),
           ),
           SizedBox(
@@ -150,14 +143,6 @@ class MyInfo extends StatelessWidget {
             ],
           ),
           SizedBox(height: Configuration.safeBlockVertical * 2),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                "  Level 10",
-              )
-            ],
-          ),
         ],
       ),
     );
@@ -166,20 +151,16 @@ class MyInfo extends StatelessWidget {
 
 class RoundedImage extends StatelessWidget {
   final String imagePath;
-  final double size;
+  final Size size;
 
   const RoundedImage({Key key, @required this.imagePath, this.size})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return ClipOval(
-      child: Image.asset(
-        imagePath,
-        width: size,
-        height: size,
-        fit: BoxFit.fitWidth,
-      ),
+    return CircleAvatar(
+      radius: size.width,
+      backgroundImage: AssetImage(imagePath)
     );
   }
 }

@@ -79,6 +79,9 @@ flutter:
     - images/sky.jpg
     - images/meditando.png
     - images/drawing.jpg
+    - images/peripheral.png
+    - images/phase 1.png
+    - images/stage 1.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
   # For details regarding adding assets from package dependencies, see

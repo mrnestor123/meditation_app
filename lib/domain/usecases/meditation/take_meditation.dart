@@ -6,14 +6,19 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/usecases/lesson/add_lesson.dart';
 
-class MeditateUseCase extends UseCase<Meditation, Params> {
+class MeditateUseCase extends UseCase<bool, Params> {
   MeditationRepository repository;
 
   MeditateUseCase(this.repository);
 
   @override
-  Future<Either<Failure, Meditation>> call(Params params) {
-    return repository.meditate(d: params.duration, user: params.user);
+  Future<Either<Failure, bool>> call(Params params) async {
+    var meditation =await repository.meditate(d: params.duration, user: params.user);
+
+    meditation.fold((Failure f) => Left(f), (Meditation m) {
+      params.user.takeMeditation(m);
+      return Right(true);
+    });
   }
 }
 

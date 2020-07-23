@@ -11,6 +11,7 @@ import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/lesson/get_brain_lessons.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
+import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
@@ -43,7 +44,7 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => UserState(cachedUseCase: sl(),meditate: sl()),
+    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl()),
   );
 
   sl.registerFactory(
@@ -61,6 +62,7 @@ Future<void> init() async {
   sl.registerLazySingleton(()=> CachedUserUseCase(sl()));
   sl.registerLazySingleton(()=> GetBrainLessonsUseCase(sl()));
   sl.registerLazySingleton(()=> MeditateUseCase(sl()));
+  sl.registerLazySingleton(()=> GetDataUseCase(sl()));
 
 
   //Repositories

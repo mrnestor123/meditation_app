@@ -14,6 +14,7 @@ class LessonModel extends Lesson {
   final String description;
   final String text;
   final int stagenumber;
+  final int requiredlevel;
 
   LessonModel({
     this.title,
@@ -23,6 +24,7 @@ class LessonModel extends Lesson {
     this.group,
     this.text,
     this.stagenumber,
+    this.requiredlevel
   }) : super(
             title: title,
             codlesson: codlesson,
@@ -30,7 +32,8 @@ class LessonModel extends Lesson {
             description: description,
             text: text,
             group:group,
-            stagenumber: stagenumber);
+            stagenumber: stagenumber,
+            requiredlevel: requiredlevel);
 
   factory LessonModel.fromRawJson(String str) =>
       LessonModel.fromJson(json.decode(str));
@@ -45,6 +48,7 @@ class LessonModel extends Lesson {
         text: json["text"] == null ? null : json["text"],
         group: json["group"] == null ? null : json["group"],
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
+          requiredlevel: json["requiredlevel"] == null ? null : json["requiredlevel"],
       );
 
   Map<String, dynamic> toJson() => {

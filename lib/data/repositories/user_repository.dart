@@ -104,4 +104,21 @@ class UserRepositoryImpl implements UserRepository {
       }
     }
   }
+
+  @override
+  Future<Either<Failure, Map>> getData() async {
+    // TODO: implement getData
+
+    if (await networkInfo.isConnected) {
+      try {
+        final data = await remoteDataSource.getData();
+        return Right(data);
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(
+          ConnectionFailure(error: "User is not connected to the internet"));
+    }
+  }
 }

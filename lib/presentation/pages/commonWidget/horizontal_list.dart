@@ -1,41 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/card_scroll.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn/lesson_view.dart';
+import 'package:provider/provider.dart';
 
 class HorizontalList extends StatelessWidget {
-  List<LessonModel> lessons;
+  var lessons;
   //String description;
 
   HorizontalList({this.lessons});
 
+  List<Widget> getWidgets(context) {
+    List<Widget> list = new List<Widget>();
+    lessons.forEach((key, value) {
+      list.addAll([
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Text(key, style: Configuration.paragraph),
+            GestureDetector(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (_) => LessonsDialog(lessons: value),
+                      barrierDismissible: true);
+                },
+                child: Text("View All", style: Configuration.paragraph3)),
+          ],
+        ),
+        SizedBox(height: Configuration.safeBlockVertical * 2),
+        CardView(lessons: value),
+        SizedBox(height: Configuration.safeBlockVertical * 3),
+      ]);
+    });
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 32),
+      margin: EdgeInsets.only(
+          top: Configuration.safeBlockVertical * 2,
+          bottom: Configuration.safeBlockVertical * 1),
+      padding: EdgeInsets.symmetric(
+          vertical: Configuration.safeBlockVertical * 5,
+          horizontal: Configuration.safeBlockHorizontal * 3),
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(
-                    left: Configuration.safeBlockHorizontal * 5),
-                child: Text("Attention", style: Configuration.paragraph)),
-            Row(
-              children: <Widget>[
-                Expanded(
-                    child: Container(
-                        height: Configuration.safeBlockVertical * 35,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            padding: const EdgeInsets.all(16),
-                            itemCount: lessons.length,
-                            itemBuilder: (context, index) {
-                              return LessonCard(lesson: lessons[index]);
-                            }))),
-              ],
-            )
-          ]),
+          children: getWidgets(context)),
     );
   }
 }
@@ -64,28 +80,20 @@ class LessonCard extends StatelessWidget {
             MaterialPageRoute(builder: (context) => LessonView(lesson: lesson)),
           ),
           child: Container(
-            margin:
-                EdgeInsets.only(right: Configuration.safeBlockHorizontal * 5),
-            width: Configuration.safeBlockHorizontal * 45,
+            height: Configuration.safeBlockHorizontal * 40,
+            width: Configuration.safeBlockHorizontal * 40,
             decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7, // changes position of shadow
-                  )
-                ],
                 // border: Border.all(color: Colors.black),
                 image: DecorationImage(
-                    image: AssetImage('images/drawing.jpg'), fit: BoxFit.cover),
+                    image: AssetImage('images/sky.jpg'), fit: BoxFit.cover),
                 borderRadius: BorderRadius.circular(8)),
           ),
         ),
         Positioned(
           bottom: 0.0,
           left: 0.0,
-          width: Configuration.safeBlockHorizontal * 45,
-          height: Configuration.safeBlockVertical * 7,
+          width: Configuration.safeBlockHorizontal * 40,
+          height: Configuration.safeBlockHorizontal * 10,
           child: Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -96,11 +104,11 @@ class LessonCard extends StatelessWidget {
           ),
         ),
         Positioned(
-            left: Configuration.safeBlockHorizontal * 2,
-            bottom: Configuration.safeBlockVertical * 1,
+            left: 5.0,
+            bottom: 0.0,
             child: Container(
-                height: Configuration.safeBlockVertical * 6,
-                width: Configuration.safeBlockHorizontal * 45,
+                height: Configuration.safeBlockHorizontal * 10,
+                width: Configuration.safeBlockHorizontal * 50,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -142,5 +150,70 @@ class BottomModal extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class LessonsDialog extends StatelessWidget {
+  var lessons;
+
+  LessonsDialog({Key key, this.lessons}) : super(key: key);
+
+  List<Widget> grid() {
+    List<Widget> result = new List<Widget>();
+
+    for (var lesson in lessons) {
+      result.add(LessonCard(lesson: lesson));
+    }
+    
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+            width: Configuration.width,
+            padding: EdgeInsets.all(Configuration.safeBlockVertical * 2),
+            child: ListView(
+              children: grid()
+            )));
+            
+            
+            
+            /*CustomScrollView(primary: false, slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverGrid.count(
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    crossAxisCount: 2,
+                    children: grid()),
+              ),
+            ])));**/
+
+    /*return AlertDialog(
+          title: Text("You can't come back"),
+          shape: ContinuousRectangleBorder(),
+          backgroundColor: Colors.grey,
+          content: Text(
+              "This session won't count if you abandon now. Do you want to exit?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+            ),
+            FlatButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );*/
   }
 }

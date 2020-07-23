@@ -4,7 +4,7 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
-import 'package:meditation_app/presentation/pages/learn/learn_widget.dart';
+import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/meditation/main_screen.dart';
 
 import 'package:meditation_app/login_injection_container.dart' as di;
@@ -12,7 +12,7 @@ import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/meditation/premeditation.dart';
 import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
-import 'package:meditation_app/presentation/pages/profile/profileWidget.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/profileWidget.dart';
 import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
             routes: <String, WidgetBuilder>{
               '/welcome': (BuildContext context) => WelcomeWidget(),
               '/brain': (BuildContext context) => Provider(
-                  create: (context) => sl<LessonState>(), child: LearnScreen()),
+                  create: (context) => sl<LessonState>(), child: BrainScreen()),
               '/loading': (BuildContext context) => Loading(),
               '/login': (BuildContext context) => Provider(
                   create: (context) => sl<LoginState>(), child: LoginWidget()),

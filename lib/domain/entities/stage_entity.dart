@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:observable/observable.dart';
 
 class Stage extends Equatable {
@@ -7,10 +9,10 @@ class Stage extends Equatable {
   final String description;
 
   //this is for referencing the lessons. A list with the ids of the lessons.
-  final ObservableList<int> lessons = new ObservableList();
+  final ObservableList<Lesson> lessons = new ObservableList();
 
   //this is for referencing the users. List with their ids
-  final ObservableList<int> users = new ObservableList();
+  final ObservableList<User> users = new ObservableList();
 
   Stage({
     @required this.stagenumber,

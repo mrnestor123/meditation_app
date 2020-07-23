@@ -12,26 +12,8 @@ class Loading extends StatefulWidget {
 
 class _LoadingState extends State<Loading> {
   final List<ReactionDisposer> _disposers = [];
-  UserState _login;
+  UserState _user;
 
-  @override
-  void dispose() {
-    _disposers.forEach((disposer) => disposer());
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _login = Provider.of<UserState>(context);
-    _disposers.add(
-      reaction((_) => _login.loggedin, (_) {
-        _login.loggedin
-            ? Navigator.pushNamed(context, '/main')
-            : Navigator.pushNamed(context, '/welcome');
-      }),
-    );
-  }
 
   @override
   void initState() {
@@ -39,10 +21,15 @@ class _LoadingState extends State<Loading> {
   }
 
   void userisLogged(context) async {
-  //  await new Future.delayed(Duration(seconds: 30));
-    _login.userisLogged();
+   // await new Future.delayed(Duration(seconds: 30));
+    await _user.getData();
+    await _user.userisLogged();
+    _user.loggedin
+        ? Navigator.pushNamed(context, '/main')
+        : Navigator.pushNamed(context, '/welcome');
+
     /*reaction(
-        (_) => _login.loggedin,
+        (_) => _user.loggedin,
         (loggedin) => loggedin
             ? Navigator.pushNamed(context, '/main')
             : Navigator.pushNamed(context, '/welcome'));*/
@@ -50,8 +37,9 @@ class _LoadingState extends State<Loading> {
 
   @override
   Widget build(BuildContext context) {
+    _user = Provider.of<UserState>(context);
     //comprobamos si el usuario esta loggeado
-     userisLogged(context);
+    userisLogged(context);
 
     return Scaffold(
       body: Column(

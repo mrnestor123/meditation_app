@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/bottom_menu.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
 class LessonView extends StatelessWidget {

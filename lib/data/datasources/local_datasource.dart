@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/exception.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,4 +41,18 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     throw CacheException();
     }
   }
+
+  @override 
+  Future<void> cacheMeditation(MeditationModel meditationtoCache){
+    
+  }
+
+  @override 
+  Future<List<MeditationModel>> getMeditations(){
+
+    
+
+  }
+
+
 }
