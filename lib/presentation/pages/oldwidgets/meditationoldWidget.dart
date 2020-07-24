@@ -1,4 +1,4 @@
-import 'package:bloc_provider/bloc_provider.dart';
+/*import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/blocs/meditationBloc.dart';
@@ -91,3 +91,4 @@ class ElementsWidget extends StatelessWidget {
 }
 
 
+*/

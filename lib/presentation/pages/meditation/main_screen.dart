@@ -19,13 +19,17 @@ class MainScreen extends StatelessWidget {
           controller: controller,
           shrinkWrap: true,
           children: <Widget>[
+            SizedBox(height:Configuration.safeBlockVertical*4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
               Text('Level 1', style: Configuration.subtitle),
               Text('Stage 10 ', style: Configuration.subtitle),
             ],),
-            Center(child:Image(image: AssetImage('images/stage 1.png'))),
+            SizedBox(height:Configuration.safeBlockVertical*8),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/path'),
+              child: Center(child:Image(image: AssetImage('images/stage 1.png')))),
             FloatingActionButton(
               onPressed: () => Navigator.pushNamed(context, '/premeditation'),
               child: Icon(Icons.timer),

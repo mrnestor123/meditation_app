@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meditation_app/blocs/stageBloc.dart';
-import 'package:meditation_app/domain/model/stageModel.dart';
-import 'package:meditation_app/interface/commonWidget/bottomMenu.dart';
-import 'package:meditation_app/interface/commonWidget/titleWidget.dart';
-
+/*
 class StageWidget extends StatelessWidget {
   final int selectedIndex;
   //StagesBloc bloc = new StagesBloc();
@@ -53,3 +49,4 @@ class StageWidget extends StatelessWidget {
     );
   }
 }
+*/

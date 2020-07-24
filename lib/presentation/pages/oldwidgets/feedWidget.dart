@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:meditation_app/interface/commonWidget/bottomMenu.dart';
 
 class FeedWidget extends StatelessWidget {
@@ -156,3 +156,4 @@ class DataWidget extends StatelessWidget {
     return new Container();
   }
 }
+*/

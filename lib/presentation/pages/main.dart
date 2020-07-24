@@ -13,7 +13,9 @@ import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/meditation/premeditation.dart';
 import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/profileWidget.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/stageWidget.dart';
 import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
@@ -55,7 +57,8 @@ class MyApp extends StatelessWidget {
               '/main': (BuildContext context) => ContainerAnimated(),
               '/premeditation': (BuildContext context) => Provider(
                   create: (context) => sl<MeditationState>(),
-                  child: SetMeditation())
+                  child: SetMeditation()),
+              '/path' : (context) => PathWidget()
 
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),
