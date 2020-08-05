@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/button.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 
 class WelcomeWidget extends StatelessWidget {
   @override

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -48,7 +49,7 @@ class _SetMeditationState extends State<SetMeditation> {
     _timer = new Timer.periodic(
         oneSec,
         (Timer timer) => setState(() {
-              if (_duration.inSeconds < 1) {
+              if (_duration.inSeconds < 2) {
                 state = 'finished';
                 timer.cancel();
               } else {
@@ -106,7 +107,10 @@ class _SetMeditationState extends State<SetMeditation> {
             padding: EdgeInsets.only(
                 left: Configuration.width * 0.05,
                 right: Configuration.width * 0.05),
-            margin: EdgeInsets.all(Configuration.width * 0.05),
+            margin: EdgeInsets.only(
+                top: Configuration.width * 0.05,
+                left: Configuration.width * 0.05,
+                right: Configuration.width * 0.05),
             decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(8)),
             child: Row(
@@ -115,6 +119,27 @@ class _SetMeditationState extends State<SetMeditation> {
               children: <Widget>[
                 Text('Duration', style: Configuration.settings),
                 TimePicker()
+              ],
+            )),
+        Container(
+            height: Configuration.height * 0.08,
+            width: Configuration.width,
+            padding: EdgeInsets.only(
+                left: Configuration.width * 0.05,
+                right: Configuration.width * 0.05),
+            margin: EdgeInsets.only(
+                bottom: Configuration.width * 0.05,
+                top: Configuration.width * 0.03,
+                left: Configuration.width * 0.05,
+                right: Configuration.width * 0.05),
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(8)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Text('Ambient sound', style: Configuration.settings),
+                Icon(Icons.music_note)
               ],
             )),
         FloatingActionButton(
@@ -131,34 +156,26 @@ class _SetMeditationState extends State<SetMeditation> {
   }
 
   Widget finishedMeditation() {
-    return Container(
-      width: Configuration.width * 0.9,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Icon(FontAwesomeIcons.male,size: Configuration.blockSizeHorizontal*25),
-          Text('Congrats',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: Configuration.safeBlockHorizontal * 10)),
-          SizedBox(height: Configuration.safeBlockVertical * 2),
-          Text(
-              'You have completed a ' +
-                  _printDuration(duration) +
-                  ' meditation',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: Configuration.safeBlockHorizontal * 7)),
-          SizedBox(height: Configuration.safeBlockVertical * 2),
-          Text(
-              'Total meditations: ' +
-                  _loginstate.user.totalMeditations.length.toString(),
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: Configuration.safeBlockHorizontal * 7))
-        ],
-      ),
+    return  Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        
+        WeekList(),
+        SizedBox(height: Configuration.height * 0.1),
+        Text(
+            'Total meditations: ' +
+                (_loginstate.user.totalMeditations.length + 1).toString(),
+            style: GoogleFonts.montserrat(
+                textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: Configuration.blockSizeHorizontal * 7))),
+        Text('Time meditated: ' + _loginstate.user.timeMeditated,
+            style: GoogleFonts.montserrat(
+                textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: Configuration.blockSizeHorizontal * 7)))
+      ],
     );
   }
 
@@ -168,7 +185,7 @@ class _SetMeditationState extends State<SetMeditation> {
         return countDown();
       case 'initial':
         return preMeditation();
-      case 'finished':
+      case 'data':
         return finishedMeditation();
     }
     return Container();
@@ -176,6 +193,7 @@ class _SetMeditationState extends State<SetMeditation> {
 
   void takeMeditation() async {
     await _loginstate.takeMeditation(duration);
+    setState((){state ='data';});
   }
 
   @override
@@ -209,7 +227,7 @@ class _SetMeditationState extends State<SetMeditation> {
                   : Icon(Icons.arrow_back,
                       size: Configuration.iconSize, color: Colors.white),
               onPressed: () {
-                if (state != 'initial' && state != 'finished') {
+                if (state != 'initial' && state != 'data') {
                   showDialog(
                       context: context,
                       builder: (_) => CustomDialog(),
@@ -365,6 +383,48 @@ class _State extends State<TimePicker> {
               }),
         )),
       ],
+    );
+  }
+}
+
+class WeekList extends StatefulWidget {
+  @override
+  _WeekListState createState() => _WeekListState();
+}
+
+class _WeekListState extends State<WeekList> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: Configuration.width * 0.9,
+      height: Configuration.height * 0.075,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          WeekItem(color: Colors.white, day: "M"),
+          WeekItem(color: Colors.white, day: "T"),
+          WeekItem(color: Colors.white, day: "W"),
+          WeekItem(color: Colors.white, day: "T"),
+          WeekItem(color: Colors.white, day: "F"),
+          WeekItem(color: Colors.white, day: "S"),
+          WeekItem(color: Colors.white, day: "S"),
+        ],
+      ),
+    );
+  }
+}
+
+class WeekItem extends StatelessWidget {
+  Color color;
+  String day;
+
+  WeekItem({this.color, this.day});
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      backgroundColor: color,
+      child: Text(day),
     );
   }
 }

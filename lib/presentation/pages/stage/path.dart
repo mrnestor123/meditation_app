@@ -16,10 +16,9 @@ class PathWidget extends StatelessWidget {
             controller: scrollController,
             child: SizedBox(
               width: Configuration.width,
-              height: Configuration.height*1.2,
+              height: Configuration.height,
               child: PhotoView(
                 imageProvider: AssetImage('images/path.png'),
-                initialScale: 0.3,
               ),
             ),
           ),

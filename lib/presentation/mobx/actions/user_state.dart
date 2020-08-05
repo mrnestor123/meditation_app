@@ -6,6 +6,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
+import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:mobx/mobx.dart';
 import 'package:observable/observable.dart';
 
@@ -15,16 +16,23 @@ class UserState extends _UserState with _$UserState {
   UserState(
       {CachedUserUseCase cachedUseCase,
       MeditateUseCase meditate,
+      LogOutUseCase logout,
       GetDataUseCase data})
-      : super(cachedUser: cachedUseCase, meditate: meditate, getdata: data);
+      : super(
+            cachedUser: cachedUseCase,
+            meditate: meditate,
+            getdata: data,
+            logoutusecase: logout);
 }
 
 abstract class _UserState with Store {
   CachedUserUseCase cachedUser;
   MeditateUseCase meditate;
   GetDataUseCase getdata;
+  LogOutUseCase logoutusecase;
 
-  _UserState({this.cachedUser, this.meditate, this.getdata});
+  _UserState(
+      {this.cachedUser, this.meditate, this.getdata, this.logoutusecase});
 
   @observable
   User user;
@@ -35,7 +43,7 @@ abstract class _UserState with Store {
   @observable
   Either<Failure, User> _isUserCached;
 
-  @observable 
+  @observable
   Map lessondata;
 
   @observable
@@ -61,10 +69,11 @@ abstract class _UserState with Store {
 
   @action
   Future takeMeditation(Duration d) async {
-    Either<Failure, bool> meditation =
+    Either<Failure, Meditation> meditation =
         await meditate.call(Params(duration: d, user: user));
 
-    meditation.fold((Failure f) => loggedin = false, (bool b) {
+    meditation.fold((Failure f) => print("something happened with the meditation"), (Meditation m) {
+      user.takeMeditation(m);
       print('The meditation has been a success');
     });
   }
@@ -72,18 +81,22 @@ abstract class _UserState with Store {
   //We get all the necessary data for displaying the app from the database and the
   @action
   Future getData() async {
-
-    final result = await  getdata.call(NoParams());
+    final result = await getdata.call(NoParams());
 
     result.fold((Failure f) => print(f.error), (Map m) {
       lessondata = m;
     });
   }
 
-
-  @action 
-  void changeBottomMenu(int stage){
-    _menuindex= stage+1;
+  @action
+  void changeBottomMenu(int stage) {
+    _menuindex = stage + 1;
   }
 
+  @action
+  void logout() async {
+    user = null;
+    loggedin = false;
+    await logoutusecase.call(NoParams());
+  }
 }

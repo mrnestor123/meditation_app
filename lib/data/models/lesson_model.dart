@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 
 class LessonModel extends Lesson {
-  final int codlesson;
+  String codlesson;
   final String title;
   final String slider;
   final String group;
@@ -15,6 +15,7 @@ class LessonModel extends Lesson {
   final String text;
   final int stagenumber;
   final int requiredlevel;
+  final int xp;
 
   LessonModel({
     this.title,
@@ -22,6 +23,7 @@ class LessonModel extends Lesson {
     this.slider,
     this.description,
     this.group,
+    this.xp,
     this.text,
     this.stagenumber,
     this.requiredlevel
@@ -31,6 +33,7 @@ class LessonModel extends Lesson {
             slider: slider,
             description: description,
             text: text,
+            xp:xp,
             group:group,
             stagenumber: stagenumber,
             requiredlevel: requiredlevel);

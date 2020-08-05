@@ -28,20 +28,13 @@ class UserRepositoryImpl implements UserRepository {
     String usuario,
   }) async {
     try {
-      final localUser = await localDataSource.getUser();
+      final localUser = await localDataSource.getUser(usuario);
       return Right(localUser);
     } on Exception {
       if (await networkInfo.isConnected) {
         try {
           final newUser = await remoteDataSource.loginUser(
               usuario: usuario, password: password);
-
-          final l = await remoteDataSource.getUserData(userid: newUser.coduser);
-
-          newUser.setRemainingLessons(l.remaining);
-          newUser.setLearnedLessons(l.learned);
-          newUser.setMeditations(l.meditation);
-
           localDataSource.cacheUser(newUser);
           return Right(newUser);
         } on LoginException {
@@ -82,8 +75,6 @@ class UserRepositoryImpl implements UserRepository {
             password: password,
             stagenumber: stagenumber);
         //Añadimos las lecciones
-        newUser.setRemainingLessons(
-            await remoteDataSource.getBrainLessons(stage: stagenumber));
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on ServerException {
@@ -119,6 +110,21 @@ class UserRepositoryImpl implements UserRepository {
     } else {
       return Left(
           ConnectionFailure(error: "User is not connected to the internet"));
+    }
+  }
+
+  Future<Either<Failure, bool>> logout() async {
+    /* A lo mejor hay que comprobar si los datos de la caché se han subido a la base de datos.
+    if(await networkInfo.isConnected){
+
+    }**/
+
+    final loggedout = await localDataSource.logout();
+
+    if (loggedout) {
+      return Right(true);
+    } else {
+      return Left(ServerFailure());
     }
   }
 }

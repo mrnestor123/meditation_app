@@ -12,7 +12,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/button.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
 
 class RegisterWidget extends StatelessWidget {

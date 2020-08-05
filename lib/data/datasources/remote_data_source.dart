@@ -34,8 +34,6 @@ abstract class UserRemoteDataSource {
 
   Future<List<LessonModel>> getMeditationLessons({int stage});
 
-  Future<Tupla> getUserData({String userid});
-
   Future<MeditationModel> meditate(Duration d, UserModel user);
 
   //We get all the users data
@@ -61,10 +59,37 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     for (DocumentSnapshot document in documents.documents) {
       print(document.data);
       print(document.reference);
-      user = new UserModel.fromJson(document.data);
+      if (usuario == document.data["usuario"] &&
+          password == document.data["password"]) {
+        user = new UserModel.fromJson(document.data);
+      }
     }
-
+    //Aquí le añadimos las lecciones que ha leido y las meditaciones que ha hecho
     if (user != null) {
+      DocumentReference userlist =
+          collectionGet('userdata').document(user.coduser);
+      //Query query = lessons.where('coduser',isequalto:userid)
+
+      CollectionReference userlessons = userlist.collection('readlessons');
+      CollectionReference usermeditations = userlist.collection('meditations');
+
+      QuerySnapshot readlesson = await userlessons.getDocuments();
+      QuerySnapshot meditationsuser = await usermeditations.getDocuments();
+
+      List<MeditationModel> m = new List<MeditationModel>();
+      List<LessonModel> l = new List<LessonModel>();
+
+      for (DocumentSnapshot document in readlesson.documents) {
+        l.add(new LessonModel.fromJson(document.data));
+      }
+
+      for (DocumentSnapshot document in meditationsuser.documents) {
+        m.add(new MeditationModel.fromJson(document.data));
+      }
+
+      user.setMeditations(m);
+      user.setLearnedLessons(l);
+
       return user;
     } else {
       throw LoginException();
@@ -106,50 +131,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<Tupla> getUserData({String userid}) async {
-    // TODO: implement getUserLessons
-
-    List<LessonModel> learned = new List();
-    List<LessonModel> remaining = new List();
-    List<MeditationModel> usermeditations = new List();
-
-    DocumentReference userlist = collectionGet('userlists').document('1');
-    //Query query = lessons.where('coduser',isequalto:userid)
-
-    CollectionReference remaininglessons =
-        userlist.collection('remaininglessons');
-    CollectionReference userlessons = userlist.collection('readlessons');
-    CollectionReference usrmeditations = userlist.collection('meditations');
-
-    QuerySnapshot readlesson = await userlessons.getDocuments();
-    QuerySnapshot remaininglesson = await remaininglessons.getDocuments();
-    QuerySnapshot meditationsuser = await usrmeditations.getDocuments();
-
-    for (DocumentSnapshot document in readlesson.documents) {
-      print(document.data);
-      learned.add(new LessonModel.fromJson(document.data));
-    }
-
-    for (DocumentSnapshot document in remaininglesson.documents) {
-      print(document.data);
-      remaining.add(new LessonModel.fromJson(document.data));
-    }
-
-    for (DocumentSnapshot document in meditationsuser.documents) {
-      print(document.data);
-      usermeditations.add(new MeditationModel.fromJson(document.data));
-    }
-
-    Tupla t = new Tupla(usermeditations, learned, remaining);
-
-    if (t != null) {
-      return (t);
-    } else {
-      throw DataException();
-    }
-  }
-
-  @override
   Future<List<LessonModel>> getMeditationLessons({int stage}) {
     // TODO: implement getMeditationLessons
     throw UnimplementedError();
@@ -159,7 +140,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<MeditationModel> meditate(Duration d, UserModel user) async {
     // TODO: implement meditate
-    MeditationModel res = new MeditationModel(duration: d);
+    MeditationModel res = new MeditationModel( duration: d);
+
+    DocumentReference ref = await collectionGet("userdata").document(user.coduser).collection("meditations").add(res.toJson());
+    
+
     // user.totalMeditations.add(res);
     return res;
   }
@@ -191,12 +176,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     print(result);
 
-    if(result.length>0) {
-
+    if (result.length > 0) {
       return result;
-    }else {
+    } else {
       throw DataException();
     }
-
   }
 }

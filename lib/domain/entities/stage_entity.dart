@@ -7,11 +7,12 @@ import 'package:observable/observable.dart';
 class Stage extends Equatable {
   final int stagenumber;
   final String description;
+ 
 
-  //this is for referencing the lessons. A list with the ids of the lessons.
+  //this is for referencing the lessons. 
   final ObservableList<Lesson> lessons = new ObservableList();
 
-  //this is for referencing the users. List with their ids
+  //this is for referencing the users.
   final ObservableList<User> users = new ObservableList();
 
   Stage({

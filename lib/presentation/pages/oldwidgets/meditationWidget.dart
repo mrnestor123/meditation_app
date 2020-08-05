@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/bottomMenu.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/bottomMenu.dart';
 
 class MeditationWidget extends StatelessWidget {
   @override

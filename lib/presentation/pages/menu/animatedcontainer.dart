@@ -51,6 +51,7 @@ class _AnimatedState extends State<ContainerAnimated> {
   var _controller = ScrollController();
 
   Widget sidebar(_userstate) {
+    final _loginstate = Provider.of<UserState>(context);
     return Container(
         padding: EdgeInsets.only(top: 40, bottom: 60, left: 20),
         color: Configuration.maincolor,
@@ -113,7 +114,9 @@ class _AnimatedState extends State<ContainerAnimated> {
                 SizedBox(width: 10),
                 Container(width: 2, height: 20, color: Colors.white),
                 SizedBox(width: 10),
-                Text('Log out', style: TextStyle(color: Colors.white))
+                GestureDetector(
+                  onTap: () {_loginstate.logout(); Navigator.pushNamed(context, '/welcome');},
+                  child: Text('Log out', style: TextStyle(color: Colors.white)))
               ],
             )
           ],
@@ -163,15 +166,23 @@ class _AnimatedState extends State<ContainerAnimated> {
         children: <Widget>[
           sidebar(_userstate),
           GestureDetector(
-              onTap: () => sidebarOpen ? setState((){ xOffset = 0;yOffset = 0;scaleFactor = 1;sidebarOpen = false; }) : null,
-              child: AnimatedContainer(
+            onTap: () => sidebarOpen
+                ? setState(() {
+                    xOffset = 0;
+                    yOffset = 0;
+                    scaleFactor = 1;
+                    sidebarOpen = false;
+                  })
+                : null,
+            child: AnimatedContainer(
               decoration: BoxDecoration(
-                  borderRadius: sidebarOpen
-                      ? BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          bottomLeft: Radius.circular(30))
-                      : null,
-                  color: Colors.grey[500]),
+                borderRadius: sidebarOpen
+                    ? BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        bottomLeft: Radius.circular(30))
+                    : null,
+                color: Colors.grey[500],
+              ),
               transform: Matrix4.translationValues(xOffset, yOffset, 0)
                 ..scale(scaleFactor)
                 ..rotateY(sidebarOpen ? -0.1 : 0),
@@ -214,7 +225,8 @@ class _AnimatedState extends State<ContainerAnimated> {
                               ),
                         Text(title, style: Configuration.title),
                         GestureDetector(
-                            onTap: () => Navigator.pushNamed(context, '/profile'),
+                            onTap: () =>
+                                Navigator.pushNamed(context, '/profile'),
                             child: CircleAvatar(child: Text('ERN')))
                       ],
                     ),
@@ -231,8 +243,20 @@ class _AnimatedState extends State<ContainerAnimated> {
                                 : Radius.circular(25))),
                     child: switchMenu(_controller),
                   )),
+                  /*currentRoute == '/meditate' || currentRoute == '/brain'
+                      ? Container(
+                        width: Configuration.width,
+                        color: Colors.transparent,
+                        child: FloatingActionButton(
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/premeditation'),
+                          child: Icon(Icons.timer),
+                          backgroundColor: Configuration.maincolor,
+                        ),
+                      )
+                      : Container(),*/
                   currentRoute == '/meditate' || currentRoute == '/brain'
-                      ? BottomMenu(selectedindex: 1,controller: _controller)
+                      ? BottomMenu(selectedindex: 0, controller: _controller)
                       : Container(),
                 ],
               ),
@@ -245,26 +269,20 @@ class _AnimatedState extends State<ContainerAnimated> {
 }
 
 //Variables for bottom menu
-List<BottomNavigationBarItem> menuitems = [
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceOne), title: Text("Stage 1")),
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceTwo), title: Text("Stage 2")),
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceThree), title: Text("Stage 3")),
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceFour), title: Text("Stage 4")),
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceFive), title: Text("Stage 5")),
-  BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.diceSix), title: Text("Stage 6")),
+List<Map> menuitems = [
+  {'icon': FontAwesomeIcons.diceOne, 'title': "Stage 1", 'index': 0},
+  {'icon': FontAwesomeIcons.diceTwo, 'title': "Stage 2", 'index': 1},
+  {'icon': FontAwesomeIcons.diceThree, 'title': "Stage 3", 'index': 2},
+  {'icon': FontAwesomeIcons.diceFour, 'title': "Stage 4", 'index': 3},
+  {'icon': FontAwesomeIcons.diceFive, 'title': "Stage 5", 'index': 4},
+  {'icon': FontAwesomeIcons.diceSix, 'title': "Stage 6", 'index': 5}
 ];
 
 class BottomMenu extends StatefulWidget {
   int selectedindex;
   ScrollController controller;
 
-  BottomMenu({Key key, this.selectedindex,this.controller}) : super(key: key);
+  BottomMenu({Key key, this.selectedindex, this.controller}) : super(key: key);
 
   @override
   _BottomMenuState createState() => _BottomMenuState();
@@ -272,6 +290,7 @@ class BottomMenu extends StatefulWidget {
 
 class _BottomMenuState extends State<BottomMenu> {
   int _selectedIndex;
+  var _userstate;
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 
@@ -281,19 +300,77 @@ class _BottomMenuState extends State<BottomMenu> {
     _selectedIndex = widget.selectedindex;
   }
 
-  @override
+  /* @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
-    return BottomNavigationBar(
-      unselectedItemColor: Colors.black,
-      items: menuitems,
-      currentIndex: _selectedIndex,
-      selectedItemColor: Configuration.maincolor,
-      onTap: (index) => setState(() {
-        widget.controller.animateTo(0, duration: Duration(milliseconds: 500), curve:Curves.ease);
-        _userstate.changeBottomMenu(index);
-        _selectedIndex = index;
-      }),
+    return BottomAppBar(
+      clipBehavior: Clip.antiAlias,
+      notchMargin: 2.0,
+      shape: CircularNotchedRectangle(),
+      child: BottomNavigationBar(
+        unselectedItemColor: Colors.black,
+        items: menuitems,
+        currentIndex: _selectedIndex,
+        selectedItemColor: Configuration.maincolor,
+        onTap: (index) => setState(() {
+          widget.controller.animateTo(0,
+              duration: Duration(milliseconds: 500), curve: Curves.ease);
+          _userstate.changeBottomMenu(index);
+          _selectedIndex = index;
+        }),
+      ),
+    );
+  }
+*/
+
+  List<Widget> buildItems() {
+    List<Widget> result = new List();
+    for (var e in menuitems) {
+      result.add(GestureDetector(
+        onTap: () => setState(() {
+          widget.controller.animateTo(0,
+              duration: Duration(milliseconds: 500), curve: Curves.ease);
+          _userstate.changeBottomMenu(e['index']);
+          _selectedIndex = e['index'];
+        }),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              e['icon'],
+              color: e['index'] == _selectedIndex
+                  ? Configuration.maincolor
+                  : Colors.black,
+              size: Configuration.height * 0.04,
+            ),
+            e['index'] == _selectedIndex
+                ? Text(
+                    e['title'],
+                    style: TextStyle(color: Configuration.maincolor),
+                  )
+                : Container()
+          ],
+        ),
+      ));
+    }
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    return Stack(
+      children: <Widget>[
+        Container(
+            padding: EdgeInsets.symmetric(
+                horizontal: Configuration.safeBlockHorizontal * 4),
+            height: Configuration.height * 0.08,
+            width: Configuration.width,
+            decoration: BoxDecoration(color: Colors.grey[100]),
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: buildItems())),
+      ],
     );
   }
 }

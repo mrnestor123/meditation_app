@@ -22,6 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/lesson_repository.dart';
 import 'domain/repositories/lesson_repository.dart';
+import 'domain/usecases/user/log_out.dart';
 import 'presentation/mobx/actions/lesson_state.dart';
 import 'presentation/mobx/actions/meditation_state.dart';
 import 'presentation/mobx/actions/menu_state.dart';
@@ -44,7 +45,7 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl()),
+    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl(),logout:sl()),
   );
 
   sl.registerFactory(
@@ -63,6 +64,8 @@ Future<void> init() async {
   sl.registerLazySingleton(()=> GetBrainLessonsUseCase(sl()));
   sl.registerLazySingleton(()=> MeditateUseCase(sl()));
   sl.registerLazySingleton(()=> GetDataUseCase(sl()));
+  sl.registerLazySingleton(() => LogOutUseCase(sl()));
+
 
 
   //Repositories

@@ -60,7 +60,7 @@ abstract class _LoginState with Store {
       // Reset the possible previous error message.
       try {
         errorMessage = "";
-        _userFuture =_loginusecase(UserParams(usuario: username, password: password));
+        _userFuture =_loginusecase(UserParams(usuario: username.trim(), password: password.trim()));
         log = await _userFuture;
         log.fold(
           (Failure f) => errorMessage = f.error, 

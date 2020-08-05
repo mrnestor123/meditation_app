@@ -21,9 +21,16 @@ class MeditationRepositoryImpl implements MeditationRepository {
   @override
   Future<Either<Failure, Meditation>> meditate({Duration d, User user}) async {
     // TODO: implement meditate
-    Meditation m = await remoteDataSource.meditate(d, user);
-
-    return Right(m);
-
+    
+    
+    if (await networkInfo.isConnected) {
+      Meditation m = await remoteDataSource.meditate(d, user);
+      await localDataSource.addMeditation(m);
+      return Right(m);
+    }
+    
   }
+
+  @override
+  Future<Either<Failure, List<Meditation>>> getmeditations() {}
 }

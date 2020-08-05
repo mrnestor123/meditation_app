@@ -15,10 +15,10 @@ abstract class UserRepository {
       String usuario,
       int stagenumber});
 
-
   Future<Either<Failure,User>> islogged();
 
-
   Future<Either<Failure,Map>> getData();
+
+  Future<Either<Failure,bool>> logout();
 
 }
