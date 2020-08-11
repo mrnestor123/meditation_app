@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/horizontal_list.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
 import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
+import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 
 //List of guided meditationsx
 List<Map> guidedmeditations = [];
@@ -16,6 +21,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
+    final _userstate = Provider.of<UserState>(context);
     return ListView(
       controller: controller,
       shrinkWrap: true,
@@ -53,16 +59,23 @@ class MainScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      LevelBar(width:Configuration.width*0.9),
-
+                      Row(children: <Widget>[
+                        LevelBar(width: Configuration.width * 0.9),
+                        Observer(
+                            builder: (context) => Text(
+                                (_userstate.user.level.xpgoal -
+                                            _userstate.user.level.levelxp)
+                                        .toString() +
+                                    " xp left till next level"))
+                      ]),
                     ],
                   ),
                 ),
               ),
             ),
             SquareContainer(
-                icon: Icon(FontAwesomeIcons.moon, color: Colors.white),
-                modal: AbstractDialog())
+              icon: Icon(FontAwesomeIcons.moon, color: Colors.white),
+            )
           ],
         ),
         SizedBox(height: Configuration.safeBlockVertical * 8),
@@ -90,6 +103,7 @@ class SquareContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
     return Container(
         decoration: BoxDecoration(),
         child: ButtonTheme(
@@ -99,8 +113,9 @@ class SquareContainer extends StatelessWidget {
               color: Colors.grey,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32)),
-              onPressed: () =>
-                  showDialog(context: context, builder: (_) => modal),
+              onPressed: () => modal == null
+                  ? null
+                  : showDialog(context: context, builder: (_) => modal),
               child: icon),
         ));
   }
@@ -136,31 +151,35 @@ class UserModal extends StatelessWidget {
   }
 }
 
-
 class LevelBar extends StatelessWidget {
   double width;
   LevelBar({this.width});
 
   @override
   Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
     return Container(
-      margin: EdgeInsets.all(Configuration.safeBlockVertical*3),
-      width: width,
-      height: Configuration.height*0.1,
-      decoration: BoxDecoration(borderRadius:BorderRadius.circular(12)),
-      child: Stack(
-        children: [
-         Align(
-           alignment:Alignment.topLeft,
-              child: RadialProgress(
-              width: Configuration.safeBlockHorizontal * 2,
-              progressColor: Configuration.maincolor,
-              progressBackgroundColor: Configuration.grey,
-              goalCompleted: 0.2,
-              child:Container(height: Configuration.height*0.1,width: Configuration.width*0.1,)
+      margin: EdgeInsets.all(Configuration.safeBlockVertical * 3),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+      child: RadialProgress(
+          width: Configuration.safeBlockHorizontal * 2,
+          progressColor: Configuration.maincolor,
+          progressBackgroundColor: Configuration.grey,
+          goalCompleted: _userstate.user.level.percentage,
+          child: Container(
+            height: Configuration.height * 0.1,
+            width: Configuration.width * 0.1,
+            child: Center(
+              child: Text(
+                _userstate.user.level.level.toString(),
+                style: GoogleFonts.montserrat(
+                    textStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Configuration.maincolor,
+                        fontSize: Configuration.blockSizeHorizontal*5)),
               ),
-         ),
-        ]),
-      );
+            ),
+          )),
+    );
   }
 }

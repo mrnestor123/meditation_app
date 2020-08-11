@@ -17,7 +17,6 @@ class User extends Equatable {
 
   final String mail;
   final int stagenumber;
-  final double experience;
   final Level level;
 
   //May be a string with 1 hour, 30 sec, 20 min ...
@@ -30,7 +29,7 @@ class User extends Equatable {
   //A list with the meditations
   final ObservableList<MeditationModel> totalMeditations = new ObservableList();
 
-  //two lists with the lessons. At the beginning the user has no lessons learned and all the remaining lessons for each stage
+  //List with the lessons that the user has learned
   final ObservableList<LessonModel> lessonslearned = new ObservableList();
 
   final ObservableList<Mission> missions = new ObservableList();
@@ -38,7 +37,6 @@ class User extends Equatable {
   User(
       {this.coduser,
       this.nombre,
-      this.experience,
       @required this.level,
       @required this.mail,
       @required this.usuario,

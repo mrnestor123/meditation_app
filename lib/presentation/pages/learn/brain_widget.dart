@@ -25,7 +25,7 @@ class BrainScreen extends StatelessWidget {
           width: Configuration.blockSizeHorizontal * 6,
           height: Configuration.blockSizeVertical * 10,
           child: Text(
-            'Learn everything about your mind',
+            'Learn',
             softWrap: true,
             style: Configuration.subtitle,
             textAlign: TextAlign.center,
@@ -34,12 +34,8 @@ class BrainScreen extends StatelessWidget {
         Observer(builder: ((context) {
           // return CardView(lessons: _learnstate.brainlessons);
           return HorizontalList(
-              lessons: _userstate.lessondata[_userstate.menuindex]["brain"]);
+              lessons: _userstate.lessondata[_userstate.menuindex]);
         })),
-        // HorizontalList(description: 'Guided Meditations'),
-        // HorizontalList(description: 'Lessons'),
-        // HorizontalList(description: 'Mind exercises'),
-        // HorizontalList(description: 'Mind improvement'),
       ],
     );
   }

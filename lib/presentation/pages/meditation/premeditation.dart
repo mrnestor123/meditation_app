@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -156,13 +157,12 @@ class _SetMeditationState extends State<SetMeditation> {
   }
 
   Widget finishedMeditation() {
-    return  Column(
+    return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        
         WeekList(),
-        SizedBox(height: Configuration.height * 0.1),
+        SizedBox(height: Configuration.height * 0.05),
         Text(
             'Total meditations: ' +
                 (_loginstate.user.totalMeditations.length + 1).toString(),
@@ -193,7 +193,9 @@ class _SetMeditationState extends State<SetMeditation> {
 
   void takeMeditation() async {
     await _loginstate.takeMeditation(duration);
-    setState((){state ='data';});
+    setState(() {
+      state = 'data';
+    });
   }
 
   @override
@@ -387,50 +389,111 @@ class _State extends State<TimePicker> {
   }
 }
 
+List<Map> weekDays = [
+  {'day': "M", 'meditated': false, 'index': 1},
+  {'day': 'T', 'meditated': false, 'index': 2},
+  {'day': 'W', 'meditated': false, 'index': 3},
+  {'day': 'TH', 'meditated': false, 'index': 4},
+  {'day': 'F', 'meditated': false, 'index': 5},
+  {'day': 'S', 'meditated': false, 'index': 6},
+  {'day': 'S', 'meditated': false, 'index': 6}
+];
+
 class WeekList extends StatefulWidget {
   @override
   _WeekListState createState() => _WeekListState();
 }
 
 class _WeekListState extends State<WeekList> {
+  UserState _userstate;
+  int dayStreak= 0;
+
+  List<Widget> getDays() {
+    List<Widget> result = new List();
+    var dayOfWeek = 1;
+    DateTime today = DateTime.now();
+    var monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
+    dayStreak= 0;
+
+    List<MeditationModel> meditations = _userstate.user.totalMeditations;
+
+    for (int i = meditations.length - 1; i > 0; i--) {
+      print(meditations[i].day.toString());
+      if (meditations[i].day == null ||
+          meditations[i].day.day < monday.day &&
+              meditations[i].day.month <= monday.month) {
+        break;
+      } else if (meditations[i].day.day >= monday.day &&
+          meditations[i].day.month == monday.month) {
+        weekDays[meditations[i].day.weekday - 1]['meditated'] = true;
+      }
+    }
+
+    for (var e in weekDays) {
+      if(e['meditated']) { dayStreak++;}
+      result.add(WeekItem(
+          day: e['day'],
+          meditated: e['meditated'],
+          animate: today.weekday == e['index']));
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
     return Container(
       width: Configuration.width * 0.9,
-      height: Configuration.height * 0.075,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: <Widget>[
-          WeekItem(color: Colors.white, day: "M"),
-          WeekItem(color: Colors.white, day: "T"),
-          WeekItem(color: Colors.white, day: "W"),
-          WeekItem(color: Colors.white, day: "T"),
-          WeekItem(color: Colors.white, day: "F"),
-          WeekItem(color: Colors.white, day: "S"),
-          WeekItem(color: Colors.white, day: "S"),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: getDays()),
+          SizedBox(height: Configuration.height*0.05),
+          Text(dayStreak.toString() + ' consecutive days',style: GoogleFonts.montserrat(
+                textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: Configuration.blockSizeHorizontal * 7)),),
+
         ],
       ),
     );
   }
 }
 
-class WeekItem extends StatelessWidget {
-  Color color;
+class WeekItem extends StatefulWidget {
+  bool meditated;
+  bool animate;
   String day;
 
-  WeekItem({this.color, this.day});
+  WeekItem({this.day, this.meditated, this.animate});
+
+  @override
+  _WeekItemState createState() => _WeekItemState();
+}
+
+class _WeekItemState extends State<WeekItem> {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundColor: color,
-      child: Text(day),
+    return AnimatedContainer(
+      width: Configuration.width * 0.1,
+      height: Configuration.width * 0.1,
+      duration: Duration(seconds: 1),
+      decoration: new BoxDecoration(
+        color: widget.meditated ? Colors.white : Configuration.grey,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+          child: Text(widget.day,
+              style: TextStyle(
+                  color:
+                      widget.meditated ? Colors.black : Colors.white))),
     );
   }
 }
 
 /** 
-
 class FinishedMeditation extends StatelessWidget {
   Duration duration;
 

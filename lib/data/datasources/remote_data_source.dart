@@ -34,10 +34,15 @@ abstract class UserRemoteDataSource {
 
   Future<List<LessonModel>> getMeditationLessons({int stage});
 
-  Future<MeditationModel> meditate(Duration d, UserModel user);
+  Future meditate(MeditationModel m, UserModel user);
 
   //We get all the users data
   Future<Map> getData();
+
+  //We get all the lessons of every stage
+  Future<Map> getAllLessons();
+
+  Future takeLesson(LessonModel l, UserModel user);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -104,11 +109,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       String usuario,
       int stagenumber}) async {
     UserModel user = new UserModel(
-        mail: mail,
-        password: password,
-        usuario: usuario,
-        nombre: nombre,
-        stagenumber: 1);
+      mail: mail,
+      password: password,
+      usuario: usuario,
+      nombre: nombre,
+      stagenumber: 1,
+    );
 
     //faltará saber el id una vez añadido
     DocumentReference docRef = await collectionGet('users').add(user.toJson());
@@ -138,15 +144,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 // Faltaría añadirlo a la base de datos
   @override
-  Future<MeditationModel> meditate(Duration d, UserModel user) async {
+  Future meditate(MeditationModel m, UserModel user) async {
     // TODO: implement meditate
-    MeditationModel res = new MeditationModel( duration: d);
 
-    DocumentReference ref = await collectionGet("userdata").document(user.coduser).collection("meditations").add(res.toJson());
-    
+    DocumentReference ref = await collectionGet("userdata")
+        .document(user.coduser)
+        .collection("meditations")
+        .add(m.toJson());
 
     // user.totalMeditations.add(res);
-    return res;
+    
   }
 
   @override
@@ -181,5 +188,36 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     } else {
       throw DataException();
     }
+  }
+
+  @override
+  Future<Map> getAllLessons() async {
+    ObservableList<LessonModel> l = new ObservableList<LessonModel>();
+    Map<int, Map<String, List<LessonModel>>> result =
+        new Map<int, Map<String, List<LessonModel>>>();
+    CollectionReference lessons = collectionGet('goodlessons');
+
+    QuerySnapshot documents = await lessons.getDocuments();
+    int stage = 1;
+
+    for (DocumentSnapshot document in documents.documents) {
+      result[stage] = {};
+      document.data.forEach((oldkey, value) {
+        if (result[stage][value["group"]] == null) {
+          result[stage][value["group"]] = [];
+        }
+        result[stage][value["group"]].add(new LessonModel.fromJson(value));
+      });
+      stage++;
+    }
+
+    return result;
+  }
+
+  Future takeLesson(LessonModel l, UserModel user) async {
+    DocumentReference ref = await collectionGet("userdata")
+        .document(user.coduser)
+        .collection("readlessons")
+        .add({"codlesson": l.codlesson, "title": l.title});
   }
 }

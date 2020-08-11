@@ -10,9 +10,9 @@ class Lesson extends Equatable {
   final String slider;
   final String group;
   final String description;
-  final String text;
-  final int stagenumber;
+  final Map<String,dynamic> text;
   final int xp;
+  final Map<String,String> lessontext= new Map();
 
   Lesson({
     this.codlesson,
@@ -22,7 +22,6 @@ class Lesson extends Equatable {
     this.slider,
     @required this.description,
     @required this.text,
-    @required this.stagenumber,
     @required this.xp
   }) {
     if (this.codlesson == null) {
@@ -33,5 +32,5 @@ class Lesson extends Equatable {
 
   @override
   List<Object> get props =>
-      [title, codlesson, slider, description, text, stagenumber,xp];
+      [title, codlesson, slider, description, text, xp];
 }

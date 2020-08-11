@@ -1,14 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
+import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:mobx/mobx.dart';
-import 'package:observable/observable.dart';
 
 part 'user_state.g.dart';
 
@@ -17,31 +18,39 @@ class UserState extends _UserState with _$UserState {
       {CachedUserUseCase cachedUseCase,
       MeditateUseCase meditate,
       LogOutUseCase logout,
-      GetDataUseCase data})
+      GetDataUseCase data,
+      TakeLessonUseCase lesson})
       : super(
             cachedUser: cachedUseCase,
             meditate: meditate,
             getdata: data,
-            logoutusecase: logout);
+            logoutusecase: logout,
+            lesson: lesson);
 }
 
 abstract class _UserState with Store {
   CachedUserUseCase cachedUser;
   MeditateUseCase meditate;
   GetDataUseCase getdata;
+  TakeLessonUseCase lesson;
+
   LogOutUseCase logoutusecase;
 
   _UserState(
-      {this.cachedUser, this.meditate, this.getdata, this.logoutusecase});
+      {this.cachedUser,
+      this.meditate,
+      this.getdata,
+      this.logoutusecase,
+      this.lesson});
 
   @observable
   User user;
 
   @observable
-  bool loggedin;
+  bool nightmode = false;
 
   @observable
-  Either<Failure, User> _isUserCached;
+  bool loggedin;
 
   @observable
   Map lessondata;
@@ -59,7 +68,7 @@ abstract class _UserState with Store {
 
   @action
   Future userisLogged() async {
-    _isUserCached = await cachedUser.call(NoParams());
+    Either<Failure, User> _isUserCached = await cachedUser.call(NoParams());
 
     _isUserCached.fold((Failure f) => loggedin = false, (User u) {
       user = u;
@@ -69,12 +78,22 @@ abstract class _UserState with Store {
 
   @action
   Future takeMeditation(Duration d) async {
-    Either<Failure, Meditation> meditation =
-        await meditate.call(Params(duration: d, user: user));
+    Either<Failure, bool> meditation = await meditate.call(Params(duration: d, user: user));
 
-    meditation.fold((Failure f) => print("something happened with the meditation"), (Meditation m) {
-      user.takeMeditation(m);
+    meditation
+        .fold((Failure f) => print("something happened with the meditation"),
+            (bool b) {
       print('The meditation has been a success');
+    });
+  }
+
+  @action
+  Future takeLesson(LessonModel l) async {
+    Either<Failure, bool> lessonsuccess = await lesson.call(LessonParams(lesson: l, user: user));
+
+    lessonsuccess.fold(
+        (Failure f) => print("something happened with the lesson"), (bool m) {
+      print('The lesson has been a success');
     });
   }
 
@@ -94,7 +113,7 @@ abstract class _UserState with Store {
   }
 
   @action
-  void logout() async {
+  Future logout() async {
     user = null;
     loggedin = false;
     await logoutusecase.call(NoParams());

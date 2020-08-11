@@ -7,7 +7,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/lesson_repository.dart';
 
-class TakeLessonUseCase extends UseCase<void, Params> {
+class TakeLessonUseCase extends UseCase<void, LessonParams> {
   LessonRepository repository;
 
   TakeLessonUseCase(this.repository);
@@ -15,8 +15,8 @@ class TakeLessonUseCase extends UseCase<void, Params> {
   //Hay que comprobar en el bloc antes de utilizar la función esta que el usuario ha acabado la lección. 
   //Esto es en el caso de que la acabe.
   @override
-  Future<Either<Failure, void>> call(Params params) {
-    //añadimos la leccion al usuario que hemos creado
+  Future<Either<Failure, void>> call(LessonParams params) {
+    //añadimos la leccion al usuario
     params.user.takeLesson(params.lesson);
     //más adelante comprobar si ha hecho algún objetivo para la stage
 
@@ -25,11 +25,11 @@ class TakeLessonUseCase extends UseCase<void, Params> {
   }
 }
 
-class Params extends Equatable {
+class LessonParams extends Equatable {
   final User user;
   final Lesson lesson;
 
-  Params({
+  LessonParams({
     @required this.user,
     @required this.lesson,
   });

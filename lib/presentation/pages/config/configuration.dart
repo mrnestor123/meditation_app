@@ -15,10 +15,13 @@ class Configuration {
   static double safeBlockHorizontal;
   static double safeBlockVertical;
 
-  //the purple color
-  static Color maincolor = Color.fromRGBO(135, 61, 175, 100);
-  static Color grey = Colors.grey;
 
+  static bool nightmode = false;
+
+  //the purple color
+  static Color maincolor = !nightmode ? Color.fromRGBO(135, 61, 175, 100) : Colors.black;
+  static Color grey = !nightmode? Colors.grey: Colors.blueGrey;
+  static Color whitecolor = !nightmode ? Colors.white : Colors.black;
 
   // TextStyles are title, subtitle, subtitle2,subtilte3, paragraph1,paragraph2,paragraph3
   static TextStyle title = GoogleFonts.montserrat(

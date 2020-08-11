@@ -162,6 +162,7 @@ class _AnimatedState extends State<ContainerAnimated> {
     final _userstate = Provider.of<UserState>(context);
 
     return Scaffold(
+      backgroundColor: Configuration.whitecolor,
       body: Stack(
         children: <Widget>[
           sidebar(_userstate),
@@ -275,7 +276,11 @@ List<Map> menuitems = [
   {'icon': FontAwesomeIcons.diceThree, 'title': "Stage 3", 'index': 2},
   {'icon': FontAwesomeIcons.diceFour, 'title': "Stage 4", 'index': 3},
   {'icon': FontAwesomeIcons.diceFive, 'title': "Stage 5", 'index': 4},
-  {'icon': FontAwesomeIcons.diceSix, 'title': "Stage 6", 'index': 5}
+  {'icon': FontAwesomeIcons.diceSix, 'title': "Stage 6", 'index': 5},
+  {'icon': Icons.plus_one ,'title': "Stage 7", 'index': 6},
+  {'icon': Icons.plus_one, 'title':'Stage 8', 'index': 7},
+  {'icon': Icons.plus_one,'title':'Stage 9', 'index': 8},
+  {'icon': Icons.plus_one,'title':'Stage 10','index':9}
 ];
 
 class BottomMenu extends StatefulWidget {
@@ -333,23 +338,26 @@ class _BottomMenuState extends State<BottomMenu> {
           _userstate.changeBottomMenu(e['index']);
           _selectedIndex = e['index'];
         }),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              e['icon'],
-              color: e['index'] == _selectedIndex
-                  ? Configuration.maincolor
-                  : Colors.black,
-              size: Configuration.height * 0.04,
-            ),
-            e['index'] == _selectedIndex
-                ? Text(
-                    e['title'],
-                    style: TextStyle(color: Configuration.maincolor),
-                  )
-                : Container()
-          ],
+        child: Container(
+          width: Configuration.width*0.15,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                e['icon'],
+                color: e['index'] == _selectedIndex
+                    ? Configuration.maincolor
+                    : Colors.black,
+                size: Configuration.height * 0.04,
+              ),
+              e['index'] == _selectedIndex
+                  ? Text(
+                      e['title'],
+                      style: TextStyle(color: Configuration.maincolor),
+                    )
+                  : Container()
+            ],
+          ),
         ),
       ));
     }
@@ -367,9 +375,12 @@ class _BottomMenuState extends State<BottomMenu> {
             height: Configuration.height * 0.08,
             width: Configuration.width,
             decoration: BoxDecoration(color: Colors.grey[100]),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: buildItems())),
+            child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                    child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: buildItems()),
+            )),
       ],
     );
   }

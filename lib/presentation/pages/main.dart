@@ -4,6 +4,7 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
+import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/meditation/main_screen.dart';
 
@@ -12,8 +13,6 @@ import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/meditation/premeditation.dart';
 import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
-import 'package:meditation_app/presentation/pages/oldwidgets/profileWidget.dart';
-import 'package:meditation_app/presentation/pages/oldwidgets/stageWidget.dart';
 import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
@@ -38,8 +37,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //we pass the userstate class to all the classes
-    return Provider(
-        create: (context) => sl<UserState>(),
+    return MultiProvider(
+        providers: [
+          Provider<UserState>(create: (context) => sl<UserState>()),
+        ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
@@ -58,7 +59,7 @@ class MyApp extends StatelessWidget {
               '/premeditation': (BuildContext context) => Provider(
                   create: (context) => sl<MeditationState>(),
                   child: SetMeditation()),
-              '/path' : (context) => PathWidget()
+              '/path': (context) => PathWidget()
 
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),

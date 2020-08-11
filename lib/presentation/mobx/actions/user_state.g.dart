@@ -9,6 +9,12 @@ part of 'user_state.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$UserState on _UserState, Store {
+  Computed<int> _$menuindexComputed;
+
+  @override
+  int get menuindex =>
+      (_$menuindexComputed ??= Computed<int>(() => super.menuindex)).value;
+
   final _$userAtom = Atom(name: '_UserState.user');
 
   @override
@@ -24,6 +30,23 @@ mixin _$UserState on _UserState, Store {
       super.user = value;
       _$userAtom.reportChanged();
     }, _$userAtom, name: '${_$userAtom.name}_set');
+  }
+
+  final _$nightmodeAtom = Atom(name: '_UserState.nightmode');
+
+  @override
+  bool get nightmode {
+    _$nightmodeAtom.context.enforceReadPolicy(_$nightmodeAtom);
+    _$nightmodeAtom.reportObserved();
+    return super.nightmode;
+  }
+
+  @override
+  set nightmode(bool value) {
+    _$nightmodeAtom.context.conditionallyRunInAction(() {
+      super.nightmode = value;
+      _$nightmodeAtom.reportChanged();
+    }, _$nightmodeAtom, name: '${_$nightmodeAtom.name}_set');
   }
 
   final _$loggedinAtom = Atom(name: '_UserState.loggedin');
@@ -43,21 +66,38 @@ mixin _$UserState on _UserState, Store {
     }, _$loggedinAtom, name: '${_$loggedinAtom.name}_set');
   }
 
-  final _$_isUserCachedAtom = Atom(name: '_UserState._isUserCached');
+  final _$lessondataAtom = Atom(name: '_UserState.lessondata');
 
   @override
-  Either<Failure, User> get _isUserCached {
-    _$_isUserCachedAtom.context.enforceReadPolicy(_$_isUserCachedAtom);
-    _$_isUserCachedAtom.reportObserved();
-    return super._isUserCached;
+  Map<dynamic, dynamic> get lessondata {
+    _$lessondataAtom.context.enforceReadPolicy(_$lessondataAtom);
+    _$lessondataAtom.reportObserved();
+    return super.lessondata;
   }
 
   @override
-  set _isUserCached(Either<Failure, User> value) {
-    _$_isUserCachedAtom.context.conditionallyRunInAction(() {
-      super._isUserCached = value;
-      _$_isUserCachedAtom.reportChanged();
-    }, _$_isUserCachedAtom, name: '${_$_isUserCachedAtom.name}_set');
+  set lessondata(Map<dynamic, dynamic> value) {
+    _$lessondataAtom.context.conditionallyRunInAction(() {
+      super.lessondata = value;
+      _$lessondataAtom.reportChanged();
+    }, _$lessondataAtom, name: '${_$lessondataAtom.name}_set');
+  }
+
+  final _$_menuindexAtom = Atom(name: '_UserState._menuindex');
+
+  @override
+  int get _menuindex {
+    _$_menuindexAtom.context.enforceReadPolicy(_$_menuindexAtom);
+    _$_menuindexAtom.reportObserved();
+    return super._menuindex;
+  }
+
+  @override
+  set _menuindex(int value) {
+    _$_menuindexAtom.context.conditionallyRunInAction(() {
+      super._menuindex = value;
+      _$_menuindexAtom.reportChanged();
+    }, _$_menuindexAtom, name: '${_$_menuindexAtom.name}_set');
   }
 
   final _$userisLoggedAsyncAction = AsyncAction('userisLogged');
@@ -74,6 +114,27 @@ mixin _$UserState on _UserState, Store {
     return _$takeMeditationAsyncAction.run(() => super.takeMeditation(d));
   }
 
+  final _$takeLessonAsyncAction = AsyncAction('takeLesson');
+
+  @override
+  Future<dynamic> takeLesson(LessonModel l) {
+    return _$takeLessonAsyncAction.run(() => super.takeLesson(l));
+  }
+
+  final _$getDataAsyncAction = AsyncAction('getData');
+
+  @override
+  Future<dynamic> getData() {
+    return _$getDataAsyncAction.run(() => super.getData());
+  }
+
+  final _$logoutAsyncAction = AsyncAction('logout');
+
+  @override
+  Future<dynamic> logout() {
+    return _$logoutAsyncAction.run(() => super.logout());
+  }
+
   final _$_UserStateActionController = ActionController(name: '_UserState');
 
   @override
@@ -87,8 +148,19 @@ mixin _$UserState on _UserState, Store {
   }
 
   @override
+  void changeBottomMenu(int stage) {
+    final _$actionInfo = _$_UserStateActionController.startAction();
+    try {
+      return super.changeBottomMenu(stage);
+    } finally {
+      _$_UserStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
-    final string = 'user: ${user.toString()},loggedin: ${loggedin.toString()}';
+    final string =
+        'user: ${user.toString()},nightmode: ${nightmode.toString()},loggedin: ${loggedin.toString()},lessondata: ${lessondata.toString()},menuindex: ${menuindex.toString()}';
     return '{$string}';
   }
 }

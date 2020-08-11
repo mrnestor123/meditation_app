@@ -102,7 +102,8 @@ class UserRepositoryImpl implements UserRepository {
 
     if (await networkInfo.isConnected) {
       try {
-        final data = await remoteDataSource.getData();
+        //final data = await remoteDataSource.getData();
+        final data = await remoteDataSource.getAllLessons();
         return Right(data);
       } on Exception {
         return Left(ServerFailure());

@@ -24,8 +24,16 @@ class LessonRepositoryImpl implements LessonRepository{
       @required this.networkInfo});
 
   @override
-  Future<Either<Failure, void>> takeLesson({Lesson lesson, User user}) {
-    // TODO: implement takeLesson
+  Future<Either<Failure, bool>> takeLesson({Lesson lesson, User user}) async{
+    if(await networkInfo.isConnected){
+     try{
+       final added = remoteDataSource.takeLesson(lesson,user);
+       return Right(true);
+     }on Exception {
+       return Left(ServerFailure());
+     }
+    }
+
     return null;
   }
 

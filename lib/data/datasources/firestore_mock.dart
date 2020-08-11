@@ -1,4 +1,4 @@
-class DatabaseString {
+  class DatabaseString {
   String db = r"""
 {
   "users": {
@@ -33,31 +33,16 @@ class DatabaseString {
     "xyv": {
       "readlessons" : {
         "1":{
-            "codlesson": "10",
-            "title": "The myth of multi-tasking",
-            "group": "Attention",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
+            "codlesson": "1",
+            "title": "Consciousness"
           },
         "2":{
-            "codlesson": "10",
-            "title": "The myth of multi-tasking",
-            "group": "Attention",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
+            "codlesson": "2",
+            "title": "Peripheral awareness vs attention"
          },
          "3":{
             "codlesson": "8",
-            "title": "Functions of attention and peripheral awareness",
-            "group": "Attention",
-            "slider" : "new_slider.jpg",
-            "description": "This lesson talks about the differences between attention and peripheral awareness",
-            "text":"Peripheral awareness is x. Attention is y",
-            "stagenumber":1
+            "title": "Functions of attention and peripheral awareness"
           }
       },
       "meditations": {
@@ -80,6 +65,48 @@ class DatabaseString {
       }
     }
   },
+  "goodlessons": {
+    "1":{
+      "1":{
+        "codlesson":"1",
+        "title":"Consciousness",
+        "group": "Mind",
+        "slider": "consciencia.jpg",
+        "description" :" Consciousness consists of whatever we're experiencing in the moment",
+        "text": {
+            "1": {
+              "image": "consciencia.png",
+              "text":"It’s a lot like vision: just as the objects in our field of vision change from one moment to the next, objects in our field of conscious awareness, like sights, sounds, smells, and other external phenomena, also arise and pass away. Of course this field isn’t just limited to what we perceive with our outer senses."
+            },
+            "2":{
+              "image":"consciencia.png",
+              "text" :"It also includes internal mental objects, which come in the form of transitory thoughts, feelings and memories. Conscious experience takes two forms, attention and peripheral awareness"
+            }
+          }
+        },
+       "2": {
+         "codlesson": "2",
+         "title":"Attention vs peripheral awareness",
+         "group": "Mind",
+         "slider":"peripheral.png",
+         "description": "Learn the differences between the two types of conscious experience",
+         "text": {
+           "1":{ 
+             "image":"peripheral.png",
+             "text":"Whenever we focus our attention on something, it dominates our conscious experience. At the same time, we can be aware of things in the background. "
+           },
+          "2":{
+            "image":"peripheral2.png",
+            "text":"Attention singles out some small part of the content from the rest to analyze and interpret it.Peripheral awareness is more open and it provides the overall context for conscious experience"
+           },
+           "3":{
+             "image":"peripheral2.png",
+             "text":"For example, right now your attention is focused on what you’re reading. At the same time you’re also aware of other sights, sounds, smells and sensations in the periphery."
+           }
+         }
+       }
+      }
+    },
   "lessons":{
     "1":{
         "brain": {

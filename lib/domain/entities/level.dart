@@ -9,6 +9,7 @@ class Level {
   //the goal for each level. Its the added plus 1000
   int xpgoal;
   int level;
+  
   //Each level is going to have 100 xp more. The first one
   int added = 0;
 
@@ -25,18 +26,22 @@ class Level {
       this.level = 1;
       this.xpgoal = 1000;
     }
-    percentage = this.levelxp / this.xpgoal;
+    this.percentage = this.levelxp / this.xpgoal;
   }
 
   void addXP(int xp) {
     // this.xp += xp * continuity;
     this.levelxp += xp;
-    if (this.levelxp < this.xpgoal) {
+    if (this.levelxp >= this.xpgoal) {
       this.levelxp = 0;
-      added += 100;
+      this.added += 100;
       this.xpgoal += added;
-      level++;
+      this.level++;
+      this.percentage = 0;
     }
+
+    this.percentage = this.levelxp/this.xpgoal;
+
   }
 
 

@@ -12,10 +12,10 @@ class LessonModel extends Lesson {
   final String slider;
   final String group;
   final String description;
-  final String text;
-  final int stagenumber;
+  final Map<String,dynamic> text;
   final int requiredlevel;
   final int xp;
+  
 
   LessonModel({
     this.title,
@@ -25,7 +25,6 @@ class LessonModel extends Lesson {
     this.group,
     this.xp,
     this.text,
-    this.stagenumber,
     this.requiredlevel
   }) : super(
             title: title,
@@ -35,7 +34,6 @@ class LessonModel extends Lesson {
             text: text,
             xp:xp,
             group:group,
-            stagenumber: stagenumber,
             requiredlevel: requiredlevel);
 
   factory LessonModel.fromRawJson(String str) =>
@@ -50,8 +48,7 @@ class LessonModel extends Lesson {
         description: json["description"] == null ? null : json["description"],
         text: json["text"] == null ? null : json["text"],
         group: json["group"] == null ? null : json["group"],
-        stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
-          requiredlevel: json["requiredlevel"] == null ? null : json["requiredlevel"],
+        requiredlevel: json["requiredlevel"] == null ? null : json["requiredlevel"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -61,6 +58,5 @@ class LessonModel extends Lesson {
         "description": description == null ? null : description,
         "text": text == null ? null : text,
         "group": group == null ? null : group,
-        "stagenumber": stagenumber == null ? null : stagenumber,
       };
 }

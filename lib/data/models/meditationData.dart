@@ -23,6 +23,7 @@ class MeditationModel extends Meditation {
         codmed: json["codmed"] == null ? null : json["codmed"],
         title: json["title"] == null ? null : json["title"],
         duration:json["duration"] == null ? null : parseDuration(json["duration"]),
+        day: json["day"] == null ? null : DateTime.parse(json["day"]),
         recording: json["recording"] == null ? null : json["recording"],
         //userId: json["userId"] == null ? null : json["userId"],
       );
@@ -32,6 +33,7 @@ class MeditationModel extends Meditation {
         "title": title == null ? null : title,
         "duration": duration == null ? null : duration.toString(),
         "recording": recording == null ? null : recording,
+        "day": day == null ? null : day.toIso8601String()
         // "userId": userId == null ? null : userId,
       };
 }
