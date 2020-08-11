@@ -15,13 +15,30 @@ List<Map> guidedmeditations = [];
 
 class MainScreen extends StatelessWidget {
   var controller;
+  UserState _userstate;
 
   MainScreen({this.controller});
+
+  List<Widget> stageMissions() {
+    List<Widget> result = new List<Widget>();
+
+    for (var mission in _userstate.user.requiredmissions) {
+      result.add(Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            SquareContainer(),
+            Text(mission.description, style: Configuration.paragraph4),
+          ]));
+    }
+    result.add(SizedBox(height: Configuration.height * 0.05));
+
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
-    final _userstate = Provider.of<UserState>(context);
+    _userstate = Provider.of<UserState>(context);
     return ListView(
       controller: controller,
       shrinkWrap: true,
@@ -33,23 +50,42 @@ class MainScreen extends StatelessWidget {
             SquareContainer(
                 icon: Icon(Icons.star, color: Colors.white),
                 modal: AbstractDialog(
-                    height: Configuration.height * 0.35,
-                    width: Configuration.width * 0.85,
-                    content: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return Row(
+                    height: Configuration.height * 0.40,
+                    content: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          Text('Stage missions'),
+                          Divider(color: Configuration.maincolor),
+                          Column(children: stageMissions()),
+                          Text('Optional missions'),
+                          Divider(color: Configuration.maincolor),
+                          Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 SquareContainer(),
                                 Text('Meditate 5 times',
                                     style: Configuration.paragraph4),
                                 Icon(Icons.check_box_outline_blank)
-                              ]);
-                        },
-                        separatorBuilder: (context, index) {
-                          return Divider(color: Colors.grey);
-                        },
-                        itemCount: 8))),
+                              ]),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                SquareContainer(),
+                                Text('Meditate 5 times',
+                                    style: Configuration.paragraph4),
+                                Icon(Icons.check_box_outline_blank)
+                              ]),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                SquareContainer(),
+                                Text('Meditate 5 times',
+                                    style: Configuration.paragraph4),
+                                Icon(Icons.check_box_outline_blank)
+                              ]),
+                        ],
+                      ),
+                    ))),
             SquareContainer(
               icon: Icon(FontAwesomeIcons.chartBar, color: Colors.white),
               modal: AbstractDialog(
@@ -135,7 +171,8 @@ class AbstractDialog extends StatelessWidget {
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
-            padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
+            padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 4),
+            margin: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
             height: height,
             width: width,
             decoration: BoxDecoration(
@@ -176,7 +213,7 @@ class LevelBar extends StatelessWidget {
                     textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Configuration.maincolor,
-                        fontSize: Configuration.blockSizeHorizontal*5)),
+                        fontSize: Configuration.blockSizeHorizontal * 5)),
               ),
             ),
           )),

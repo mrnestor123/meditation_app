@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 abstract class UserRepository {
@@ -21,4 +22,5 @@ abstract class UserRepository {
 
   Future<Either<Failure,bool>> logout();
 
+  Future<Either<Failure,bool>> updateMission(Mission m);
 }

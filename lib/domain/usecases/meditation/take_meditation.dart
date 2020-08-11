@@ -5,18 +5,24 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
+import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/lesson/add_lesson.dart';
 
 class MeditateUseCase extends UseCase<bool, Params> {
   MeditationRepository repository;
+  UserRepository userRepository;
 
-  MeditateUseCase(this.repository);
+  MeditateUseCase(this.repository,this.userRepository);
 
   @override
   Future<Either<Failure, bool>> call(Params params) async {
 
    MeditationModel m = new MeditationModel(duration:params.duration,day:DateTime.now());
-   params.user.takeMeditation(m);
+   var mission = params.user.takeMeditation(m);
+
+    if(mission != null){
+      await userRepository.updateMission(mission);
+    }
 
    return await repository.meditate(meditation: m, user: params.user);
   }

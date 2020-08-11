@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/structures/tupla.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:observable/observable.dart';
@@ -43,6 +44,8 @@ abstract class UserRemoteDataSource {
   Future<Map> getAllLessons();
 
   Future takeLesson(LessonModel l, UserModel user);
+
+  Future<void> updateMission(MissionModel m,UserModel u);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -71,18 +74,21 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
     //Aquí le añadimos las lecciones que ha leido y las meditaciones que ha hecho
     if (user != null) {
-      DocumentReference userlist =
-          collectionGet('userdata').document(user.coduser);
+      DocumentReference userlist = collectionGet('userdata').document(user.coduser);
       //Query query = lessons.where('coduser',isequalto:userid)
 
       CollectionReference userlessons = userlist.collection('readlessons');
       CollectionReference usermeditations = userlist.collection('meditations');
+      CollectionReference usermissions = userlist.collection('missions');
 
       QuerySnapshot readlesson = await userlessons.getDocuments();
       QuerySnapshot meditationsuser = await usermeditations.getDocuments();
+      QuerySnapshot missions = await usermissions.getDocuments();
 
       List<MeditationModel> m = new List<MeditationModel>();
       List<LessonModel> l = new List<LessonModel>();
+      List<MissionModel> requiredmissions = new List<MissionModel>();
+      List<MissionModel> optionalmissions = new List<MissionModel>();
 
       for (DocumentSnapshot document in readlesson.documents) {
         l.add(new LessonModel.fromJson(document.data));
@@ -92,8 +98,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         m.add(new MeditationModel.fromJson(document.data));
       }
 
+      for (DocumentSnapshot document in missions.documents){
+         document.data.forEach((oldkey, value) {
+           MissionModel aux = MissionModel.fromJson(value);
+           requiredmissions.add(aux);
+         });
+      }
+
       user.setMeditations(m);
       user.setLearnedLessons(l);
+      user.setRequiredMissions(requiredmissions);
 
       return user;
     } else {
@@ -152,7 +166,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         .collection("meditations")
         .add(m.toJson());
 
-    // user.totalMeditations.add(res);
+    //Aquí le añadiríamos el nivel de ahora.
     
   }
 
@@ -219,5 +233,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         .document(user.coduser)
         .collection("readlessons")
         .add({"codlesson": l.codlesson, "title": l.title});
+
+    CollectionReference users = await collectionGet("users");
+    Query query = users.where("coduser"==user.coduser);
+    //Aquí le añadiríamos el nivel de ahora
+
+  }
+
+  @override
+  Future<void> updateMission(MissionModel m, UserModel u) {
+    // TODO: implement updateMission
+    throw UnimplementedError();
   }
 }

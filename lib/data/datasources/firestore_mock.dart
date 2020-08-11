@@ -62,6 +62,27 @@
                 "recording": "hindrances.mp3",
                 "duration" : "5:00"
           }
+      },
+      "missions":{
+        "required":{
+           "1":{
+              "codmission": "abcde",
+              "description":"Meditate 20 min",
+              "type":"meditation",
+              "requirement":"20",
+              "xp":125,
+              "done":false
+            },
+          "2":{
+            "codmission": "bcdef",
+            "description":"Read all stage lessons",
+            "type":"lesson",
+            "requirement":"list",
+            "requirements": ["1","2"],
+            "xp":125,
+            "done":false
+          }
+        }
       }
     }
   },
@@ -105,6 +126,32 @@
            }
          }
        }
+      }
+    },
+  "missions": {
+    "1":{
+      "required":{
+        "1":{
+          "codmission": "abcde",
+          "description":"Meditate 20 min",
+          "type":"meditation",
+          "requirement":"20",
+          "xp":125,
+          "done":false
+          },
+          "2":{
+          "codmission": "bcdef",
+          "description":"Read all lessons",
+          "type":"meditation",
+          "requirement":"list",
+          "requirements": {
+              "1":"1",
+              "2":"2"
+                },
+          "xp":125,
+          "done":false
+          }
+        }
       }
     },
   "lessons":{

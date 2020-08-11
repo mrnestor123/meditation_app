@@ -63,7 +63,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(()=> CachedUserUseCase(sl()));
   sl.registerLazySingleton(()=> GetBrainLessonsUseCase(sl()));
-  sl.registerLazySingleton(()=> MeditateUseCase(sl()));
+  sl.registerLazySingleton(()=> MeditateUseCase(sl(),sl()));
   sl.registerLazySingleton(()=> GetDataUseCase(sl()));
   sl.registerLazySingleton(() => LogOutUseCase(sl()));
   sl.registerLazySingleton(()=> TakeLessonUseCase(sl()));

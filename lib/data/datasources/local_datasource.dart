@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,22 +16,42 @@ abstract class UserLocalDataSource {
 
   Future<void> cacheUser(UserModel userToCache);
 
-  Future<bool> logout();
+  Future logout();
 
-  Future<void> addMeditation(MeditationModel meditation);
+  Future<void> addMeditation(MeditationModel meditation, UserModel user);
+
+  Future takeLesson(LessonModel lesson, UserModel user);
+
+  Future updateData(UserModel user);
+
+  Future updateMission(MissionModel m);
 }
 
 const CACHED_USER = 'CACHED_USER';
 const CACHED_MEDITATIONS = 'CACHED_MEDITATIONS';
 const CACHED_LESSONS = 'CACHED_LESSONS';
+const REQUIRED_MISSIONS = 'REQUIRED_MISSIONS';
+const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
 
   List<String> usermeditations;
   List<String> userlessons;
+  List<String> requiredmissions;
+  List<String> optionalmissions;
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
+
+  @override
+  Future updateData(UserModel user) async {
+    final jsonUser =
+        sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
+
+    if (jsonUser == null) {
+      throw CacheException();
+    }
+  }
 
   //Añadimos el usuario a la cache con su nombre de usuario.
   @override
@@ -45,17 +66,27 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         .map((lesson) => json.encode(lesson.toJson()))
         .toList();
 
+    requiredmissions= userToCache.requiredmissions.map((mission) => json.encode(mission.toJson())).toList();
+
+
     sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
-    return sharedPreferences.setStringList(
-        CACHED_MEDITATIONS, usermeditations);
+    sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
+    sharedPreferences.setStringList(REQUIRED_MISSIONS, requiredmissions);
+
   }
 
-  Future<bool> addMeditation(MeditationModel meditation) async {
+  Future<void> addMeditation(MeditationModel meditation, UserModel user) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       usermeditations.add(json.encode(meditation.toJson()));
-      return await sharedPreferences.setStringList(
+      final added = await sharedPreferences.setStringList(
           CACHED_MEDITATIONS, usermeditations);
+
+      if (!added) {
+        throw CacheException;
+      }
+
+      updateData(user);
     } else {
       throw CacheException();
     }
@@ -72,27 +103,30 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<UserModel> getUser([String usuario]) async {
+    sharedPreferences.clear();
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       final user = UserModel.fromJson(json.decode(jsonUser));
       if (usuario == null || usuario != null && user.usuario == usuario) {
         if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
-          userlessons =
-              sharedPreferences.getStringList(CACHED_LESSONS);
+          userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
           user.setLearnedLessons((userlessons)
               .map((lesson) => LessonModel.fromJson((json.decode(lesson))))
               .toList());
         }
-        if (sharedPreferences.getStringList(CACHED_MEDITATIONS) !=
-            null) {
-          usermeditations =
-              sharedPreferences.getStringList(CACHED_MEDITATIONS);
+        if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
+          usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
           user.setMeditations((usermeditations)
               .map((meditation) =>
                   MeditationModel.fromJson(json.decode(meditation)))
               .toList());
         }
-
+        if (sharedPreferences.getStringList(REQUIRED_MISSIONS) != null) {
+          requiredmissions = sharedPreferences.getStringList(REQUIRED_MISSIONS);
+          user.setRequiredMissions((requiredmissions)
+              .map((mission) => MissionModel.fromJson(json.decode(mission)))
+              .toList());
+        }
         return Future.value(user);
       } else {
         throw Exception();
@@ -103,18 +137,25 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   }
 
   @override
-  Future<void> cacheMeditation(MeditationModel meditationtoCache) {
-    List<String> currentmeditations =
-        sharedPreferences.getStringList(CACHED_USER + " meditations");
-
-    currentmeditations.add(meditationtoCache.toRawJson());
-  }
-
-  @override
-  Future<bool> logout() {
+  Future logout() async {
     return sharedPreferences.clear();
   }
 
   @override
-  Future<List<MeditationModel>> getMeditations() {}
+  Future<void> takeLesson(LessonModel lesson, UserModel user) async {
+    userlessons.add(lesson.toRawJson());
+    final added =
+        await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
+    updateData(user);
+
+    if (!added) {
+      throw CacheException;
+    }
+  }
+
+  @override
+  Future updateMission(MissionModel m) {
+    // TODO: implement updateMission
+    throw UnimplementedError();
+  }
 }

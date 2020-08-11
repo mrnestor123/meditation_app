@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:observable/observable.dart';
 import 'package:uuid/uuid.dart';
@@ -19,6 +20,8 @@ class User extends Equatable {
   final int stagenumber;
   final Level level;
 
+  int meditationstreak = 0;
+
   //May be a string with 1 hour, 30 sec, 20 min ...
   String timeMeditated = "";
   int minutesMeditated = 0;
@@ -32,7 +35,9 @@ class User extends Equatable {
   //List with the lessons that the user has learned
   final ObservableList<LessonModel> lessonslearned = new ObservableList();
 
-  final ObservableList<Mission> missions = new ObservableList();
+  //Missions for the stage. When the user completes all the stage missions he
+  final ObservableList<MissionModel> requiredmissions = new ObservableList();
+  final ObservableList<MissionModel> optionalmissions = new ObservableList();
 
   User(
       {this.coduser,
@@ -56,6 +61,8 @@ class User extends Equatable {
 
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
+  void setRequiredMissions(List<MissionModel> m) => requiredmissions.addAll(m);
+  void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
 
   void setTimeMeditated(int days, int hours, int minutes, int seconds) {
     if (days > 0) {
@@ -80,7 +87,8 @@ class User extends Equatable {
     this.level.addXP(l.xp);
   }
 
-  void takeMeditation(Meditation m) {
+  //Este método se tendrá que refinar
+  Mission takeMeditation(Meditation m) {
     this.totalMeditations.add(m);
     this.level.addXP(m.xp);
 
@@ -105,5 +113,23 @@ class User extends Equatable {
 
     setTimeMeditated(
         daysMeditated, hoursMeditated, minutesMeditated, secondsMeditated);
+    for (MissionModel mission in this.requiredmissions) {
+      if (mission.type == 'meditation') {
+        if (m.duration.inMinutes > int.parse(mission.requirement)) {
+          mission.done = true;
+          return mission;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  void passMission(Mission m, bool isstagemission) {
+    if (isstagemission) {
+      this.requiredmissions.remove(m);
+    } else {
+      this.optionalmissions.remove(m);
+    }
   }
 }

@@ -6,8 +6,10 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
@@ -128,4 +130,15 @@ class UserRepositoryImpl implements UserRepository {
       return Left(ServerFailure());
     }
   }
+
+
+  Future<Either<Failure,bool>> updateMission(Mission m) async{ 
+    if(await networkInfo.isConnected){
+     // remoteDataSource.updateMission(m);
+
+    }
+  }
+
+
+
 }
