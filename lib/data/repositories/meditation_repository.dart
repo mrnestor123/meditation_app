@@ -6,6 +6,7 @@ import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 
@@ -20,16 +21,16 @@ class MeditationRepositoryImpl implements MeditationRepository {
       @required this.networkInfo});
 
   @override
-  Future<Either<Failure, bool>> meditate({Meditation meditation,User user}) async {
+  Future<Either<Failure, List<Mission>>> meditate({Meditation meditation,User user, List<Mission> missions}) async {
     // TODO: implement meditate
     
     if (await networkInfo.isConnected) {
       await remoteDataSource.meditate(meditation, user);
       await localDataSource.addMeditation(meditation,user);
-      return Right(true);
+      return Right(missions);
     }else{
       await localDataSource.addMeditation(meditation,user);
-      return Right(false);
+      return Right(missions);
     }
     
   }

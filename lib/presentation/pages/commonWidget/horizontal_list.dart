@@ -11,8 +11,8 @@ import 'package:provider/provider.dart';
 class HorizontalList extends StatelessWidget {
   var lessons;
   //String description;
-
-  HorizontalList({this.lessons});
+  
+  HorizontalList({this.lessons, Key key}):super(key:key);
 
   List<Widget> getWidgets(context) {
     List<Widget> list = new List<Widget>();

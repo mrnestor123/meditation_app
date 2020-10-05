@@ -4,24 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/lesson_repository.dart';
+import 'package:meditation_app/domain/repositories/user_repository.dart';
 
-class TakeLessonUseCase extends UseCase<void, LessonParams> {
+class TakeLessonUseCase extends UseCase<List<Mission>, LessonParams> {
   LessonRepository repository;
+  UserRepository userRepository;
 
-  TakeLessonUseCase(this.repository);
+  TakeLessonUseCase(this.repository, this.userRepository);
 
-  //Hay que comprobar en el bloc antes de utilizar la función esta que el usuario ha acabado la lección. 
+  //Hay que comprobar en el bloc antes de utilizar la función esta que el usuario ha acabado la lección.
   //Esto es en el caso de que la acabe.
   @override
-  Future<Either<Failure, void>> call(LessonParams params) {
-    //añadimos la leccion al usuario
-    params.user.takeLesson(params.lesson);
-    //más adelante comprobar si ha hecho algún objetivo para la stage
+  Future<Either<Failure, List<Mission>>> call(LessonParams params) {
 
-    // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-    return repository.takeLesson(lesson:params.lesson, user:params.user);
+    //añadimos la leccion al usuario
+    if (!params.user.lessonslearned.contains(params.lesson)) {
+      final missions = params.user.takeLesson(params.lesson);
+      if (missions.length > 0) {
+        userRepository.updateMissions(missions, params.user);
+      }
+      
+      // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
+      return repository.takeLesson(lesson: params.lesson, user: params.user,missions:missions);
+    }
   }
 }
 
@@ -35,8 +43,5 @@ class LessonParams extends Equatable {
   });
 
   @override
-  List<Object> get props => [
-        this.user,
-        this.lesson
-      ];
+  List<Object> get props => [this.user, this.lesson];
 }

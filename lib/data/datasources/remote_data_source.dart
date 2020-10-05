@@ -3,6 +3,7 @@ import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/structures/tupla.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
+import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:observable/observable.dart';
@@ -43,9 +44,11 @@ abstract class UserRemoteDataSource {
   //We get all the lessons of every stage
   Future<Map> getAllLessons();
 
+  Future changeStage(UserModel user);
+
   Future takeLesson(LessonModel l, UserModel user);
 
-  Future<void> updateMission(MissionModel m,UserModel u);
+  Future<void> updateMission(MissionModel m, UserModel u, bool requiredmission);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -56,7 +59,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     collectionGet = db.collection;
   }
 
-  //Habrá que cambiar este método yo creo por meter un UserModel
+  //sacamos todos los datos del usuario. Meditaciones, lecciones y misiones.
+  //También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({String password, String usuario}) async {
     CollectionReference docRef = collectionGet("users");
@@ -72,23 +76,29 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         user = new UserModel.fromJson(document.data);
       }
     }
-    //Aquí le añadimos las lecciones que ha leido y las meditaciones que ha hecho
+    //Aquí le añadimos las lecciones que ha leido,las meditaciones que ha hecho y las misiones que tiene hechas y por hacer
     if (user != null) {
-      DocumentReference userlist = collectionGet('userdata').document(user.coduser);
+      DocumentReference userlist =
+          collectionGet('userdata').document(user.coduser);
       //Query query = lessons.where('coduser',isequalto:userid)
 
       CollectionReference userlessons = userlist.collection('readlessons');
       CollectionReference usermeditations = userlist.collection('meditations');
-      CollectionReference usermissions = userlist.collection('missions');
+      CollectionReference requiredmissionscol =
+          userlist.collection('requiredmissions');
+      CollectionReference optionalmissionscol =
+          userlist.collection('optionalmissions');
 
       QuerySnapshot readlesson = await userlessons.getDocuments();
       QuerySnapshot meditationsuser = await usermeditations.getDocuments();
-      QuerySnapshot missions = await usermissions.getDocuments();
+      QuerySnapshot reqmissions = await requiredmissionscol.getDocuments();
+      QuerySnapshot optmissions = await optionalmissionscol.getDocuments();
+    
 
       List<MeditationModel> m = new List<MeditationModel>();
       List<LessonModel> l = new List<LessonModel>();
-      List<MissionModel> requiredmissions = new List<MissionModel>();
-      List<MissionModel> optionalmissions = new List<MissionModel>();
+      List<StageModel> s = new List<StageModel>();
+
 
       for (DocumentSnapshot document in readlesson.documents) {
         l.add(new LessonModel.fromJson(document.data));
@@ -98,22 +108,46 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         m.add(new MeditationModel.fromJson(document.data));
       }
 
-      for (DocumentSnapshot document in missions.documents){
-         document.data.forEach((oldkey, value) {
-           MissionModel aux = MissionModel.fromJson(value);
-           requiredmissions.add(aux);
-         });
+      user.missions["required"] = {};
+      for (DocumentSnapshot document in reqmissions.documents) {
+        MissionModel aux = new MissionModel.fromJson(document.data);
+        if (user.missions["required"][aux.type] == null) {
+          user.missions["required"][aux.type] = new ObservableList();
+        }
+        user.missions["required"][aux.type].add(aux);
+      }
+
+      user.missions["optional"] = {};
+      for (DocumentSnapshot document in optmissions.documents) {
+        MissionModel aux = new MissionModel.fromJson(document.data);
+        if (user.missions["optional"][aux.type] == null) {
+          user.missions["optional"][aux.type] = new ObservableList();
+        }
+        user.missions["optional"][aux.type].add(aux);
       }
 
       user.setMeditations(m);
       user.setLearnedLessons(l);
-      user.setRequiredMissions(requiredmissions);
 
       return user;
     } else {
       throw LoginException();
     }
   }
+
+
+  //en este método el usuario cambia de etapa y se le añaden las misiones de esa etapa.
+  Future changeStage(UserModel user) async{
+
+    CollectionReference stages = collectionGet('stages');
+    QuerySnapshot stagesqry = await stages.getDocuments();
+    for(DocumentSnapshot document in stagesqry.documents){
+      if(document.data["stagenumber"] == user.stagenumber){
+        user.setStage(new StageModel.fromJson(document.data));
+      }
+    }
+  }
+
 
   @override
   Future<UserModel> registerUser(
@@ -167,7 +201,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         .add(m.toJson());
 
     //Aquí le añadiríamos el nivel de ahora.
-    
   }
 
   @override
@@ -235,13 +268,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         .add({"codlesson": l.codlesson, "title": l.title});
 
     CollectionReference users = await collectionGet("users");
-    Query query = users.where("coduser"==user.coduser);
+    // Query query = users.where("coduser"==user.coduser);
     //Aquí le añadiríamos el nivel de ahora
-
   }
 
+  //FALTA POR IMPLEMENTAR, CUANDO HAYA CONEXION CON FIREBASE LO HAREMOS
   @override
-  Future<void> updateMission(MissionModel m, UserModel u) {
+  Future<void> updateMission(
+      MissionModel m, UserModel u, bool requiredmission) {
     // TODO: implement updateMission
     throw UnimplementedError();
   }

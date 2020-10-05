@@ -23,4 +23,8 @@ abstract class UserRepository {
   Future<Either<Failure,bool>> logout();
 
   Future<Either<Failure,bool>> updateMission(Mission m);
+
+  Future<Either<Failure,bool>> updateMissions(List<Mission> missions,User u);
+
+  Future<Either<Failure,bool>> changeStage(User user);
 }

@@ -7,6 +7,7 @@ import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:observable/observable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UserLocalDataSource {
@@ -24,7 +25,7 @@ abstract class UserLocalDataSource {
 
   Future updateData(UserModel user);
 
-  Future updateMission(MissionModel m);
+  Future updateMission(MissionModel m, bool requiredmission);
 }
 
 const CACHED_USER = 'CACHED_USER';
@@ -36,10 +37,11 @@ const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
 
-  List<String> usermeditations;
-  List<String> userlessons;
-  List<String> requiredmissions;
-  List<String> optionalmissions;
+  List<String> usermeditations = new List<String>();
+  List<String> userlessons = new List<String>();
+  List<String> requiredmissions = new List<String>();
+  List<String> optionalmissions = new List<String>();
+  List<String> stagemissions = new List<String>();
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
@@ -56,7 +58,6 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   //Añadimos el usuario a la cache con su nombre de usuario.
   @override
   Future<void> cacheUser(UserModel userToCache) async {
-    await sharedPreferences.clear();
     sharedPreferences.setString(CACHED_USER, json.encode(userToCache.toJson()));
 
     usermeditations = userToCache.totalMeditations
@@ -66,13 +67,26 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         .map((lesson) => json.encode(lesson.toJson()))
         .toList();
 
-    requiredmissions= userToCache.requiredmissions.map((mission) => json.encode(mission.toJson())).toList();
-
+    userToCache.missions.forEach((key, value) {
+      if (key == "required") {
+        value.forEach((key, value) {
+           for (MissionModel mission in value) {
+             requiredmissions.add(json.encode(mission.toJson()));
+           }
+        });
+      } else {
+        value.forEach((key, value) {
+          for (MissionModel mission in value) {
+             optionalmissions.add(json.encode(mission.toJson()));
+           }
+        });
+      }
+    });
 
     sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
     sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
     sharedPreferences.setStringList(REQUIRED_MISSIONS, requiredmissions);
-
+    sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
   }
 
   Future<void> addMeditation(MeditationModel meditation, UserModel user) async {
@@ -103,7 +117,6 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<UserModel> getUser([String usuario]) async {
-    sharedPreferences.clear();
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       final user = UserModel.fromJson(json.decode(jsonUser));
@@ -123,10 +136,28 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         }
         if (sharedPreferences.getStringList(REQUIRED_MISSIONS) != null) {
           requiredmissions = sharedPreferences.getStringList(REQUIRED_MISSIONS);
-          user.setRequiredMissions((requiredmissions)
-              .map((mission) => MissionModel.fromJson(json.decode(mission)))
-              .toList());
+          user.missions["required"] = {};
+          requiredmissions.map((mission) {
+            MissionModel aux = MissionModel.fromJson(json.decode(mission));
+            if (user.missions["required"][aux.type] == null) {
+              user.missions["required"][aux.type] = new ObservableList();
+            }
+            user.missions["required"][aux.type].add(aux);
+          }).toList();
         }
+
+        if (sharedPreferences.getStringList(OPTIONAL_MISSIONS) != null) {
+          optionalmissions = sharedPreferences.getStringList(OPTIONAL_MISSIONS);
+          user.missions["optional"] = {};
+          optionalmissions.map((mission) {
+            MissionModel aux = MissionModel.fromJson(json.decode(mission));
+            if (user.missions["optional"][aux.type] == null) {
+              user.missions["optional"][aux.type] = new ObservableList();
+            }
+            user.missions["optional"][aux.type].add(aux);
+          }).toList();
+        }
+        
         return Future.value(user);
       } else {
         throw Exception();
@@ -138,6 +169,10 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future logout() async {
+    if(usermeditations.length>0){ usermeditations.clear();}
+    if(userlessons.length > 0) userlessons.clear();
+    if(requiredmissions.length>0) requiredmissions.clear();
+    if(optionalmissions.length>0) optionalmissions.clear();
     return sharedPreferences.clear();
   }
 
@@ -154,8 +189,20 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   }
 
   @override
-  Future updateMission(MissionModel m) {
+  Future updateMission(MissionModel m, bool requiredmission) {
     // TODO: implement updateMission
-    throw UnimplementedError();
+    if (requiredmission) {
+      int index = requiredmissions.indexWhere(
+          (element) => json.decode(element)["codmission"] == m.codmission);
+      requiredmissions.removeAt(index);
+      requiredmissions.add(json.encode(m.toJson()));
+      sharedPreferences.setStringList(REQUIRED_MISSIONS, requiredmissions);
+    } else {
+      int index = optionalmissions.indexWhere(
+          (element) => json.decode(element)["codmission"] == m.codmission);
+      optionalmissions.removeAt(index);
+      optionalmissions.add(json.encode(m.toJson()));
+      sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
+    }
   }
 }

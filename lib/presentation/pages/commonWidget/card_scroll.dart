@@ -13,7 +13,7 @@ class CardView extends StatefulWidget {
   var lessons;
   //String description;
 
-  CardView({this.lessons});
+  CardView({this.lessons, Key key}): super(key:key);
   @override
   _CardViewState createState() => new _CardViewState();
 }
@@ -39,6 +39,7 @@ class _CardViewState extends State<CardView> {
     controller.addListener(() {
       setState(() {
         currentPage =controller.page;
+        lessons=widget.lessons;
       });
     });
 
@@ -144,8 +145,8 @@ class CardScrollWidget extends StatelessWidget {
                           color: Colors.white,
                           image: DecorationImage(
                               image: AssetImage(
-                                  lessons[i].slider.startsWith('images')
-                                      ? lessons[i].slider
+                                  lessons[i].slider != null
+                                      ? 'images/' + lessons[i].slider
                                       : 'images/sky.jpg'),
                               fit: BoxFit.cover)),
                     ),

@@ -31,6 +31,14 @@ class Configuration {
         fontSize: safeBlockHorizontal * 6),
   );
 
+  static TextStyle title2 = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+      fontSize: safeBlockHorizontal*8),
+  );
+
+
+
   static TextStyle subtitle = GoogleFonts.montserrat(
     textStyle: TextStyle(
       color: Color.fromRGBO(135, 61, 175, 100),
@@ -162,6 +170,28 @@ class Configuration {
         _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
     safeBlockHorizontal = (width - _safeAreaHorizontal) / 100;
     safeBlockVertical = (height - _safeAreaVertical) / 100;
+  }
+
+
+
+  void leftRollDialog(context,dialog){
+    showGeneralDialog(
+    barrierColor: Colors.black.withOpacity(0.5),
+    transitionBuilder: (context, a1, a2, widget) {
+      final curvedValue = Curves.easeInOutBack.transform(a1.value) -   1.0;
+      return Transform(
+        transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+        child: Opacity(
+          opacity: a1.value,
+          child: dialog
+        ),
+      );
+    },
+    transitionDuration: Duration(milliseconds: 300),
+    barrierDismissible: true,
+    barrierLabel: '',
+    context: context,
+    pageBuilder: (context, animation1, animation2) {});
   }
 
   /*Configuration(context){

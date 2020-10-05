@@ -6,8 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/mission_popup.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 
@@ -102,47 +104,9 @@ class _SetMeditationState extends State<SetMeditation> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text('Meditate', style: Configuration.subtitle2),
-        Container(
-            height: Configuration.height * 0.08,
-            width: Configuration.width,
-            padding: EdgeInsets.only(
-                left: Configuration.width * 0.05,
-                right: Configuration.width * 0.05),
-            margin: EdgeInsets.only(
-                top: Configuration.width * 0.05,
-                left: Configuration.width * 0.05,
-                right: Configuration.width * 0.05),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(8)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text('Duration', style: Configuration.settings),
-                TimePicker()
-              ],
-            )),
-        Container(
-            height: Configuration.height * 0.08,
-            width: Configuration.width,
-            padding: EdgeInsets.only(
-                left: Configuration.width * 0.05,
-                right: Configuration.width * 0.05),
-            margin: EdgeInsets.only(
-                bottom: Configuration.width * 0.05,
-                top: Configuration.width * 0.03,
-                left: Configuration.width * 0.05,
-                right: Configuration.width * 0.05),
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(8)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Text('Ambient sound', style: Configuration.settings),
-                Icon(Icons.music_note)
-              ],
-            )),
+        TimePicker(),
+        SoundPicker(),
+        SizedBox(height: Configuration.height * 0.05),
         FloatingActionButton(
             child: Icon(Icons.check, color: Colors.black),
             backgroundColor: Colors.white,
@@ -165,16 +129,11 @@ class _SetMeditationState extends State<SetMeditation> {
         SizedBox(height: Configuration.height * 0.05),
         Text(
             'Total meditations: ' +
-                (_loginstate.user.totalMeditations.length + 1).toString(),
+                (_loginstate.user.totalMeditations.length).toString(),
             style: GoogleFonts.montserrat(
                 textStyle: TextStyle(
                     color: Colors.white,
                     fontSize: Configuration.blockSizeHorizontal * 7))),
-        Text('Time meditated: ' + _loginstate.user.timeMeditated,
-            style: GoogleFonts.montserrat(
-                textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: Configuration.blockSizeHorizontal * 7)))
       ],
     );
   }
@@ -192,10 +151,16 @@ class _SetMeditationState extends State<SetMeditation> {
   }
 
   void takeMeditation() async {
-    await _loginstate.takeMeditation(duration);
+    List<Mission> missions = await _loginstate.takeMeditation(duration);
     setState(() {
       state = 'data';
     });
+
+    if (missions != null && missions.length > 0) {
+      await Future.delayed(Duration(seconds: 1));
+      Configuration().leftRollDialog(context, MissionPopup(missions: missions));
+      //showDialog(context: context, child: MissionPopup(missions: missions));
+    }
   }
 
   @override
@@ -243,6 +208,47 @@ class _SetMeditationState extends State<SetMeditation> {
         ),
       ],
     ));
+  }
+}
+
+class ContainerSelect extends StatelessWidget {
+  String lefttext;
+  Widget righttext;
+
+  ContainerSelect({
+    this.lefttext,
+    this.righttext,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: Configuration.height * 0.08,
+        width: Configuration.width,
+        padding: EdgeInsets.only(
+            left: Configuration.width * 0.05,
+            right: Configuration.width * 0.05),
+        margin: EdgeInsets.only(
+            top: Configuration.width * 0.05,
+            left: Configuration.width * 0.05,
+            right: Configuration.width * 0.05),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: Offset(0, 3), // changes position of shadow
+          ),
+        ], color: Colors.white, borderRadius: BorderRadius.circular(8)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text(lefttext, style: Configuration.settings),
+            righttext
+          ],
+        ));
   }
 }
 
@@ -356,36 +362,44 @@ class _State extends State<TimePicker> {
   @override
   Widget build(BuildContext context) {
     // final _meditationBloc = BlocProvider.of<MeditationBloc>(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-            child: GestureDetector(
-          child: Text(hours.toString() +
-              ' : ' +
-              minutes.toString() +
-              ' : ' +
-              seconds.toString()),
-          onTap: () => showModalBottomSheet(
-              context: context,
-              builder: (BuildContext builder) {
-                return CupertinoTimerPicker(
-                    mode: CupertinoTimerPickerMode.hms,
-                    minuteInterval: 1,
-                    secondInterval: 1,
-                    initialTimerDuration: duration,
-                    onTimerDurationChanged: (Duration changedtimer) {
-                      setState(() {
-                        duration = changedtimer;
-                        hours = changedtimer.inSeconds ~/ 3600;
-                        minutes = (changedtimer.inSeconds % 3600) ~/ 60;
-                        seconds = (changedtimer.inSeconds % 3600) % 60;
-                      });
-                    });
-              }),
-        )),
-      ],
-    );
+    return GestureDetector(
+        onTap: () => showModalBottomSheet(
+            backgroundColor: Colors.transparent,
+            context: context,
+            builder: (BuildContext builder) {
+              return Wrap(
+                children: [
+                  CupertinoTimerPicker(
+                      mode: CupertinoTimerPickerMode.hms,
+                      minuteInterval: 1,
+                      secondInterval: 1,
+                      initialTimerDuration: duration,
+                      onTimerDurationChanged: (Duration changedtimer) {
+                        setState(() {
+                          duration = changedtimer;
+                          hours = changedtimer.inSeconds ~/ 3600;
+                          minutes = (changedtimer.inSeconds % 3600) ~/ 60;
+                          seconds = (changedtimer.inSeconds % 3600) % 60;
+                        });
+                      }),
+                ],
+              );
+            }),
+        child: ContainerSelect(
+          lefttext: 'Duration',
+          righttext: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: Text(hours.toString() +
+                    ' : ' +
+                    minutes.toString() +
+                    ' : ' +
+                    seconds.toString()),
+              ),
+            ],
+          ),
+        ));
   }
 }
 
@@ -396,7 +410,7 @@ List<Map> weekDays = [
   {'day': 'TH', 'meditated': false, 'index': 4},
   {'day': 'F', 'meditated': false, 'index': 5},
   {'day': 'S', 'meditated': false, 'index': 6},
-  {'day': 'S', 'meditated': false, 'index': 6}
+  {'day': 'S', 'meditated': false, 'index': 7}
 ];
 
 class WeekList extends StatefulWidget {
@@ -406,31 +420,26 @@ class WeekList extends StatefulWidget {
 
 class _WeekListState extends State<WeekList> {
   UserState _userstate;
-  int dayStreak= 0;
 
   List<Widget> getDays() {
     List<Widget> result = new List();
     var dayOfWeek = 1;
     DateTime today = DateTime.now();
-    var monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
-    dayStreak= 0;
+    var weekday = today.weekday;
+    //   var monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
+    var meditationstreak = _userstate.user.meditationstreak;
 
     List<MeditationModel> meditations = _userstate.user.totalMeditations;
 
-    for (int i = meditations.length - 1; i > 0; i--) {
-      print(meditations[i].day.toString());
-      if (meditations[i].day == null ||
-          meditations[i].day.day < monday.day &&
-              meditations[i].day.month <= monday.month) {
-        break;
-      } else if (meditations[i].day.day >= monday.day &&
-          meditations[i].day.month == monday.month) {
-        weekDays[meditations[i].day.weekday - 1]['meditated'] = true;
+    if (meditationstreak == 1) {
+      weekDays[--weekday]['meditated'] = true;
+    } else {
+      while (meditationstreak-- != 0 && weekday > 1) {
+        weekDays[weekday--]['meditated'] = true;
       }
     }
 
     for (var e in weekDays) {
-      if(e['meditated']) { dayStreak++;}
       result.add(WeekItem(
           day: e['day'],
           meditated: e['meditated'],
@@ -449,12 +458,14 @@ class _WeekListState extends State<WeekList> {
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: getDays()),
-          SizedBox(height: Configuration.height*0.05),
-          Text(dayStreak.toString() + ' consecutive days',style: GoogleFonts.montserrat(
+          SizedBox(height: Configuration.height * 0.05),
+          Text(
+            _userstate.user.meditationstreak.toString() + ' consecutive days',
+            style: GoogleFonts.montserrat(
                 textStyle: TextStyle(
                     color: Colors.white,
-                    fontSize: Configuration.blockSizeHorizontal * 7)),),
-
+                    fontSize: Configuration.blockSizeHorizontal * 7)),
+          ),
         ],
       ),
     );
@@ -473,7 +484,6 @@ class WeekItem extends StatefulWidget {
 }
 
 class _WeekItemState extends State<WeekItem> {
-
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
@@ -487,8 +497,53 @@ class _WeekItemState extends State<WeekItem> {
       child: Center(
           child: Text(widget.day,
               style: TextStyle(
-                  color:
-                      widget.meditated ? Colors.black : Colors.white))),
+                  color: widget.meditated ? Colors.black : Colors.white))),
+    );
+  }
+}
+
+class SoundPicker extends StatefulWidget {
+  @override
+  _SoundPickerState createState() => _SoundPickerState();
+}
+
+class _SoundPickerState extends State<SoundPicker> {
+  IconData icon;
+
+  @override
+  void initState() {
+    super.initState();
+    icon = Icons.music_note;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext builder) {
+            return Wrap(children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(Configuration.safeBlockVertical * 4),
+                margin: EdgeInsets.all(Configuration.safeBlockVertical * 2),
+                decoration: new BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: new BorderRadius.all(Radius.circular(25.0)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('title', style: Configuration.modaltitle),
+                    SizedBox(height: Configuration.safeBlockVertical * 3),
+                    Text('subtitle', style: Configuration.modalsubtitle)
+                  ],
+                ),
+              )
+            ]);
+          }),
+      child: ContainerSelect(lefttext: 'Ambient Sound', righttext: Icon(icon)),
     );
   }
 }

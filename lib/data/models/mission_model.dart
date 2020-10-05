@@ -6,6 +6,8 @@ class MissionModel extends Mission {
   String image;
   String type;
   String requirement;
+  bool requiredmission;
+  bool done;
   int xp;
 
   MissionModel(
@@ -14,12 +16,16 @@ class MissionModel extends Mission {
       this.type,
       this.image,
       this.requirement,
+      this.requiredmission,
+      this.done,
       this.xp})
       : super(
             codmission: codmission,
             description: description,
             type: type,
             requirement: requirement,
+            requiredmission: requiredmission,
+            done: done,
             image: image,
             xp: xp);
 
@@ -30,6 +36,8 @@ class MissionModel extends Mission {
         type: json['type'] == null ? null : json['type'],
         image: json['image'] == null ? null : json['image'],
         requirement: json['requirement'] == null ? null : json['requirement'],
+        requiredmission: json['required'] == null ? null : json['required'],
+        done: json['done'] == null ? false : json['done'],
         xp: json['xp'] == null ? null : json['xp']);
     m.requirements = json["requirements"];
     return m;
@@ -41,6 +49,11 @@ class MissionModel extends Mission {
         "type": type == null ? null : type,
         "requirement": requirement == null ? null : requirement,
         "image": image == null ? null : image,
-        "xp": xp == null ? null : xp
+        "done": done == null ? false : done,
+        "xp": xp == null ? null : xp,
+        "required": requiredmission == null ? null : requiredmission,
+        "requirements":
+            requirements == null ? null : requirements.map((e) => e).toList()
       };
+
 }

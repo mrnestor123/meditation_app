@@ -110,14 +110,14 @@ mixin _$UserState on _UserState, Store {
   final _$takeMeditationAsyncAction = AsyncAction('takeMeditation');
 
   @override
-  Future<dynamic> takeMeditation(Duration d) {
+  Future<List<Mission>> takeMeditation(Duration d) {
     return _$takeMeditationAsyncAction.run(() => super.takeMeditation(d));
   }
 
   final _$takeLessonAsyncAction = AsyncAction('takeLesson');
 
   @override
-  Future<dynamic> takeLesson(LessonModel l) {
+  Future<List<Mission>> takeLesson(LessonModel l) {
     return _$takeLessonAsyncAction.run(() => super.takeLesson(l));
   }
 

@@ -101,7 +101,6 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<Either<Failure, Map>> getData() async {
     // TODO: implement getData
-
     if (await networkInfo.isConnected) {
       try {
         //final data = await remoteDataSource.getData();
@@ -132,13 +131,36 @@ class UserRepositoryImpl implements UserRepository {
   }
 
 
-  Future<Either<Failure,bool>> updateMission(Mission m) async{ 
+  @override
+  Future<Either<Failure,bool>> changeStage(User user) async{
     if(await networkInfo.isConnected){
-     // remoteDataSource.updateMission(m);
-
+      remoteDataSource.changeStage(user);
+      return Right(true);
+    }else{
+      return Left(ServerFailure());
     }
   }
 
 
+  Future<Either<Failure, bool>> updateMission(Mission m) async {
+    if (await networkInfo.isConnected) {
+      // remoteDataSource.updateMission(m);
 
+    }
+  }
+
+  Future<Either<Failure, bool>> updateMissions(
+      List<Mission> missions, User u) async {
+    if (await networkInfo.isConnected) {
+      for (Mission m in missions) {
+        try {
+         // await remoteDataSource.updateMission(m, u, m.requiredmission);
+          await localDataSource.updateMission(m, m.requiredmission);
+        } on Exception {
+          return Left(ServerFailure());
+        }
+      }
+      return Right(true);
+    }
+  }
 }

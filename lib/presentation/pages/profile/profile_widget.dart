@@ -60,28 +60,6 @@ class ProfileScreen extends StatelessWidget {
                                   secondText: "lessons completed",
                                   icon: Icon(Icons.check))
                             ]),
-                            TableRow(children: [
-                              ProfileInfoBigCard(
-                                firstText: "4",
-                                secondText: "meditations completed",
-                                icon: Icon(Icons.check),
-                              ),
-                              ProfileInfoBigCard(
-                                  firstText: "4",
-                                  secondText: "lessons completed",
-                                  icon: Icon(Icons.check))
-                            ]),
-                            TableRow(children: [
-                              ProfileInfoBigCard(
-                                firstText: "4",
-                                secondText: "meditations completed",
-                                icon: Icon(Icons.check),
-                              ),
-                              ProfileInfoBigCard(
-                                  firstText: "4",
-                                  secondText: "lessons completed",
-                                  icon: Icon(Icons.check))
-                            ]),
                           ],
                         ),
                       ],
@@ -100,11 +78,11 @@ class ProfileScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    ProfileInfoCard(firstText: "54%", secondText: "Progress"),
+                    ProfileInfoCard(firstText: ''+_userstate.user.level.level.toString(), secondText: "Level"),
                     SizedBox(
                       width: Configuration.safeBlockHorizontal*5,
                     ),
-                    ProfileInfoCard(firstText: "152", secondText: "Level"),
+                    ProfileInfoCard(firstText:''+ '10 ' + ' %', secondText: "Completed"),
                   ],
                 ),
               ),
@@ -124,7 +102,7 @@ class MyInfo extends StatelessWidget {
         children: [
           RadialProgress(
             width: Configuration.safeBlockHorizontal * 1,
-            goalCompleted: 0.5,
+            goalCompleted: _userstate.user.level.level /100,
             child: RoundedImage(
               imagePath: "images/sky.jpg",
               size: Size.fromWidth(Configuration.blockSizeHorizontal*12),
@@ -356,9 +334,11 @@ class TwoLineItem extends StatelessWidget {
       children: <Widget>[
         Text(
           firstText,
+          style: TextStyle(fontWeight:FontWeight.bold,fontSize: 20),
         ),
         Text(
           secondText,
+          style: TextStyle(fontSize: 15),
         ),
       ],
     );

@@ -1,6 +1,3 @@
-
-
-
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
@@ -9,6 +6,7 @@ import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/lesson_repository.dart';
 
@@ -24,18 +22,16 @@ class LessonRepositoryImpl implements LessonRepository{
       @required this.networkInfo});
 
   @override
-  Future<Either<Failure, bool>> takeLesson({Lesson lesson, User user}) async{
+  Future<Either<Failure, List<Mission>>> takeLesson({Lesson lesson, User user,List<Mission> missions}) async{
     if(await networkInfo.isConnected){
      try{
        final added = await remoteDataSource.takeLesson(lesson,user);
        await localDataSource.takeLesson(lesson,user);
-
-       return Right(true);
+       return Right(missions);
      }on Exception {
        return Left(ServerFailure());
      }
     }
-
     return null;
   }
 
@@ -50,11 +46,7 @@ class LessonRepositoryImpl implements LessonRepository{
       if(await networkInfo.isConnected){
         try {
           final lessons= await remoteDataSource.getBrainLessons(stage: stage);
-
           return Right(lessons);
-
-
-
         }on Exception {
           return Left(ServerFailure());
         }

@@ -18,18 +18,18 @@ List<Map> sidebarItems = [
     'title': 'Time to wake up'
   },
   {
-    'icon': Icons.school,
-    'text': 'Meditation',
-    'route': '/meditate',
-    'title': 'Meditation'
-  },
-  {
     'icon': FontAwesomeIcons.brain,
-    'text': 'Brain',
+    'text': 'Learn',
     'route': '/brain',
-    'title': 'Brain'
+    'title': 'Learn'
   },
-  {'icon': Icons.chat, 'text': 'Chat', 'route': '/main', 'title': 'Chat'},
+  // {
+  //   'icon': FontAwesomeIcons.brain,
+  //   'text': 'Brain',
+  //   'route': '/brain',
+  //   'title': 'Brain'
+  // },
+  // {'icon': Icons.chat, 'text': 'Chat', 'route': '/main', 'title': 'Chat'},
 ];
 
 class ContainerAnimated extends StatefulWidget {
@@ -52,6 +52,7 @@ class _AnimatedState extends State<ContainerAnimated> {
 
   Widget sidebar(_userstate) {
     final _loginstate = Provider.of<UserState>(context);
+    Configuration().init(context);
     return Container(
         padding: EdgeInsets.only(top: 40, bottom: 60, left: 20),
         color: Configuration.maincolor,
@@ -115,8 +116,11 @@ class _AnimatedState extends State<ContainerAnimated> {
                 Container(width: 2, height: 20, color: Colors.white),
                 SizedBox(width: 10),
                 GestureDetector(
-                  onTap: () {_loginstate.logout(); Navigator.pushNamed(context, '/welcome');},
-                  child: Text('Log out', style: TextStyle(color: Colors.white)))
+                    onTap: () {
+                      _loginstate.logout();
+                      Navigator.pushNamed(context, '/welcome');
+                    },
+                    child: Text('Log out', style: TextStyle(color: Colors.red)))
               ],
             )
           ],
@@ -157,7 +161,6 @@ class _AnimatedState extends State<ContainerAnimated> {
 
   @override
   Widget build(BuildContext context) {
-    Configuration().init(context);
     // showstages = widget.menuindex =='Meditation'|| widget.menuindex == 'Brain';
     final _userstate = Provider.of<UserState>(context);
 
@@ -257,7 +260,9 @@ class _AnimatedState extends State<ContainerAnimated> {
                       )
                       : Container(),*/
                   currentRoute == '/meditate' || currentRoute == '/brain'
-                      ? BottomMenu(selectedindex: 0, controller: _controller)
+                      ? BottomMenu(
+                          selectedindex: _userstate.user.stagenumber - 1,
+                          controller: _controller)
                       : Container(),
                 ],
               ),
@@ -277,10 +282,10 @@ List<Map> menuitems = [
   {'icon': FontAwesomeIcons.diceFour, 'title': "Stage 4", 'index': 3},
   {'icon': FontAwesomeIcons.diceFive, 'title': "Stage 5", 'index': 4},
   {'icon': FontAwesomeIcons.diceSix, 'title': "Stage 6", 'index': 5},
-  {'icon': Icons.plus_one ,'title': "Stage 7", 'index': 6},
-  {'icon': Icons.plus_one, 'title':'Stage 8', 'index': 7},
-  {'icon': Icons.plus_one,'title':'Stage 9', 'index': 8},
-  {'icon': Icons.plus_one,'title':'Stage 10','index':9}
+  {'icon': Icons.plus_one, 'title': "Stage 7", 'index': 6},
+  {'icon': Icons.plus_one, 'title': 'Stage 8', 'index': 7},
+  {'icon': Icons.plus_one, 'title': 'Stage 9', 'index': 8},
+  {'icon': Icons.plus_one, 'title': 'Stage 10', 'index': 9}
 ];
 
 class BottomMenu extends StatefulWidget {
@@ -333,13 +338,14 @@ class _BottomMenuState extends State<BottomMenu> {
     for (var e in menuitems) {
       result.add(GestureDetector(
         onTap: () => setState(() {
-          widget.controller.animateTo(0,
-              duration: Duration(milliseconds: 500), curve: Curves.ease);
-          _userstate.changeBottomMenu(e['index']);
-          _selectedIndex = e['index'];
+          if (_userstate.user.stagenumber >= e['index'] +1) {
+            widget.controller.animateTo(0,duration: Duration(milliseconds: 500), curve: Curves.ease);
+            _userstate.changeBottomMenu(e['index']);
+            _selectedIndex = e['index'];
+          }
         }),
         child: Container(
-          width: Configuration.width*0.15,
+          width: Configuration.width * 0.15,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -347,7 +353,7 @@ class _BottomMenuState extends State<BottomMenu> {
                 e['icon'],
                 color: e['index'] == _selectedIndex
                     ? Configuration.maincolor
-                    : Colors.black,
+                    : _userstate.user.stagenumber >= e['index']+1 ? Colors.black : Colors.grey,
                 size: Configuration.height * 0.04,
               ),
               e['index'] == _selectedIndex
@@ -376,8 +382,8 @@ class _BottomMenuState extends State<BottomMenu> {
             width: Configuration.width,
             decoration: BoxDecoration(color: Colors.grey[100]),
             child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                    child: Row(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: buildItems()),
             )),

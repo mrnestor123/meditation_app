@@ -15,7 +15,6 @@ class LessonModel extends Lesson {
   final Map<String,dynamic> text;
   final int requiredlevel;
   final int xp;
-  
 
   LessonModel({
     this.title,

@@ -28,6 +28,10 @@ void main() async {
 
   SystemChrome.setEnabledSystemUIOverlays([]);
 
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+
   await di.init();
   runApp(MyApp());
 }

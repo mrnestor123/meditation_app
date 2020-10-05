@@ -21,11 +21,12 @@ class BrainScreen extends StatelessWidget {
     return ListView(
       controller: controller,
       children: <Widget>[
+        SizedBox(height: Configuration.height*0.05),
         Container(
-          width: Configuration.blockSizeHorizontal * 6,
+          width: Configuration.blockSizeHorizontal * 4,
           height: Configuration.blockSizeVertical * 10,
           child: Text(
-            'Learn',
+            'Learn everything you need to know',
             softWrap: true,
             style: Configuration.subtitle,
             textAlign: TextAlign.center,
@@ -34,7 +35,7 @@ class BrainScreen extends StatelessWidget {
         Observer(builder: ((context) {
           // return CardView(lessons: _learnstate.brainlessons);
           return HorizontalList(
-              lessons: _userstate.lessondata[_userstate.menuindex]);
+              lessons: _userstate.lessondata[_userstate.menuindex],key: Key(_userstate.menuindex.toString()));
         })),
       ],
     );

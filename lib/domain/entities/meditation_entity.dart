@@ -20,7 +20,6 @@ class Meditation extends Equatable {
       this.codmed = uuid.v1();
     }
     this.xp = this.duration.inMinutes* 100;
-
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
@@ -69,7 +70,6 @@ abstract class _UserState with Store {
   @action
   Future userisLogged() async {
     Either<Failure, User> _isUserCached = await cachedUser.call(NoParams());
-
     _isUserCached.fold((Failure f) => loggedin = false, (User u) {
       user = u;
       loggedin = true;
@@ -77,24 +77,39 @@ abstract class _UserState with Store {
   }
 
   @action
-  Future takeMeditation(Duration d) async {
-    Either<Failure, bool> meditation = await meditate.call(Params(duration: d, user: user));
+  Future<List<Mission>> takeMeditation(Duration d) async {
+    Either<Failure, List<Mission>> meditation =
+        await meditate.call(Params(duration: d, user: user));
+
+    List<Mission> m = new List<Mission>();
 
     meditation
         .fold((Failure f) => print("something happened with the meditation"),
-            (bool b) {
+            (List<Mission> missions) {
       print('The meditation has been a success');
+      m = missions;
     });
+    return m;
   }
 
   @action
-  Future takeLesson(LessonModel l) async {
-    Either<Failure, bool> lessonsuccess = await lesson.call(LessonParams(lesson: l, user: user));
+  Future<List<Mission>> takeLesson(LessonModel l) async {
+    int currentstage = user.stagenumber;
+    Either<Failure, List<Mission>> lessonsuccess =
+        await lesson.call(LessonParams(lesson: l, user: user));
+    
+    List<Mission> result = new List<Mission>();
 
-    lessonsuccess.fold(
-        (Failure f) => print("something happened with the lesson"), (bool m) {
-      print('The lesson has been a success');
-    });
+    if (lessonsuccess != null) {
+      lessonsuccess
+          .fold((Failure f) => print("something happened with the lesson"),
+              (List<Mission> missions) {
+        print("We passed a mission");
+        result = missions;
+      });
+    }
+
+    return result;
   }
 
   //We get all the necessary data for displaying the app from the database and the

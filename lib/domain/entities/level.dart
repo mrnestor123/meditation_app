@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 
 class Level {
   int totalxp;
-
   // in each level we start with 0 xp
   int levelxp;
-
   //the goal for each level. Its the added plus 1000
   int xpgoal;
   int level;
   
-  //Each level is going to have 100 xp more. The first one
+  //Each level is going to have 100 xp more. The first one has
   int added = 0;
 
   // the percentage is how close you are from the next level;
-  double percentage;
-
+  int percentage;
   double continuity;
 
   //constructor for creating a level with xp,level and continuity. The added is an aggregate for each level.
@@ -25,8 +22,10 @@ class Level {
       this.levelxp = 0;
       this.level = 1;
       this.xpgoal = 1000;
+      this.continuity= 1;
     }
-    this.percentage = this.levelxp / this.xpgoal;
+    
+    this.percentage = this.levelxp ~/ this.xpgoal;
   }
 
   void addXP(int xp) {
@@ -39,11 +38,8 @@ class Level {
       this.level++;
       this.percentage = 0;
     }
-
-    this.percentage = this.levelxp/this.xpgoal;
-
+    this.percentage = this.levelxp ~/this.xpgoal;
   }
-
 
   Map<String,dynamic> toJson() => {
       "level": level == null ? null : level,

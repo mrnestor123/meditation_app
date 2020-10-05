@@ -14,10 +14,10 @@ import 'package:observable/observable.dart';
 import 'meditationData.dart';
 
 class UserModel extends User {
-  final int stagenumber;
+  int stagenumber;
   final String coduser, nombre, usuario, password;
   final String mail;
-  final Level level;
+  Level level;
 
   UserModel({
     this.coduser,
