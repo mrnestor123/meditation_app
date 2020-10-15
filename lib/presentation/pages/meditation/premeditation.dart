@@ -369,19 +369,26 @@ class _State extends State<TimePicker> {
             builder: (BuildContext builder) {
               return Wrap(
                 children: [
-                  CupertinoTimerPicker(
-                      mode: CupertinoTimerPickerMode.hms,
-                      minuteInterval: 1,
-                      secondInterval: 1,
-                      initialTimerDuration: duration,
-                      onTimerDurationChanged: (Duration changedtimer) {
-                        setState(() {
-                          duration = changedtimer;
-                          hours = changedtimer.inSeconds ~/ 3600;
-                          minutes = (changedtimer.inSeconds % 3600) ~/ 60;
-                          seconds = (changedtimer.inSeconds % 3600) % 60;
-                        });
-                      }),
+                  Container(
+                    margin: EdgeInsets.all(Configuration.safeBlockVertical * 2),
+                    decoration: new BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: new BorderRadius.all(Radius.circular(25.0)),
+                    ),
+                    child: CupertinoTimerPicker(
+                        mode: CupertinoTimerPickerMode.hms,
+                        minuteInterval: 1,
+                        secondInterval: 1,
+                        initialTimerDuration: duration,
+                        onTimerDurationChanged: (Duration changedtimer) {
+                          setState(() {
+                            duration = changedtimer;
+                            hours = changedtimer.inSeconds ~/ 3600;
+                            minutes = (changedtimer.inSeconds % 3600) ~/ 60;
+                            seconds = (changedtimer.inSeconds % 3600) % 60;
+                          });
+                        }),
+                  ),
                 ],
               );
             }),

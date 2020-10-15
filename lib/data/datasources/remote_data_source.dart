@@ -39,7 +39,7 @@ abstract class UserRemoteDataSource {
   Future meditate(MeditationModel m, UserModel user);
 
   //We get all the users data
-  Future<Map> getData();
+//  Future<Map> getData();
 
   //We get all the lessons of every stage
   Future<Map> getAllLessons();
@@ -59,8 +59,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     collectionGet = db.collection;
   }
 
-  //sacamos todos los datos del usuario. Meditaciones, lecciones y misiones.
-  //También sacamos las misiones de cada etapa
+  Map<int, Map<String, List<LessonModel>>> alllessons;
+
+
+  //sacamos todos los datos del usuario. 
+  //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({String password, String usuario}) async {
     CollectionReference docRef = collectionGet("users");
@@ -84,21 +87,17 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       CollectionReference userlessons = userlist.collection('readlessons');
       CollectionReference usermeditations = userlist.collection('meditations');
-      CollectionReference requiredmissionscol =
-          userlist.collection('requiredmissions');
-      CollectionReference optionalmissionscol =
-          userlist.collection('optionalmissions');
+      CollectionReference requiredmissionscol = userlist.collection('requiredmissions');
+      CollectionReference optionalmissionscol = userlist.collection('optionalmissions');
 
       QuerySnapshot readlesson = await userlessons.getDocuments();
       QuerySnapshot meditationsuser = await usermeditations.getDocuments();
       QuerySnapshot reqmissions = await requiredmissionscol.getDocuments();
       QuerySnapshot optmissions = await optionalmissionscol.getDocuments();
     
-
       List<MeditationModel> m = new List<MeditationModel>();
       List<LessonModel> l = new List<LessonModel>();
       List<StageModel> s = new List<StageModel>();
-
 
       for (DocumentSnapshot document in readlesson.documents) {
         l.add(new LessonModel.fromJson(document.data));
@@ -126,9 +125,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         user.missions["optional"][aux.type].add(aux);
       }
 
+
       user.setMeditations(m);
       user.setLearnedLessons(l);
-
+      //user.setLessons(await getAllLessons());
       return user;
     } else {
       throw LoginException();
@@ -138,7 +138,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   //en este método el usuario cambia de etapa y se le añaden las misiones de esa etapa.
   Future changeStage(UserModel user) async{
-
     CollectionReference stages = collectionGet('stages');
     QuerySnapshot stagesqry = await stages.getDocuments();
     for(DocumentSnapshot document in stagesqry.documents){
@@ -203,9 +202,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     //Aquí le añadiríamos el nivel de ahora.
   }
 
-  @override
+ /* @override
   Future<Map> getData() async {
-    ObservableList<LessonModel> l = new ObservableList<LessonModel>();
     Map<int, Map<String, Map<String, List<LessonModel>>>> result =
         new Map<int, Map<String, Map<String, List<LessonModel>>>>();
     CollectionReference lessons = collectionGet('lessons');
@@ -235,7 +233,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     } else {
       throw DataException();
     }
-  }
+  }*/
 
   @override
   Future<Map> getAllLessons() async {
@@ -257,6 +255,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       });
       stage++;
     }
+    alllessons = result;
 
     return result;
   }

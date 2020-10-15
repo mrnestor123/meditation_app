@@ -56,7 +56,7 @@ class UserRepositoryImpl implements UserRepository {
       final user = await localDataSource.getUser();
       return Right(user);
     } on Exception {
-      return Left(CacheFailure(error: ' User is not in cache'));
+      return Left(CacheFailure(error: 'User is not in cache'));
     }
   }
 

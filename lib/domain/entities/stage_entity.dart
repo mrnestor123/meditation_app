@@ -26,5 +26,4 @@ class Stage {
     @required this.description,
     @required this.image
   });
-
 }

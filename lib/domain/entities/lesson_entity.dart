@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-class Lesson extends Equatable {
+class Lesson {
   String codlesson;
   //to unlock the lesson whenever the user is at a given level
-  final int requiredlevel;
+  final String precedinglesson;
   final String title;
   final String slider;
   final String group;
@@ -13,16 +13,18 @@ class Lesson extends Equatable {
   final Map<String,dynamic> text;
   final int xp;
   final Map<String,String> lessontext= new Map();
+  bool blocked;
 
   Lesson({
     this.codlesson,
     @required this.title,
-    this.requiredlevel,
+    this.precedinglesson,
     this.group,
     this.slider,
     @required this.description,
     @required this.text,
-    @required this.xp
+    @required this.xp,
+    this.blocked
   }) {
     if (this.codlesson == null) {
       var uuid = Uuid();
@@ -30,7 +32,7 @@ class Lesson extends Equatable {
     }
   }
 
-  @override
-  List<Object> get props =>
-      [title, codlesson, slider, description, text, xp];
+//  @override
+  //List<Object> get props =>
+    //  [title, codlesson, slider, description, text, xp];
 }

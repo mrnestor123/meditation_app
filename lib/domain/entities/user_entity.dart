@@ -16,13 +16,10 @@ class User {
   //Nombre es el nombre de pila y usuario es el nombre en la aplicación
   String coduser;
   String nombre, usuario, password;
-
   String mail;
   int stagenumber;
   Level level;
-
   int meditationstreak = 0;
-
   Stage stage; 
 
   //May be a string with 1 hour, 30 sec, 20 min ...
@@ -40,13 +37,15 @@ class User {
   //List with the lessons that the user has learned
   final ObservableList<LessonModel> lessonslearned = new ObservableList();
 
+  //contains the list of lessons learned, grouped by stage 
+  final ObservableMap<int,List<LessonModel>> lessons = new ObservableMap();
+
   //Missions for the stage. When the user completes all the stage missions he
   final ObservableList<MissionModel> requiredmissions = new ObservableList();
   final ObservableList<MissionModel> optionalmissions = new ObservableList();
 
   //Map with "required" and "optional" missions. In the form {"required":[Mission,Mission]}
-  final Map<String, Map<String, ObservableList<MissionModel>>> missions =
-      new Map();
+  final Map<String, Map<String, ObservableList<MissionModel>>> missions = new Map();
 
   User(
       {this.coduser,
@@ -64,9 +63,8 @@ class User {
     timeMeditated = '15 minutes meditated';
   }
 
-  /* @override
-  List<Object> get props =>
-      [coduser, nombre, mail, usuario, password, stagenumber];*/
+  /* @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
+  */
 
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
 
@@ -86,7 +84,8 @@ class User {
     }
   }
   void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
-  
+  //void setLessons(List<LessonModel> l) => lessons.addAll(l);
+
   //este método recorrerá por todas las misiones de la stage para añadirselas al user
   void setStage(StageModel s) { 
     stage = s;
@@ -110,8 +109,11 @@ class User {
   }
 
   List<Mission> takeLesson(Lesson l) {
-    if (!this.lessonslearned.contains(l)) this.lessonslearned.add(l);
+    if (!this.lessonslearned.contains(l)) this.lessonslearned.add(l);    
+    if(!this.lessons[stagenumber].contains(l)) { this.lessons[stagenumber].add(l);}
     List<Mission> result = new List<Mission>();
+
+    this.lessons[stagenumber].forEach((element) { if(element.precedinglesson == l.codlesson) {element.blocked = false;}});
 
     if (l.xp != null) {
       this.level.addXP(l.xp);

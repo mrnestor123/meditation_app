@@ -277,6 +277,7 @@
         "group": "Mind",
         "slider": "consciencia.png",
         "description" :" Consciousness consists of whatever we're experiencing in the moment",
+        "blocked":false,
         "text": {
             "1": {
               "image": "consciencia.png",
@@ -291,8 +292,10 @@
        "2": {
          "codlesson": "2",
          "title":"Attention vs peripheral awareness",
+         "precedinglesson": "1",
          "group": "Mind",
          "slider":"peripheral.png",
+         "blocked": true,
          "description": "Learn the differences between the two types of conscious experience",
          "text": {
            "1":{ 
@@ -315,6 +318,7 @@
          "group":"Meditation",
          "slider": "phase 1.png",
          "description":"learn the basics to start meditating straight away.",
+         "blocked":false,
          "text":{
            "1":{
              "image":"phase 1.png",
@@ -337,9 +341,11 @@
        "4":{
          "codlesson":"4",
          "title":"Counting the breath",
+         "precedinglesson":"3",
          "group":"Meditation",
          "slider": "nose-breath.png",
          "description":"learn the basics to start meditating straight away.",
+         "blocked":true,
          "text":{
              "1":{
              "image":"phase 1.png",
@@ -367,6 +373,7 @@
          "group": "Mind",
          "slider":"daysprogress.png",
          "description": "Learn how to get your mind into the present",
+         "blocked":true,
          "text": {
               "1":{ 
                 "image":"peripheral.png",
@@ -388,6 +395,7 @@
          "group": "Mind",
          "slider":"daysprogress.png",
          "description": "Learn how to get your mind into the present",
+         "blocked":true,
          "text": {
            "1":{ 
              "image":"peripheral.png",
@@ -409,6 +417,7 @@
          "group": "Meditation",
          "slider":"multipleyou.png",
          "description": "Your mind is a collective of mental processes",
+         "blocked":true,
          "text": {
            "1":{ 
              "image":"peripheral.png",
@@ -430,6 +439,7 @@
          "group": "Meditation",
          "slider":"circlefirst.png",
          "description": "Your mind is a collective of mental processes",
+         "blocked":true,
          "text": {
            "1":{ 
              "image":"peripheral.png",

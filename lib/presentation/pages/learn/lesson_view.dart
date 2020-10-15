@@ -41,8 +41,8 @@ class _LessonViewState extends State<LessonView> {
           barrierLabel: '',
           context: context,
           pageBuilder: (context, animation1, animation2) {});
-     
-      await Future.delayed(Duration(seconds: 2)); 
+
+      await Future.delayed(Duration(seconds: 2));
       Navigator.pop(context);
       Navigator.pop(context);
     } else {
@@ -54,78 +54,89 @@ class _LessonViewState extends State<LessonView> {
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
-      body: Container(
-        color: index == 0 ? Configuration.maincolor : Configuration.whitecolor,
-        width: Configuration.width,
-        height: Configuration.height,
-        child: Stack(
-          children: <Widget>[
-            index == 0
-                ? Center(
-                    child: Container(
-                        width: Configuration.width * 0.8,
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(widget.lesson.title,
-                                  style: Configuration.title2),
-                              SizedBox(height: Configuration.height * 0.1),
-                              Text(widget.lesson.description,
-                                  style: Configuration.paragraph4)
-                            ])),
-                  )
-                : Positioned(
-                    bottom: 0.0,
-                    child: Column(children: [
-                      Image(
-                          width: Configuration.width,
-                          image: AssetImage("images/" +
-                              widget.lesson.text[index.toString()]["image"])),
-                      Container(
-                          width: Configuration.width,
-                          padding: EdgeInsets.all(
-                              Configuration.safeBlockHorizontal * 4),
-                          color: Configuration.grey,
-                          child: Center(
-                              child: Text(
-                                  widget.lesson.text[index.toString()]["text"],
-                                  style: GoogleFonts.montserrat(
-                                      textStyle: TextStyle(color: Colors.white),
-                                      fontSize:
-                                          Configuration.safeBlockHorizontal *
-                                              5))))
-                    ])),
-            new Positioned(
-              //Place it at the top, and not use the entire screen
-              top: Configuration.safeBlockVertical * 6,
-              left: 10.0,
-              child: IconButton(
-                icon: Icon(index == 0 ? Icons.close : Icons.arrow_left,
-                    size: Configuration.iconSize),
-                color: index == 0 ? Colors.white : Colors.black,
-                onPressed: () => setState(
-                    () => index == 0 ? Navigator.pop(context) : index--),
+      body: Dismissible(
+        onDismissed: (DismissDirection direction) {
+          setState(() {
+            index += direction == DismissDirection.endToStart ? 1 : -1;
+          });
+        },
+        key: new ValueKey(index),
+        child: Container(
+          color:
+              index == 0 ? Configuration.maincolor : Configuration.whitecolor,
+          width: Configuration.width,
+          height: Configuration.height,
+          child: Stack(
+            children: <Widget>[
+              index == 0
+                  ? Center(
+                      child: Container(
+                          width: Configuration.width * 0.8,
+                          child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(widget.lesson.title,
+                                    style: Configuration.title2),
+                                SizedBox(height: Configuration.height * 0.1),
+                                Text(widget.lesson.description,
+                                    style: Configuration.paragraph4)
+                              ])),
+                    )
+                  : Positioned(
+                      bottom: 0.0,
+                      child: Column(children: [
+                        Image(
+                            width: Configuration.width,
+                            image: AssetImage("images/" +
+                                widget.lesson.text[index.toString()]["image"])),
+                        Container(
+                            width: Configuration.width,
+                            padding: EdgeInsets.all(
+                                Configuration.safeBlockHorizontal * 4),
+                            color: Configuration.grey,
+                            child: Center(
+                                child: Text(
+                                    widget.lesson.text[index.toString()]
+                                        ["text"],
+                                    style: GoogleFonts.montserrat(
+                                        textStyle:
+                                            TextStyle(color: Colors.white),
+                                        fontSize:
+                                            Configuration.safeBlockHorizontal *
+                                                5))))
+                      ])),
+              new Positioned(
+                //Place it at the top, and not use the entire screen
+                top: Configuration.safeBlockVertical * 6,
+                left: 10.0,
+                child: IconButton(
+                  icon: Icon(index == 0 ? Icons.close : Icons.arrow_left,
+                      size: Configuration.iconSize),
+                  color: index == 0 ? Colors.white : Colors.black,
+                  onPressed: () => setState(
+                      () => index == 0 ? Navigator.pop(context) : index--),
+                ),
               ),
-            ),
-            new Positioned(
-              //Place it at the top, and not use the entire screen4
-              top: Configuration.safeBlockVertical * 6,
-              right: 10.0,
-              child: IconButton(
-                icon: Icon(
-                    index == widget.lesson.text.length
-                        ? Icons.check
-                        : Icons.arrow_right,
-                    size: Configuration.iconSize),
-                color: index == 0 ? Colors.white : Colors.black,
-                onPressed: () => setState(() =>
-                    index < widget.lesson.text.length
-                        ? index++
-                        : finishlesson(context)),
+              new Positioned(
+                //Place it at the top, and not use the entire screen
+                top: Configuration.safeBlockVertical * 6,
+                right: 10.0,
+                child: IconButton(
+                  icon: Icon(
+                      index == widget.lesson.text.length
+                          ? Icons.check
+                          : Icons.arrow_right,
+                      size: Configuration.iconSize),
+                  color: index == 0 ? Colors.white : Colors.black,
+                  onPressed: () => setState(() =>
+                      index < widget.lesson.text.length
+                          ? index++
+                          : finishlesson(context)),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

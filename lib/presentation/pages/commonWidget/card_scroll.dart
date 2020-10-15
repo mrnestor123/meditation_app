@@ -8,12 +8,11 @@ import 'package:meditation_app/presentation/pages/learn/lesson_view.dart';
 
 import 'horizontal_list.dart';
 
-
 class CardView extends StatefulWidget {
   var lessons;
   //String description;
 
-  CardView({this.lessons, Key key}): super(key:key);
+  CardView({this.lessons, Key key}) : super(key: key);
   @override
   _CardViewState createState() => new _CardViewState();
 }
@@ -24,22 +23,25 @@ var widgetAspectRatio = cardAspectRatio * 1.2;
 class _CardViewState extends State<CardView> {
   var currentPage;
   List<LessonModel> lessons;
+  bool blocked;
 
   @override
   void initState() {
     super.initState();
     // currentPage = widget.lessons.length - 1.0;
     lessons = widget.lessons;
-    currentPage = lessons.length - 1.0;
+    //empezamos o desde el 0 o desde la primera lección sin leer del usuario. PARA HACER!!
+    currentPage = 0.0;
   }
 
   @override
   Widget build(BuildContext context) {
-    PageController controller = PageController(initialPage: lessons.length - 1);
+    //empezamos o desde el 0 o desde la primera lección sin leer del usuario. PARA HACER!!
+    PageController controller = PageController(initialPage: 0);
     controller.addListener(() {
       setState(() {
-        currentPage =controller.page;
-        lessons=widget.lessons;
+        currentPage = controller.page;
+        lessons = widget.lessons;
       });
     });
 
@@ -53,7 +55,7 @@ class _CardViewState extends State<CardView> {
             reverse: true,
             itemBuilder: (context, index) {
               return GestureDetector(
-                behavior: HitTestBehavior.translucent,
+                  behavior: HitTestBehavior.translucent,
                   onLongPress: () => showModalBottomSheet(
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
@@ -62,17 +64,17 @@ class _CardViewState extends State<CardView> {
                         return Wrap(children: <Widget>[
                           BottomModal(
                               title: lessons[currentPage.round()].title,
-                              subtitle: lessons[currentPage.round()].description)
+                              subtitle:lessons[currentPage.round()].description)
                         ]);
                       }),
                   onTap: () {
-                    print("tapped");
+                    !lessons[currentPage.round()].blocked ?
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
                               LessonView(lesson: lessons[currentPage.round()])),
-                    );
+                    ): null ;
                   },
                   child: Container());
             },
@@ -109,19 +111,14 @@ class CardScrollWidget extends StatelessWidget {
 
         List<Widget> cardList = new List();
 
-        for (var i = 0; i < lessons.length; i++) {
+        for (var i = 0; i < lessons.length ; i++) {
           var delta = i - currentPage;
           bool isOnRight = delta > 0;
-
-          var start = 
-              max(
-                  primaryCardLeft -
-                      horizontalInset * -delta * (isOnRight ? 15 : 1),
-                  0.0);
+          var start = max(primaryCardLeft - horizontalInset * -delta * (isOnRight ? 15 : 1),0.0);
 
           var cardItem = Positioned.directional(
             top: verticalInset * max(-delta, 0.0),
-            bottom:  verticalInset * max(-delta, 0.0),
+            bottom: verticalInset * max(-delta, 0.0),
             start: start,
             textDirection: TextDirection.rtl,
             child: ClipRRect(
@@ -142,12 +139,10 @@ class CardScrollWidget extends StatelessWidget {
                           ],
                           border: Border.all(color: Colors.black12),
                           borderRadius: BorderRadius.circular(16.0),
-                          color: Colors.white,
                           image: DecorationImage(
-                              image: AssetImage(
-                                  lessons[i].slider != null
-                                      ? 'images/' + lessons[i].slider
-                                      : 'images/sky.jpg'),
+                              image: AssetImage(lessons[i].slider != null
+                                  ? 'images/' + lessons[i].slider
+                                  : 'images/sky.jpg'),
                               fit: BoxFit.cover)),
                     ),
                     Positioned(
@@ -158,25 +153,43 @@ class CardScrollWidget extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.grey.withOpacity(0.7),
-                                Colors.grey.withOpacity(0.1)
-                              ],
-                            )),
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.grey.withOpacity(0.7),
+                            Colors.grey.withOpacity(0.1)
+                          ],
+                        )),
                       ),
                     ),
                     Positioned(
                         left: 0.0,
                         bottom: 0.0,
                         child: Container(
-                            height: heightOfPrimaryCard*0.2,
+                            height: heightOfPrimaryCard * 0.2,
                             width: widthOfPrimaryCard,
                             child: Center(
                               child: Text(lessons[i].title,
                                   style: Configuration.lessontext),
                             ))),
+                     Positioned(
+                      bottom: 0.0,
+                      width: widthOfPrimaryCard,
+                      height: heightOfPrimaryCard,
+                      child: lessons[i].blocked ? Container(
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.grey.withOpacity(0.6),
+                            Colors.grey.withOpacity(0.6)
+                          ],
+                        )
+                        ),
+                        child: Icon(Icons.lock_outline,size:Configuration.safeBlockVertical*8,color:Colors.white),
+                      ): Container(),
+                    ),
                   ],
                 ),
               ),

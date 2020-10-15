@@ -26,7 +26,7 @@ class UserModel extends User {
     @required this.usuario,
     @required this.password,
     @required this.stagenumber,
-    @required this.level
+    this.level
   }) : super(
             coduser: coduser,
             nombre: nombre,

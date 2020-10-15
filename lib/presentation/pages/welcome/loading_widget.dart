@@ -58,7 +58,6 @@ class _LoadingState extends State<Loading> {
   }
 
   void userisLogged(context) async {
-    await new Future.delayed(Duration(seconds: 5));
     await _user.getData();
     await _user.userisLogged();
     _user.loggedin
@@ -75,10 +74,9 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<UserState>(context);
+    
     //comprobamos si el usuario esta loggeado
-
     if(!started) {userisLogged(context); started = true;}
-
     //startTimer();
 
     return Scaffold(

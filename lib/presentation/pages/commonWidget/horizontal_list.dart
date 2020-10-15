@@ -63,6 +63,7 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(this.lesson);
     return Stack(
       children: <Widget>[
         GestureDetector(
@@ -94,14 +95,14 @@ class LessonCard extends StatelessWidget {
           left: 0.0,
           width: Configuration.safeBlockHorizontal * 40,
           height: Configuration.safeBlockHorizontal * 10,
-          child: Container(
+          child: lesson.blocked ? Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [Colors.grey, Colors.grey.withOpacity(0.5)],
             )),
-          ),
+          ) : Container(),
         ),
         Positioned(
             left: 5.0,

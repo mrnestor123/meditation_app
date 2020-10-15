@@ -70,15 +70,15 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     userToCache.missions.forEach((key, value) {
       if (key == "required") {
         value.forEach((key, value) {
-           for (MissionModel mission in value) {
-             requiredmissions.add(json.encode(mission.toJson()));
-           }
+          for (MissionModel mission in value) {
+            requiredmissions.add(json.encode(mission.toJson()));
+          }
         });
       } else {
         value.forEach((key, value) {
           for (MissionModel mission in value) {
-             optionalmissions.add(json.encode(mission.toJson()));
-           }
+            optionalmissions.add(json.encode(mission.toJson()));
+          }
         });
       }
     });
@@ -157,7 +157,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
             user.missions["optional"][aux.type].add(aux);
           }).toList();
         }
-        
+
         return Future.value(user);
       } else {
         throw Exception();
@@ -169,10 +169,12 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future logout() async {
-    if(usermeditations.length>0){ usermeditations.clear();}
-    if(userlessons.length > 0) userlessons.clear();
-    if(requiredmissions.length>0) requiredmissions.clear();
-    if(optionalmissions.length>0) optionalmissions.clear();
+    if (usermeditations.length > 0) {
+      usermeditations.clear();
+    }
+    if (userlessons.length > 0) userlessons.clear();
+    if (requiredmissions.length > 0) requiredmissions.clear();
+    if (optionalmissions.length > 0) optionalmissions.clear();
     return sharedPreferences.clear();
   }
 
@@ -205,4 +207,5 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
     }
   }
+
 }
