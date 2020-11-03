@@ -16,6 +16,7 @@ class LessonModel extends Lesson {
   final String precedinglesson;
   final int xp;
   bool blocked;
+  bool seen;
 
   LessonModel(
       {this.title,
@@ -26,7 +27,8 @@ class LessonModel extends Lesson {
       this.xp,
       this.text,
       this.precedinglesson,
-      this.blocked})
+      this.blocked,
+      this.seen})
       : super(
             title: title,
             codlesson: codlesson,
@@ -36,7 +38,9 @@ class LessonModel extends Lesson {
             xp: xp,
             group: group,
             precedinglesson: precedinglesson,
-            blocked: blocked);
+            blocked: blocked,
+            seen: seen
+            );
 
   factory LessonModel.fromRawJson(String str) =>
       LessonModel.fromJson(json.decode(str));
@@ -51,7 +55,9 @@ class LessonModel extends Lesson {
       text: json["text"] == null ? null : json["text"],
       group: json["group"] == null ? null : json["group"],
       precedinglesson: json["precedinglesson"] == null ? null : json["precedinglesson"],
-      blocked: json["blocked"] == null ? null : json["blocked"]);
+      blocked: json["blocked"] == null ? null : json["blocked"],
+      seen: json["seen"] == null ? null : json["seen"]
+      );
 
   Map<String, dynamic> toJson() => {
         "codlesson": codlesson == null ? null : codlesson,
@@ -61,6 +67,7 @@ class LessonModel extends Lesson {
         "text": text == null ? null : text,
         "group": group == null ? null : group,
         "precedinglesson": precedinglesson == null ? null : precedinglesson,
-        "blocked": blocked == null ? null : blocked
+        "blocked": blocked == null ? null : blocked,
+        "seen": seen == null ? null : seen
       };
 }

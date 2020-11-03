@@ -35,7 +35,8 @@ dependencies:
   dartz: any
   get_it: ^2.0.1  
   firebase_core: ^0.4.4+3
-  cloud_firestore: ^0.13.4+2
+  firebase_auth: ^0.16.0  
+  cloud_firestore: ^0.13.5 
   cloud_firestore_mocks: ^0.4.2
   mock_cloud_firestore: ^0.0.20
   collection: ^1.14.12

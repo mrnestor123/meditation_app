@@ -76,7 +76,7 @@ class UserRepositoryImpl implements UserRepository {
             usuario: usuario,
             password: password,
             stagenumber: stagenumber);
-        //Añadimos las lecciones
+        //Lo añadimos a la caché
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on ServerException {
@@ -149,8 +149,7 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  Future<Either<Failure, bool>> updateMissions(
-      List<Mission> missions, User u) async {
+  Future<Either<Failure, bool>> updateMissions(List<Mission> missions, User u) async {
     if (await networkInfo.isConnected) {
       for (Mission m in missions) {
         try {

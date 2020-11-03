@@ -15,9 +15,6 @@ class Stage {
   //Lessons for each stage
   ObservableList<LessonModel> lessons = new ObservableList();
 
-  //Users that are currently on the stage
-  ObservableList<UserModel> users = new ObservableList();
-
   //missions for each stage
   ObservableList<MissionModel> missions =new ObservableList();
 

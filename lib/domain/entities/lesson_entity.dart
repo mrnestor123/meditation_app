@@ -14,6 +14,7 @@ class Lesson {
   final int xp;
   final Map<String,String> lessontext= new Map();
   bool blocked;
+  bool seen;
 
   Lesson({
     this.codlesson,
@@ -24,7 +25,8 @@ class Lesson {
     @required this.description,
     @required this.text,
     @required this.xp,
-    this.blocked
+    this.blocked,
+    @required this.seen
   }) {
     if (this.codlesson == null) {
       var uuid = Uuid();

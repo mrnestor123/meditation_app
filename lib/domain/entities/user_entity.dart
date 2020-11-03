@@ -37,8 +37,10 @@ class User {
   //List with the lessons that the user has learned
   final ObservableList<LessonModel> lessonslearned = new ObservableList();
 
-  //contains the list of lessons learned, grouped by stage 
-  final ObservableMap<int,List<LessonModel>> lessons = new ObservableMap();
+  final Map<int,Map<String,ObservableList<LessonModel>>> lessons = new Map();
+
+  //contains a list with all lessons 
+  //final ObservableMap<int,List<LessonModel>> lessons = new ObservableMap();
 
   //Missions for the stage. When the user completes all the stage missions he
   final ObservableList<MissionModel> requiredmissions = new ObservableList();
@@ -59,8 +61,6 @@ class User {
       var uuid = Uuid();
       this.coduser = uuid.v1();
     }
-    minutesMeditated = 15;
-    timeMeditated = '15 minutes meditated';
   }
 
   /* @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
@@ -84,7 +84,7 @@ class User {
     }
   }
   void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
-  //void setLessons(List<LessonModel> l) => lessons.addAll(l);
+  void setLessons(Map<int,Map<String,List<LessonModel>>>l) => lessons.addAll(l);
 
   //este método recorrerá por todas las misiones de la stage para añadirselas al user
   void setStage(StageModel s) { 
@@ -110,10 +110,10 @@ class User {
 
   List<Mission> takeLesson(Lesson l) {
     if (!this.lessonslearned.contains(l)) this.lessonslearned.add(l);    
-    if(!this.lessons[stagenumber].contains(l)) { this.lessons[stagenumber].add(l);}
+    //if(!this.lessons[stagenumber].contains(l)) { this.lessons[stagenumber].add(l);}
     List<Mission> result = new List<Mission>();
-
-    this.lessons[stagenumber].forEach((element) { if(element.precedinglesson == l.codlesson) {element.blocked = false;}});
+    
+    //this.lessons[stagenumber].forEach((element) { if(element.precedinglesson == l.codlesson) {element.blocked = false;}});
 
     if (l.xp != null) {
       this.level.addXP(l.xp);

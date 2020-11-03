@@ -55,8 +55,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   //Firestore db;
   MockCloudFirestore db;
   CollectionGet collectionGet;
+  Firestore database;
+
+
   UserRemoteDataSourceImpl(this.db) {
     collectionGet = db.collection;
+    database = Firestore.instance;
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -81,8 +85,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
     //Aquí le añadimos las lecciones que ha leido,las meditaciones que ha hecho y las misiones que tiene hechas y por hacer
     if (user != null) {
-      DocumentReference userlist =
-          collectionGet('userdata').document(user.coduser);
+      DocumentReference userlist = collectionGet('userdata').document(user.coduser);
       //Query query = lessons.where('coduser',isequalto:userid)
 
       CollectionReference userlessons = userlist.collection('readlessons');
@@ -125,9 +128,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         user.missions["optional"][aux.type].add(aux);
       }
 
-
       user.setMeditations(m);
       user.setLearnedLessons(l);
+
+      Map<String,dynamic> demoData =  {'name': 'Stage  1', 'description':'What is going on'};
+
+      database.collection('stages').add(demoData);
+
       //user.setLessons(await getAllLessons());
       return user;
     } else {
@@ -147,7 +154,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
-
   @override
   Future<UserModel> registerUser(
       {String nombre,
@@ -165,6 +171,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     //faltará saber el id una vez añadido
     DocumentReference docRef = await collectionGet('users').add(user.toJson());
+
+    await database.collection('users').add(user.toJson());
+
+    CollectionReference lessons = database.collection('stages').document('1').collection('lessons');
+    QuerySnapshot lessonsdoc = await lessons.getDocuments();
+
+    List<LessonModel> lessonlist = new List();
+
+    for(DocumentSnapshot doc in lessonsdoc.documents){
+      doc.data['seen']= false;
+      doc.data['blocked']=false;
+      lessonlist.add(new LessonModel.fromJson(doc.data));
+    }
+
+
+
     print(docRef.toString());
     return user;
   }

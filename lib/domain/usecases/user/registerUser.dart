@@ -17,8 +17,7 @@ class RegisterUseCase extends UseCase<User, UserParams> {
   Future<Either<Failure, User>> call(UserParams params) async {
 
     if (!params.validatePassword(params.password)) {
-      return Left(
-          RegisterFailure(error: 'Password length must be more than 6'));
+      return Left(RegisterFailure(error: 'Password length must be more than 6'));
     }
 
     if (params.confirmpassword != params.password) {
