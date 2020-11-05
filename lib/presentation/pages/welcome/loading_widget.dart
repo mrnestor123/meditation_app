@@ -58,7 +58,7 @@ class _LoadingState extends State<Loading> {
   }
 
   void userisLogged(context) async {
-    await _user.getData();
+   // await _user.getData();
     await _user.userisLogged();
     _user.loggedin
         ? Navigator.pushNamed(context, '/main')

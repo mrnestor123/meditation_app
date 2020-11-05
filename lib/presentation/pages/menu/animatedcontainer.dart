@@ -67,7 +67,7 @@ class _AnimatedState extends State<ContainerAnimated> {
               Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(_userstate.user.nombre,
+                    Text(_userstate.user.usuario,
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold)),
                     Text('Level 10', style: TextStyle(color: Colors.grey))

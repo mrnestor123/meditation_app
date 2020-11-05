@@ -94,12 +94,16 @@ class RegisterWidget extends StatelessWidget {
                           boxShadow: [BoxShadow(color:Colors.grey,offset:Offset(2, 3),spreadRadius: 1,blurRadius: 3)]
                           ),
                     ),
-                    onTap: () {
-                      _registerstate.register(
+                    onTap: () async {
+                      await _registerstate.register(
                           _userController.text,
                           _passwordController.text,
                           _confirmController.text,
                           _mailController.text);
+                      if (_registerstate.user != null) {
+                        _userstate.setUser(_registerstate.user);
+                        Navigator.pushNamed(context, '/main');
+                      }
                     }),
                 SizedBox(height:10)
               ],

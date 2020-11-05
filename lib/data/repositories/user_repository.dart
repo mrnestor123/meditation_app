@@ -60,6 +60,9 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  /*
+    Hay que comprobar si el usuario ya existe antes de registrarlo y hacer nada
+  */
   @override
   Future<Either<Failure, User>> registerUser(
       {String nombre,

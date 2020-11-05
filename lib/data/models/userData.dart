@@ -6,8 +6,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/level.dart';
+import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:observable/observable.dart';
 
@@ -15,18 +17,21 @@ import 'meditationData.dart';
 
 class UserModel extends User {
   int stagenumber;
-  final String coduser, nombre, usuario, password;
-  final String mail;
+  String coduser;
+  String nombre, usuario, password;
+  String mail;
   Level level;
+  Stage stage;
 
   UserModel({
     this.coduser,
-    @required this.nombre,
+    this.nombre,
     @required this.mail,
     @required this.usuario,
     @required this.password,
     @required this.stagenumber,
-    this.level
+    this.level,
+    this.stage
   }) : super(
             coduser: coduser,
             nombre: nombre,
@@ -34,7 +39,8 @@ class UserModel extends User {
             password: password,
             level: level,
             usuario: usuario,
-            stagenumber: stagenumber);
+            stagenumber: stagenumber,
+            stage:stage);
 
   factory UserModel.fromRawJson(String str) =>
       UserModel.fromJson(json.decode(str));

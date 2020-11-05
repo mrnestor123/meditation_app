@@ -68,7 +68,7 @@ abstract class _LoginState with Store {
         );
         
       } on Failure {
-        errorMessage = ' Could not log user';
+        errorMessage = 'Could not log user';
       }
     }else{
       errorMessage= 'Please fill user and password fields';

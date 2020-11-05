@@ -15,7 +15,17 @@ class StageModel extends Stage {
       this.goals,
       this.obstacles,
       this.skills,
-      this.mastery});
+      this.mastery}):
+      super(
+        stagenumber:stagenumber,
+        userscount:userscount,
+        description: description,
+        image: image,
+        goals:goals,
+        obstacles:obstacles,
+        skills:skills,
+        mastery:mastery
+        );
 
   factory StageModel.fromRawJson(String str) =>
       StageModel.fromJson(json.decode(str));
@@ -35,9 +45,10 @@ class StageModel extends Stage {
         skills: json["skills"] == null ? null : json["skills"],
         mastery: json["mastery"] == null ? null : json["mastery"]);
     
-      while(json['missions'][count.toString()] != null){
+      if(json['missions'] != null){ while(json['missions'][count.toString()] != null){
         s.missions.add(new MissionModel.fromJson(json['missions'][(count++).toString()]));
-      }
+      }}
+
     return s;
    }
 

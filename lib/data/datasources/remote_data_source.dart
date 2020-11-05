@@ -5,8 +5,11 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/level.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:observable/observable.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/lesson_model.dart';
 
@@ -66,6 +69,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
 
+
+
+
   //sacamos todos los datos del usuario. 
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
@@ -75,6 +81,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot documents = await docRef.getDocuments();
     //Query query = documents.where('username',isEqualTo:usuario);
     UserModel user;
+
+
     for (DocumentSnapshot document in documents.documents) {
       print(document.data);
       print(document.reference);
@@ -101,6 +109,28 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       List<MeditationModel> m = new List<MeditationModel>();
       List<LessonModel> l = new List<LessonModel>();
       List<StageModel> s = new List<StageModel>();
+
+      QuerySnapshot missions = await collectionGet('missions').getDocuments();
+
+      /*
+      for(DocumentSnapshot doc in missions.documents){
+        MissionModel m = new MissionModel.fromJson(doc.data);
+        database.collection('missions').add(m.toJson());
+      }
+      de momento no hago misiones
+      hay que darle unas cuantas vueltas a los atributos
+      */
+
+
+
+     /* 
+      Añadiendo lecciones a la base de datos
+     QuerySnapshot goodlessons = await collectionGet('goodlessons').getDocuments();
+
+      for(DocumentSnapshot doc in goodlessons.documents){
+        LessonModel l = new LessonModel.fromJson(doc.data);
+        database.collection('lessons').add(l.toJson());
+      }*/
 
       for (DocumentSnapshot document in readlesson.documents) {
         l.add(new LessonModel.fromJson(document.data));
@@ -131,10 +161,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       user.setMeditations(m);
       user.setLearnedLessons(l);
 
-      Map<String,dynamic> demoData =  {'name': 'Stage  1', 'description':'What is going on'};
-
-      database.collection('stages').add(demoData);
-
       //user.setLessons(await getAllLessons());
       return user;
     } else {
@@ -161,33 +187,55 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       String password,
       String usuario,
       int stagenumber}) async {
+
+    //Sacamos la primera etapa
+    QuerySnapshot firststage = await database.collection('stages').where('stagenumber',isEqualTo:1).getDocuments();
+    StageModel one;
+
+    for(DocumentSnapshot doc in firststage.documents) {
+      one = new StageModel.fromJson(doc.data);
+    }
+
     UserModel user = new UserModel(
+      // De momento lo pongo así. Debería de crearse en el constructor :(
+      coduser: Uuid().v1(),
       mail: mail,
       password: password,
       usuario: usuario,
       nombre: nombre,
       stagenumber: 1,
+      stage: one,
+      level: new Level()
     );
-
-    //faltará saber el id una vez añadido
-    DocumentReference docRef = await collectionGet('users').add(user.toJson());
-
+    //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
+    //creamos su entrada en userdata
+    DocumentReference userdata = await database.collection('userdata').add({'coduser': user.coduser});
 
-    CollectionReference lessons = database.collection('stages').document('1').collection('lessons');
-    QuerySnapshot lessonsdoc = await lessons.getDocuments();
+    //sacamos las lecciones y misiones para añadirlas al usuario. Se le añaden hasta la etapa 3
+    QuerySnapshot lessons = await database.collection('lessons').where('stagenumber', isLessThan: 4).getDocuments();
 
-    List<LessonModel> lessonlist = new List();
+    //de momento no sacamos misiones
+   // QuerySnapshot missions = await database.collection('missions').where('stagenumber', isLessThan: 4).getDocuments();
 
-    for(DocumentSnapshot doc in lessonsdoc.documents){
-      doc.data['seen']= false;
-      doc.data['blocked']=false;
-      lessonlist.add(new LessonModel.fromJson(doc.data));
+    // sacamos las lecciones y misiones y las añadimos a la base de datos userdata
+    for(DocumentSnapshot lesson in lessons.documents){
+      LessonModel l = new LessonModel.fromJson(lesson.data);
+      l.precedinglesson != null ? l.blocked = true : l.blocked = false;
+      l.seen = false;
+      user.addLesson(l);
+      userdata.collection('lessons').add({'codlesson': lesson.data['codlesson'],'seen': false, 'blocked': l.blocked});
     }
 
+    /* para sacar misiones en el futuro
+    for(DocumentSnapshot mission in missions.documents){
+      mission.data['done'] = false;
+      user.addMission(new MissionModel.fromJson(mission.data));
+      userdata.collection('missions').add({'codmission': mission.data['codmission'],'done': false});
+    }*/
 
+    print(user);
 
-    print(docRef.toString());
     return user;
   }
 
@@ -223,6 +271,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     //Aquí le añadiríamos el nivel de ahora.
   }
+
+
+
+
 
  /* @override
   Future<Map> getData() async {

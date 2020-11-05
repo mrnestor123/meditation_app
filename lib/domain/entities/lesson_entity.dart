@@ -12,6 +12,7 @@ class Lesson {
   final String description;
   final Map<String,dynamic> text;
   final int xp;
+  final int stagenumber;
   final Map<String,String> lessontext= new Map();
   bool blocked;
   bool seen;
@@ -22,6 +23,7 @@ class Lesson {
     this.precedinglesson,
     this.group,
     this.slider,
+    this.stagenumber,
     @required this.description,
     @required this.text,
     @required this.xp,

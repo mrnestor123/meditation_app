@@ -134,8 +134,8 @@ class _MainScreenState extends State<MainScreen> {
                 child: Image(
                     width: Configuration.width,
                     image: AssetImage(_userstate.user.stagenumber == 1
-                        ? 'images/stage 1.png'
-                        : 'images/stage 2.png')))),
+                        ? 'images/stage 1/stage 1.png'
+                        : 'images/stage 2/stage 2.png')))),
         FloatingActionButton(
           onPressed: () => Navigator.pushNamed(context, '/premeditation')
               .then((value) => setState(() {

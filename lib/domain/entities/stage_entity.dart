@@ -11,6 +11,7 @@ import 'package:observable/observable.dart';
 class Stage {
   int stagenumber,userscount;
   String description,image,goals,obstacles,skills,mastery;
+  
  
   //Lessons for each stage
   ObservableList<LessonModel> lessons = new ObservableList();
@@ -20,7 +21,12 @@ class Stage {
 
   Stage({
     @required this.stagenumber,
-    @required this.description,
-    @required this.image
+    this.description,
+    @required this.image,
+    this.goals,
+    this.obstacles,
+    this.skills,
+    this.mastery,
+    this.userscount
   });
 }

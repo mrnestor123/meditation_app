@@ -15,6 +15,7 @@ class LessonModel extends Lesson {
   final Map<String, dynamic> text;
   final String precedinglesson;
   final int xp;
+  final int stagenumber;
   bool blocked;
   bool seen;
 
@@ -28,6 +29,7 @@ class LessonModel extends Lesson {
       this.text,
       this.precedinglesson,
       this.blocked,
+      this.stagenumber,
       this.seen})
       : super(
             title: title,
@@ -39,7 +41,8 @@ class LessonModel extends Lesson {
             group: group,
             precedinglesson: precedinglesson,
             blocked: blocked,
-            seen: seen
+            seen: seen,
+            stagenumber: stagenumber
             );
 
   factory LessonModel.fromRawJson(String str) =>
@@ -56,7 +59,8 @@ class LessonModel extends Lesson {
       group: json["group"] == null ? null : json["group"],
       precedinglesson: json["precedinglesson"] == null ? null : json["precedinglesson"],
       blocked: json["blocked"] == null ? null : json["blocked"],
-      seen: json["seen"] == null ? null : json["seen"]
+      seen: json["seen"] == null ? null : json["seen"],
+      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]
       );
 
   Map<String, dynamic> toJson() => {
@@ -68,6 +72,7 @@ class LessonModel extends Lesson {
         "group": group == null ? null : group,
         "precedinglesson": precedinglesson == null ? null : precedinglesson,
         "blocked": blocked == null ? null : blocked,
-        "seen": seen == null ? null : seen
+        "seen": seen == null ? null : seen,
+        "stagenumber": stagenumber == null ? null: stagenumber
       };
 }

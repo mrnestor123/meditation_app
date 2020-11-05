@@ -15,6 +15,7 @@ import 'meditation_entity.dart';
 class User {
   //Nombre es el nombre de pila y usuario es el nombre en la aplicación
   String coduser;
+  
   String nombre, usuario, password;
   String mail;
   int stagenumber;
@@ -49,17 +50,34 @@ class User {
   //Map with "required" and "optional" missions. In the form {"required":[Mission,Mission]}
   final Map<String, Map<String, ObservableList<MissionModel>>> missions = new Map();
 
-  User(
+   User(
       {this.coduser,
       this.nombre,
-      @required this.level,
+      this.level,
       @required this.mail,
       @required this.usuario,
       @required this.password,
-      @required this.stagenumber}) {
-    if (this.coduser == null) {
+      @required this.stagenumber,
+      this.stage
+      }) {
+        
+    if (coduser == null) {
       var uuid = Uuid();
       this.coduser = uuid.v1();
+    }else {
+      this.coduser= coduser;
+    }
+
+    if(this.level == null){
+      this.level = new Level();
+    }
+    
+    //inicializamos el map
+    for(int i= 1; i < 11; i++){
+      lessons[i]= {};
+      // de momento hay dos categorías. Cuando haya mas las añadiremos
+      lessons[i]["Mind"] = new ObservableList<LessonModel>();
+      lessons[i]["Meditation"] = new ObservableList<LessonModel>();
     }
   }
 
@@ -69,6 +87,13 @@ class User {
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
 
   int getStageNumber() => this.stagenumber;
+
+  //añadimos la lección a la lista de lecciones
+  void addLesson(LessonModel l) {
+    lessons[l.stagenumber][l.group].add(l);
+ }
+  void addMission(MissionModel m) => m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
+
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setRequiredMissions(List<MissionModel> m) {

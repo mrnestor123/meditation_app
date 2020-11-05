@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 //List of guided meditationsx
 List<Map> guidedmeditations = [];
 
+/* NO DEBERÍA LLAMARSE ASÍ*/
 class BrainScreen extends StatelessWidget {
   var brainlessons;
   var controller;
@@ -35,7 +36,7 @@ class BrainScreen extends StatelessWidget {
         Observer(builder: ((context) {
           // return CardView(lessons: _learnstate.brainlessons);
           return HorizontalList(
-              lessons: _userstate.lessondata[_userstate.menuindex],key: Key(_userstate.menuindex.toString()));
+              lessons: _userstate.user.lessons[_userstate.menuindex], key: Key(_userstate.menuindex.toString()));
         })),
       ],
     );

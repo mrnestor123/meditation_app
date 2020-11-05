@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:mobx/mobx.dart';
 
@@ -58,16 +59,17 @@ abstract class _RegisterState with Store {
     String confirmpassword,
     String email,
   ) async {
-    var user = await _registerusecase.call(UserParams(
+    var register = await _registerusecase.call(UserParams(
         password: password,
         confirmpassword: confirmpassword,
         mail: email,
         stagenumber: 1,
         usuario: username));
 
-    user.fold((failure) {
+    register.fold((Failure failure) {
       errorMessage = _mapFailureToMessage(failure);
-    }, (user) {
+    }, (User u) {
+      user = u;
       print('user has been registered correctly');
     });
   }

@@ -213,9 +213,7 @@
                 }
               },
        "2": {
-              "codlesson": "2",
               "title":"Attention vs peripheral awareness",
-              "precedinglesson": "1",
               "group": "Mind",
               "slider":"peripheral.png",
               "blocked": true,
@@ -264,9 +262,7 @@
          }
        },
        "4":{
-         "codlesson":"4",
          "title":"Counting the breath",
-         "precedinglesson":"3",
          "group":"Meditation",
          "slider": "nose-breath.png",
          "description":"learn the basics to start meditating straight away.",
@@ -366,15 +362,12 @@
     }
   },
   "goodlessons": {
-    "1":{
       "1":{
-        "codlesson":"1",
         "title":"Consciousness",
         "group": "Mind",
         "slider": "consciencia.png",
         "description" :" Consciousness consists of whatever we're experiencing in the moment",
-        "blocked":false,
-        "seen":false,
+        "stagenumber":1,
         "text": {
             "1": {
               "image": "consciencia.png",
@@ -387,14 +380,11 @@
           }
         },
        "2": {
-         "codlesson": "2",
          "title":"Attention vs peripheral awareness",
-         "precedinglesson": "1",
          "group": "Mind",
          "slider":"peripheral.png",
-         "blocked": true,
-         "seen":false,
          "description": "Learn the differences between the two types of conscious experience",
+         "stagenumber":1,
          "text": {
            "1":{ 
              "image":"peripheral.png",
@@ -411,13 +401,11 @@
          }
        },
        "3":{
-         "codlesson":"3",
          "title":"Four-step transition",
          "group":"Meditation",
+         "stagenumber":1,
          "slider": "phase 1.png",
          "description":"learn the basics to start meditating straight away.",
-         "blocked":false,
-         "seen":false,
          "text":{
            "1":{
              "image":"phase 1.png",
@@ -438,14 +426,11 @@
          }
        },
        "4":{
-         "codlesson":"4",
          "title":"Counting the breath",
-         "precedinglesson":"3",
          "group":"Meditation",
          "slider": "nose-breath.png",
          "description":"learn the basics to start meditating straight away.",
-         "blocked":true,
-         "seen":false,
+         "stagenumber":1,
          "text":{
              "1":{
              "image":"phase 1.png",
@@ -464,17 +449,13 @@
              "text":"Step four: Focus on sensations of the breath at the nose but continue to be aware of everything else."
            }
           }
-        }
-      },
-      "2":{
-        "1":{
-         "codlesson": "5",
+        },
+        "5":{
          "title":"Overcoming mind-wandering",
          "group": "Mind",
          "slider":"daysprogress.png",
          "description": "Learn how to get your mind into the present",
-         "blocked":true,
-         "seen":false,
+         "stagenumber":2,
          "text": {
               "1":{ 
                 "image":"peripheral.png",
@@ -490,14 +471,12 @@
               }
           }
           },
-        "2":{
-           "codlesson": "6",
+        "6":{
          "title":"Shortening mind-wandering",
          "group": "Mind",
          "slider":"daysprogress.png",
          "description": "Learn how to get your mind into the present",
-         "blocked":true,
-         "seen":false,
+         "stagenumber":2,
          "text": {
            "1":{ 
              "image":"peripheral.png",
@@ -513,14 +492,12 @@
            }
          }
         },
-        "3":{
-         "codlesson":"7",
+        "7":{
          "title":"There is no  you",
          "group": "Meditation",
          "slider":"multipleyou.png",
          "description": "Your mind is a collective of mental processes",
-         "blocked":true,
-         "seen":false,
+         "stagenumber":2,
          "text": {
            "1":{ 
              "image":"peripheral.png",
@@ -536,14 +513,12 @@
             }
           }
         },
-        "4":{
-         "codlesson":"8",
+        "8":{
          "title":"Overcoming monkey-mind",
          "group": "Meditation",
          "slider":"circlefirst.png",
          "description": "Your mind is a collective of mental processes",
-         "blocked":true,
-         "seen":false,
+         "stagenumber":2,
          "text": {
             "1":{ 
               "image":"peripheral.png",
@@ -557,7 +532,6 @@
               "image":"peripheral2.png",
               "text":"For example, right now your attention is focused on what you’re reading. At the same time you’re also aware of other sights, sounds, smells and sensations in the periphery."
             }
-          }
         }
       }
     },
@@ -569,6 +543,8 @@
           "description":"Meditate 20 min",
           "type":"meditation",
           "requirement":"20",
+          "required":true,
+          "stagenumber":1,
           "xp":125,
           "done":false
           },
@@ -577,6 +553,8 @@
           "description":"Read all lessons",
           "type":"lesson",
           "requirement":"list",
+          "required":true,
+          "stagenumber":1,
           "requirements": {
               "1":"1",
               "2":"2"

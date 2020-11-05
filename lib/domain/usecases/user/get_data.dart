@@ -14,6 +14,6 @@ class GetDataUseCase extends UseCase<Map, NoParams> {
   @override
   Future<Either<Failure, Map>> call(NoParams p) async{
     // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-    return await repository.getData();
+   // return await repository.getData();
   }
 }

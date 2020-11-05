@@ -78,6 +78,8 @@ flutter:
 
   assets:
     - images/
+    - images/stage 1/
+    - images/stage 2/
 
 
 

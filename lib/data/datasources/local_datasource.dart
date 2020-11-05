@@ -63,9 +63,19 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     usermeditations = userToCache.totalMeditations
         .map((meditation) => json.encode(meditation.toJson()))
         .toList();
-    userlessons = userToCache.lessonslearned
+
+    userToCache.lessons.forEach((key, value) { 
+      value.forEach((key, value) { 
+        for(LessonModel l in value){
+          userlessons.add(json.encode(l.toJson()));
+        }
+      });
+    });
+
+
+    /*userlessons = userToCache.lessonslearned
         .map((lesson) => json.encode(lesson.toJson()))
-        .toList();
+        .toList();*/
 
     userToCache.missions.forEach((key, value) {
       if (key == "required") {
@@ -117,15 +127,18 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<UserModel> getUser([String usuario]) async {
+    sharedPreferences.clear();
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       final user = UserModel.fromJson(json.decode(jsonUser));
       if (usuario == null || usuario != null && user.usuario == usuario) {
         if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
           userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
-          user.setLearnedLessons((userlessons)
+          userlessons.map((lesson) => user.addLesson(new LessonModel.fromJson(json.decode(lesson))));
+
+         /* user.setLearnedLessons((userlessons)
               .map((lesson) => LessonModel.fromJson((json.decode(lesson))))
-              .toList());
+              .toList());*/
         }
         if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
           usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
