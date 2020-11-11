@@ -111,8 +111,11 @@ class User {
   void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
   void setLessons(Map<int,Map<String,List<LessonModel>>>l) => lessons.addAll(l);
 
+
+  void setStage(StageModel s) => this.stage = s;
+
   //este método recorrerá por todas las misiones de la stage para añadirselas al user
-  void setStage(StageModel s) { 
+  void setMissions(StageModel s) { 
     stage = s;
     missions['required']['lesson'].clear();
     missions['required']['meditation'].clear();
@@ -122,7 +125,6 @@ class User {
     for(MissionModel m in s.missions){
       missions[ m.requiredmission ? 'required' :'optional'][m.type].add(m);
     }
-
   }
   void setTimeMeditated() {
     if (minutesMeditated / 60 > 0) {
@@ -134,18 +136,29 @@ class User {
   }
 
   List<Mission> takeLesson(Lesson l) {
-    if (!this.lessonslearned.contains(l)) this.lessonslearned.add(l);    
-    //if(!this.lessons[stagenumber].contains(l)) { this.lessons[stagenumber].add(l);}
-    List<Mission> result = new List<Mission>();
     
-    //this.lessons[stagenumber].forEach((element) { if(element.precedinglesson == l.codlesson) {element.blocked = false;}});
+    List<Mission> result = new List<Mission>();
 
+    if(!l.seen) l.seen = true;
+
+    //Habrá que desbloquear la lección siguiente. 
+
+    this.lessons[l.stagenumber].forEach((key, value) {
+        for(Lesson lesson in value) {
+          if(lesson.precedinglesson == l.codlesson ){
+            lesson.blocked = false;
+          }
+        }
+     });
+
+   
     if (l.xp != null) {
       this.level.addXP(l.xp);
     } else {
       this.level.addXP(250);
     }
 
+  /*
     this.missions.forEach((key, value) {
       value.forEach((key, value) {
         if (key == "lesson") {
@@ -178,7 +191,7 @@ class User {
             this.missions["required"]["meditation"].length)) {
       this.stagenumber++;
       missionspassed = 0;
-    }
+    }*/
     return result;
   }
 

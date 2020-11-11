@@ -54,8 +54,9 @@ class _AnimatedState extends State<ContainerAnimated> {
     final _loginstate = Provider.of<UserState>(context);
     Configuration().init(context);
     return Container(
-        padding: EdgeInsets.only(top: 40, bottom: 60, left: 20),
+        padding: EdgeInsets.only(top: 60, bottom: 60, left: 50),
         color: Configuration.maincolor,
+        //decoration: BoxDecoration(image: DecorationImage(image: AssetImage('/images/cascadita.jpg'),fit: BoxFit.cover)) ,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -70,7 +71,7 @@ class _AnimatedState extends State<ContainerAnimated> {
                     Text(_userstate.user.usuario,
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold)),
-                    Text('Level 10', style: TextStyle(color: Colors.grey))
+                    Text('Level 10', style: TextStyle(color: Colors.lime))
                   ])
             ]),
             Column(

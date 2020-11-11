@@ -127,11 +127,11 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<UserModel> getUser([String usuario]) async {
-    sharedPreferences.clear();
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       final user = UserModel.fromJson(json.decode(jsonUser));
       if (usuario == null || usuario != null && user.usuario == usuario) {
+        
         if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
           userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
           userlessons.map((lesson) => user.addLesson(new LessonModel.fromJson(json.decode(lesson))));

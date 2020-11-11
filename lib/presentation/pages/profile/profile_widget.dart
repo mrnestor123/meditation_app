@@ -115,7 +115,7 @@ class MyInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                _userstate.user.nombre,
+                _userstate.user.usuario,
                 style: Configuration.nombre,
               ),
             ],

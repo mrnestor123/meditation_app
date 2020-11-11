@@ -68,14 +68,41 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
-
-
-
-
   //sacamos todos los datos del usuario. 
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({String password, String usuario}) async {
+    
+    QuerySnapshot user = await database.collection('users').where('usuario', isEqualTo: usuario).where('password',isEqualTo:password).getDocuments();
+    UserModel loggeduser;
+
+    if(user.documents.length > 0) {
+      loggeduser= new UserModel.fromJson(user.documents[0].data);
+      QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:loggeduser.stagenumber).getDocuments();  
+      loggeduser.setStage(new StageModel.fromJson(stage.documents[0].data));
+      QuerySnapshot userdata = await database.collection('userdata').where('coduser',isEqualTo: loggeduser.coduser).getDocuments();
+      String documentId = userdata.documents[0].documentID;
+      // HAY QUE HACER UN JOIN DE LAS DOS
+      QuerySnapshot userlessons = await database.collection('userdata').document(documentId).collection('lessons').getDocuments();
+      QuerySnapshot databaselessons = await database.collection('lessons').where('stagenumber', isLessThan: loggeduser.stagenumber +3).getDocuments();
+      Map<String,dynamic> joinedlessons = {};
+
+      for(DocumentSnapshot doc in databaselessons.documents){
+        joinedlessons[doc.data['codlesson']] = doc.data;
+      }
+
+
+      for(DocumentSnapshot doc in userlessons.documents) {
+        joinedlessons[doc.data['codlesson']]['seen'] = doc.data['seen'];
+        joinedlessons[doc.data['codlesson']]['blocked'] = doc.data['blocked'];       
+        loggeduser.addLesson(new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
+      }
+
+      //Faltaría por hacer lo mismo con las misiones
+      return loggeduser;
+    }
+
+/*
     CollectionReference docRef = collectionGet("users");
     // Query query = docRef.where('username',isEqualTo:usuario);
     QuerySnapshot documents = await docRef.getDocuments();
@@ -163,7 +190,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       //user.setLessons(await getAllLessons());
       return user;
-    } else {
+    }*/
+     else {
       throw LoginException();
     }
   }

@@ -21,15 +21,18 @@ class TakeLessonUseCase extends UseCase<List<Mission>, LessonParams> {
   Future<Either<Failure, List<Mission>>> call(LessonParams params) {
 
     //añadimos la leccion al usuario
+    /*
     if (!params.user.lessonslearned.contains(params.lesson)) {
       final missions = params.user.takeLesson(params.lesson);
       if (missions.length > 0) {
         userRepository.updateMissions(missions, params.user);
       }
-      
+    }*/
+      if(!params.lesson.seen){
+      final missions = params.user.takeLesson(params.lesson);
       // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
       return repository.takeLesson(lesson: params.lesson, user: params.user,missions:missions);
-    }
+      }
   }
 }
 
