@@ -21,14 +21,16 @@ class LessonRepositoryImpl implements LessonRepository{
       @required this.localDataSource,
       @required this.networkInfo});
 
+
+  //Me llevo el missions de antes hasta aquí !! Esto no debería de ser así..
   @override
-  Future<Either<Failure, List<Mission>>> takeLesson({Lesson lesson, User user,List<Mission> missions}) async{
+  Future<Either<Failure, List<Mission>>> takeLesson({Lesson lesson, User user,List<Mission> missions,List<Lesson> unlockedlessons}) async{
     if(await networkInfo.isConnected){
      try{
-       final added = await remoteDataSource.takeLesson(lesson,user);
-       await localDataSource.takeLesson(lesson,user);
+       await remoteDataSource.takeLesson(lesson,user,unlockedlessons);
+       await localDataSource.takeLesson(user);
        return Right(missions);
-     }on Exception {
+      }on Exception {
        return Left(ServerFailure());
      }
     }

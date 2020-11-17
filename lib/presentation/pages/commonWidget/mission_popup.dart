@@ -31,8 +31,8 @@ class MissionPopup extends StatelessWidget {
           .add(Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         Image(
             image: AssetImage(m.type == 'lesson'
-                ? 'images/books.png'
-                : 'images/meditation.png'),
+                ? 'assets/books.png'
+                : 'assets/meditation.png'),
             height: Configuration.blockSizeHorizontal * 9,
             width: Configuration.blockSizeHorizontal * 9),
         Text(m.description,

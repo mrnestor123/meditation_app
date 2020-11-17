@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
-class Meditation extends Equatable {
+class Meditation {
   String codmed;
   int xp;
   final String recording;
@@ -22,6 +22,5 @@ class Meditation extends Equatable {
     this.xp = this.duration.inMinutes* 100;
   }
 
-  @override
-  List<Object> get props => [codmed, duration, recording, day];
+
 }

@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
+import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -28,11 +29,19 @@ class TakeLessonUseCase extends UseCase<List<Mission>, LessonParams> {
         userRepository.updateMissions(missions, params.user);
       }
     }*/
-      if(!params.lesson.seen){
-      final missions = params.user.takeLesson(params.lesson);
+    //devolvemos una lista vacía si ya la ha leído
+    List<Mission> missions = new List<Mission>();
+
+    //take lesson devuelve una lección si hay alguna que desbloquear y pass mission devuelve la misión que se haya pasado
+    List<Lesson> aux;
+    if(!params.lesson.seen){
+      aux = params.user.takeLesson(params.lesson);
       // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-      return repository.takeLesson(lesson: params.lesson, user: params.user,missions:missions);
-      }
+      return repository.takeLesson(lesson: params.lesson, user: params.user,missions:missions, unlockedlessons: aux );
+    }else {
+      //habrá que hacer algo aqui
+      return null;
+    } 
   }
 }
 

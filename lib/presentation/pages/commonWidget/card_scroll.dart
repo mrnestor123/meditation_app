@@ -141,8 +141,8 @@ class CardScrollWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16.0),
                           image: DecorationImage(
                               image: AssetImage(lessons[i].slider != null
-                                  ? 'images/' + lessons[i].slider
-                                  : 'images/sky.jpg'),
+                                  ? 'assets/' + lessons[i].slider
+                                  : 'assets/sky.jpg'),
                               fit: BoxFit.cover)),
                     ),
                     Positioned(

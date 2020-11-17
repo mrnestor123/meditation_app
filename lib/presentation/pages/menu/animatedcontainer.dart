@@ -56,7 +56,7 @@ class _AnimatedState extends State<ContainerAnimated> {
     return Container(
         padding: EdgeInsets.only(top: 60, bottom: 60, left: 50),
         color: Configuration.maincolor,
-        //decoration: BoxDecoration(image: DecorationImage(image: AssetImage('/images/cascadita.jpg'),fit: BoxFit.cover)) ,
+        //decoration: BoxDecoration(image: DecorationImage(image: AssetImage('/assets/cascadita.jpg'),fit: BoxFit.cover)) ,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -339,7 +339,7 @@ class _BottomMenuState extends State<BottomMenu> {
     for (var e in menuitems) {
       result.add(GestureDetector(
         onTap: () => setState(() {
-          if (_userstate.user.stagenumber >= e['index'] +1) {
+          if (_userstate.user.stagenumber >= e['index'] -1) {
             widget.controller.animateTo(0,duration: Duration(milliseconds: 500), curve: Curves.ease);
             _userstate.changeBottomMenu(e['index']);
             _selectedIndex = e['index'];
@@ -354,7 +354,7 @@ class _BottomMenuState extends State<BottomMenu> {
                 e['icon'],
                 color: e['index'] == _selectedIndex
                     ? Configuration.maincolor
-                    : _userstate.user.stagenumber >= e['index']+1 ? Colors.black : Colors.grey,
+                    : _userstate.user.stagenumber >= e['index'] -1 ? Colors.black : Colors.grey,
                 size: Configuration.height * 0.04,
               ),
               e['index'] == _selectedIndex

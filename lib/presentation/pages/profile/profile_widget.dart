@@ -104,7 +104,7 @@ class MyInfo extends StatelessWidget {
             width: Configuration.safeBlockHorizontal * 1,
             goalCompleted: _userstate.user.level.level /100,
             child: RoundedImage(
-              imagePath: "images/sky.jpg",
+              imagePath: "assets/sky.jpg",
               size: Size.fromWidth(Configuration.blockSizeHorizontal*12),
             ),
           ),

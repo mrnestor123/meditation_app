@@ -91,7 +91,7 @@ class FeedWidget extends StatelessWidget {
         centerTitle: true,
         title: Text("Today is a great day to start",
             style: TextStyle(color: Colors.white, fontSize: 16.0)),
-        background: Image.asset('images/sky.jpg', fit: BoxFit.cover)),
+        background: Image.asset('assets/sky.jpg', fit: BoxFit.cover)),
   );
 }
 

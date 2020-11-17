@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
 class MeditationModel extends Meditation {
-  final String codmed, recording, title;
-
+  String codmed, recording, title;
   final Duration duration;
   final DateTime day;
   
@@ -29,11 +28,11 @@ class MeditationModel extends Meditation {
       );
 
   Map<String, dynamic> toJson() => {
-        "codmed": codmed == null ? null : codmed,
-        "title": title == null ? null : title,
-        "duration": duration == null ? null : duration.toString(),
-        "recording": recording == null ? null : recording,
-        "day": day == null ? null : day.toIso8601String()
+        "codmed": this.codmed == null ? null : this.codmed,
+        "title": this.title == null ? null : this.title,
+        "duration": this.duration == null ? null : duration.toString(),
+        "recording": this.recording == null ? null : this.recording,
+        "day": this.day == null ? null : day.toIso8601String()
         // "userId": userId == null ? null : userId,
       };
 }

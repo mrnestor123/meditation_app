@@ -135,18 +135,24 @@ class User {
     }
   }
 
-  List<Mission> takeLesson(Lesson l) {
+
+  //returns the list of the next unlockable lessons
+  List<Lesson> takeLesson(Lesson l) {
     
     List<Mission> result = new List<Mission>();
 
+    
+    List<Lesson> lessons = new List<Lesson>();
+
     if(!l.seen) l.seen = true;
 
+    
     //Habrá que desbloquear la lección siguiente. 
-
     this.lessons[l.stagenumber].forEach((key, value) {
         for(Lesson lesson in value) {
           if(lesson.precedinglesson == l.codlesson ){
             lesson.blocked = false;
+            lessons.add(lesson);
           }
         }
      });
@@ -157,6 +163,8 @@ class User {
     } else {
       this.level.addXP(250);
     }
+
+    return lessons;
 
   /*
     this.missions.forEach((key, value) {
@@ -192,12 +200,15 @@ class User {
       this.stagenumber++;
       missionspassed = 0;
     }*/
-    return result;
   }
 
   //Este método se tendrá que refinar. Devuelve null o una misión cuando se pase una el usuario
   List<Mission> takeMeditation(Meditation m) {
     List<Mission> result = new List<Mission>();
+    this.totalMeditations.add(m);
+    this.level.addXP(m.xp);
+  
+  
     if (meditationstreak == 0) {
       meditationstreak++;
     } else {
@@ -214,11 +225,10 @@ class User {
       }
     }
 
-    this.totalMeditations.add(m);
-    this.level.addXP(m.xp);
+ 
     //minutesMeditated += m.duration.inMinutes;
     //setTimeMeditated();
-
+/*
     this.missions.forEach((key, value) {
       value.forEach((key, value) {
         if (key == "meditation") {
@@ -260,7 +270,8 @@ class User {
       stagenumber++;
       missionspassed = 0;
     }
-
+    */
+    
     minutesMeditated += m.duration.inMinutes;
     timeMeditated = minutesMeditated.toString() + ' minutes meditated';
 

@@ -5,7 +5,9 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/level.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mock_cloud_firestore/mock_cloud_firestore.dart';
 import 'package:observable/observable.dart';
@@ -49,7 +51,7 @@ abstract class UserRemoteDataSource {
 
   Future changeStage(UserModel user);
 
-  Future takeLesson(LessonModel l, UserModel user);
+  Future takeLesson(Lesson l, User user,List<Lesson> unlockedlessons);
 
   Future<void> updateMission(MissionModel m, UserModel u, bool requiredmission);
 }
@@ -77,14 +79,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     UserModel loggeduser;
 
     if(user.documents.length > 0) {
-      loggeduser= new UserModel.fromJson(user.documents[0].data);
+      loggeduser = new UserModel.fromJson(user.documents[0].data);
       QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:loggeduser.stagenumber).getDocuments();  
       loggeduser.setStage(new StageModel.fromJson(stage.documents[0].data));
       QuerySnapshot userdata = await database.collection('userdata').where('coduser',isEqualTo: loggeduser.coduser).getDocuments();
       String documentId = userdata.documents[0].documentID;
       // HAY QUE HACER UN JOIN DE LAS DOS
       QuerySnapshot userlessons = await database.collection('userdata').document(documentId).collection('lessons').getDocuments();
+      QuerySnapshot usermeditations = await database.collection('userdata').document(documentId).collection('meditations').getDocuments();
       QuerySnapshot databaselessons = await database.collection('lessons').where('stagenumber', isLessThan: loggeduser.stagenumber +3).getDocuments();
+
       Map<String,dynamic> joinedlessons = {};
 
       for(DocumentSnapshot doc in databaselessons.documents){
@@ -98,99 +102,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         loggeduser.addLesson(new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
       }
 
+      for(DocumentSnapshot doc in usermeditations.documents){
+        loggeduser.addMeditation(new MeditationModel.fromJson(doc.data));
+      }
+
       //Faltaría por hacer lo mismo con las misiones
       return loggeduser;
     }
 
-/*
-    CollectionReference docRef = collectionGet("users");
-    // Query query = docRef.where('username',isEqualTo:usuario);
-    QuerySnapshot documents = await docRef.getDocuments();
-    //Query query = documents.where('username',isEqualTo:usuario);
-    UserModel user;
-
-
-    for (DocumentSnapshot document in documents.documents) {
-      print(document.data);
-      print(document.reference);
-      if (usuario == document.data["usuario"] &&
-          password == document.data["password"]) {
-        user = new UserModel.fromJson(document.data);
-      }
-    }
-    //Aquí le añadimos las lecciones que ha leido,las meditaciones que ha hecho y las misiones que tiene hechas y por hacer
-    if (user != null) {
-      DocumentReference userlist = collectionGet('userdata').document(user.coduser);
-      //Query query = lessons.where('coduser',isequalto:userid)
-
-      CollectionReference userlessons = userlist.collection('readlessons');
-      CollectionReference usermeditations = userlist.collection('meditations');
-      CollectionReference requiredmissionscol = userlist.collection('requiredmissions');
-      CollectionReference optionalmissionscol = userlist.collection('optionalmissions');
-
-      QuerySnapshot readlesson = await userlessons.getDocuments();
-      QuerySnapshot meditationsuser = await usermeditations.getDocuments();
-      QuerySnapshot reqmissions = await requiredmissionscol.getDocuments();
-      QuerySnapshot optmissions = await optionalmissionscol.getDocuments();
-    
-      List<MeditationModel> m = new List<MeditationModel>();
-      List<LessonModel> l = new List<LessonModel>();
-      List<StageModel> s = new List<StageModel>();
-
-      QuerySnapshot missions = await collectionGet('missions').getDocuments();
-
-      /*
-      for(DocumentSnapshot doc in missions.documents){
-        MissionModel m = new MissionModel.fromJson(doc.data);
-        database.collection('missions').add(m.toJson());
-      }
-      de momento no hago misiones
-      hay que darle unas cuantas vueltas a los atributos
-      */
-
-
-
-     /* 
-      Añadiendo lecciones a la base de datos
-     QuerySnapshot goodlessons = await collectionGet('goodlessons').getDocuments();
-
-      for(DocumentSnapshot doc in goodlessons.documents){
-        LessonModel l = new LessonModel.fromJson(doc.data);
-        database.collection('lessons').add(l.toJson());
-      }*/
-
-      for (DocumentSnapshot document in readlesson.documents) {
-        l.add(new LessonModel.fromJson(document.data));
-      }
-
-      for (DocumentSnapshot document in meditationsuser.documents) {
-        m.add(new MeditationModel.fromJson(document.data));
-      }
-
-      user.missions["required"] = {};
-      for (DocumentSnapshot document in reqmissions.documents) {
-        MissionModel aux = new MissionModel.fromJson(document.data);
-        if (user.missions["required"][aux.type] == null) {
-          user.missions["required"][aux.type] = new ObservableList();
-        }
-        user.missions["required"][aux.type].add(aux);
-      }
-
-      user.missions["optional"] = {};
-      for (DocumentSnapshot document in optmissions.documents) {
-        MissionModel aux = new MissionModel.fromJson(document.data);
-        if (user.missions["optional"][aux.type] == null) {
-          user.missions["optional"][aux.type] = new ObservableList();
-        }
-        user.missions["optional"][aux.type].add(aux);
-      }
-
-      user.setMeditations(m);
-      user.setLearnedLessons(l);
-
-      //user.setLessons(await getAllLessons());
-      return user;
-    }*/
      else {
       throw LoginException();
     }
@@ -209,12 +128,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<UserModel> registerUser(
-      {String nombre,
-      String mail,
-      String password,
-      String usuario,
-      int stagenumber}) async {
+  Future<UserModel> registerUser({String nombre, String mail,String password,String usuario,int stagenumber}) async {
 
     //Sacamos la primera etapa
     QuerySnapshot firststage = await database.collection('stages').where('stagenumber',isEqualTo:1).getDocuments();
@@ -235,6 +149,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       stage: one,
       level: new Level()
     );
+    
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
     //creamos su entrada en userdata
@@ -292,50 +207,21 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future meditate(MeditationModel m, UserModel user) async {
     // TODO: implement meditate
 
-    DocumentReference ref = await collectionGet("userdata")
+
+    QuerySnapshot usersnapshot = await database.collection('userdata').where('coduser', isEqualTo:user.coduser).getDocuments();
+
+    DocumentReference meditations = await database.collection('userdata').document(usersnapshot.documents[0].documentID).collection('meditations').add(m.toJson());
+
+
+
+   /* DocumentReference ref = await collectionGet("userdata")
         .document(user.coduser)
         .collection("meditations")
         .add(m.toJson());
-
+    */
     //Aquí le añadiríamos el nivel de ahora.
   }
 
-
-
-
-
- /* @override
-  Future<Map> getData() async {
-    Map<int, Map<String, Map<String, List<LessonModel>>>> result =
-        new Map<int, Map<String, Map<String, List<LessonModel>>>>();
-    CollectionReference lessons = collectionGet('lessons');
-
-    QuerySnapshot documents = await lessons.getDocuments();
-    int stage = 1;
-
-    for (DocumentSnapshot document in documents.documents) {
-      result[stage] = {};
-      document.data.forEach((oldkey, value) {
-        result[stage][oldkey] = {};
-        value.forEach((newkey, newvalue) {
-          if (result[stage][oldkey][newvalue["group"]] == null) {
-            result[stage][oldkey][newvalue["group"]] = [];
-          }
-          result[stage][oldkey][newvalue["group"]]
-              .add(new LessonModel.fromJson(newvalue));
-        });
-      });
-      stage++;
-    }
-
-    print(result);
-
-    if (result.length > 0) {
-      return result;
-    } else {
-      throw DataException();
-    }
-  }*/
 
   @override
   Future<Map> getAllLessons() async {
@@ -362,16 +248,24 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return result;
   }
 
-  Future takeLesson(LessonModel l, UserModel user) async {
-    DocumentReference ref = await collectionGet("userdata")
-        .document(user.coduser)
-        .collection("readlessons")
-        .add({"codlesson": l.codlesson, "title": l.title});
 
-    CollectionReference users = await collectionGet("users");
-    // Query query = users.where("coduser"==user.coduser);
-    //Aquí le añadiríamos el nivel de ahora
-  }
+  //ESTO DEBERÍAN SER LESSONMODELS Y USERMODELS
+  Future takeLesson(Lesson l, User user,List<Lesson> unlockedlessons) async {
+    QuerySnapshot userdata = await database.collection('userdata').where('coduser',isEqualTo:user.coduser).getDocuments();
+    String documentId = userdata.documents[0].documentID;
+
+    
+    QuerySnapshot lessondone = await database.collection('userdata').document(documentId).collection('lessons').where('codlesson', isEqualTo: l.codlesson).getDocuments();
+    // lo ha visto en la base de datos
+    await database.collection('userdata').document(documentId).collection('lessons').document(lessondone.documents[0].documentID).updateData({'seen':true});
+    
+    //desbloqueamos las lecciones que haya que desbloquear
+    for(LessonModel lesson in unlockedlessons){
+      QuerySnapshot dbunlockedlesson = await database.collection('userdata').document(documentId).collection('lessons').where('codlesson', isEqualTo: lesson.codlesson).getDocuments();
+      await database.collection('userdata').document(documentId).collection('lessons').document(dbunlockedlesson.documents[0].documentID).updateData({'blocked':false});
+    }
+
+   }
 
   //FALTA POR IMPLEMENTAR, CUANDO HAYA CONEXION CON FIREBASE LO HAREMOS
   @override

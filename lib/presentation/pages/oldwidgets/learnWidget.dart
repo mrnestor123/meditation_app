@@ -46,7 +46,7 @@ class LessonView extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: 6,
                 itemBuilder: (context, index) {
-                  return LessonIcon('Prueba', 'images/sky.jpg');
+                  return LessonIcon('Prueba', 'assets/sky.jpg');
                 }),
           )
         ]));

@@ -91,7 +91,7 @@ class _LoadingState extends State<Loading> {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage('images/logo.jpg')),
+            image: DecorationImage(image: AssetImage('assets/logo.jpg')),
           )),*/
     ));
   }

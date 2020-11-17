@@ -46,7 +46,7 @@ class RegisterWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Image.asset('images/logo.jpg', fit: BoxFit.cover),
+                Image.asset('assets/logo.jpg', fit: BoxFit.cover),
                 SizedBox(height: 20.0),
                 WidgetTextField(
                     text: 'username',

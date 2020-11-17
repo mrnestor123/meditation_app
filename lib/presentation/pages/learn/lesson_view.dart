@@ -22,6 +22,8 @@ class _LessonViewState extends State<LessonView> {
   UserState _userstate;
 
   void finishlesson(context) async {
+
+    //Esto no hace falta. Simplemente esperar a que la lista de misiones del usuario cambie
     List<Mission> l = await _userstate.takeLesson(widget.lesson);
 
     if (l != null && l.length > 0) {
@@ -88,7 +90,7 @@ class _LessonViewState extends State<LessonView> {
                       child: Column(children: [
                         Image(
                             width: Configuration.width,
-                            image: AssetImage("images/" +
+                            image: AssetImage("assets/" +
                                 widget.lesson.text[index.toString()]["image"])),
                         Container(
                             width: Configuration.width,

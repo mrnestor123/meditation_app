@@ -3,13 +3,10 @@
 * 
 */
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
@@ -41,7 +38,7 @@ class LoginWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Image.asset('images/logo.jpg', fit: BoxFit.cover),
+                Image.asset('assets/logo.jpg', fit: BoxFit.cover),
                 SizedBox(height: 20.0),
                 WidgetTextField(
                     text: 'username',

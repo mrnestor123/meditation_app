@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -26,11 +27,20 @@ class _SetMeditationState extends State<SetMeditation> {
   bool _started;
   IconData icon;
   UserState _loginstate;
+  final assetsAudioPlayer =  AssetsAudioPlayer();
 
   bool added = false;
 
   //changes between initial, meditating and finished
   String state = 'initial';
+
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
 
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -52,9 +62,10 @@ class _SetMeditationState extends State<SetMeditation> {
     _timer = new Timer.periodic(
         oneSec,
         (Timer timer) => setState(() {
+              print("el estado sigue cambiando");
               if (_duration.inSeconds < 2) {
-                state = 'finished';
-                timer.cancel();
+                  state = 'finished';
+                  timer.cancel();
               } else {
                 _duration = _duration - oneSec;
               }
@@ -120,7 +131,9 @@ class _SetMeditationState extends State<SetMeditation> {
     );
   }
 
+  bool played = false;
   Widget finishedMeditation() {
+    if(!played) { assetsAudioPlayer.open(Audio("assets/audios/gong.mp3")); played = true;}
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -138,13 +151,13 @@ class _SetMeditationState extends State<SetMeditation> {
     );
   }
 
-  Widget switchScreen(_meditationstate) {
+  Widget switchScreen(state) {
     switch (state) {
       case 'started':
         return countDown();
       case 'initial':
         return preMeditation();
-      case 'data':
+      case 'finished':
         return finishedMeditation();
     }
     return Container();
@@ -152,10 +165,7 @@ class _SetMeditationState extends State<SetMeditation> {
 
   void takeMeditation() async {
     List<Mission> missions = await _loginstate.takeMeditation(duration);
-    setState(() {
-      state = 'data';
-    });
-
+    
     if (missions != null && missions.length > 0) {
       await Future.delayed(Duration(seconds: 1));
       Configuration().leftRollDialog(context, MissionPopup(missions: missions));
@@ -177,7 +187,7 @@ class _SetMeditationState extends State<SetMeditation> {
         Container(
             height: Configuration.height,
             width: Configuration.width,
-            child: switchScreen(_meditationstate),
+            child: switchScreen(state),
             decoration: BoxDecoration(color: Configuration.maincolor)),
         new Positioned(
           //Place it at the top, and not use the entire screen
@@ -194,7 +204,7 @@ class _SetMeditationState extends State<SetMeditation> {
                   : Icon(Icons.arrow_back,
                       size: Configuration.iconSize, color: Colors.white),
               onPressed: () {
-                if (state != 'initial' && state != 'data') {
+                if (state != 'initial' && state != 'finished') {
                   showDialog(
                       context: context,
                       builder: (_) => CustomDialog(),
@@ -491,20 +501,28 @@ class WeekItem extends StatefulWidget {
 }
 
 class _WeekItemState extends State<WeekItem> {
+
+  bool changed = false;
   @override
   Widget build(BuildContext context) {
+    print(changed);
+    if(widget.animate && !changed){ 
+        var timer = Timer(Duration(seconds: 1), () => setState(()=>changed= true));
+    }
+
     return AnimatedContainer(
       width: Configuration.width * 0.1,
       height: Configuration.width * 0.1,
-      duration: Duration(seconds: 1),
+      duration: Duration(seconds: 3),
+      curve: Curves.easeIn,
       decoration: new BoxDecoration(
-        color: widget.meditated ? Colors.white : Configuration.grey,
+        color: widget.meditated && !widget.animate || widget.animate && changed ? Colors.white : Configuration.grey,
         shape: BoxShape.circle,
       ),
       child: Center(
           child: Text(widget.day,
               style: TextStyle(
-                  color: widget.meditated ? Colors.black : Colors.white))),
+                  color: widget.meditated && !widget.animate || widget.animate && changed ? Colors.black : Colors.white))),
     );
   }
 }

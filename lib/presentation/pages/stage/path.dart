@@ -18,7 +18,7 @@ class PathWidget extends StatelessWidget {
               width: Configuration.width,
               height: Configuration.height,
               child: Image(
-                image: AssetImage('images/path.png') ,
+                image: AssetImage('assets/path.png') ,
                 width: Configuration.width,
                 height: Configuration.height,
               ),

@@ -45,8 +45,8 @@ class _MainScreenState extends State<MainScreen> {
               children: <Widget>[
                 Image(
                     image: AssetImage(mission.type == 'lesson'
-                        ? 'images/books.png'
-                        : 'images/meditation.png'),
+                        ? 'assets/books.png'
+                        : 'assets/meditation.png'),
                     height: Configuration.blockSizeHorizontal * 9,
                     width: Configuration.blockSizeHorizontal * 9),
                 Container(
@@ -134,8 +134,8 @@ class _MainScreenState extends State<MainScreen> {
                 child: Image(
                     width: Configuration.width,
                     image: AssetImage(_userstate.user.stagenumber == 1
-                        ? 'images/stage 1/stage 1.png'
-                        : 'images/stage 2/stage 2.png')))),
+                        ? 'assets/stage 1/stage 1.png'
+                        : 'assets/stage 2/stage 2.png')))),
         FloatingActionButton(
           onPressed: () => Navigator.pushNamed(context, '/premeditation')
               .then((value) => setState(() {

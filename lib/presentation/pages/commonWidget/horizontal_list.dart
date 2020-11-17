@@ -86,7 +86,7 @@ class LessonCard extends StatelessWidget {
             decoration: BoxDecoration(
                 // border: Border.all(color: Colors.black),
                 image: DecorationImage(
-                    image: AssetImage('images/sky.jpg'), fit: BoxFit.cover),
+                    image: AssetImage('assets/sky.jpg'), fit: BoxFit.cover),
                 borderRadius: BorderRadius.circular(8)),
           ),
         ),

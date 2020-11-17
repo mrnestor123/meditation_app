@@ -7,6 +7,8 @@ import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:observable/observable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +23,7 @@ abstract class UserLocalDataSource {
 
   Future<void> addMeditation(MeditationModel meditation, UserModel user);
 
-  Future takeLesson(LessonModel lesson, UserModel user);
+  Future takeLesson(User user);
 
   Future updateData(UserModel user);
 
@@ -129,12 +131,14 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   Future<UserModel> getUser([String usuario]) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
-      final user = UserModel.fromJson(json.decode(jsonUser));
+      UserModel user = UserModel.fromJson(json.decode(jsonUser));
       if (usuario == null || usuario != null && user.usuario == usuario) {
         
         if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
           userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
-          userlessons.map((lesson) => user.addLesson(new LessonModel.fromJson(json.decode(lesson))));
+          for(var lesson in userlessons){
+            user.addLesson(new LessonModel.fromJson(json.decode(lesson)));
+          }
 
          /* user.setLearnedLessons((userlessons)
               .map((lesson) => LessonModel.fromJson((json.decode(lesson))))
@@ -191,12 +195,21 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     return sharedPreferences.clear();
   }
 
+  //iteramos sobre las lecciones del usuario y cambiamos la lista
   @override
-  Future<void> takeLesson(LessonModel lesson, UserModel user) async {
-    userlessons.add(lesson.toRawJson());
-    final added =
-        await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
-    updateData(user);
+  Future<void> takeLesson(User user) async {
+    
+    userlessons = [];
+    user.lessons[user.stagenumber].forEach((key, value)  
+      {
+        for(LessonModel less in value){
+          userlessons.add(json.encode(less.toJson()));
+        }
+      }
+    );
+
+
+    final added = await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
 
     if (!added) {
       throw CacheException;

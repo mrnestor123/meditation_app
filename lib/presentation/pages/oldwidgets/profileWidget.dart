@@ -39,7 +39,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
                       borderRadius: BorderRadius.circular(62.5),
                       image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: AssetImage('images/sky.jpg')))),
+                          image: AssetImage('assets/sky.jpg')))),
             ),
             SizedBox(
               height: 25.0,
@@ -101,7 +101,7 @@ class _ProfileWidgetState extends State<ProfileWidget> {
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15.0),
               image: DecorationImage(
-                  image: AssetImage('images/sky.jpg'), fit: BoxFit.cover))),
+                  image: AssetImage('assets/sky.jpg'), fit: BoxFit.cover))),
     );
   }
 
