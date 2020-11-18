@@ -15,7 +15,6 @@ import 'meditation_entity.dart';
 class User {
   //Nombre es el nombre de pila y usuario es el nombre en la aplicación
   String coduser;
-  
   String nombre, usuario, password;
   String mail;
   int stagenumber;
@@ -93,6 +92,8 @@ class User {
     lessons[l.stagenumber][l.group].add(l);
  }
   void addMission(MissionModel m) => m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
+
+  void addMeditation(MeditationModel m ) => this.meditate
 
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
@@ -214,6 +215,7 @@ class User {
     } else {
       var lastMeditation = totalMeditations[totalMeditations.length - 1].day;
       if (lastMeditation != null) {
+        //comprobamos la streak
         if (lastMeditation.add(Duration(days: 1)).day == m.day.day) {
           meditationstreak++;
         } else if (lastMeditation.day != m.day.day ||
@@ -225,6 +227,10 @@ class User {
       }
     }
 
+    minutesMeditated += m.duration.inMinutes;
+    timeMeditated = minutesMeditated.toString() + ' minutes meditated';
+
+    return result;
  
     //minutesMeditated += m.duration.inMinutes;
     //setTimeMeditated();
@@ -272,10 +278,7 @@ class User {
     }
     */
     
-    minutesMeditated += m.duration.inMinutes;
-    timeMeditated = minutesMeditated.toString() + ' minutes meditated';
-
-    return result;
+  
   }
 
   void passMission(Mission m, bool isstagemission) {
