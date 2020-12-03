@@ -18,6 +18,7 @@ import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:workmanager/workmanager.dart';
 
 import '../../login_injection_container.dart';
 import 'welcome/loading_widget.dart';
@@ -37,7 +38,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+// This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     //we pass the userstate class to all the classes

@@ -20,7 +20,9 @@ class User {
   int stagenumber;
   Level level;
   int meditationstreak = 0;
-  Stage stage; 
+  Stage stage;
+
+  String role;
 
   //May be a string with 1 hour, 30 sec, 20 min ...
   String timeMeditated = "";
@@ -37,9 +39,9 @@ class User {
   //List with the lessons that the user has learned
   final ObservableList<LessonModel> lessonslearned = new ObservableList();
 
-  final Map<int,Map<String,ObservableList<LessonModel>>> lessons = new Map();
+  final Map<int, Map<String, ObservableList<LessonModel>>> lessons = new Map();
 
-  //contains a list with all lessons 
+  //contains a list with all lessons
   //final ObservableMap<int,List<LessonModel>> lessons = new ObservableMap();
 
   //Missions for the stage. When the user completes all the stage missions he
@@ -47,9 +49,10 @@ class User {
   final ObservableList<MissionModel> optionalmissions = new ObservableList();
 
   //Map with "required" and "optional" missions. In the form {"required":[Mission,Mission]}
-  final Map<String, Map<String, ObservableList<MissionModel>>> missions = new Map();
+  final Map<String, Map<String, ObservableList<MissionModel>>> missions =
+      new Map();
 
-   User(
+  User(
       {this.coduser,
       this.nombre,
       this.level,
@@ -57,26 +60,25 @@ class User {
       @required this.usuario,
       @required this.password,
       @required this.stagenumber,
-      this.stage
-      }) {
-        
+      this.stage,
+      this.role,
+      this.meditationstreak,
+      this.minutesMeditated}) {
     if (coduser == null) {
       var uuid = Uuid();
       this.coduser = uuid.v1();
-    }else {
-      this.coduser= coduser;
+    } else {
+      this.coduser = coduser;
     }
 
-    if(this.level == null){
+    if (this.level == null) {
       this.level = new Level();
     }
-    
+
     //inicializamos el map
-    for(int i= 1; i < 11; i++){
-      lessons[i]= {};
+    for (int i = 1; i < 11; i++) {
+      lessons[i] = {};
       // de momento hay dos categorías. Cuando haya mas las añadiremos
-      lessons[i]["Mind"] = new ObservableList<LessonModel>();
-      lessons[i]["Meditation"] = new ObservableList<LessonModel>();
     }
   }
 
@@ -89,11 +91,15 @@ class User {
 
   //añadimos la lección a la lista de lecciones
   void addLesson(LessonModel l) {
+    if (lessons[l.stagenumber][l.group] == null) {
+      lessons[l.stagenumber][l.group] = new ObservableList<LessonModel>();
+    }
     lessons[l.stagenumber][l.group].add(l);
- }
-  void addMission(MissionModel m) => m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
+  }
 
-  void addMeditation(MeditationModel m ) => this.meditate
+  void addMission(MissionModel m) =>  m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
+
+  void addMeditation(MeditationModel m) => totalMeditations.add(m);
 
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
@@ -109,24 +115,26 @@ class User {
       missions['required'][mission.type].add(mission);
     }
   }
-  void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
-  void setLessons(Map<int,Map<String,List<LessonModel>>>l) => lessons.addAll(l);
 
+  void setOptionalMissions(List<MissionModel> m) => optionalmissions.addAll(m);
+  void setLessons(Map<int, Map<String, List<LessonModel>>> l) =>
+      lessons.addAll(l);
 
   void setStage(StageModel s) => this.stage = s;
 
   //este método recorrerá por todas las misiones de la stage para añadirselas al user
-  void setMissions(StageModel s) { 
+  void setMissions(StageModel s) {
     stage = s;
     missions['required']['lesson'].clear();
     missions['required']['meditation'].clear();
     missions['optional']['lesson'].clear();
     missions['optional']['meditation'].clear();
 
-    for(MissionModel m in s.missions){
-      missions[ m.requiredmission ? 'required' :'optional'][m.type].add(m);
+    for (MissionModel m in s.missions) {
+      missions[m.requiredmission ? 'required' : 'optional'][m.type].add(m);
     }
   }
+
   void setTimeMeditated() {
     if (minutesMeditated / 60 > 0) {
       this.timeMeditated = (minutesMeditated / 60).toString() + " h ";
@@ -136,29 +144,24 @@ class User {
     }
   }
 
-
   //returns the list of the next unlockable lessons
   List<Lesson> takeLesson(Lesson l) {
-    
     List<Mission> result = new List<Mission>();
 
-    
     List<Lesson> lessons = new List<Lesson>();
 
-    if(!l.seen) l.seen = true;
+    if (!l.seen) l.seen = true;
 
-    
-    //Habrá que desbloquear la lección siguiente. 
+    //Habrá que desbloquear la lección siguiente.
     this.lessons[l.stagenumber].forEach((key, value) {
-        for(Lesson lesson in value) {
-          if(lesson.precedinglesson == l.codlesson ){
-            lesson.blocked = false;
-            lessons.add(lesson);
-          }
+      for (Lesson lesson in value) {
+        if (lesson.precedinglesson == l.codlesson) {
+          lesson.blocked = false;
+          lessons.add(lesson);
         }
-     });
+      }
+    });
 
-   
     if (l.xp != null) {
       this.level.addXP(l.xp);
     } else {
@@ -167,7 +170,7 @@ class User {
 
     return lessons;
 
-  /*
+    /*
     this.missions.forEach((key, value) {
       value.forEach((key, value) {
         if (key == "lesson") {
@@ -208,8 +211,7 @@ class User {
     List<Mission> result = new List<Mission>();
     this.totalMeditations.add(m);
     this.level.addXP(m.xp);
-  
-  
+
     if (meditationstreak == 0) {
       meditationstreak++;
     } else {
@@ -231,7 +233,7 @@ class User {
     timeMeditated = minutesMeditated.toString() + ' minutes meditated';
 
     return result;
- 
+
     //minutesMeditated += m.duration.inMinutes;
     //setTimeMeditated();
 /*
@@ -277,8 +279,6 @@ class User {
       missionspassed = 0;
     }
     */
-    
-  
   }
 
   void passMission(Mission m, bool isstagemission) {

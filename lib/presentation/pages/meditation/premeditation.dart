@@ -13,6 +13,8 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/mission_popup.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock/wakelock.dart';
+import 'package:workmanager/workmanager.dart';
 
 class SetMeditation extends StatefulWidget {
   @override
@@ -27,20 +29,20 @@ class _SetMeditationState extends State<SetMeditation> {
   bool _started;
   IconData icon;
   UserState _loginstate;
-  final assetsAudioPlayer =  AssetsAudioPlayer();
+  final assetsAudioPlayer = AssetsAudioPlayer();
 
   bool added = false;
 
   //changes between initial, meditating and finished
   String state = 'initial';
 
-
   @override
   void dispose() {
-    _timer.cancel();
+    if (_timer != null) {
+      _timer.cancel();
+    }
     super.dispose();
   }
-
 
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -59,13 +61,16 @@ class _SetMeditationState extends State<SetMeditation> {
 
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
+    Wakelock.enable();
+
     _timer = new Timer.periodic(
         oneSec,
         (Timer timer) => setState(() {
               print("el estado sigue cambiando");
               if (_duration.inSeconds < 2) {
-                  state = 'finished';
-                  timer.cancel();
+                state = 'finished';
+                Wakelock.disable();
+                timer.cancel();
               } else {
                 _duration = _duration - oneSec;
               }
@@ -115,6 +120,7 @@ class _SetMeditationState extends State<SetMeditation> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Text('Meditate', style: Configuration.subtitle2),
+        MeditationPicker(),
         TimePicker(),
         SoundPicker(),
         SizedBox(height: Configuration.height * 0.05),
@@ -133,7 +139,10 @@ class _SetMeditationState extends State<SetMeditation> {
 
   bool played = false;
   Widget finishedMeditation() {
-    if(!played) { assetsAudioPlayer.open(Audio("assets/audios/gong.mp3")); played = true;}
+    if (!played) {
+      assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
+      played = true;
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,7 +174,7 @@ class _SetMeditationState extends State<SetMeditation> {
 
   void takeMeditation() async {
     List<Mission> missions = await _loginstate.takeMeditation(duration);
-    
+
     if (missions != null && missions.length > 0) {
       await Future.delayed(Duration(seconds: 1));
       Configuration().leftRollDialog(context, MissionPopup(missions: missions));
@@ -218,6 +227,44 @@ class _SetMeditationState extends State<SetMeditation> {
         ),
       ],
     ));
+  }
+}
+
+class MeditationPicker extends StatefulWidget {
+  @override
+  _MeditationPickerState createState() => _MeditationPickerState();
+}
+
+class _MeditationPickerState extends State<MeditationPicker> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => showModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext builder) {
+            return Wrap(children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(Configuration.safeBlockVertical * 4),
+                margin: EdgeInsets.all(Configuration.safeBlockVertical * 2),
+                decoration: new BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: new BorderRadius.all(Radius.circular(25.0)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('title', style: Configuration.modaltitle),
+                    SizedBox(height: Configuration.safeBlockVertical * 3),
+                    Text('subtitle', style: Configuration.modalsubtitle)
+                  ],
+                ),
+              )
+            ]);
+          }),
+      child: ContainerSelect(lefttext: 'Meditation', righttext: Text('none')),
+    );
   }
 }
 
@@ -501,13 +548,13 @@ class WeekItem extends StatefulWidget {
 }
 
 class _WeekItemState extends State<WeekItem> {
-
   bool changed = false;
   @override
   Widget build(BuildContext context) {
     print(changed);
-    if(widget.animate && !changed){ 
-        var timer = Timer(Duration(seconds: 1), () => setState(()=>changed= true));
+    if (widget.animate && !changed) {
+      var timer =
+          Timer(Duration(seconds: 1), () => setState(() => changed = true));
     }
 
     return AnimatedContainer(
@@ -516,13 +563,18 @@ class _WeekItemState extends State<WeekItem> {
       duration: Duration(seconds: 3),
       curve: Curves.easeIn,
       decoration: new BoxDecoration(
-        color: widget.meditated && !widget.animate || widget.animate && changed ? Colors.white : Configuration.grey,
+        color: widget.meditated && !widget.animate || widget.animate && changed
+            ? Colors.white
+            : Configuration.grey,
         shape: BoxShape.circle,
       ),
       child: Center(
           child: Text(widget.day,
               style: TextStyle(
-                  color: widget.meditated && !widget.animate || widget.animate && changed ? Colors.black : Colors.white))),
+                  color: widget.meditated && !widget.animate ||
+                          widget.animate && changed
+                      ? Colors.black
+                      : Colors.white))),
     );
   }
 }

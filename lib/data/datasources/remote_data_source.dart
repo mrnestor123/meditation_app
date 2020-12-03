@@ -51,7 +51,13 @@ abstract class UserRemoteDataSource {
 
   Future changeStage(UserModel user);
 
-  Future takeLesson(Lesson l, User user,List<Lesson> unlockedlessons);
+  Future addMeditation(MeditationModel m);
+
+  Future addLesson(LessonModel m);
+
+  Future updateLessons(UserModel u);
+
+  Future takeLesson(Lesson l, User user, List<Lesson> unlockedlessons);
 
   Future<void> updateMission(MissionModel m, UserModel u, bool requiredmission);
 }
@@ -62,7 +68,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   CollectionGet collectionGet;
   Firestore database;
 
-
   UserRemoteDataSourceImpl(this.db) {
     collectionGet = db.collection;
     database = Firestore.instance;
@@ -70,104 +75,154 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
-  //sacamos todos los datos del usuario. 
+  Future updateLessons(UserModel u) async {}
+
+  //sacamos todos los datos del usuario.
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({String password, String usuario}) async {
-    
-    QuerySnapshot user = await database.collection('users').where('usuario', isEqualTo: usuario).where('password',isEqualTo:password).getDocuments();
+    QuerySnapshot user = await database
+        .collection('users')
+        .where('usuario', isEqualTo: usuario)
+        .where('password', isEqualTo: password)
+        .getDocuments();
     UserModel loggeduser;
 
-    if(user.documents.length > 0) {
+    if (user.documents.length > 0) {
       loggeduser = new UserModel.fromJson(user.documents[0].data);
-      QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:loggeduser.stagenumber).getDocuments();  
+      //sacamos la etapa del usuario
+      QuerySnapshot stage = await database
+          .collection('stages')
+          .where('stagenumber', isEqualTo: loggeduser.stagenumber)
+          .getDocuments();
       loggeduser.setStage(new StageModel.fromJson(stage.documents[0].data));
-      QuerySnapshot userdata = await database.collection('userdata').where('coduser',isEqualTo: loggeduser.coduser).getDocuments();
+
+      QuerySnapshot userdata = await database
+          .collection('userdata')
+          .where('coduser', isEqualTo: loggeduser.coduser)
+          .getDocuments();
       String documentId = userdata.documents[0].documentID;
+
       // HAY QUE HACER UN JOIN DE LAS DOS
-      QuerySnapshot userlessons = await database.collection('userdata').document(documentId).collection('lessons').getDocuments();
-      QuerySnapshot usermeditations = await database.collection('userdata').document(documentId).collection('meditations').getDocuments();
-      QuerySnapshot databaselessons = await database.collection('lessons').where('stagenumber', isLessThan: loggeduser.stagenumber +3).getDocuments();
+      QuerySnapshot userlessons = await database
+          .collection('userdata')
+          .document(documentId)
+          .collection('lessons')
+          .getDocuments();
+      QuerySnapshot usermeditations = await database
+          .collection('userdata')
+          .document(documentId)
+          .collection('meditations')
+          .getDocuments();
+      QuerySnapshot databaselessons = await database
+          .collection('lessons')
+          .where('stagenumber', isLessThan: loggeduser.stagenumber + 3)
+          .getDocuments();
 
-      Map<String,dynamic> joinedlessons = {};
+      Map<String, dynamic> joinedlessons = {};
 
-      for(DocumentSnapshot doc in databaselessons.documents){
+      for (DocumentSnapshot doc in databaselessons.documents) {
         joinedlessons[doc.data['codlesson']] = doc.data;
+        //los ponemos aquí por si hay alguno nuevo. A lo mejor hay que crear reglas buenas
+        joinedlessons[doc.data['codlesson']]['seen'] = false;
+        joinedlessons[doc.data['codlesson']]['blocked'] = true;
       }
 
-
-      for(DocumentSnapshot doc in userlessons.documents) {
-        joinedlessons[doc.data['codlesson']]['seen'] = doc.data['seen'];
-        joinedlessons[doc.data['codlesson']]['blocked'] = doc.data['blocked'];       
-        loggeduser.addLesson(new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
+      for (DocumentSnapshot doc in userlessons.documents) {
+        if (joinedlessons[doc.data['codlesson']] != null) {
+          joinedlessons[doc.data['codlesson']]['seen'] = doc.data['seen'];
+          joinedlessons[doc.data['codlesson']]['blocked'] = doc.data['blocked'];
+          loggeduser.addLesson(new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
+          joinedlessons.remove(doc.data['codlesson']);
+        } else {
+          joinedlessons.remove(doc.data['codlesson']);
+        }
       }
 
-      for(DocumentSnapshot doc in usermeditations.documents){
+      //si hay más lecciones que en userdata quiere decir que hemos actualizado. HABRÁ QUE SUBIRLAS A USERDATA!??
+      if (!joinedlessons.isEmpty) {
+        joinedlessons.forEach((key, value) {
+          loggeduser.addLesson(new LessonModel.fromJson(value));
+        });
+      }
+
+      for (DocumentSnapshot doc in usermeditations.documents) {
         loggeduser.addMeditation(new MeditationModel.fromJson(doc.data));
       }
 
       //Faltaría por hacer lo mismo con las misiones
       return loggeduser;
-    }
-
-     else {
+    } else {
       throw LoginException();
     }
   }
 
-
   //en este método el usuario cambia de etapa y se le añaden las misiones de esa etapa.
-  Future changeStage(UserModel user) async{
+  Future changeStage(UserModel user) async {
     CollectionReference stages = collectionGet('stages');
     QuerySnapshot stagesqry = await stages.getDocuments();
-    for(DocumentSnapshot document in stagesqry.documents){
-      if(document.data["stagenumber"] == user.stagenumber){
+    for (DocumentSnapshot document in stagesqry.documents) {
+      if (document.data["stagenumber"] == user.stagenumber) {
         user.setStage(new StageModel.fromJson(document.data));
       }
     }
   }
 
   @override
-  Future<UserModel> registerUser({String nombre, String mail,String password,String usuario,int stagenumber}) async {
-
+  Future<UserModel> registerUser(
+      {String nombre,
+      String mail,
+      String password,
+      String usuario,
+      int stagenumber}) async {
     //Sacamos la primera etapa
-    QuerySnapshot firststage = await database.collection('stages').where('stagenumber',isEqualTo:1).getDocuments();
+    QuerySnapshot firststage = await database
+        .collection('stages')
+        .where('stagenumber', isEqualTo: 1)
+        .getDocuments();
     StageModel one;
 
-    for(DocumentSnapshot doc in firststage.documents) {
+    for (DocumentSnapshot doc in firststage.documents) {
       one = new StageModel.fromJson(doc.data);
     }
 
     UserModel user = new UserModel(
-      // De momento lo pongo así. Debería de crearse en el constructor :(
-      coduser: Uuid().v1(),
-      mail: mail,
-      password: password,
-      usuario: usuario,
-      nombre: nombre,
-      stagenumber: 1,
-      stage: one,
-      level: new Level()
-    );
-    
+        // De momento lo pongo así. Debería de crearse en el constructor :(
+        coduser: Uuid().v1(),
+        mail: mail,
+        password: password,
+        usuario: usuario,
+        nombre: nombre,
+        stagenumber: 1,
+        stage: one,
+        level: new Level());
+
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
     //creamos su entrada en userdata
-    DocumentReference userdata = await database.collection('userdata').add({'coduser': user.coduser});
+    DocumentReference userdata =
+        await database.collection('userdata').add({'coduser': user.coduser});
 
     //sacamos las lecciones y misiones para añadirlas al usuario. Se le añaden hasta la etapa 3
-    QuerySnapshot lessons = await database.collection('lessons').where('stagenumber', isLessThan: 4).getDocuments();
+    QuerySnapshot lessons = await database
+        .collection('lessons')
+        .where('stagenumber', isLessThan: 4)
+        .getDocuments();
 
     //de momento no sacamos misiones
-   // QuerySnapshot missions = await database.collection('missions').where('stagenumber', isLessThan: 4).getDocuments();
+    // QuerySnapshot missions = await database.collection('missions').where('stagenumber', isLessThan: 4).getDocuments();
 
     // sacamos las lecciones y misiones y las añadimos a la base de datos userdata
-    for(DocumentSnapshot lesson in lessons.documents){
+    for (DocumentSnapshot lesson in lessons.documents) {
       LessonModel l = new LessonModel.fromJson(lesson.data);
       l.precedinglesson != null ? l.blocked = true : l.blocked = false;
       l.seen = false;
       user.addLesson(l);
-      userdata.collection('lessons').add({'codlesson': lesson.data['codlesson'],'seen': false, 'blocked': l.blocked});
+      userdata.collection('lessons').add({
+        'codlesson': lesson.data['codlesson'],
+        'seen': false,
+        'blocked': l.blocked
+      });
     }
 
     /* para sacar misiones en el futuro
@@ -202,26 +257,38 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     throw UnimplementedError();
   }
 
-// Faltaría añadirlo a la base de datos
   @override
   Future meditate(MeditationModel m, UserModel user) async {
-    // TODO: implement meditate
+    QuerySnapshot userquery = await database
+        .collection('users')
+        .where('coduser', isEqualTo: user.coduser)
+        .getDocuments();
+    await database
+        .collection('users')
+        .document(userquery.documents[0].documentID)
+        .updateData({
+      'minutesMeditated': user.minutesMeditated,
+      'meditationstreak': user.meditationstreak
+    });
 
+    QuerySnapshot usersnapshot = await database
+        .collection('userdata')
+        .where('coduser', isEqualTo: user.coduser)
+        .getDocuments();
 
-    QuerySnapshot usersnapshot = await database.collection('userdata').where('coduser', isEqualTo:user.coduser).getDocuments();
+    DocumentReference meditations = await database
+        .collection('userdata')
+        .document(usersnapshot.documents[0].documentID)
+        .collection('meditations')
+        .add(m.toJson());
 
-    DocumentReference meditations = await database.collection('userdata').document(usersnapshot.documents[0].documentID).collection('meditations').add(m.toJson());
-
-
-
-   /* DocumentReference ref = await collectionGet("userdata")
+    /* DocumentReference ref = await collectionGet("userdata")
         .document(user.coduser)
         .collection("meditations")
         .add(m.toJson());
     */
     //Aquí le añadiríamos el nivel de ahora.
   }
-
 
   @override
   Future<Map> getAllLessons() async {
@@ -248,24 +315,44 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return result;
   }
 
-
   //ESTO DEBERÍAN SER LESSONMODELS Y USERMODELS
-  Future takeLesson(Lesson l, User user,List<Lesson> unlockedlessons) async {
-    QuerySnapshot userdata = await database.collection('userdata').where('coduser',isEqualTo:user.coduser).getDocuments();
+  Future takeLesson(Lesson l, User user, List<Lesson> unlockedlessons) async {
+    QuerySnapshot userdata = await database
+        .collection('userdata')
+        .where('coduser', isEqualTo: user.coduser)
+        .getDocuments();
     String documentId = userdata.documents[0].documentID;
 
-    
-    QuerySnapshot lessondone = await database.collection('userdata').document(documentId).collection('lessons').where('codlesson', isEqualTo: l.codlesson).getDocuments();
+    QuerySnapshot lessondone = await database
+        .collection('userdata')
+        .document(documentId)
+        .collection('lessons')
+        .where('codlesson', isEqualTo: l.codlesson)
+        .getDocuments();
     // lo ha visto en la base de datos
-    await database.collection('userdata').document(documentId).collection('lessons').document(lessondone.documents[0].documentID).updateData({'seen':true});
-    
-    //desbloqueamos las lecciones que haya que desbloquear
-    for(LessonModel lesson in unlockedlessons){
-      QuerySnapshot dbunlockedlesson = await database.collection('userdata').document(documentId).collection('lessons').where('codlesson', isEqualTo: lesson.codlesson).getDocuments();
-      await database.collection('userdata').document(documentId).collection('lessons').document(dbunlockedlesson.documents[0].documentID).updateData({'blocked':false});
-    }
+    await database
+        .collection('userdata')
+        .document(documentId)
+        .collection('lessons')
+        .document(lessondone.documents[0].documentID)
+        .updateData({'seen': true});
 
-   }
+    //desbloqueamos las lecciones que haya que desbloquear
+    for (LessonModel lesson in unlockedlessons) {
+      QuerySnapshot dbunlockedlesson = await database
+          .collection('userdata')
+          .document(documentId)
+          .collection('lessons')
+          .where('codlesson', isEqualTo: lesson.codlesson)
+          .getDocuments();
+      await database
+          .collection('userdata')
+          .document(documentId)
+          .collection('lessons')
+          .document(dbunlockedlesson.documents[0].documentID)
+          .updateData({'blocked': false});
+    }
+  }
 
   //FALTA POR IMPLEMENTAR, CUANDO HAYA CONEXION CON FIREBASE LO HAREMOS
   @override
@@ -273,5 +360,20 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       MissionModel m, UserModel u, bool requiredmission) {
     // TODO: implement updateMission
     throw UnimplementedError();
+  }
+
+  @override
+  //adds a meditation to the database
+  Future addMeditation(MeditationModel m) async {
+    DocumentReference meditation =
+        await database.collection('meditations').add(m.toJson());
+    // TODO: implement addMeditation
+    throw UnimplementedError();
+  }
+
+  @override
+  Future addLesson(LessonModel l) async {
+    DocumentReference lesson =
+        await database.collection('lessons').add(l.toJson());
   }
 }

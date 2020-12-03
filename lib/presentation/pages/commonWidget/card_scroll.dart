@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/learn/lesson_view.dart';
 
 import 'horizontal_list.dart';
@@ -121,79 +122,7 @@ class CardScrollWidget extends StatelessWidget {
             bottom: verticalInset * max(-delta, 0.0),
             start: start,
             textDirection: TextDirection.rtl,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: AspectRatio(
-                aspectRatio: cardAspectRatio,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                            )
-                          ],
-                          border: Border.all(color: Colors.black12),
-                          borderRadius: BorderRadius.circular(16.0),
-                          image: DecorationImage(
-                              image: AssetImage(lessons[i].slider != null
-                                  ? 'assets/' + lessons[i].slider
-                                  : 'assets/sky.jpg'),
-                              fit: BoxFit.cover)),
-                    ),
-                    Positioned(
-                      bottom: 0.0,
-                      left: 0.0,
-                      width: widthOfPrimaryCard,
-                      height: heightOfPrimaryCard * 0.2,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.grey.withOpacity(0.7),
-                            Colors.grey.withOpacity(0.1)
-                          ],
-                        )),
-                      ),
-                    ),
-                    Positioned(
-                        left: 0.0,
-                        bottom: 0.0,
-                        child: Container(
-                            height: heightOfPrimaryCard * 0.2,
-                            width: widthOfPrimaryCard,
-                            child: Center(
-                              child: Text(lessons[i].title,
-                                  style: Configuration.lessontext),
-                            ))),
-                     Positioned(
-                      bottom: 0.0,
-                      width: widthOfPrimaryCard,
-                      height: heightOfPrimaryCard,
-                      child: lessons[i].blocked ? Container(
-                        decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            Colors.grey.withOpacity(0.6),
-                            Colors.grey.withOpacity(0.6)
-                          ],
-                        )
-                        ),
-                        child: Icon(Icons.lock_outline,size:Configuration.safeBlockVertical*8,color:Colors.white),
-                      ): Container(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            child: CardLesson(lesson: lessons[i], widthOfPrimaryCard: widthOfPrimaryCard, heightOfPrimaryCard: heightOfPrimaryCard),
           );
           cardList.add(cardItem);
         }
@@ -201,6 +130,96 @@ class CardScrollWidget extends StatelessWidget {
           children: cardList,
         );
       }),
+    );
+  }
+}
+
+class CardLesson extends StatelessWidget {
+  const CardLesson({
+    Key key,
+    @required this.lesson,
+    @required this.widthOfPrimaryCard,
+    @required this.heightOfPrimaryCard,
+  }) : super(key: key);
+
+  final LessonModel lesson;
+  final double widthOfPrimaryCard;
+  final double heightOfPrimaryCard;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.0),
+      child: AspectRatio(
+        aspectRatio: cardAspectRatio,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 5,
+                      blurRadius: 7,
+                    )
+                  ],
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(16.0),
+                  image: DecorationImage(
+                      image: AssetImage(lesson.slider != null
+                          ? 'assets/stage ' + lesson.stagenumber.toString() + '/' + lesson.slider
+                          : 'assets/sky.jpg'),
+                      fit: BoxFit.cover)),
+            ),
+            Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              width: widthOfPrimaryCard,
+              height: heightOfPrimaryCard * 0.2,
+              child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.grey.withOpacity(0.7),
+                    Colors.grey.withOpacity(0.1)
+                  ],
+                )),
+              ),
+            ),
+            Positioned(
+                left: 0.0,
+                bottom: 0.0,
+                child: Container(
+                    height: heightOfPrimaryCard * 0.2,
+                    width: widthOfPrimaryCard,
+                    child: Center(
+                      child: Text(lesson.title,
+                          style: Configuration.lessontext),
+                    ))),
+             Positioned(
+              bottom: 0.0,
+              width: widthOfPrimaryCard,
+              height: heightOfPrimaryCard,
+              child: lesson.blocked ? Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.grey.withOpacity(0.6),
+                    Colors.grey.withOpacity(0.6)
+                  ],
+                )
+                ),
+                child: Icon(Icons.lock_outline,size:Configuration.safeBlockVertical*8,color:Colors.white),
+              ): Container(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

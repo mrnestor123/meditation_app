@@ -66,14 +66,13 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         .map((meditation) => json.encode(meditation.toJson()))
         .toList();
 
-    userToCache.lessons.forEach((key, value) { 
-      value.forEach((key, value) { 
-        for(LessonModel l in value){
+    userToCache.lessons.forEach((key, value) {
+      value.forEach((key, value) {
+        for (LessonModel l in value) {
           userlessons.add(json.encode(l.toJson()));
         }
       });
     });
-
 
     /*userlessons = userToCache.lessonslearned
         .map((lesson) => json.encode(lesson.toJson()))
@@ -133,14 +132,13 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     if (jsonUser != null) {
       UserModel user = UserModel.fromJson(json.decode(jsonUser));
       if (usuario == null || usuario != null && user.usuario == usuario) {
-        
         if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
           userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
-          for(var lesson in userlessons){
+          for (var lesson in userlessons) {
             user.addLesson(new LessonModel.fromJson(json.decode(lesson)));
           }
 
-         /* user.setLearnedLessons((userlessons)
+          /* user.setLearnedLessons((userlessons)
               .map((lesson) => LessonModel.fromJson((json.decode(lesson))))
               .toList());*/
         }
@@ -198,18 +196,15 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   //iteramos sobre las lecciones del usuario y cambiamos la lista
   @override
   Future<void> takeLesson(User user) async {
-    
     userlessons = [];
-    user.lessons[user.stagenumber].forEach((key, value)  
-      {
-        for(LessonModel less in value){
-          userlessons.add(json.encode(less.toJson()));
-        }
+    user.lessons[user.stagenumber].forEach((key, value) {
+      for (LessonModel less in value) {
+        userlessons.add(json.encode(less.toJson()));
       }
-    );
+    });
 
-
-    final added = await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
+    final added =
+        await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
 
     if (!added) {
       throw CacheException;
@@ -233,5 +228,4 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
     }
   }
-
 }

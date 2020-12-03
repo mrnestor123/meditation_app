@@ -37,6 +37,31 @@ class Configuration {
       fontSize: safeBlockHorizontal*8),
   );
 
+  static TextStyle title3 = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.white,
+      fontSize: safeBlockHorizontal*6),
+  );
+
+  static TextStyle titleblackbig = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      fontSize: safeBlockHorizontal*8),
+  );
+
+  static TextStyle titleblackmedium = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      fontSize: safeBlockHorizontal*7),
+  );
+
+
+
+  static TextStyle titleblacksmall = GoogleFonts.montserrat(
+    textStyle: TextStyle(
+      color: Colors.black,
+      fontSize: safeBlockHorizontal*6),
+  );
 
 
   static TextStyle subtitle = GoogleFonts.montserrat(

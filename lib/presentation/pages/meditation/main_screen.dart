@@ -166,9 +166,18 @@ class _MainScreenState extends State<MainScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceAround,
                                       children: [
-                                        Text("CONGRATS!",style:GoogleFonts.roboto(
-                                              fontSize: Configuration.blockSizeHorizontal * 7)),
-                                        Text("You have improved to stage 2",style: GoogleFonts.roboto(fontSize:Configuration.blockSizeHorizontal*4),)
+                                        Text("CONGRATS!",
+                                            style: GoogleFonts.roboto(
+                                                fontSize: Configuration
+                                                        .blockSizeHorizontal *
+                                                    7)),
+                                        Text(
+                                          "You have improved to stage 2",
+                                          style: GoogleFonts.roboto(
+                                              fontSize: Configuration
+                                                      .blockSizeHorizontal *
+                                                  4),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -250,14 +259,24 @@ class AbstractDialog extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         backgroundColor: Colors.transparent,
-        child: Container(
-            padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 4),
-            margin: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
-            height: height,
-            width: width,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12), color: Colors.white),
-            child: content));
+        child: Stack(children: [
+          Container(
+              padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 4),
+              margin: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
+              height: height,
+              width: width,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12), color: Colors.white),
+              child: content),
+          Positioned(
+            top:0,
+            left:width/2,
+            right: width/2,
+            child: CircleAvatar(
+            backgroundColor: Colors.red,
+            ),
+          ),
+        ]));
   }
 }
 

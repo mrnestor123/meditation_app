@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/horizontal_list.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:provider/provider.dart';
 
 //List of guided meditations

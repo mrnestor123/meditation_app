@@ -33,7 +33,9 @@ List<Map> sidebarItems = [
 ];
 
 class ContainerAnimated extends StatefulWidget {
-  const ContainerAnimated({Key key}) : super(key: key);
+  final String route;
+
+  const ContainerAnimated({Key key, this.route}) : super(key: key);
 
   @override
   _AnimatedState createState() => _AnimatedState();
@@ -54,7 +56,10 @@ class _AnimatedState extends State<ContainerAnimated> {
     final _loginstate = Provider.of<UserState>(context);
     Configuration().init(context);
     return Container(
-        padding: EdgeInsets.only(top: 60, bottom: 60, left: 50),
+        padding: EdgeInsets.only(
+            top: Configuration.blockSizeVertical * 10,
+            bottom: Configuration.blockSizeVertical * 10,
+            left: Configuration.blockSizeHorizontal * 5),
         color: Configuration.maincolor,
         //decoration: BoxDecoration(image: DecorationImage(image: AssetImage('/assets/cascadita.jpg'),fit: BoxFit.cover)) ,
         child: Column(
@@ -164,6 +169,9 @@ class _AnimatedState extends State<ContainerAnimated> {
   Widget build(BuildContext context) {
     // showstages = widget.menuindex =='Meditation'|| widget.menuindex == 'Brain';
     final _userstate = Provider.of<UserState>(context);
+    if (widget.route != null) {
+      currentRoute = widget.route;
+    }
 
     return Scaffold(
       backgroundColor: Configuration.whitecolor,
@@ -220,10 +228,12 @@ class _AnimatedState extends State<ContainerAnimated> {
                                 onPressed: () => {
                                   setState(() {
                                     xOffset =
-                                        Configuration.safeBlockHorizontal * 50;
+                                        MediaQuery.of(context).size.width *
+                                            0.45;
                                     yOffset =
-                                        Configuration.safeBlockVertical * 20;
-                                    scaleFactor = 0.6;
+                                        MediaQuery.of(context).size.height *
+                                            0.12;
+                                    scaleFactor = 0.7;
                                     sidebarOpen = true;
                                   })
                                 },
@@ -339,8 +349,9 @@ class _BottomMenuState extends State<BottomMenu> {
     for (var e in menuitems) {
       result.add(GestureDetector(
         onTap: () => setState(() {
-          if (_userstate.user.stagenumber >= e['index'] -1) {
-            widget.controller.animateTo(0,duration: Duration(milliseconds: 500), curve: Curves.ease);
+          if (_userstate.user.stagenumber >= e['index'] - 1) {
+            widget.controller.animateTo(0,
+                duration: Duration(milliseconds: 500), curve: Curves.ease);
             _userstate.changeBottomMenu(e['index']);
             _selectedIndex = e['index'];
           }
@@ -354,7 +365,9 @@ class _BottomMenuState extends State<BottomMenu> {
                 e['icon'],
                 color: e['index'] == _selectedIndex
                     ? Configuration.maincolor
-                    : _userstate.user.stagenumber >= e['index'] -1 ? Colors.black : Colors.grey,
+                    : _userstate.user.stagenumber >= e['index'] - 1
+                        ? Colors.black
+                        : Colors.grey,
                 size: Configuration.height * 0.04,
               ),
               e['index'] == _selectedIndex

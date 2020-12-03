@@ -26,7 +26,7 @@ class Lesson {
     this.stagenumber,
     @required this.description,
     @required this.text,
-    @required this.xp,
+    this.xp,
     this.blocked,
     @required this.seen
   }) {
