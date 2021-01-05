@@ -5,7 +5,6 @@ import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 
 class WelcomeWidget extends StatelessWidget {
 
-
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);

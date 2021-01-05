@@ -102,13 +102,13 @@ class _MainScreenState extends State<MainScreen> {
                     children: <Widget>[
                       Row(children: <Widget>[
                         LevelBar(width: Configuration.width * 0.9),
-                        Observer(
+                        /*Observer(
                           builder: (context) => Text(
                               (_userstate.user.level.xpgoal -
                                           _userstate.user.level.levelxp)
                                       .toString() +
                                   " xp left till next level"),
-                        ),
+                        ),*/
                       ]),
                       Text(_userstate.user.timeMeditated,
                           style: GoogleFonts.roboto(
@@ -139,7 +139,6 @@ class _MainScreenState extends State<MainScreen> {
         FloatingActionButton(
           onPressed: () => Navigator.pushNamed(context, '/premeditation')
               .then((value) => setState(() {
-                    print(stagenumber);
                     print(_userstate.user.stagenumber);
                     if (stagenumber != _userstate.user.stagenumber) {
                       Future.delayed(Duration(seconds: 1));
@@ -301,20 +300,21 @@ class LevelBar extends StatelessWidget {
           width: Configuration.safeBlockHorizontal * 2,
           progressColor: Configuration.maincolor,
           progressBackgroundColor: Configuration.grey,
-          goalCompleted:
-              _userstate.user.level.levelxp / _userstate.user.level.xpgoal,
+          //goalCompleted:
+            //  _userstate.user.level.levelxp / _userstate.user.level.xpgoal,
           child: Container(
             height: Configuration.height * 0.1,
             width: Configuration.width * 0.1,
             child: Center(
-              child: Text(
-                _userstate.user.level.level.toString(),
+              child: Text('test'
+               /* _userstate.user.level.level.toString(),
                 style: GoogleFonts.montserrat(
                     textStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Configuration.maincolor,
                         fontSize: Configuration.blockSizeHorizontal * 5)),
-              ),
+              ),*/
+              )
             ),
           )),
     );

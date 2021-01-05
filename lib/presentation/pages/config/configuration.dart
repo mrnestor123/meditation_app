@@ -15,12 +15,12 @@ class Configuration {
   static double safeBlockHorizontal;
   static double safeBlockVertical;
 
-
   static bool nightmode = false;
 
   //the purple color
-  static Color maincolor = !nightmode ? Color.fromRGBO(135, 61, 175, 100) : Colors.black;
-  static Color grey = !nightmode? Colors.grey: Colors.blueGrey;
+  static Color maincolor = !nightmode ? Color.fromRGBO(88,67, 187, 100) : Colors.black;
+  static Color secondarycolor = Color.fromRGBO(255, 204, 255, 100);
+  static Color grey = !nightmode ? Colors.grey : Colors.blueGrey;
   static Color whitecolor = !nightmode ? Colors.white : Colors.black;
 
   // TextStyles are title, subtitle, subtitle2,subtilte3, paragraph1,paragraph2,paragraph3
@@ -32,37 +32,29 @@ class Configuration {
   );
 
   static TextStyle title2 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.white,
-      fontSize: safeBlockHorizontal*8),
+    textStyle:
+        TextStyle(color: Colors.white, fontSize: safeBlockHorizontal * 8),
   );
 
   static TextStyle title3 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.white,
-      fontSize: safeBlockHorizontal*6),
+    textStyle:
+        TextStyle(color: Colors.white, fontSize: safeBlockHorizontal * 6),
   );
 
   static TextStyle titleblackbig = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      fontSize: safeBlockHorizontal*8),
+    textStyle:
+        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 8),
   );
 
   static TextStyle titleblackmedium = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      fontSize: safeBlockHorizontal*7),
+    textStyle:
+        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 7),
   );
-
-
 
   static TextStyle titleblacksmall = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      fontSize: safeBlockHorizontal*6),
+    textStyle:
+        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 6),
   );
-
 
   static TextStyle subtitle = GoogleFonts.montserrat(
     textStyle: TextStyle(
@@ -197,26 +189,21 @@ class Configuration {
     safeBlockVertical = (height - _safeAreaVertical) / 100;
   }
 
-
-
-  void leftRollDialog(context,dialog){
+  void leftRollDialog(context, dialog) {
     showGeneralDialog(
-    barrierColor: Colors.black.withOpacity(0.5),
-    transitionBuilder: (context, a1, a2, widget) {
-      final curvedValue = Curves.easeInOutBack.transform(a1.value) -   1.0;
-      return Transform(
-        transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
-        child: Opacity(
-          opacity: a1.value,
-          child: dialog
-        ),
-      );
-    },
-    transitionDuration: Duration(milliseconds: 300),
-    barrierDismissible: true,
-    barrierLabel: '',
-    context: context,
-    pageBuilder: (context, animation1, animation2) {});
+        barrierColor: Colors.black.withOpacity(0.5),
+        transitionBuilder: (context, a1, a2, widget) {
+          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+          return Transform(
+            transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+            child: Opacity(opacity: a1.value, child: dialog),
+          );
+        },
+        transitionDuration: Duration(milliseconds: 300),
+        barrierDismissible: true,
+        barrierLabel: '',
+        context: context,
+        pageBuilder: (context, animation1, animation2) {});
   }
 
   /*Configuration(context){

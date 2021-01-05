@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/error/failures.dart';
@@ -65,20 +66,14 @@ class UserRepositoryImpl implements UserRepository {
   */
   @override
   Future<Either<Failure, User>> registerUser(
-      {String nombre,
-      String mail,
-      String password,
-      String usuario,
-      int stagenumber}) async {
+      {
+      FirebaseUser usuario}) async {
     //si esta conectado lo añadimos a la base de datos. Si no lo añadimos a nuestra caché. Devolvemos el usuario guardado
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.registerUser(
-            nombre: nombre,
-            mail: mail,
-            usuario: usuario,
-            password: password,
-            stagenumber: stagenumber);
+            usuario:usuario
+            );
         //Lo añadimos a la caché
         localDataSource.cacheUser(newUser);
         return Right(newUser);
@@ -86,18 +81,14 @@ class UserRepositoryImpl implements UserRepository {
         return Left(ServerFailure());
       }
     } else {
-      try {
-        localDataSource.cacheUser(UserModel(
-            nombre: nombre,
-            mail: mail,
-            usuario: usuario,
-            password: password,
-            stagenumber: stagenumber));
+      /*try {
+        //localDataSource.cacheUser(UserModel(
+          //  user: usuario,
+            //stagenumber: stagenumber));
         final localUser = await localDataSource.getUser();
         return Right(localUser);
-      } on ServerException {
-        return Left(ServerFailure());
-      }
+      } on ServerException {*/
+      return Left(ConnectionFailure(error: "User is not connected to the internet"));
     }
   }
 

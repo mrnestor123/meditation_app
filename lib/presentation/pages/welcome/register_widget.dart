@@ -11,9 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
@@ -23,12 +25,30 @@ class RegisterWidget extends StatelessWidget {
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _confirmController = new TextEditingController();
   final TextEditingController _mailController = new TextEditingController();
+  String your_client_id = "445064026505232";
+  String your_redirect_url =
+      "https://www.facebook.com/connect/login_success.html";
+  var _userstate;
+
+  void pushNextPage(user, context) {
+    print(user);
+    print('REGISTERING');
+    if (user != null) {
+      _userstate.user = user;
+      if (user.user.displayName != null) {
+        print(user);
+        _userstate.user = user;
+        Navigator.pushNamed(context, '/main');
+      } else {
+        Navigator.pushNamed(context, '/main');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final _registerstate = Provider.of<RegisterState>(context);
-    final _userstate = Provider.of<UserState>(context);
-    // TODO: implement build
+    _userstate = Provider.of<UserState>(context);
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -73,8 +93,7 @@ class RegisterWidget extends StatelessWidget {
                 Observer(
                     builder: (context) => _registerstate.errorMessage == ""
                         ? Container()
-                        : Text(_registerstate.errorMessage,
-                            style: Theme.of(context).textTheme.display1)),
+                        : Text(_registerstate.errorMessage)),
                 GestureDetector(
                     child: Container(
                       child: Center(
@@ -91,21 +110,67 @@ class RegisterWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                           color: Configuration.maincolor,
                           borderRadius: new BorderRadius.circular(30),
-                          boxShadow: [BoxShadow(color:Colors.grey,offset:Offset(2, 3),spreadRadius: 1,blurRadius: 3)]
-                          ),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey,
+                                offset: Offset(2, 3),
+                                spreadRadius: 1,
+                                blurRadius: 3)
+                          ]),
                     ),
                     onTap: () async {
-                      await _registerstate.register(
+                      var user = await _registerstate.register(
                           _userController.text,
                           _passwordController.text,
                           _confirmController.text,
                           _mailController.text);
-                      if (_registerstate.user != null) {
-                        _userstate.setUser(_registerstate.user);
-                        Navigator.pushNamed(context, '/main');
+                      if (user != null) {
+                        pushNextPage(user, context);
                       }
                     }),
-                SizedBox(height:10)
+                SizedBox(height: 30),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  RawMaterialButton(
+                    onPressed: () async{
+                      await _registerstate.googleLogin();
+                      if (_registerstate.user != null) {
+                        pushNextPage(_registerstate.user, context);
+                      }
+                    },
+                    elevation: 2.0,
+                    fillColor: Configuration.maincolor,
+                    child: Icon(
+                      FontAwesomeIcons.google,
+                      color: Colors.white,
+                      size: 35.0,
+                    ),
+                    padding: EdgeInsets.all(15.0),
+                    shape: CircleBorder(),
+                  ),
+                  RawMaterialButton(
+                      child: Icon(FontAwesomeIcons.facebookF,
+                          color: Colors.white, size: 35.0),
+                      padding: EdgeInsets.all(15.0),
+                      shape: CircleBorder(),
+                      fillColor: Configuration.maincolor,
+                      onPressed: () async {
+                        String result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CustomWebView(
+                                    selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
+                                  ),
+                              maintainState: true),
+                        );
+                        if (result != null) {
+                          UserModel user =
+                              await _registerstate.registerWithFacebook(result);
+                          if (user != null) {
+                            pushNextPage(user, context);
+                          }
+                        }
+                      })
+                ])
               ],
             ),
           ),

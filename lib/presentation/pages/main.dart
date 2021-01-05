@@ -13,6 +13,7 @@ import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/meditation/premeditation.dart';
 import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
+import 'package:meditation_app/presentation/pages/menu/layout.dart';
 import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
@@ -26,7 +27,6 @@ import 'welcome/welcome_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   SystemChrome.setEnabledSystemUIOverlays([]);
 
   SystemChrome.setPreferredOrientations([
@@ -61,10 +61,14 @@ class MyApp extends StatelessWidget {
                   child: RegisterWidget()),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/main': (BuildContext context) => ContainerAnimated(),
+              //'/main': (BuildContext context) => MainLayout(),
+
               '/premeditation': (BuildContext context) => Provider(
                   create: (context) => sl<MeditationState>(),
                   child: SetMeditation()),
-              '/path': (context) => PathWidget()
+              '/path': (context) => PathWidget(),
+              '/learn': (BuildContext context) => Provider(
+                  create: (context) => sl<LessonState>(), child: BrainScreen()),
 
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),

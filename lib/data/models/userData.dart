@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
@@ -18,13 +19,12 @@ import 'meditationData.dart';
 class UserModel extends User {
   int stagenumber;
   String coduser;
-  String nombre, usuario, password;
-  String mail;
-  Level level;
+  FirebaseUser user;
+
   Stage stage;
   int meditationstreak = 0;
 
-  // user || admin || moderator 
+  // user || admin || moderator
   String role;
 
   //May be a string with 1 hour, 30 sec, 20 min ...
@@ -35,24 +35,16 @@ class UserModel extends User {
 
   UserModel(
       {this.coduser,
-      this.nombre,
-      @required this.mail,
-      @required this.usuario,
-      @required this.password,
       @required this.stagenumber,
-      this.level,
+      this.user,
       this.stage,
       this.meditationstreak,
       this.role,
       this.minutesMeditated})
       : super(
             coduser: coduser,
-            nombre: nombre,
-            mail: mail,
-            password: password,
-            level: level,
+            user:user,
             role: role,
-            usuario: usuario,
             stagenumber: stagenumber,
             stage: stage,
             meditationstreak: meditationstreak,
@@ -65,16 +57,7 @@ class UserModel extends User {
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         coduser: json["coduser"] == null ? null : json["coduser"],
-        nombre: json["nombre"] == null ? null : json["nombre"],
-        password: json["password"] == null ? null : json["password"],
-        level: json["level"] == null
-            ? null
-            : Level(
-                level: json["level"]["level"],
-                xpgoal: json["level"]["xpgoal"],
-                levelxp: json["level"]["levelxp"]),
-        mail: json["mail"] == null ? null : json["mail"],
-        usuario: json["usuario"] == null ? null : json["usuario"],
+        user: json["user"] == null ? null : json["user"],
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
         meditationstreak:
@@ -85,12 +68,7 @@ class UserModel extends User {
 
   Map<String, dynamic> toJson() => {
         "coduser": coduser == null ? null : coduser,
-        "nombre": nombre == null ? null : nombre,
-        "password": password == null ? null : password,
-        "mail": mail == null ? null : mail,
-        "level": level == null ? null : level.toJson(),
         "role": role == null ? null : role,
-        "usuario": usuario == null ? null : usuario,
         "stagenumber": stagenumber == null ? null : stagenumber,
         "minutesMeditated": minutesMeditated == null ? 0 : minutesMeditated,
         "meditationstreak": meditationstreak == null ? 0 : meditationstreak

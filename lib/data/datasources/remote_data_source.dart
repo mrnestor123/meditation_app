@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/structures/tupla.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
@@ -29,12 +30,7 @@ abstract class UserRemoteDataSource {
 
   UserRemoteDataSource(this.db);
 
-  Future<UserModel> registerUser(
-      {String nombre,
-      String mail,
-      String password,
-      String usuario,
-      int stagenumber});
+  Future<UserModel> registerUser({FirebaseUser usuario});
 
   //Given the stage we get all the lessons of  it. We get the brain lessons
   Future<List<LessonModel>> getBrainLessons({int stage});
@@ -83,7 +79,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<UserModel> loginUser({String password, String usuario}) async {
     QuerySnapshot user = await database
         .collection('users')
-        .where('usuario', isEqualTo: usuario)
+        .where('coduser', isEqualTo: usuario)
         .where('password', isEqualTo: password)
         .getDocuments();
     UserModel loggeduser;
@@ -123,7 +119,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       for (DocumentSnapshot doc in databaselessons.documents) {
         joinedlessons[doc.data['codlesson']] = doc.data;
-        //los ponemos aquí por si hay alguno nuevo. A lo mejor hay que crear reglas buenas
+        //los ponemos aquí por si hay alguno nuevo. A lo mejor hay que crear reglas en cloud firestore
         joinedlessons[doc.data['codlesson']]['seen'] = false;
         joinedlessons[doc.data['codlesson']]['blocked'] = true;
       }
@@ -132,7 +128,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         if (joinedlessons[doc.data['codlesson']] != null) {
           joinedlessons[doc.data['codlesson']]['seen'] = doc.data['seen'];
           joinedlessons[doc.data['codlesson']]['blocked'] = doc.data['blocked'];
-          loggeduser.addLesson(new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
+          loggeduser.addLesson(
+              new LessonModel.fromJson(joinedlessons[doc.data['codlesson']]));
           joinedlessons.remove(doc.data['codlesson']);
         } else {
           joinedlessons.remove(doc.data['codlesson']);
@@ -169,12 +166,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<UserModel> registerUser(
-      {String nombre,
-      String mail,
-      String password,
-      String usuario,
-      int stagenumber}) async {
+  Future<UserModel> registerUser({FirebaseUser usuario}) async {
     //Sacamos la primera etapa
     QuerySnapshot firststage = await database
         .collection('stages')
@@ -187,21 +179,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     UserModel user = new UserModel(
-        // De momento lo pongo así. Debería de crearse en el constructor :(
-        coduser: Uuid().v1(),
-        mail: mail,
-        password: password,
-        usuario: usuario,
-        nombre: nombre,
+        coduser: usuario.uid,
+        user: usuario,
         stagenumber: 1,
-        stage: one,
-        level: new Level());
+        role: "meditator",
+        meditationstreak: 0,
+        minutesMeditated: 0,
+        stage: one);
 
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
     //creamos su entrada en userdata
-    DocumentReference userdata =
-        await database.collection('userdata').add({'coduser': user.coduser});
+    DocumentReference userdata = await database.collection('userdata').add({'coduser': user.coduser});
 
     //sacamos las lecciones y misiones para añadirlas al usuario. Se le añaden hasta la etapa 3
     QuerySnapshot lessons = await database
@@ -210,7 +199,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         .getDocuments();
 
     //de momento no sacamos misiones
-    // QuerySnapshot missions = await database.collection('missions').where('stagenumber', isLessThan: 4).getDocuments();
 
     // sacamos las lecciones y misiones y las añadimos a la base de datos userdata
     for (DocumentSnapshot lesson in lessons.documents) {

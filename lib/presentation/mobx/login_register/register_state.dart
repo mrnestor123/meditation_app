@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
@@ -31,9 +33,16 @@ abstract class _RegisterState with Store {
   @observable
   bool startedlogin = false;
 
+  FirebaseAuth auth = FirebaseAuth.instance;
+  final googleSignin = GoogleSignIn();
+
   _RegisterState({@required RegisterUseCase register}) {
     _registerusecase = register;
   }
+
+  String your_client_id = "445064026505232";
+  String your_redirect_url =
+      "https://www.facebook.com/connect/login_success.html";
 
   // @computed
   // StoreState get state {
@@ -52,6 +61,20 @@ abstract class _RegisterState with Store {
   //: StoreState.loaded;
   // }
 
+  //Una vez registrados en firebase auth
+  Future<UserModel> userRegistered(FirebaseUser firebaseuser) async {
+    firebaseuser.sendEmailVerification();
+    var register = await _registerusecase.call(UserParams(user: firebaseuser));
+
+    register.fold((Failure failure) {
+      errorMessage = _mapFailureToMessage(failure);
+    }, (User u) {
+      user = u;
+      //user = u;
+    });
+  }
+
+  //Hay que comprobar si el password es el mismo que confirmpassword. MIRAR ALGÚN VIDEO DE YOUTUBE
   @action
   Future register(
     String username,
@@ -59,19 +82,27 @@ abstract class _RegisterState with Store {
     String confirmpassword,
     String email,
   ) async {
-    var register = await _registerusecase.call(UserParams(
-        password: password,
-        confirmpassword: confirmpassword,
-        mail: email,
-        stagenumber: 1,
-        usuario: username));
-
-    register.fold((Failure failure) {
-      errorMessage = _mapFailureToMessage(failure);
-    }, (User u) {
-      user = u;
-      print('user has been registered correctly');
-    });
+    try {
+      AuthResult result =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: confirmpassword,
+      );
+      FirebaseUser user = result.user;
+      var userUpdateInfo = UserUpdateInfo();
+      userUpdateInfo.displayName = username;
+      user.updateProfile(userUpdateInfo);
+      await userRegistered(user);
+    } catch (e) {
+      if (e.code == 'weak-password') {
+        errorMessage = "The password provided is too weak";
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = "The account already exists for that email";
+      }
+      errorMessage = e.code;
+      print(e.code);
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {
@@ -86,5 +117,38 @@ abstract class _RegisterState with Store {
       default:
         return 'Unexpected Error';
     }
+  }
+
+  Future registerWithFacebook(String token) async {
+    final facebookAuthCred =
+        FacebookAuthProvider.getCredential(accessToken: token);
+    final user = await auth.signInWithCredential(facebookAuthCred);
+    await userRegistered(user.user);
+  }
+
+  @action
+  Future googleLogin() async {
+    try {
+      GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
+
+      if (googleSignInAccount != null) {
+        GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(
+            idToken: googleSignInAuthentication.idToken,
+            accessToken: googleSignInAuthentication.accessToken);
+
+        AuthResult result = await auth.signInWithCredential(credential);
+
+        FirebaseUser user = await auth.currentUser();
+        print('registered user');
+        await userRegistered(user);
+      }
+    } catch (e) {
+      print(e);
+    }
+
+    return null;
   }
 }

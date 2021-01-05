@@ -78,7 +78,7 @@ class ProfileScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    ProfileInfoCard(firstText: ''+_userstate.user.level.level.toString(), secondText: "Level"),
+                    ProfileInfoCard(firstText: ''+_userstate.user.stage.stagenumber.toString(), secondText: "Stage"),
                     SizedBox(
                       width: Configuration.safeBlockHorizontal*5,
                     ),
@@ -102,7 +102,7 @@ class MyInfo extends StatelessWidget {
         children: [
           RadialProgress(
             width: Configuration.safeBlockHorizontal * 1,
-            goalCompleted: _userstate.user.level.level /100,
+            goalCompleted: _userstate.user.stage.stagenumber /10,
             child: RoundedImage(
               imagePath: "assets/sky.jpg",
               size: Size.fromWidth(Configuration.blockSizeHorizontal*12),

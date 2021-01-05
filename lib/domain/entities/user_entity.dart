@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
@@ -13,12 +14,15 @@ import 'level.dart';
 import 'meditation_entity.dart';
 
 class User {
-  //Nombre es el nombre de pila y usuario es el nombre en la aplicación
+  //Nombre es el nombre de pila y usuario es el nombre en la aplicación. ESTO HAY QUE QUITARLO
   String coduser;
   String nombre, usuario, password;
   String mail;
+  // !!!!
+
+
+  FirebaseUser user;
   int stagenumber;
-  Level level;
   int meditationstreak = 0;
   Stage stage;
 
@@ -49,16 +53,12 @@ class User {
   final ObservableList<MissionModel> optionalmissions = new ObservableList();
 
   //Map with "required" and "optional" missions. In the form {"required":[Mission,Mission]}
-  final Map<String, Map<String, ObservableList<MissionModel>>> missions =
-      new Map();
+  final Map<String, Map<String, ObservableList<MissionModel>>> missions = new Map();
 
   User(
       {this.coduser,
       this.nombre,
-      this.level,
-      @required this.mail,
-      @required this.usuario,
-      @required this.password,
+      this.user,
       @required this.stagenumber,
       this.stage,
       this.role,
@@ -71,9 +71,6 @@ class User {
       this.coduser = coduser;
     }
 
-    if (this.level == null) {
-      this.level = new Level();
-    }
 
     //inicializamos el map
     for (int i = 1; i < 11; i++) {
@@ -97,7 +94,8 @@ class User {
     lessons[l.stagenumber][l.group].add(l);
   }
 
-  void addMission(MissionModel m) =>  m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
+  void addMission(MissionModel m) =>
+      m.requiredmission ? requiredmissions.add(m) : optionalmissions.add(m);
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
 
@@ -162,12 +160,6 @@ class User {
       }
     });
 
-    if (l.xp != null) {
-      this.level.addXP(l.xp);
-    } else {
-      this.level.addXP(250);
-    }
-
     return lessons;
 
     /*
@@ -210,7 +202,6 @@ class User {
   List<Mission> takeMeditation(Meditation m) {
     List<Mission> result = new List<Mission>();
     this.totalMeditations.add(m);
-    this.level.addXP(m.xp);
 
     if (meditationstreak == 0) {
       meditationstreak++;
