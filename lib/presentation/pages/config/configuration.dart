@@ -18,155 +18,75 @@ class Configuration {
   static bool nightmode = false;
 
   //the purple color
-  static Color maincolor = !nightmode ? Color.fromRGBO(88,67, 187, 100) : Colors.black;
-  static Color secondarycolor = Color.fromRGBO(255, 204, 255, 100);
+  static Color maincolor =
+      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+  static Color darkpurple = Colors.deepPurple;
+  static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
+
+  //lighter purple
+  static Color secondarycolor = Color.fromRGBO(165, 149, 248, 1.0);
+  //pink
+  static Color accentcolor = Color.fromRGBO(241, 212, 240, 1.0);
+
   static Color grey = !nightmode ? Colors.grey : Colors.blueGrey;
   static Color whitecolor = !nightmode ? Colors.white : Colors.black;
 
-  // TextStyles are title, subtitle, subtitle2,subtilte3, paragraph1,paragraph2,paragraph3
-  static TextStyle title = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-        color: Colors.white,
-        letterSpacing: .5,
-        fontSize: safeBlockHorizontal * 6),
-  );
+  // Paddings
+  static double tinpadding;
+  static double smpadding;
+  static double medpadding;
+  static double bigpadding;
 
-  static TextStyle title2 = GoogleFonts.montserrat(
-    textStyle:
-        TextStyle(color: Colors.white, fontSize: safeBlockHorizontal * 8),
-  );
+  //icons
+  static double smicon;
+  static double medicon;
+  static double bigicon;
 
-  static TextStyle title3 = GoogleFonts.montserrat(
-    textStyle:
-        TextStyle(color: Colors.white, fontSize: safeBlockHorizontal * 6),
-  );
+  //margin
+  static double smmargin;
+  static double medmargin;
+  static double bigmargin;
 
-  static TextStyle titleblackbig = GoogleFonts.montserrat(
-    textStyle:
-        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 8),
-  );
+  //textstyles
+  static TextStyle text(String size, Color color,
+      [String style, double spacing]) {
+    var px;
+    var weight = FontWeight.normal;
+    double letterspacing = 0;
 
-  static TextStyle titleblackmedium = GoogleFonts.montserrat(
-    textStyle:
-        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 7),
-  );
+    if (style == "bold") {
+      weight = FontWeight.bold;
+    }
 
-  static TextStyle titleblacksmall = GoogleFonts.montserrat(
-    textStyle:
-        TextStyle(color: Colors.black, fontSize: safeBlockHorizontal * 6),
-  );
+    if (spacing != null) {
+      letterspacing = spacing;
+    }
 
-  static TextStyle subtitle = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Color.fromRGBO(135, 61, 175, 100),
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal * 6,
-    ),
-  );
+    switch (size) {
+      case "tiny":
+        px = safeBlockHorizontal * 3;
+        break;
+      case "small":
+        px = safeBlockHorizontal * 4;
+        break;
+      case "smallmedium":
+        px = safeBlockHorizontal * 5;
+        break;
+      case "medium":
+        px = safeBlockHorizontal * 6;
+        break;
+      case "big":
+        px = safeBlockHorizontal * 6;
+        break;
+    }
 
-  static TextStyle subtitle2 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.white,
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal * 10,
-    ),
-  );
-
-  static TextStyle paragraph = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-        color: Colors.grey,
-        fontWeight: FontWeight.bold,
-        letterSpacing: .5,
-      ),
-      fontSize: safeBlockHorizontal * 5);
-
-  static TextStyle paragraph2 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal * 6,
-    ),
-  );
-
-  static TextStyle paragraph3 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Color.fromRGBO(135, 61, 175, 100),
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal * 5,
-    ),
-  );
-
-  static TextStyle paragraph4 = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: Configuration.safeBlockHorizontal * 5,
-    ),
-  );
-
-  static TextStyle longtext = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-    color: Colors.black,
-    fontSize: Configuration.safeBlockHorizontal * 5,
-  ));
-
-  static TextStyle modaltitle = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-        letterSpacing: .5,
-        fontSize: safeBlockHorizontal * 6),
-  );
-
-  static TextStyle modalsubtitle = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-        color: Colors.black,
-        letterSpacing: .5,
-        fontSize: safeBlockHorizontal * 4),
-  );
-
-  static TextStyle settings = GoogleFonts.montserrat(
-    textStyle: TextStyle(
-      color: Colors.black,
-      letterSpacing: .5,
-      fontSize: blockSizeHorizontal * 6,
-    ),
-  );
-
-  static TextStyle nombre = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-          color: Colors.white,
-          letterSpacing: .5,
-          fontSize: blockSizeHorizontal * 10));
-
-  static double iconSize;
-
-  static TextStyle numbers = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-        color: Colors.white,
-        letterSpacing: .5,
-      ),
-      fontSize: safeBlockHorizontal * 15);
-
-  static TextStyle lessontext = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-          color: Colors.white, letterSpacing: .5, fontWeight: FontWeight.bold),
-      fontSize: safeBlockHorizontal * 3.5);
-
-  static TextStyle infoCardnumber = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-        color: Colors.black,
-        letterSpacing: .5,
-        fontWeight: FontWeight.bold,
-      ),
-      fontSize: safeBlockHorizontal * 5);
-
-  static TextStyle infoCarddescription = GoogleFonts.montserrat(
-      textStyle: TextStyle(
-        color: Colors.black,
-        letterSpacing: .5,
-      ),
-      fontSize: safeBlockHorizontal * 3);
+    return TextStyle(
+        fontFamily: 'Gotham',
+        fontSize: px,
+        color: color,
+        fontWeight: weight,
+        letterSpacing: letterspacing);
+  }
 
   static List<Color> slidegradient = [
     Colors.grey[300],
@@ -178,7 +98,6 @@ class Configuration {
     _mediaQueryData = MediaQuery.of(context);
     width = _mediaQueryData.size.width;
     height = _mediaQueryData.size.height;
-    iconSize = height * 0.05;
     blockSizeHorizontal = width / 100;
     blockSizeVertical = height / 100;
     _safeAreaHorizontal =
@@ -187,6 +106,22 @@ class Configuration {
         _mediaQueryData.padding.top + _mediaQueryData.padding.bottom;
     safeBlockHorizontal = (width - _safeAreaHorizontal) / 100;
     safeBlockVertical = (height - _safeAreaVertical) / 100;
+
+    //Paddings
+    tinpadding = blockSizeHorizontal * 2;
+    smpadding = blockSizeHorizontal * 4;
+    medpadding = blockSizeHorizontal * 8;
+    bigpadding = blockSizeHorizontal * 10;
+
+    //icons
+    smicon = safeBlockHorizontal * 6;
+    medicon = safeBlockHorizontal * 11;
+    bigicon = safeBlockHorizontal * 15;
+
+    //Paddings
+    smmargin = blockSizeHorizontal * 1;
+    medmargin = blockSizeHorizontal * 2;
+    bigmargin = blockSizeHorizontal * 4;
   }
 
   void leftRollDialog(context, dialog) {

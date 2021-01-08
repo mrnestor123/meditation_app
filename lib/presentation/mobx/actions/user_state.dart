@@ -2,8 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
+import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
@@ -48,6 +50,9 @@ abstract class _UserState with Store {
   User user;
 
   @observable
+  DataBase data;
+
+  @observable
   bool nightmode = false;
 
   @observable
@@ -55,12 +60,6 @@ abstract class _UserState with Store {
 
   @observable
   Map lessondata;
-
-  @observable
-  int _menuindex = 1;
-
-  @computed
-  int get menuindex => _menuindex;
 
   @action
   void setUser(var u) {
@@ -76,6 +75,7 @@ abstract class _UserState with Store {
     });
   }
 
+  //hay que cambiar el list<mission>
   @action
   Future<List<Mission>> takeMeditation(Duration d) async {
     Either<Failure, List<Mission>> meditation =
@@ -93,23 +93,16 @@ abstract class _UserState with Store {
   }
 
   @action
-  Future<List<Mission>> takeLesson(LessonModel l) async {
-    int currentstage = user.stagenumber;
-    Either<Failure, List<Mission>> lessonsuccess =
-        await lesson.call(LessonParams(lesson: l, user: user));
-    
-    List<Mission> result = new List<Mission>();
+  Future<bool> takeLesson(LessonModel l) async {
+    int currentposition = user.position;
+    await lesson.call(LessonParams(lesson: l, user: user));
 
-    if (lessonsuccess != null) {
-      lessonsuccess
-          .fold((Failure f) => print("something happened with the lesson"),
-              (List<Mission> missions) {
-        print("We passed a mission");
-        result = missions;
-      });
+    if (currentposition < user.position) {
+      return true;
+    } else {
+      return false;
     }
 
-    return result;
   }
 
   //We get all the necessary data for displaying the app from the database and the
@@ -117,14 +110,9 @@ abstract class _UserState with Store {
   Future getData() async {
     final result = await getdata.call(NoParams());
 
-    result.fold((Failure f) => print(f.error), (Map m) {
-      lessondata = m;
+    result.fold((Failure f) => print(f.error), (DataBase d) {
+      data = d;
     });
-  }
-
-  @action
-  void changeBottomMenu(int stage) {
-    _menuindex = stage + 1;
   }
 
   @action

@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
 class MeditationModel extends Meditation {
-  String codmed, recording, title;
+  String codmed, recording, title, type;
   final Duration duration;
   final DateTime day;
   
   MeditationModel(
-      {this.codmed, this.title, this.duration, this.recording, this.day})
+      {this.codmed, this.title, this.duration, this.recording, this.day,this.type})
       : super(
-            codmed: codmed, duration: duration, recording: recording, day: day);
+            codmed: codmed, duration: duration, recording: recording, day: day, type: type);
 
   factory MeditationModel.fromRawJson(String str) =>
       MeditationModel.fromJson(json.decode(str));
@@ -24,6 +24,7 @@ class MeditationModel extends Meditation {
         duration:json["duration"] == null ? null : parseDuration(json["duration"]),
         day: json["day"] == null ? null : DateTime.parse(json["day"]),
         recording: json["recording"] == null ? null : json["recording"],
+        type: json["type"] == null ? null : json["type"],
         //userId: json["userId"] == null ? null : json["userId"],
       );
 
@@ -32,7 +33,8 @@ class MeditationModel extends Meditation {
         "title": this.title == null ? null : this.title,
         "duration": this.duration == null ? null : duration.toString(),
         "recording": this.recording == null ? null : this.recording,
-        "day": this.day == null ? null : day.toIso8601String()
+        "day": this.day == null ? null : day.toIso8601String(),
+        "type": this.type == null ? null : type
         // "userId": userId == null ? null : userId,
       };
 }

@@ -6,24 +6,22 @@ part of 'meditation_state.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$MeditationState on _MeditationState, Store {
   final _$userAtom = Atom(name: '_MeditationState.user');
 
   @override
   dynamic get user {
-    _$userAtom.context.enforceReadPolicy(_$userAtom);
-    _$userAtom.reportObserved();
+    _$userAtom.reportRead();
     return super.user;
   }
 
   @override
   set user(dynamic value) {
-    _$userAtom.context.conditionallyRunInAction(() {
+    _$userAtom.reportWrite(value, super.user, () {
       super.user = value;
-      _$userAtom.reportChanged();
-    }, _$userAtom, name: '${_$userAtom.name}_set');
+    });
   }
 
   final _$_meditationFutureAtom =
@@ -31,51 +29,45 @@ mixin _$MeditationState on _MeditationState, Store {
 
   @override
   Future<Either<Failure, Meditation>> get _meditationFuture {
-    _$_meditationFutureAtom.context.enforceReadPolicy(_$_meditationFutureAtom);
-    _$_meditationFutureAtom.reportObserved();
+    _$_meditationFutureAtom.reportRead();
     return super._meditationFuture;
   }
 
   @override
   set _meditationFuture(Future<Either<Failure, Meditation>> value) {
-    _$_meditationFutureAtom.context.conditionallyRunInAction(() {
+    _$_meditationFutureAtom.reportWrite(value, super._meditationFuture, () {
       super._meditationFuture = value;
-      _$_meditationFutureAtom.reportChanged();
-    }, _$_meditationFutureAtom, name: '${_$_meditationFutureAtom.name}_set');
+    });
   }
 
   final _$errorMessageAtom = Atom(name: '_MeditationState.errorMessage');
 
   @override
   String get errorMessage {
-    _$errorMessageAtom.context.enforceReadPolicy(_$errorMessageAtom);
-    _$errorMessageAtom.reportObserved();
+    _$errorMessageAtom.reportRead();
     return super.errorMessage;
   }
 
   @override
   set errorMessage(String value) {
-    _$errorMessageAtom.context.conditionallyRunInAction(() {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
       super.errorMessage = value;
-      _$errorMessageAtom.reportChanged();
-    }, _$errorMessageAtom, name: '${_$errorMessageAtom.name}_set');
+    });
   }
 
   final _$durationAtom = Atom(name: '_MeditationState.duration');
 
   @override
   Duration get duration {
-    _$durationAtom.context.enforceReadPolicy(_$durationAtom);
-    _$durationAtom.reportObserved();
+    _$durationAtom.reportRead();
     return super.duration;
   }
 
   @override
   set duration(Duration value) {
-    _$durationAtom.context.conditionallyRunInAction(() {
+    _$durationAtom.reportWrite(value, super.duration, () {
       super.duration = value;
-      _$durationAtom.reportChanged();
-    }, _$durationAtom, name: '${_$durationAtom.name}_set');
+    });
   }
 
   final _$startedmeditationAtom =
@@ -83,34 +75,30 @@ mixin _$MeditationState on _MeditationState, Store {
 
   @override
   bool get startedmeditation {
-    _$startedmeditationAtom.context.enforceReadPolicy(_$startedmeditationAtom);
-    _$startedmeditationAtom.reportObserved();
+    _$startedmeditationAtom.reportRead();
     return super.startedmeditation;
   }
 
   @override
   set startedmeditation(bool value) {
-    _$startedmeditationAtom.context.conditionallyRunInAction(() {
+    _$startedmeditationAtom.reportWrite(value, super.startedmeditation, () {
       super.startedmeditation = value;
-      _$startedmeditationAtom.reportChanged();
-    }, _$startedmeditationAtom, name: '${_$startedmeditationAtom.name}_set');
+    });
   }
 
   final _$meditationphaseAtom = Atom(name: '_MeditationState.meditationphase');
 
   @override
   String get meditationphase {
-    _$meditationphaseAtom.context.enforceReadPolicy(_$meditationphaseAtom);
-    _$meditationphaseAtom.reportObserved();
+    _$meditationphaseAtom.reportRead();
     return super.meditationphase;
   }
 
   @override
   set meditationphase(String value) {
-    _$meditationphaseAtom.context.conditionallyRunInAction(() {
+    _$meditationphaseAtom.reportWrite(value, super.meditationphase, () {
       super.meditationphase = value;
-      _$meditationphaseAtom.reportChanged();
-    }, _$meditationphaseAtom, name: '${_$meditationphaseAtom.name}_set');
+    });
   }
 
   final _$_MeditationStateActionController =
@@ -118,7 +106,8 @@ mixin _$MeditationState on _MeditationState, Store {
 
   @override
   void startMeditation(Duration duration) {
-    final _$actionInfo = _$_MeditationStateActionController.startAction();
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.startMeditation');
     try {
       return super.startMeditation(duration);
     } finally {
@@ -128,7 +117,8 @@ mixin _$MeditationState on _MeditationState, Store {
 
   @override
   void finishMeditation() {
-    final _$actionInfo = _$_MeditationStateActionController.startAction();
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.finishMeditation');
     try {
       return super.finishMeditation();
     } finally {
@@ -138,8 +128,12 @@ mixin _$MeditationState on _MeditationState, Store {
 
   @override
   String toString() {
-    final string =
-        'user: ${user.toString()},errorMessage: ${errorMessage.toString()},duration: ${duration.toString()},startedmeditation: ${startedmeditation.toString()},meditationphase: ${meditationphase.toString()}';
-    return '{$string}';
+    return '''
+user: ${user},
+errorMessage: ${errorMessage},
+duration: ${duration},
+startedmeditation: ${startedmeditation},
+meditationphase: ${meditationphase}
+    ''';
   }
 }

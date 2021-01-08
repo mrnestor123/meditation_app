@@ -10,7 +10,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/lesson_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
-class TakeLessonUseCase extends UseCase<List<Mission>, LessonParams> {
+class TakeLessonUseCase extends UseCase<void, LessonParams> {
   LessonRepository repository;
   UserRepository userRepository;
 
@@ -19,29 +19,17 @@ class TakeLessonUseCase extends UseCase<List<Mission>, LessonParams> {
   //Hay que comprobar en el bloc antes de utilizar la función esta que el usuario ha acabado la lección.
   //Esto es en el caso de que la acabe.
   @override
-  Future<Either<Failure, List<Mission>>> call(LessonParams params) {
-
+  Future<Either<Failure,void>> call(LessonParams params) {
     //añadimos la leccion al usuario
-    /*
-    if (!params.user.lessonslearned.contains(params.lesson)) {
-      final missions = params.user.takeLesson(params.lesson);
-      if (missions.length > 0) {
-        userRepository.updateMissions(missions, params.user);
-      }
-    }*/
     //devolvemos una lista vacía si ya la ha leído
-    List<Mission> missions = new List<Mission>();
 
     //take lesson devuelve una lección si hay alguna que desbloquear y pass mission devuelve la misión que se haya pasado
-    List<Lesson> aux;
-    if(!params.lesson.seen){
-      aux = params.user.takeLesson(params.lesson);
-      // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-      return repository.takeLesson(lesson: params.lesson, user: params.user,missions:missions, unlockedlessons: aux );
-    }else {
-      //habrá que hacer algo aqui
-      return null;
-    } 
+    bool aux;
+    params.user.takeLesson(params.lesson);
+    
+    // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
+    return repository.takeLesson(
+        user: params.user);
   }
 }
 

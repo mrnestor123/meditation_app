@@ -19,8 +19,7 @@ class LoginWidget extends StatelessWidget {
   final TextEditingController _userController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
   String your_client_id = "445064026505232";
-  String your_redirect_url =
-      "https://www.facebook.com/connect/login_success.html";
+  String your_redirect_url = "https://www.facebook.com/connect/login_success.html";
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class LoginWidget extends StatelessWidget {
                           ]),
                     ),
                     onTap: () async {
-                      await _loginstate.login(
+                      await _loginstate.signin(
                           _userController.text, _passwordController.text);
                       if (_loginstate.loggeduser != null) {
                         _userstate.setUser(_loginstate.loggeduser);
@@ -95,8 +94,12 @@ class LoginWidget extends StatelessWidget {
                 SizedBox(height: 50),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   RawMaterialButton(
-                    onPressed: () {
-                      _loginstate.googleLogin();
+                    onPressed: () async{
+                      await _loginstate.googleLogin();
+                      if (_loginstate.loggeduser != null) {
+                        _userstate.setUser(_loginstate.loggeduser);
+                        Navigator.pushNamed(context, '/main');
+                      }
                     },
                     elevation: 2.0,
                     fillColor: Configuration.maincolor,
@@ -110,7 +113,7 @@ class LoginWidget extends StatelessWidget {
                   ),
                   RawMaterialButton(
                       child: Icon(FontAwesomeIcons.facebookF,
-                          color: Colors.white, size: 35.0),
+                        color: Colors.white, size: 35.0),
                       padding: EdgeInsets.all(15.0),
                       shape: CircleBorder(),
                       fillColor: Configuration.maincolor,
@@ -119,15 +122,17 @@ class LoginWidget extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => CustomWebView(
-                                    selectedUrl:
-                                        'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
+                                    selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
                                   ),
                               maintainState: true),
                         );
                         if (result != null) {
-                          try {
-                            _loginstate.loginWithFacebook(result);
-                          } catch (e) {}
+                          
+                          await _loginstate.loginWithFacebook(result);
+                          if (_loginstate.loggeduser != null) {
+                            _userstate.setUser(_loginstate.loggeduser);
+                            Navigator.pushNamed(context, '/main');
+                          }
                         }
                       })
                 ])

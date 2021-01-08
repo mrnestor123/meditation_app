@@ -1,3 +1,5 @@
+/*
+
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -148,7 +150,7 @@ class _LessonViewState extends State<LessonView> {
                   print(widget.lesson.text.entries.length);
                   /* if (index == 1) {
                     setState(() {});
-                  }*/
+                  }
 
                   if (index == widget.lesson.text.entries.length) {
                     setState(() {
@@ -168,7 +170,7 @@ class _LessonViewState extends State<LessonView> {
                     autoPlayInterval: Duration(seconds: 3),
                     autoPlayAnimationDuration: Duration(milliseconds: 800),
                     autoPlayCurve: Curves.fastOutSlowIn,
-                    */
+                    
                 enlargeCenterPage: true,
                 scrollDirection: Axis.horizontal,
               )),
@@ -427,4 +429,5 @@ class _LessonViewState extends State<LessonView> {
     );
   }
 }
+
 */

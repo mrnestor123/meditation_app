@@ -1,3 +1,5 @@
+/*
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
@@ -6,7 +8,6 @@ import 'package:meditation_app/presentation/pages/commonWidget/card_scroll.dart'
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn/lesson_view.dart';
 import 'package:provider/provider.dart';
-
 //List of guided meditationsx
 List<Map> guidedmeditations = [];
 
@@ -258,3 +259,4 @@ class LessonsDialog extends StatelessWidget {
         );*/
   }
 }
+*/

@@ -1,32 +1,18 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/lesson_model.dart';
-import 'package:meditation_app/data/models/mission_model.dart';
-import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
-import 'package:meditation_app/domain/entities/mission.dart';
-import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:observable/observable.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class Stage {
-  int stagenumber,userscount;
-  String description,image,goals,obstacles,skills,mastery;
-  
- 
-  //Lessons for each stage
-  ObservableList<LessonModel> lessons = new ObservableList();
+  int stagenumber, userscount;
+  String description, image, goals, obstacles, skills, mastery;
+  Map<String, List<Content>> path = new Map();
 
-  //missions for each stage
-  ObservableList<MissionModel> missions =new ObservableList();
-
-  Stage({
-    @required this.stagenumber,
-    this.description,
-    @required this.image,
-    this.goals,
-    this.obstacles,
-    this.skills,
-    this.mastery,
-    this.userscount
-  });
+  Stage(
+      {@required this.stagenumber,
+      this.description,
+      @required this.image,
+      this.goals,
+      this.obstacles,
+      this.skills,
+      this.mastery,
+      this.userscount}) ;
 }

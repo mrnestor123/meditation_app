@@ -10,6 +10,7 @@ import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
+import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
@@ -26,25 +27,22 @@ class UserRepositoryImpl implements UserRepository {
 
   //Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
   @override
-  Future<Either<Failure, User>> loginUser({
-    String password,
-    String usuario,
-  }) async {
-    try {
-      final localUser = await localDataSource.getUser(usuario);
-      return Right(localUser);
-    } on Exception {
-      if (await networkInfo.isConnected) {
-        try {
-          final newUser = await remoteDataSource.loginUser(
-              usuario: usuario, password: password);
-          localDataSource.cacheUser(newUser);
-          return Right(newUser);
-        } on LoginException {
-          return Left(LoginFailure());
-        } on ServerException {
-          return Left(ServerFailure());
-        }
+  Future<Either<Failure, User>> loginUser({FirebaseUser usuario}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final newUser = await remoteDataSource.loginUser(usuario: usuario);
+        localDataSource.cacheUser(newUser);
+        return Right(newUser);
+      } on LoginException {
+        return Left(LoginFailure(error: 'No existe un usuario en la base de datos'));
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      //Hay que arreglar este método
+      final localUser = await localDataSource.getUser();
+      if (localUser != null) {
+        return Right(localUser);
       } else {
         return Left(ServerFailure());
       }
@@ -65,15 +63,11 @@ class UserRepositoryImpl implements UserRepository {
     Hay que comprobar si el usuario ya existe antes de registrarlo y hacer nada
   */
   @override
-  Future<Either<Failure, User>> registerUser(
-      {
-      FirebaseUser usuario}) async {
+  Future<Either<Failure, User>> registerUser({FirebaseUser usuario}) async {
     //si esta conectado lo añadimos a la base de datos. Si no lo añadimos a nuestra caché. Devolvemos el usuario guardado
     if (await networkInfo.isConnected) {
       try {
-        final newUser = await remoteDataSource.registerUser(
-            usuario:usuario
-            );
+        final newUser = await remoteDataSource.registerUser(usuario: usuario);
         //Lo añadimos a la caché
         localDataSource.cacheUser(newUser);
         return Right(newUser);
@@ -88,17 +82,17 @@ class UserRepositoryImpl implements UserRepository {
         final localUser = await localDataSource.getUser();
         return Right(localUser);
       } on ServerException {*/
-      return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      return Left(
+          ConnectionFailure(error: "User is not connected to the internet"));
     }
   }
 
   @override
-  Future<Either<Failure, Map>> getData() async {
+  Future<Either<Failure, DataBase>> getData() async {
     // TODO: implement getData
     if (await networkInfo.isConnected) {
       try {
-        //final data = await remoteDataSource.getData();
-        final data = await remoteDataSource.getAllLessons();
+        final data = await remoteDataSource.getData();
         return Right(data);
       } on Exception {
         return Left(ServerFailure());
@@ -124,36 +118,13 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-
   @override
-  Future<Either<Failure,bool>> changeStage(User user) async{
-    if(await networkInfo.isConnected){
+  Future<Either<Failure, bool>> changeStage(User user) async {
+    if (await networkInfo.isConnected) {
       remoteDataSource.changeStage(user);
       return Right(true);
-    }else{
+    } else {
       return Left(ServerFailure());
-    }
-  }
-
-
-  Future<Either<Failure, bool>> updateMission(Mission m) async {
-    if (await networkInfo.isConnected) {
-      // remoteDataSource.updateMission(m);
-
-    }
-  }
-
-  Future<Either<Failure, bool>> updateMissions(List<Mission> missions, User u) async {
-    if (await networkInfo.isConnected) {
-      for (Mission m in missions) {
-        try {
-         // await remoteDataSource.updateMission(m, u, m.requiredmission);
-          await localDataSource.updateMission(m, m.requiredmission);
-        } on Exception {
-          return Left(ServerFailure());
-        }
-      }
-      return Right(true);
     }
   }
 }

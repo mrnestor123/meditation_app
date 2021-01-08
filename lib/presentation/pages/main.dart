@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
-import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
-import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
-import 'package:meditation_app/presentation/pages/meditation/main_screen.dart';
+import 'package:meditation_app/presentation/pages/learn_screen.dart';
 
 import 'package:meditation_app/login_injection_container.dart' as di;
 
 import 'package:flutter/services.dart';
-import 'package:meditation_app/presentation/pages/meditation/premeditation.dart';
-import 'package:meditation_app/presentation/pages/menu/animatedcontainer.dart';
-import 'package:meditation_app/presentation/pages/menu/layout.dart';
-import 'package:meditation_app/presentation/pages/profile/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/stage/path.dart';
+import 'package:meditation_app/presentation/pages/main_screen.dart';
+import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/path_screen.dart';
+import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
+import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:workmanager/workmanager.dart';
 
 import '../../login_injection_container.dart';
-import 'welcome/loading_widget.dart';
-import 'welcome/welcome_widget.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +27,7 @@ void main() async {
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
   ]);
 
   await di.init();
@@ -41,6 +38,7 @@ class MyApp extends StatelessWidget {
 // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     //we pass the userstate class to all the classes
     return MultiProvider(
         providers: [
@@ -51,24 +49,26 @@ class MyApp extends StatelessWidget {
             initialRoute: '/loading',
             routes: <String, WidgetBuilder>{
               '/welcome': (BuildContext context) => WelcomeWidget(),
-              '/brain': (BuildContext context) => Provider(
-                  create: (context) => sl<LessonState>(), child: BrainScreen()),
+        //      '/brain': (BuildContext context) => Provider(
+          //        create: (context) => sl<LessonState>(), child: BrainScreen()),
               '/loading': (BuildContext context) => Loading(),
               '/login': (BuildContext context) => Provider(
                   create: (context) => sl<LoginState>(), child: LoginWidget()),
               '/register': (BuildContext context) => Provider(
                   create: (context) => sl<RegisterState>(),
                   child: RegisterWidget()),
-              '/profile': (BuildContext context) => ProfileScreen(),
-              '/main': (BuildContext context) => ContainerAnimated(),
-              //'/main': (BuildContext context) => MainLayout(),
+            //  '/profile': (BuildContext context) => ProfileScreen(),
+              //'/main': (BuildContext context) => ContainerAnimated(),
 
-              '/premeditation': (BuildContext context) => Provider(
-                  create: (context) => sl<MeditationState>(),
-                  child: SetMeditation()),
-              '/path': (context) => PathWidget(),
+              '/main': (BuildContext context) => Layout(),
+              '/main2': (BuildContext context) => MainScreen(),
+              //'/premeditation': (BuildContext context) => Provider(
+                //  create: (context) => sl<MeditationState>(),
+                  //child: SetMeditation()),
+
+              '/path': (context) => PathScreen(),
               '/learn': (BuildContext context) => Provider(
-                  create: (context) => sl<LessonState>(), child: BrainScreen()),
+                  create: (context) => sl<LessonState>(), child: LearnScreen()),
 
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),

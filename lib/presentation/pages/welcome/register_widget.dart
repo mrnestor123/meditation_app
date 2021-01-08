@@ -163,10 +163,9 @@ class RegisterWidget extends StatelessWidget {
                               maintainState: true),
                         );
                         if (result != null) {
-                          UserModel user =
                               await _registerstate.registerWithFacebook(result);
-                          if (user != null) {
-                            pushNextPage(user, context);
+                          if (_registerstate.user != null) {
+                            pushNextPage(_registerstate.user, context);
                           }
                         }
                       })

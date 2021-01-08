@@ -27,7 +27,7 @@ class MeditateUseCase extends UseCase<List<Mission>, Params> {
         userRepository.changeStage(params.user);
       }else{
         //cambia las misiones que tiene el usuario actualmente. Las pone en done
-        await userRepository.updateMissions(mission,params.user);
+       // await userRepository.updateMissions(mission,params.user);
       }
     }
     

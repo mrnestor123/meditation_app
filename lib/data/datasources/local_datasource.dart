@@ -6,8 +6,9 @@ import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
+import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:observable/observable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,16 +24,15 @@ abstract class UserLocalDataSource {
 
   Future<void> addMeditation(MeditationModel meditation, UserModel user);
 
-  Future takeLesson(User user);
+  Future takeLesson(UserModel user);
 
   Future updateData(UserModel user);
-
-  Future updateMission(MissionModel m, bool requiredmission);
 }
 
 const CACHED_USER = 'CACHED_USER';
 const CACHED_MEDITATIONS = 'CACHED_MEDITATIONS';
 const CACHED_LESSONS = 'CACHED_LESSONS';
+const CACHED_STAGE = 'CACHED_STAGE';
 const REQUIRED_MISSIONS = 'REQUIRED_MISSIONS';
 const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 
@@ -41,9 +41,8 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   List<String> usermeditations = new List<String>();
   List<String> userlessons = new List<String>();
-  List<String> requiredmissions = new List<String>();
-  List<String> optionalmissions = new List<String>();
   List<String> stagemissions = new List<String>();
+  Stage cachedStage;
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
@@ -66,38 +65,9 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         .map((meditation) => json.encode(meditation.toJson()))
         .toList();
 
-    userToCache.lessons.forEach((key, value) {
-      value.forEach((key, value) {
-        for (LessonModel l in value) {
-          userlessons.add(json.encode(l.toJson()));
-        }
-      });
-    });
-
-    /*userlessons = userToCache.lessonslearned
-        .map((lesson) => json.encode(lesson.toJson()))
-        .toList();*/
-
-    userToCache.missions.forEach((key, value) {
-      if (key == "required") {
-        value.forEach((key, value) {
-          for (MissionModel mission in value) {
-            requiredmissions.add(json.encode(mission.toJson()));
-          }
-        });
-      } else {
-        value.forEach((key, value) {
-          for (MissionModel mission in value) {
-            optionalmissions.add(json.encode(mission.toJson()));
-          }
-        });
-      }
-    });
-
-    sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
     sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
-    sharedPreferences.setStringList(REQUIRED_MISSIONS, requiredmissions);
-    sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
+
+    sharedPreferences.setString(CACHED_STAGE, userToCache.stage.toRawJson());
   }
 
   Future<void> addMeditation(MeditationModel meditation, UserModel user) async {
@@ -131,52 +101,17 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       UserModel user = UserModel.fromJson(json.decode(jsonUser));
-      if (usuario == null || usuario != null && user.usuario == usuario) {
-        if (sharedPreferences.getStringList(CACHED_LESSONS) != null) {
-          userlessons = sharedPreferences.getStringList(CACHED_LESSONS);
-          for (var lesson in userlessons) {
-            user.addLesson(new LessonModel.fromJson(json.decode(lesson)));
-          }
+      user.setStage(new StageModel.fromRawJson(
+          sharedPreferences.getString(CACHED_STAGE)));
 
-          /* user.setLearnedLessons((userlessons)
-              .map((lesson) => LessonModel.fromJson((json.decode(lesson))))
-              .toList());*/
-        }
-        if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
-          usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
-          user.setMeditations((usermeditations)
-              .map((meditation) =>
-                  MeditationModel.fromJson(json.decode(meditation)))
-              .toList());
-        }
-        if (sharedPreferences.getStringList(REQUIRED_MISSIONS) != null) {
-          requiredmissions = sharedPreferences.getStringList(REQUIRED_MISSIONS);
-          user.missions["required"] = {};
-          requiredmissions.map((mission) {
-            MissionModel aux = MissionModel.fromJson(json.decode(mission));
-            if (user.missions["required"][aux.type] == null) {
-              user.missions["required"][aux.type] = new ObservableList();
-            }
-            user.missions["required"][aux.type].add(aux);
-          }).toList();
-        }
-
-        if (sharedPreferences.getStringList(OPTIONAL_MISSIONS) != null) {
-          optionalmissions = sharedPreferences.getStringList(OPTIONAL_MISSIONS);
-          user.missions["optional"] = {};
-          optionalmissions.map((mission) {
-            MissionModel aux = MissionModel.fromJson(json.decode(mission));
-            if (user.missions["optional"][aux.type] == null) {
-              user.missions["optional"][aux.type] = new ObservableList();
-            }
-            user.missions["optional"][aux.type].add(aux);
-          }).toList();
-        }
-
-        return Future.value(user);
-      } else {
-        throw Exception();
+      if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
+        usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
+        user.setMeditations((usermeditations)
+            .map((meditation) =>
+                MeditationModel.fromJson(json.decode(meditation)))
+            .toList());
       }
+      return Future.value(user);
     } else {
       throw Exception();
     }
@@ -188,44 +123,12 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       usermeditations.clear();
     }
     if (userlessons.length > 0) userlessons.clear();
-    if (requiredmissions.length > 0) requiredmissions.clear();
-    if (optionalmissions.length > 0) optionalmissions.clear();
     return sharedPreferences.clear();
   }
 
   //iteramos sobre las lecciones del usuario y cambiamos la lista
   @override
-  Future<void> takeLesson(User user) async {
-    userlessons = [];
-    user.lessons[user.stagenumber].forEach((key, value) {
-      for (LessonModel less in value) {
-        userlessons.add(json.encode(less.toJson()));
-      }
-    });
-
-    final added =
-        await sharedPreferences.setStringList(CACHED_LESSONS, userlessons);
-
-    if (!added) {
-      throw CacheException;
-    }
-  }
-
-  @override
-  Future updateMission(MissionModel m, bool requiredmission) {
-    // TODO: implement updateMission
-    if (requiredmission) {
-      int index = requiredmissions.indexWhere(
-          (element) => json.decode(element)["codmission"] == m.codmission);
-      requiredmissions.removeAt(index);
-      requiredmissions.add(json.encode(m.toJson()));
-      sharedPreferences.setStringList(REQUIRED_MISSIONS, requiredmissions);
-    } else {
-      int index = optionalmissions.indexWhere(
-          (element) => json.decode(element)["codmission"] == m.codmission);
-      optionalmissions.removeAt(index);
-      optionalmissions.add(json.encode(m.toJson()));
-      sharedPreferences.setStringList(OPTIONAL_MISSIONS, optionalmissions);
-    }
+  Future<void> takeLesson(UserModel user) async {
+    sharedPreferences.setString(CACHED_USER, user.toRawJson());
   }
 }

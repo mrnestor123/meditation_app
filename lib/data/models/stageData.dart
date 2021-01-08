@@ -1,10 +1,13 @@
 import 'dart:convert';
-
+import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
+import 'package:observable/observable.dart';
 
 class StageModel extends Stage {
-  int stagenumber,userscount;
+  int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery;
 
   StageModel(
@@ -15,42 +18,53 @@ class StageModel extends Stage {
       this.goals,
       this.obstacles,
       this.skills,
-      this.mastery}):
-      super(
-        stagenumber:stagenumber,
-        userscount:userscount,
-        description: description,
-        image: image,
-        goals:goals,
-        obstacles:obstacles,
-        skills:skills,
-        mastery:mastery
-        );
+      this.mastery})
+      : super(
+            stagenumber: stagenumber,
+            userscount: userscount,
+            description: description,
+            image: image,
+            goals: goals,
+            obstacles: obstacles,
+            skills: skills,
+            mastery: mastery);
 
   factory StageModel.fromRawJson(String str) =>
       StageModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-
   factory StageModel.fromJson(Map<String, dynamic> json) {
-    int count = 1;
+    int count = 0;
     StageModel s = new StageModel(
-        stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
-        description: json["description"] == null ? null : json["description"],
-        userscount: json['userscount'] == null ? null :json['userscount'],
-        image: json["image"] == null ? null : json["image"],
-        goals: json["goals"] == null ? null : json["goals"],
-        obstacles: json["obstacles"] == null ? null : json["obstacles"],
-        skills: json["skills"] == null ? null : json["skills"],
-        mastery: json["mastery"] == null ? null : json["mastery"]);
-    
-      if(json['missions'] != null){ while(json['missions'][count.toString()] != null){
-        s.missions.add(new MissionModel.fromJson(json['missions'][(count++).toString()]));
-      }}
+      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
+      description: json["description"] == null ? null : json["description"],
+      userscount: json['userscount'] == null ? null : json['userscount'],
+      image: json["image"] == null ? null : json["image"],
+      goals: json["goals"] == null ? null : json["goals"],
+      obstacles: json["obstacles"] == null ? null : json["obstacles"],
+      skills: json["skills"] == null ? null : json["skills"],
+      mastery: json["mastery"] == null ? null : json["mastery"],
+    );
+
+    if (json['path'] != null) {
+      while (json['path'][count.toString()] != null) {
+        for (var content in json['path'][count.toString()]) {
+          if (s.path[count.toString()] == null) {
+            s.path[count.toString()] = new ObservableList<Content>();
+          }
+          if (content["type"] == "lesson") {
+            s.path[count.toString()].add(new LessonModel.fromJson(content));
+          } else {
+            s.path[count.toString()].add(new MeditationModel.fromJson(content));
+          }
+        }
+        count++;
+      }
+    }
 
     return s;
-   }
+  }
 
   Map<String, dynamic> toJson() => {
         "stagenumber": stagenumber == null ? null : stagenumber,
@@ -60,6 +74,7 @@ class StageModel extends Stage {
         "goals": goals == null ? null : goals,
         "obstacles": obstacles == null ? null : obstacles,
         "skills": skills == null ? null : skills,
-        "mastery": mastery == null ? null : mastery
+        "mastery": mastery == null ? null : mastery,
+        "path": path == null ? null : path
       };
 }

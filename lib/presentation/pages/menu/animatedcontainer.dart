@@ -1,3 +1,4 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/login_injection_container.dart';
@@ -405,3 +406,5 @@ class _BottomMenuState extends State<BottomMenu> {
     );
   }
 }
+
+*/

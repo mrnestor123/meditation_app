@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
@@ -12,27 +13,23 @@ class LoginUseCase extends UseCase<User, UserParams> {
   LoginUseCase(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(UserParams params) async{
+  Future<Either<Failure, User>> call(UserParams params) async {
     // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
     return await repository.loginUser(
-      password: params.password,
       usuario: params.usuario,
     );
   }
 }
 
 class UserParams extends Equatable {
-  final String usuario;
-  final String password;
+  final FirebaseUser usuario;
 
   UserParams({
     @required this.usuario,
-    @required this.password,
   });
 
   @override
   List<Object> get props => [
         this.usuario,
-        this.password,
       ];
 }

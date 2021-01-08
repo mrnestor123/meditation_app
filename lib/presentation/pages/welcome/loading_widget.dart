@@ -25,6 +25,7 @@ class _LoadingState extends State<Loading> {
   Duration _duration = Duration(seconds: 15);
   bool started = false;
 
+  // UN TIMER PARA QUEEE 
   void startTimer() {
     const oneSec = const Duration(milliseconds: 200);
     _timer = new Timer.periodic(
@@ -58,7 +59,8 @@ class _LoadingState extends State<Loading> {
   }
 
   void userisLogged(context) async {
-   // await _user.getData();
+    //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
+    await _user.getData();
     await _user.userisLogged();
     _user.loggedin
         ? Navigator.pushNamed(context, '/main')

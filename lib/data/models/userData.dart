@@ -6,49 +6,33 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
-import 'package:meditation_app/domain/entities/auth/email_address.dart';
-import 'package:meditation_app/domain/entities/level.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:observable/observable.dart';
-
-import 'meditationData.dart';
 
 class UserModel extends User {
-  int stagenumber;
-  String coduser;
+  int stagenumber, position, minutesmeditated;
+  String coduser, role;
   FirebaseUser user;
-
-  Stage stage;
-  int meditationstreak = 0;
-
-  // user || admin || moderator
-  String role;
-
-  //May be a string with 1 hour, 30 sec, 20 min ...
-  String timeMeditated = "";
-
-  //We only need minutes meditated for the total minutes;
-  int minutesMeditated = 0;
+  StageModel stage;
+  Map<String, dynamic> stats = {};
 
   UserModel(
       {this.coduser,
       @required this.stagenumber,
       this.user,
       this.stage,
-      this.meditationstreak,
       this.role,
-      this.minutesMeditated})
+      this.position,
+      this.stats})
       : super(
             coduser: coduser,
-            user:user,
+            user: user,
             role: role,
             stagenumber: stagenumber,
+            position: position,
             stage: stage,
-            meditationstreak: meditationstreak,
-            minutesMeditated: minutesMeditated);
+            stats:stats);
 
   factory UserModel.fromRawJson(String str) =>
       UserModel.fromJson(json.decode(str));
@@ -58,19 +42,17 @@ class UserModel extends User {
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         coduser: json["coduser"] == null ? null : json["coduser"],
         user: json["user"] == null ? null : json["user"],
+        position: json['position'] == null ? 0 : json['position'],
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
-        meditationstreak:
-            json["meditationstreak"] == null ? 0 : json["meditationstreak"],
-        minutesMeditated:
-            json["minutesMeditated"] == null ? 0 : json["minutesMeditated"],
+        stats: json['stats'] == null ? null : json['stats']
       );
 
   Map<String, dynamic> toJson() => {
         "coduser": coduser == null ? null : coduser,
         "role": role == null ? null : role,
         "stagenumber": stagenumber == null ? null : stagenumber,
-        "minutesMeditated": minutesMeditated == null ? 0 : minutesMeditated,
-        "meditationstreak": meditationstreak == null ? 0 : meditationstreak
+        "position" : position == null ? null : position,
+        'stats': stats == null ? null: stats
       };
 }

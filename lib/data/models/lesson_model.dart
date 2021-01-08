@@ -7,43 +7,26 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 
 class LessonModel extends Lesson {
-  String codlesson;
-  final String title;
-  final String slider;
-  final String group;
-  final String description;
-  final Map<String, dynamic> text;
-  final String precedinglesson;
-  final int xp;
+  String codlesson, title, image, description, type;
+  final List<dynamic> text;
   final int stagenumber;
-  bool blocked;
-  bool seen;
 
   LessonModel(
       {this.title,
       this.codlesson,
-      this.slider,
+      this.image,
       this.description,
-      this.group,
-      this.xp,
       this.text,
-      this.precedinglesson,
-      this.blocked,
-      this.stagenumber,
-      this.seen})
+      this.type,
+      this.stagenumber})
       : super(
             title: title,
             codlesson: codlesson,
-            slider: slider,
+            image: image,
             description: description,
+            type: type,
             text: text,
-            xp: xp,
-            group: group,
-            precedinglesson: precedinglesson,
-            blocked: blocked,
-            seen: seen,
-            stagenumber: stagenumber
-            );
+            stagenumber: stagenumber);
 
   factory LessonModel.fromRawJson(String str) =>
       LessonModel.fromJson(json.decode(str));
@@ -53,26 +36,19 @@ class LessonModel extends Lesson {
   factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
       codlesson: json["codlesson"] == null ? null : json["codlesson"],
       title: json["title"] == null ? null : json["title"],
-      slider: json["slider"] == null ? null : json["slider"],
+      image: json["image"] == null ? null : json["image"],
       description: json["description"] == null ? null : json["description"],
       text: json["text"] == null ? null : json["text"],
-      group: json["group"] == null ? null : json["group"],
-      precedinglesson: json["precedinglesson"] == null ? null : json["precedinglesson"],
-      blocked: json["blocked"] == null ? null : json["blocked"],
-      seen: json["seen"] == null ? null : json["seen"],
-      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]
-      );
+      type: json["type"] == null ? null : json["type"],
+      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]);
 
   Map<String, dynamic> toJson() => {
         "codlesson": codlesson == null ? null : codlesson,
         "title": title == null ? null : title,
-        "slider": slider == null ? null : slider,
+        "slider": image == null ? null : image,
         "description": description == null ? null : description,
         "text": text == null ? null : text,
-        "group": group == null ? null : group,
-        "precedinglesson": precedinglesson == null ? null : precedinglesson,
-        "blocked": blocked == null ? null : blocked,
-        "seen": seen == null ? null : seen,
-        "stagenumber": stagenumber == null ? null: stagenumber
+        "type": type == null ? null : type,
+        "stagenumber": stagenumber == null ? null : stagenumber
       };
 }

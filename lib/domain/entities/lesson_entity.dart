@@ -1,42 +1,31 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 
-class Lesson {
-  String codlesson;
-  //to unlock the lesson whenever the user is at a given level
-  final String precedinglesson;
-  final String title;
-  final String slider;
-  final String group;
-  final String description;
-  final Map<String,dynamic> text;
-  final int xp;
-  final int stagenumber;
-  final Map<String,String> lessontext= new Map();
-  bool blocked;
-  bool seen;
+class Lesson extends Content {
+  String codlesson, title, image, description, type;
+  List<dynamic> text;
+  int stagenumber;
+  Map<String, String> lessontext = new Map();
 
-  Lesson({
-    this.codlesson,
-    @required this.title,
-    this.precedinglesson,
-    this.group,
-    this.slider,
-    this.stagenumber,
-    @required this.description,
-    @required this.text,
-    this.xp,
-    this.blocked,
-    @required this.seen
-  }) {
-    if (this.codlesson == null) {
-      var uuid = Uuid();
-      this.codlesson = uuid.v1();
-    }
-  }
+  Lesson(
+      {this.codlesson,
+      @required this.title,
+      this.image,
+      this.stagenumber,
+      this.type,
+      @required this.description,
+      @required this.text})
+      : super(
+            cod: codlesson,
+            title: title,
+            type: type,
+            image: image,
+            stagenumber: stagenumber,
+            description: description);
 
 //  @override
   //List<Object> get props =>
-    //  [title, codlesson, slider, description, text, xp];
+  //  [title, codlesson, slider, description, text, xp];
 }

@@ -6,48 +6,45 @@ part of 'menu_state.dart';
 // StoreGenerator
 // **************************************************************************
 
-// ignore_for_file: non_constant_identifier_names, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
+// ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$MenuState on _MenuState, Store {
   final _$sidebarRouteAtom = Atom(name: '_MenuState.sidebarRoute');
 
   @override
   String get sidebarRoute {
-    _$sidebarRouteAtom.context.enforceReadPolicy(_$sidebarRouteAtom);
-    _$sidebarRouteAtom.reportObserved();
+    _$sidebarRouteAtom.reportRead();
     return super.sidebarRoute;
   }
 
   @override
   set sidebarRoute(String value) {
-    _$sidebarRouteAtom.context.conditionallyRunInAction(() {
+    _$sidebarRouteAtom.reportWrite(value, super.sidebarRoute, () {
       super.sidebarRoute = value;
-      _$sidebarRouteAtom.reportChanged();
-    }, _$sidebarRouteAtom, name: '${_$sidebarRouteAtom.name}_set');
+    });
   }
 
   final _$bottomenuindexAtom = Atom(name: '_MenuState.bottomenuindex');
 
   @override
   int get bottomenuindex {
-    _$bottomenuindexAtom.context.enforceReadPolicy(_$bottomenuindexAtom);
-    _$bottomenuindexAtom.reportObserved();
+    _$bottomenuindexAtom.reportRead();
     return super.bottomenuindex;
   }
 
   @override
   set bottomenuindex(int value) {
-    _$bottomenuindexAtom.context.conditionallyRunInAction(() {
+    _$bottomenuindexAtom.reportWrite(value, super.bottomenuindex, () {
       super.bottomenuindex = value;
-      _$bottomenuindexAtom.reportChanged();
-    }, _$bottomenuindexAtom, name: '${_$bottomenuindexAtom.name}_set');
+    });
   }
 
   final _$_MenuStateActionController = ActionController(name: '_MenuState');
 
   @override
   Future<dynamic> switchbottommenu({int index}) {
-    final _$actionInfo = _$_MenuStateActionController.startAction();
+    final _$actionInfo = _$_MenuStateActionController.startAction(
+        name: '_MenuState.switchbottommenu');
     try {
       return super.switchbottommenu(index: index);
     } finally {
@@ -57,7 +54,8 @@ mixin _$MenuState on _MenuState, Store {
 
   @override
   Future<dynamic> switchsidebarmenu({String route}) {
-    final _$actionInfo = _$_MenuStateActionController.startAction();
+    final _$actionInfo = _$_MenuStateActionController.startAction(
+        name: '_MenuState.switchsidebarmenu');
     try {
       return super.switchsidebarmenu(route: route);
     } finally {
@@ -67,8 +65,9 @@ mixin _$MenuState on _MenuState, Store {
 
   @override
   String toString() {
-    final string =
-        'sidebarRoute: ${sidebarRoute.toString()},bottomenuindex: ${bottomenuindex.toString()}';
-    return '{$string}';
+    return '''
+sidebarRoute: ${sidebarRoute},
+bottomenuindex: ${bottomenuindex}
+    ''';
   }
 }

@@ -45,7 +45,6 @@ dependencies:
   data_connection_checker: any
   font_awesome_flutter: ^8.8.1
   carousel_slider: ^2.3.1
-  android_alarm_manager: ^0.4.5+17
   wakelock: ^0.2.1+1
   google_sign_in: ^4.5.6
   flutter_webview_plugin: ^0.3.10+1
@@ -86,8 +85,10 @@ flutter:
     - assets/stage 1/
     - assets/stage 2/
     - assets/audios/
-
-
+  fonts: 
+    - family: Gotham
+      fonts:
+        - asset: fonts/GothamRounded.ttf
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

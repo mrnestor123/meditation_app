@@ -41,51 +41,31 @@ abstract class _LoginState with Store {
     _loginusecase = login;
   }
 
-  // @computed
-  // StoreState get state {
-  // If the user has not yet searched for a weather forecast or there has been an error
-  // if (_userFuture == null && !startedlogin) {
-  // return StoreState.initial;
-  // } else if (startedlogin && _userFuture == null) {
-  // return StoreState.loading;
-  // } else {
-  // return StoreState.loaded;
-  // }
-  // Pending Future means "loading"
-  // Fulfilled Future means "loaded"
-  //  } return //_userFuture.status == FutureStatus.pending
-  //? StoreState.loading
-  //: StoreState.loaded;
-  // }
-
   @action
-  Future login(String username, String password) async {
-    if (username != "" && password != "") {
-      startedlogin = true;
-      // Reset the possible previous error message.
-      try {
-        errorMessage = "";
-        _userFuture = _loginusecase(
-            UserParams(usuario: username.trim(), password: password.trim()));
-        log = await _userFuture;
-        log.fold(
-            (Failure f) => errorMessage = f.error, (User u) => loggeduser = u);
-      } on Failure {
-        errorMessage = 'Could not log user';
-      }
-    } else {
-      errorMessage = 'Please fill user and password fields';
+  Future login(FirebaseUser user) async {
+    startedlogin = true;
+    // Reset the possible previous error message.
+    try {
+      errorMessage = "";
+      _userFuture = _loginusecase(UserParams(usuario: user));
+      log = await _userFuture;
+      log.fold(
+          (Failure f) => errorMessage = f.error, (User u) => loggeduser = u);
+    } on Failure {
+      errorMessage = 'Could not log user';
     }
   }
 
   // instead of returning true or false
 // returning user to directly access UserID
-  Future<FirebaseUser> signin(
-      String email, String password, BuildContext context) async {
+  Future signin(
+      String email, String password) async {
     try {
       AuthResult result =
           await auth.signInWithEmailAndPassword(email: email, password: email);
       FirebaseUser user = result.user;
+      await login(user);
+
       // return Future.value(true);
       return Future.value(user);
     } catch (e) {
@@ -120,7 +100,7 @@ abstract class _LoginState with Store {
   }
 
   @action
-  Future<bool> googleLogin() async {
+  Future googleLogin() async {
     try {
       GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
 
@@ -135,8 +115,8 @@ abstract class _LoginState with Store {
         AuthResult result = await auth.signInWithCredential(credential);
 
         FirebaseUser user = await auth.currentUser();
-        print(user);
-        print(user.uid);
+
+        await login(user);
 
         return Future.value(true);
       }
@@ -147,10 +127,10 @@ abstract class _LoginState with Store {
     return Future.value(false);
   }
 
-  loginWithFacebook(String token) async {
-    final facebookAuthCred =
-        FacebookAuthProvider.getCredential(accessToken: token);
+  Future loginWithFacebook(String token) async {
+    final facebookAuthCred = FacebookAuthProvider.getCredential(accessToken: token);
     final user = await auth.signInWithCredential(facebookAuthCred);
+    await login(user.user);
   }
 
   String _mapFailureToMessage(Failure failure) {
