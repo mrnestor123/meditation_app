@@ -9,6 +9,7 @@ import 'package:observable/observable.dart';
 class StageModel extends Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery;
+  Map<String, dynamic> objectives;
 
   StageModel(
       {this.stagenumber,
@@ -18,7 +19,8 @@ class StageModel extends Stage {
       this.goals,
       this.obstacles,
       this.skills,
-      this.mastery})
+      this.mastery,
+      this.objectives})
       : super(
             stagenumber: stagenumber,
             userscount: userscount,
@@ -27,7 +29,8 @@ class StageModel extends Stage {
             goals: goals,
             obstacles: obstacles,
             skills: skills,
-            mastery: mastery);
+            mastery: mastery,
+            objectives: objectives);
 
   factory StageModel.fromRawJson(String str) =>
       StageModel.fromJson(json.decode(str));
@@ -37,15 +40,21 @@ class StageModel extends Stage {
   factory StageModel.fromJson(Map<String, dynamic> json) {
     int count = 0;
     StageModel s = new StageModel(
-      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
-      description: json["description"] == null ? null : json["description"],
-      userscount: json['userscount'] == null ? null : json['userscount'],
-      image: json["image"] == null ? null : json["image"],
-      goals: json["goals"] == null ? null : json["goals"],
-      obstacles: json["obstacles"] == null ? null : json["obstacles"],
-      skills: json["skills"] == null ? null : json["skills"],
-      mastery: json["mastery"] == null ? null : json["mastery"],
-    );
+        stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
+        description: json["description"] == null ? null : json["description"],
+        userscount: json['userscount'] == null ? null : json['userscount'],
+        image: json["image"] == null ? null : json["image"],
+        goals: json["goals"] == null ? null : json["goals"],
+        obstacles: json["obstacles"] == null ? null : json["obstacles"],
+        skills: json["skills"] == null ? null : json["skills"],
+        mastery: json["mastery"] == null ? null : json["mastery"],
+        objectives: json['objectives'] == null ? null : json['objectives']);
+
+    if (s.objectives == null) {
+      s.objectives = new Map();
+    }
+    s.objectives['totallessons'] = 0;
+    s.objectives['totalmeditations'] = 0;
 
     if (json['path'] != null) {
       while (json['path'][count.toString()] != null) {
@@ -54,8 +63,10 @@ class StageModel extends Stage {
             s.path[count.toString()] = new ObservableList<Content>();
           }
           if (content["type"] == "lesson") {
+            s.objectives['totallessons']++;
             s.path[count.toString()].add(new LessonModel.fromJson(content));
           } else {
+            s.objectives['totalmeditations']++;
             s.path[count.toString()].add(new MeditationModel.fromJson(content));
           }
         }
@@ -75,6 +86,7 @@ class StageModel extends Stage {
         "obstacles": obstacles == null ? null : obstacles,
         "skills": skills == null ? null : skills,
         "mastery": mastery == null ? null : mastery,
-        "path": path == null ? null : path
+        "path": path == null ? null : path,
+        'objectives': objectives == null ? null : objectives
       };
 }

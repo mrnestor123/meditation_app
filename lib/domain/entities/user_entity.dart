@@ -68,7 +68,8 @@ class User {
 
     print(this.stage.path);
 
-    if(this.stage.path[position.toString()].firstWhere((element) => element.cod == l.codlesson)!= null && l.stagenumber == this.stagenumber){
+    if(this.stage.path[position.toString()].firstWhere((element) => element.cod == l.codlesson) != null && l.stagenumber == this.stagenumber){
+      this.stats['totallecciones']++;
       if (this.stage.path[position.toString()].length == this.stats['ultimosleidos'].length + 1) {
         position++;
         this.stats['ultimosleidos'] = [];

@@ -17,9 +17,16 @@ class Configuration {
 
   static bool nightmode = false;
 
+  static Color maincolor2 = Colors.white;
+
+  //buttoncolor ?? 
+
+  // scaffoldcolor ?? 
+  static Color scaffoldcolor =  !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+
+
   //the purple color
-  static Color maincolor =
-      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+  static Color maincolor = !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
   static Color darkpurple = Colors.deepPurple;
   static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
 

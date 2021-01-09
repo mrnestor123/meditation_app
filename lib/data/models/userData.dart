@@ -53,6 +53,6 @@ class UserModel extends User {
         "role": role == null ? null : role,
         "stagenumber": stagenumber == null ? null : stagenumber,
         "position" : position == null ? null : position,
-        'stats': stats == null ? null: stats
+        'stats': stats == null ? null: stats,
       };
 }

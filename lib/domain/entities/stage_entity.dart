@@ -5,6 +5,7 @@ class Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery;
   Map<String, List<Content>> path = new Map();
+  Map<String, dynamic> objectives = new Map();
 
   Stage(
       {@required this.stagenumber,
@@ -14,5 +15,6 @@ class Stage {
       this.obstacles,
       this.skills,
       this.mastery,
-      this.userscount}) ;
+      this.userscount,
+      this.objectives});
 }

@@ -69,21 +69,45 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({FirebaseUser usuario}) async {
-    QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: usuario.uid).getDocuments();
+    QuerySnapshot user = await database
+        .collection('users')
+        .where('coduser', isEqualTo: usuario.uid)
+        .getDocuments();
 
     UserModel loggeduser;
 
     if (user.documents.length > 0) {
       loggeduser = new UserModel.fromJson(user.documents[0].data);
 
-      QuerySnapshot stage = await database.collection('stages').where('stagenumber', isEqualTo: loggeduser.stagenumber).getDocuments();
-      loggeduser.setStage(new StageModel.fromJson(stage.documents[0].data));
+      QuerySnapshot stage = await database
+          .collection('stages')
+          .where('stagenumber', isEqualTo: loggeduser.stagenumber)
+          .getDocuments();
 
-      QuerySnapshot userdata = await database.collection('userdata').where('coduser', isEqualTo: loggeduser.coduser).getDocuments();
-      
-      if(userdata.documents.length >0 ){
+      StageModel s = new StageModel.fromJson(stage.documents[0].data);
+
+      if (s.stagenumber == 1) {
+        s.objectives.addAll({
+          'totaltime': 4,
+          'meditation': {'count': 5, 'time': 20},
+          'streak': 7
+        });
+      }
+
+      loggeduser.setStage(s);
+
+      QuerySnapshot userdata = await database
+          .collection('userdata')
+          .where('coduser', isEqualTo: loggeduser.coduser)
+          .getDocuments();
+
+      if (userdata.documents.length > 0) {
         String documentId = userdata.documents[0].documentID;
-        QuerySnapshot usermeditations = await database.collection('userdata').document(documentId).collection('meditations').getDocuments(); 
+        QuerySnapshot usermeditations = await database
+            .collection('userdata')
+            .document(documentId)
+            .collection('meditations')
+            .getDocuments();
         for (DocumentSnapshot doc in usermeditations.documents) {
           loggeduser.addMeditation(new MeditationModel.fromJson(doc.data));
         }
@@ -109,7 +133,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<UserModel> registerUser({FirebaseUser usuario}) async {
     //Sacamos la primera etapa
-    QuerySnapshot firststage = await database.collection('stages').where('stagenumber', isEqualTo: 1).getDocuments();
+    QuerySnapshot firststage = await database
+        .collection('stages')
+        .where('stagenumber', isEqualTo: 1)
+        .getDocuments();
     StageModel one;
 
     for (DocumentSnapshot doc in firststage.documents) {
@@ -123,18 +150,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         role: "meditator",
         position: 0,
         stage: one,
-        stats : {
-        'totallecciones': 0,
-        'totalmeditaciones': 0,
-        'tiempo': 0,
-        'racha': 0,
-        'ultimosleidos': []
+        stats: {
+          'totallecciones': 0,
+          'totalmeditaciones': 0,
+          'tiempo': 0,
+          'racha': 0,
+          'ultimosleidos': []
         });
 
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
     await database.collection('userdata').add({'coduser': user.coduser});
- 
+
     return user;
   }
 
@@ -206,7 +233,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   //FALTA POR IMPLEMENTAR, CUANDO HAYA CONEXION CON FIREBASE LO HAREMOS
   @override
-  Future<void> updateMission(MissionModel m, UserModel u, bool requiredmission) {
+  Future<void> updateMission(
+      MissionModel m, UserModel u, bool requiredmission) {
     // TODO: implement updateMission
     throw UnimplementedError();
   }
@@ -233,14 +261,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot users = await database.collection('users').getDocuments();
 
     for (var stage in stages.documents) {
-      d.stages.add(new StageModel.fromJson(stage.data));
+      StageModel s = new StageModel.fromJson(stage.data);
+      if (s.stagenumber == 1) {
+        s.objectives = {
+          'totaltime': '4h',
+          'meditations': [20, 20, 20, 20, 20],
+          'streak': 7
+        };
+      }
+      d.stages.add(s);
     }
 
     for (var user in users.documents) {
       d.users.add(new UserModel.fromJson(user.data));
     }
 
-    d.stages.sort((a,b) => a.stagenumber.compareTo(b.stagenumber));
+    d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
 
     return d;
   }

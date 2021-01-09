@@ -43,6 +43,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
+    UserState _userstate = Provider.of<UserState>(context);
 
     switch (currentindex) {
       case 0:
@@ -66,6 +67,13 @@ class _MobileLayoutState extends State<MobileLayout> {
             ),
             preferredSize: Size.fromHeight(4.0)),
         elevation: 0,
+        leading: IconButton(
+            icon: Icon(Icons.logout,
+                color: Colors.white, size: Configuration.smicon),
+            onPressed: () async {
+              await _userstate.logout();
+              Navigator.pushReplacementNamed(context, '/welcome');
+            }),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(

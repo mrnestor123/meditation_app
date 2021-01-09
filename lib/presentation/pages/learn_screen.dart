@@ -87,11 +87,17 @@ class _StageViewState extends State<StageView> {
     print('init');
   }
 
-  Widget getLessons() {
+  Widget getLessons(context) {
     List<Widget> lessons = new List();
+    List<Image> imagelist = new List();
 
     widget.stage.path.forEach((key, list) {
       for (var content in list) {
+        var image;
+        if (content.image != null) {
+          var configuration = createLocalImageConfiguration(context);
+          image = new NetworkImage(content.image)..resolve(configuration);
+        }
         if (filter.contains(content.type)) {
           lessons.add(GestureDetector(
             onTap: () {
@@ -101,13 +107,17 @@ class _StageViewState extends State<StageView> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => ContentView(
-                              meditation: content, content: content)));
+                              meditation: content,
+                              content: content,
+                              slider: image)));
                 } else {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              ContentView(content: content, lesson: content)));
+                          builder: (context) => ContentView(
+                              content: content,
+                              lesson: content,
+                              slider: image)));
                 }
               }
             },
@@ -266,7 +276,7 @@ class _StageViewState extends State<StageView> {
             Divider(
               color: Colors.white,
             ),
-            Expanded(child: getLessons())
+            Expanded(child: getLessons(context))
           ],
         ),
       ),
@@ -278,8 +288,9 @@ class ContentView extends StatefulWidget {
   Content content;
   Meditation meditation;
   Lesson lesson;
+  NetworkImage slider;
 
-  ContentView({this.content, this.lesson, this.meditation});
+  ContentView({this.content, this.lesson, this.meditation, this.slider});
 
   @override
   _ContentViewState createState() => _ContentViewState();
@@ -288,14 +299,12 @@ class ContentView extends StatefulWidget {
 class _ContentViewState extends State<ContentView> {
   int _index = 0;
   var _userstate;
+  Map<int, NetworkImage> textimages = new Map();
 
   Widget portada() {
     return Column(children: [
       Stack(children: [
-        Image.network(widget.content.image,
-            width: Configuration.width,
-            height: Configuration.height * 0.5,
-            fit: BoxFit.fill),
+        Image(image: widget.slider),
         Container(
             width: Configuration.width,
             color: Configuration.darkpurple.withOpacity(0.9),
