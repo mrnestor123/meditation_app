@@ -4,13 +4,13 @@ import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class Lesson extends Content {
-  String codlesson, title, image, description, type;
+  String cod, title, image, description, type;
   List<dynamic> text;
   int stagenumber;
   Map<String, String> lessontext = new Map();
 
   Lesson(
-      {this.codlesson,
+      {this.cod,
       @required this.title,
       this.image,
       this.stagenumber,
@@ -18,7 +18,7 @@ class Lesson extends Content {
       @required this.description,
       @required this.text})
       : super(
-            cod: codlesson,
+            cod: cod,
             title: title,
             type: type,
             image: image,

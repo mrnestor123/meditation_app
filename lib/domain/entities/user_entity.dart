@@ -1,11 +1,10 @@
-import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
-import 'package:meditation_app/domain/entities/mission.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
+import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:observable/observable.dart';
 import 'package:uuid/uuid.dart';
@@ -14,33 +13,31 @@ import 'level.dart';
 import 'meditation_entity.dart';
 
 class User {
-  //Nombre es el nombre de pila y usuario es el nombre en la aplicación. ESTO HAY QUE QUITARLO
-  String coduser;
-  String nombre;
-  // !!!!
+  String coduser, nombre, role, image;
   FirebaseUser user;
-  int stagenumber, position;
-  StageModel stage;
-  String role;
-  //May be a string with 1 hour, 30 sec, 20 min ...
-  String timeMeditated = "";
+  int stagenumber,position, meditposition; 
+  Stage stage;
+  bool classic;
 
   Map<String, dynamic> stats = {};
 
-  //A list with the meditations
-  final ObservableList<MeditationModel> totalMeditations = new ObservableList();
+  final ObservableList<Meditation> totalMeditations = new ObservableList();
+  final ObservableList<Meditation> guidedMeditations = new ObservableList();
 
   //List with the lessons that the user has learned
-  final ObservableList<LessonModel> lessonslearned = new ObservableList();
+  final ObservableList<Lesson> lessonslearned = new ObservableList();
 
   User(
       {this.coduser,
       this.nombre,
       this.user,
       this.position,
+      this.image,
       @required this.stagenumber,
       this.stage,
       this.role,
+      this.classic,
+      this.meditposition,
       this.stats}) {
     if (coduser == null) {
       var uuid = Uuid();
@@ -54,7 +51,6 @@ class User {
   */
 
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
-
   int getStageNumber() => this.stagenumber;
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
@@ -62,52 +58,100 @@ class User {
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setStage(StageModel s) => this.stage = s;
 
-  // JUNTAR TAKEMEDITATION Y TAKELESSON EN UN MÉTODO
-  bool takeLesson(Lesson l) {
-    List<Lesson> lessons = new List<Lesson>();
+  void updateStage(DataBase data) {
+    data.stages.forEach((element) {
+      if (element.stagenumber == (this.stagenumber + 1)) {
+        this.stage = element;
+      }
+    });
 
-    print(this.stage.path);
+    this.stagenumber = this.stage.stagenumber;
+    this.position = 0;
+    this.stats['etapa'].forEach((key, value) => {this.stats['etapa'][key] = 0});
+  }
 
-    if(this.stage.path[position.toString()].firstWhere((element) => element.cod == l.codlesson) != null && l.stagenumber == this.stagenumber){
-      this.stats['totallecciones']++;
-      if (this.stage.path[position.toString()].length == this.stats['ultimosleidos'].length + 1) {
-        position++;
-        this.stats['ultimosleidos'] = [];
+  bool lessoninStage(Lesson l) {
+    for (Content c in this.stage.path[position.toString()]) {
+      if (c.cod == l.cod) {
         return true;
-      } else {
-        this.stats['ultimosleidos'].add({'cod': l.codlesson});
-        return false;
       }
     }
     return false;
   }
 
-  //Este método se tendrá que refinar. Devuelve null o una misión cuando se pase una el usuario
-  List<Mission> takeMeditation(Meditation m) {
-    List<Mission> result = new List<Mission>();
-    this.totalMeditations.add(m);
-/*
-    if (meditationstreak == 0) {
-      meditationstreak++;
-    } else {
-      var lastMeditation = totalMeditations[totalMeditations.length - 1].day;
-      if (lastMeditation != null) {
-        //comprobamos la streak
-        if (lastMeditation.add(Duration(days: 1)).day == m.day.day) {
-          meditationstreak++;
-        } else if (lastMeditation.day != m.day.day ||
-            lastMeditation.month != m.day.month) {
-          meditationstreak = 1;
+  // JUNTAR TAKEMEDITATION Y TAKELESSON EN UN MÉTODO
+  bool takeLesson(Lesson l, DataBase d) {
+    List<Lesson> lessons = new List<Lesson>();
+
+    try {
+      if (l.stagenumber == this.stagenumber && lessoninStage(l)) {
+        this.stats['etapa']['lecciones']++;
+        this.stats['total']['lecciones']++;
+        if (this.stage.path[position.toString()].length ==
+            this.stats['ultimosleidos'].length + 1) {
+          this.position += 1;
+          this.stats['ultimosleidos'] = [];
+          return true;
+        } else {
+          this.stats['ultimosleidos'].add({'cod': l.cod});
+          return false;
         }
-      } else {
-        meditationstreak = 1;
+      }
+    } catch (Exception) {}
+
+    if (this.stage.checkifPassedStage(this)) {
+      this.updateStage(d);
+    }
+
+    return false;
+  }
+
+  bool takeMeditation(Meditation m, DataBase d) {
+    this.totalMeditations.add(m);
+
+    if (this.stats['racha'] > 0) {
+      DateTime lastmeditation = DateTime.parse(this.stats['lastmeditated']);
+
+      //si meditamos ayer
+      if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
+        this.stats['racha']++;
+      } else if (lastmeditation.day != m.day.day) {
+        this.stats['racha'] = 1;
+      }
+    } else {
+      this.stats['racha'] = 1;
+    }
+
+    this.stats['lastmeditated'] = m.day.toIso8601String();
+    this.stats['etapa']['tiempo'] += m.duration.inMinutes;
+    this.stats['total']['tiempo'] += m.duration.inMinutes;
+
+    if (this.stats['etapa']['maxstreak'] < this.stats['racha']) {
+      this.stats['etapa']['maxstreak'] = this.stats['racha'];
+    }
+
+    if (this.stats['total']['maxstreak'] < this.stats['racha']) {
+      this.stats['total']['maxstreak'] = this.stats['racha'];
+    }
+
+    // si la meditación es free
+    if (m.title == null) {
+      if (this.stage.objectives['meditation']['time'] <= m.duration.inMinutes) {
+        this.stats['etapa']['medittiempo']++;
+      }
+    } else {
+      //no se si esto funcionará bien
+      if (!guidedMeditations.contains(m)) {
+        this.stats['etapa']['meditguiadas']++;
+        guidedMeditations.add(m);
       }
     }
 
-    minutesMeditated += m.duration.inMinutes;
-    timeMeditated = minutesMeditated.toString() + ' minutes meditated';
-*/
-    return result;
+    if (this.stage.checkifPassedStage(this)) {
+      this.updateStage(d);
+    }
+
+    return false;
 
     //minutesMeditated += m.duration.inMinutes;
     //setTimeMeditated();

@@ -31,17 +31,9 @@ class RegisterWidget extends StatelessWidget {
   var _userstate;
 
   void pushNextPage(user, context) {
-    print(user);
-    print('REGISTERING');
     if (user != null) {
       _userstate.user = user;
-      if (user.user.displayName != null) {
-        print(user);
-        _userstate.user = user;
-        Navigator.pushNamed(context, '/main');
-      } else {
-        Navigator.pushNamed(context, '/main');
-      }
+      Navigator.pushNamed(context, '/selectusername');
     }
   }
 
@@ -67,11 +59,6 @@ class RegisterWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Image.asset('assets/logo.jpg', fit: BoxFit.cover),
-                SizedBox(height: 20.0),
-                WidgetTextField(
-                    text: 'username',
-                    icon: Icon(Icons.person),
-                    controller: _userController),
                 // spacer
                 SizedBox(height: 12.0),
                 WidgetTextField(
@@ -119,13 +106,13 @@ class RegisterWidget extends StatelessWidget {
                           ]),
                     ),
                     onTap: () async {
-                      var user = await _registerstate.register(
+                       await _registerstate.register(
                           _userController.text,
                           _passwordController.text,
                           _confirmController.text,
                           _mailController.text);
-                      if (user != null) {
-                        pushNextPage(user, context);
+                      if (_registerstate.user != null) {
+                        pushNextPage(_registerstate.user, context);
                       }
                     }),
                 SizedBox(height: 30),

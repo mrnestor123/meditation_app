@@ -3,15 +3,15 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
-import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
+import 'package:meditation_app/domain/usecases/user/loginUser.dart';
+import 'package:meditation_app/domain/usecases/user/update_user.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
@@ -22,13 +22,15 @@ class UserState extends _UserState with _$UserState {
       MeditateUseCase meditate,
       LogOutUseCase logout,
       GetDataUseCase data,
-      TakeLessonUseCase lesson})
+      TakeLessonUseCase lesson,
+      UpdateUserUseCase updateUserUseCase})
       : super(
             cachedUser: cachedUseCase,
             meditate: meditate,
             getdata: data,
             logoutusecase: logout,
-            lesson: lesson);
+            lesson: lesson,
+            updateUserUseCase: updateUserUseCase);
 }
 
 abstract class _UserState with Store {
@@ -36,15 +38,16 @@ abstract class _UserState with Store {
   MeditateUseCase meditate;
   GetDataUseCase getdata;
   TakeLessonUseCase lesson;
-
   LogOutUseCase logoutusecase;
+  UpdateUserUseCase updateUserUseCase;
 
   _UserState(
       {this.cachedUser,
       this.meditate,
       this.getdata,
       this.logoutusecase,
-      this.lesson});
+      this.lesson,
+      this.updateUserUseCase});
 
   @observable
   User user;
@@ -73,36 +76,35 @@ abstract class _UserState with Store {
       user = u;
       loggedin = true;
     });
-  }
+  } 
 
-  //hay que cambiar el list<mission>
-  @action
-  Future<List<Mission>> takeMeditation(Duration d) async {
-    Either<Failure, List<Mission>> meditation =
-        await meditate.call(Params(duration: d, user: user));
+
+  //SE PUEDE BORRARRR
+  @action 
+  Future<bool> takeMeditation(Duration d) async {
+    int currentposition = user.position;
+    Either<Failure, User> meditation =await meditate.call(Params(duration: d, user: user, d: data));
 
     List<Mission> m = new List<Mission>();
-
-    meditation
-        .fold((Failure f) => print("something happened with the meditation"),
-            (List<Mission> missions) {
-      print('The meditation has been a success');
-      m = missions;
-    });
-    return m;
-  }
-
-  @action
-  Future<bool> takeLesson(LessonModel l) async {
-    int currentposition = user.position;
-    await lesson.call(LessonParams(lesson: l, user: user));
 
     if (currentposition < user.position) {
       return true;
     } else {
       return false;
     }
+  }
 
+  //Esto tiene que ser LESSONNNNNNNN
+  @action
+  Future<bool> takeLesson(LessonModel l) async {
+    int currentposition = user.position;
+    await lesson.call(LessonParams(lesson: l, user: user, d: data));
+
+    if (currentposition < user.position) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   //We get all the necessary data for displaying the app from the database and the
@@ -120,5 +122,25 @@ abstract class _UserState with Store {
     user = null;
     loggedin = false;
     await logoutusecase.call(NoParams());
+  }
+
+  @action
+  Future changeName(String username) async {
+    Either<Failure, User> _addedname = await updateUserUseCase
+        .call(UParams(user: user, nombre: username, type: "name"));
+
+    return true;
+  }
+
+  @action
+  Future updateUser(String path, String type) async {
+    Either<Failure, User> _addedname = await updateUserUseCase
+        .call(UParams(user: user, type: type, image: path));
+  }
+
+  @action
+  Future updateStage() async {
+    Either<Failure, User> _addedname = await updateUserUseCase
+        .call(UParams(user: user, type: "stage", db: data));
   }
 }

@@ -4,12 +4,13 @@ import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class Meditation extends Content {
-  String codmed, title, description, image,recording, type;
+  String codmed, title, description, image, recording, type, coduser;
   int stagenumber;
   Duration duration;
   DateTime day;
 
   List<String> sentences;
+  Map<dynamic, dynamic> content;
 
   //for referencing the user.
   //final String userId;
@@ -23,7 +24,16 @@ class Meditation extends Content {
       this.stagenumber,
       this.description,
       this.image,
-      this.title
+      this.title,
+      this.coduser,
+      this.content
       //this.userId
-      }) : super(cod: codmed, description: description, image: image, title: title, stagenumber: stagenumber, type: type);
+      })
+      : super(
+            cod: codmed,
+            description: description,
+            image: image,
+            title: title,
+            stagenumber: stagenumber,
+            type: type);
 }

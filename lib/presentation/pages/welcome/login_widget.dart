@@ -88,7 +88,7 @@ class LoginWidget extends StatelessWidget {
                           _userController.text, _passwordController.text);
                       if (_loginstate.loggeduser != null) {
                         _userstate.setUser(_loginstate.loggeduser);
-                        Navigator.pushNamed(context, '/main');
+                        Navigator.pushReplacementNamed(context, '/main');
                       }
                     }),
                 SizedBox(height: 50),
@@ -98,7 +98,7 @@ class LoginWidget extends StatelessWidget {
                       await _loginstate.googleLogin();
                       if (_loginstate.loggeduser != null) {
                         _userstate.setUser(_loginstate.loggeduser);
-                        Navigator.pushNamed(context, '/main');
+                        Navigator.pushReplacementNamed(context, '/main');
                       }
                     },
                     elevation: 2.0,
@@ -127,11 +127,10 @@ class LoginWidget extends StatelessWidget {
                               maintainState: true),
                         );
                         if (result != null) {
-                          
                           await _loginstate.loginWithFacebook(result);
                           if (_loginstate.loggeduser != null) {
                             _userstate.setUser(_loginstate.loggeduser);
-                            Navigator.pushNamed(context, '/main');
+                            Navigator.pushReplacementNamed(context, '/main');
                           }
                         }
                       })

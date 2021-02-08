@@ -1,22 +1,17 @@
-/*import 'dart:async';
+import 'dart:async';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/domain/entities/mission.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/mission_popup.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
-import 'package:workmanager/workmanager.dart';
-import 'package:android_alarm_manager/android_alarm_manager.dart';
-
 
 class SetMeditation extends StatefulWidget {
   @override
@@ -65,9 +60,8 @@ class _SetMeditationState extends State<SetMeditation> {
     const oneSec = const Duration(seconds: 1);
     Wakelock.enable();
 
-   // await AndroidAlarmManager.initialize();
-   // await AndroidAlarmManager.periodic(duration, 0, callback)
-
+    // await AndroidAlarmManager.initialize();
+    // await AndroidAlarmManager.periodic(duration, 0, callback)
 
     _timer = new Timer.periodic(
         oneSec,
@@ -92,10 +86,11 @@ class _SetMeditationState extends State<SetMeditation> {
                 margin: EdgeInsets.all(16),
                 alignment: Alignment.bottomCenter,
                 child: Text(
-                    _duration.inHours > 0
-                        ? _duration.toString().substring(0, 7)
-                        : _duration.toString().substring(2, 7),
-                    style: Configuration.numbers))),
+                  _duration.inHours > 0
+                      ? _duration.toString().substring(0, 7)
+                      : _duration.toString().substring(2, 7),
+                  style: Configuration.text('huge', Colors.white),
+                ))),
         Expanded(
             child: Container(
           margin: EdgeInsets.all(16),
@@ -125,7 +120,7 @@ class _SetMeditationState extends State<SetMeditation> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Text('Meditate', style: Configuration.subtitle2),
+        Text('Meditate', style: Configuration.text('huge', Colors.white)),
         MeditationPicker(),
         TimePicker(),
         SoundPicker(),
@@ -179,13 +174,7 @@ class _SetMeditationState extends State<SetMeditation> {
   }
 
   void takeMeditation() async {
-    List<Mission> missions = await _loginstate.takeMeditation(duration);
-
-    if (missions != null && missions.length > 0) {
-      await Future.delayed(Duration(seconds: 1));
-      Configuration().leftRollDialog(context, MissionPopup(missions: missions));
-      //showDialog(context: context, child: MissionPopup(missions: missions));
-    }
+    await _loginstate.takeMeditation(duration);
   }
 
   @override
@@ -214,10 +203,8 @@ class _SetMeditationState extends State<SetMeditation> {
             elevation: 0,
             leading: IconButton(
               icon: state != 'initial'
-                  ? Icon(Icons.close,
-                      size: Configuration.iconSize, color: Colors.white)
-                  : Icon(Icons.arrow_back,
-                      size: Configuration.iconSize, color: Colors.white),
+                  ? Icon(Icons.close, color: Colors.white)
+                  : Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
                 if (state != 'initial' && state != 'finished') {
                   showDialog(
@@ -261,9 +248,9 @@ class _MeditationPickerState extends State<MeditationPicker> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('title', style: Configuration.modaltitle),
+                    Text('title'),
                     SizedBox(height: Configuration.safeBlockVertical * 3),
-                    Text('subtitle', style: Configuration.modalsubtitle)
+                    Text('subtitle')
                   ],
                 ),
               )
@@ -307,10 +294,7 @@ class ContainerSelect extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text(lefttext, style: Configuration.settings),
-            righttext
-          ],
+          children: <Widget>[Text(lefttext), righttext],
         ));
   }
 }
@@ -497,9 +481,9 @@ class _WeekListState extends State<WeekList> {
     DateTime today = DateTime.now();
     var weekday = today.weekday;
     //   var monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
-    var meditationstreak = _userstate.user.meditationstreak;
+    var meditationstreak = 0;
 
-    List<MeditationModel> meditations = _userstate.user.totalMeditations;
+    List<Meditation> meditations = _userstate.user.totalMeditations;
 
     if (meditationstreak == 1) {
       weekDays[--weekday]['meditated'] = true;
@@ -530,7 +514,8 @@ class _WeekListState extends State<WeekList> {
               children: getDays()),
           SizedBox(height: Configuration.height * 0.05),
           Text(
-            _userstate.user.meditationstreak.toString() + ' consecutive days',
+            'to change',
+            //_userstate.user.meditationstreak.toString() + ' consecutive days',
             style: GoogleFonts.montserrat(
                 textStyle: TextStyle(
                     color: Colors.white,
@@ -618,9 +603,9 @@ class _SoundPickerState extends State<SoundPicker> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('title', style: Configuration.modaltitle),
+                    //  Text('title', style: Configuration.modaltitle),
                     SizedBox(height: Configuration.safeBlockVertical * 3),
-                    Text('subtitle', style: Configuration.modalsubtitle)
+                    //Text('subtitle', style: Configuration.modalsubtitle)
                   ],
                 ),
               )
@@ -630,4 +615,3 @@ class _SoundPickerState extends State<SoundPicker> {
     );
   }
 }
-*/

@@ -16,15 +16,7 @@ class WelcomeWidget extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image.asset('assets/logo.jpg', fit: BoxFit.cover),
-              SizedBox(height: 12.0),
-              Text('The Mind Illuminated',
-                  style: GoogleFonts.playfairDisplay(fontSize:Configuration.blockSizeHorizontal*8)),
-              SizedBox(height: 6.0),
-              Text('''Are you ready to master your mind?''',
-                  style: GoogleFonts.roboto(fontSize:Configuration.blockSizeHorizontal*4),
-                  textAlign: TextAlign.center),
-              SizedBox(height: 60.0),
+              Image.asset('assets/logo.png', fit: BoxFit.cover),
               ButtonContainer(
                   text: 'LOGIN',
                   color: Configuration.maincolor,

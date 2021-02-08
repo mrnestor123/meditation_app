@@ -19,16 +19,20 @@ class Configuration {
 
   static Color maincolor2 = Colors.white;
 
-  //buttoncolor ?? 
+  //buttoncolor ??
 
-  // scaffoldcolor ?? 
-  static Color scaffoldcolor =  !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
-
+  // scaffoldcolor ??
+  static Color scaffoldcolor =
+      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
 
   //the purple color
-  static Color maincolor = !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+  static Color maincolor =
+      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
   static Color darkpurple = Colors.deepPurple;
   static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
+
+  static Color white = !nightmode ? Colors.white : Colors.black;
+  static Color lightgrey = Color.fromARGB(255, 242, 242, 242);
 
   //lighter purple
   static Color secondarycolor = Color.fromRGBO(165, 149, 248, 1.0);
@@ -36,7 +40,6 @@ class Configuration {
   static Color accentcolor = Color.fromRGBO(241, 212, 240, 1.0);
 
   static Color grey = !nightmode ? Colors.grey : Colors.blueGrey;
-  static Color whitecolor = !nightmode ? Colors.white : Colors.black;
 
   // Paddings
   static double tinpadding;
@@ -83,7 +86,10 @@ class Configuration {
         px = safeBlockHorizontal * 6;
         break;
       case "big":
-        px = safeBlockHorizontal * 6;
+        px = safeBlockHorizontal * 8;
+        break;
+      case "huge":
+        px = safeBlockHorizontal * 10;
         break;
     }
 

@@ -51,6 +51,9 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     final jsonUser =
         sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
 
+    StageModel stage = user.stage;
+    sharedPreferences.setString(CACHED_STAGE, json.encode(stage.toJson()));
+
     if (jsonUser == null) {
       throw CacheException();
     }
@@ -61,26 +64,23 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   Future<void> cacheUser(UserModel userToCache) async {
     sharedPreferences.setString(CACHED_USER, json.encode(userToCache.toJson()));
 
-    usermeditations = userToCache.totalMeditations
-        .map((meditation) => json.encode(meditation.toJson()))
-        .toList();
+    for (MeditationModel m in userToCache.totalMeditations) {
+      usermeditations.add(m.toRawJson());
+    }
 
     sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
 
-    sharedPreferences.setString(CACHED_STAGE, userToCache.stage.toRawJson());
+    StageModel stage = userToCache.stage;
+    sharedPreferences.setString(CACHED_STAGE, stage.toRawJson());
   }
 
-  Future<void> addMeditation(MeditationModel meditation, UserModel user) async {
+  Future addMeditation(MeditationModel meditation, UserModel user) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
+
     if (jsonUser != null) {
       usermeditations.add(json.encode(meditation.toJson()));
-      final added = await sharedPreferences.setStringList(
+      await sharedPreferences.setStringList(
           CACHED_MEDITATIONS, usermeditations);
-
-      if (!added) {
-        throw CacheException;
-      }
-
       updateData(user);
     } else {
       throw CacheException();
@@ -98,18 +98,25 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<UserModel> getUser([String usuario]) async {
+
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       UserModel user = UserModel.fromJson(json.decode(jsonUser));
-      user.setStage(new StageModel.fromRawJson(
-          sharedPreferences.getString(CACHED_STAGE)));
+
+      if (sharedPreferences.getString(CACHED_STAGE) != null) {
+        user.setStage(new StageModel.fromRawJson(
+            sharedPreferences.getString(CACHED_STAGE)));
+      }
 
       if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
         usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
-        user.setMeditations((usermeditations)
-            .map((meditation) =>
-                MeditationModel.fromJson(json.decode(meditation)))
-            .toList());
+
+        if (usermeditations != null && usermeditations.length > 0) {
+          user.setMeditations((usermeditations)
+              .map((meditation) =>
+                  MeditationModel.fromJson(json.decode(meditation)))
+              .toList());
+        }
       }
       return Future.value(user);
     } else {
@@ -119,6 +126,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future logout() async {
+    sharedPreferences.clear();
     if (usermeditations.length > 0) {
       usermeditations.clear();
     }

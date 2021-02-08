@@ -238,46 +238,6 @@ class SquareContainer extends StatelessWidget {
   }
 }
 
-//Dialog for everyone
-class AbstractDialog extends StatelessWidget {
-  Widget content;
-  double width, height;
-
-  AbstractDialog({this.content, this.width, this.height}) {
-    if (this.width == null) {
-      this.width = Configuration.width * 0.9;
-    }
-    if (this.height == null) {
-      this.height = Configuration.height * 0.3;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        child: Stack(children: [
-          Container(
-              padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 4),
-              margin: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
-              height: height,
-              width: width,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12), color: Colors.white),
-              child: content),
-          Positioned(
-            top:0,
-            left:width/2,
-            right: width/2,
-            child: CircleAvatar(
-            backgroundColor: Colors.red,
-            ),
-          ),
-        ]));
-  }
-}
 
 class UserModal extends StatelessWidget {
   @override

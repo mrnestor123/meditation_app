@@ -14,9 +14,9 @@ class PathScreen extends StatelessWidget {
     int achieveduser = 0;
     int stageobjective = 0;
 
-    //esto se tendrá que sacar en el modelo
-    _userstate.user.stats.forEach((key, value) {
-      if (key != 'ultimosleidos' && key != 'racha') {
+    //esto se tendrá que sacar en el modelo ??
+    _userstate.user.stats['etapa'].forEach((key, value) {
+      if (key != 'ultimosleidos' && key != 'racha' && value is int) {
         achieveduser += value;
       }
     });
@@ -30,27 +30,35 @@ class PathScreen extends StatelessWidget {
     });
 
     return RadialProgress(
-      goalCompleted: (achieveduser/stageobjective),
-      progressColor: Configuration.accentcolor,
-      progressBackgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.all(Configuration.smpadding),
-        child: Text(
-          (achieveduser*100/stageobjective).round().toString() + '%',
-          style: Configuration.text('medium', Colors.white),
+        goalCompleted: 100.0,
+        progressColor: Colors.transparent,
+        progressBackgroundColor: Configuration.accentcolor,
+          child: Container(
+            padding: EdgeInsets.all(Configuration.blockSizeHorizontal*1),
+            child: RadialProgress(
+        goalCompleted: (achieveduser / stageobjective),
+        progressColor: Configuration.maincolor,
+        progressBackgroundColor: Colors.transparent,
+        child: Container(
+            padding: EdgeInsets.all(Configuration.medpadding),
+            child: Text(
+              (achieveduser * 100 / stageobjective).round().toString() + '%',
+              style: Configuration.text('medium', Colors.black),
+            ),
         ),
       ),
+          ),
     );
   }
 
   Widget goals() {
     return Container(
-      width: Configuration.width * 0.95,
+      width: Configuration.width ,
       padding: EdgeInsets.symmetric(
           vertical: Configuration.smpadding,
           horizontal: Configuration.smpadding),
       decoration: BoxDecoration(
-          color: Configuration.lightpurple,
+          color: Configuration.maincolor,
           borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
@@ -89,119 +97,89 @@ class PathScreen extends StatelessWidget {
     );
   }
 
+  Widget data(dynamic value, dynamic valuestage, String text) {
+    return Column(
+      children: [
+        value >= valuestage
+            ? Icon(Icons.check_circle,
+                size: Configuration.medpadding, color: Configuration.maincolor)
+            : Text(
+                (value).toString() + '/' + (valuestage).toString(),
+                style: Configuration.text('medium', Configuration.maincolor),
+              ),
+        SizedBox(height: Configuration.blockSizeVertical*0.2),
+        Text(
+          text,
+          style: Configuration.text('small', Colors.black),
+          textAlign: TextAlign.center,
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(height: Configuration.height * 0.05),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('You are currently on ',
-                style: Configuration.text('smallmedium', Colors.white)),
-            Text('Stage ' + _userstate.user.stagenumber.toString(),
-                style: Configuration.text(
-                    'smallmedium', Configuration.accentcolor))
-          ],
-        ),
-        SizedBox(height: Configuration.height * 0.05),
-        porcentaje(),
-        SizedBox(height: Configuration.height * 0.05),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Text(
-                  _userstate.user.stats['tiempo'].toString() +
-                      '/' +
-                      _userstate.user.stage.objectives['totaltime'].toString(),
-                  style:
-                      Configuration.text('medium', Configuration.accentcolor),
-                ),
-                Text(
-                  'Hours\nmeditated',
-                  style: Configuration.text('small', Configuration.whitecolor),
-                  textAlign: TextAlign.center,
-                )
-              ],
-            ),
-            Column(
-              children: [
-                Text(
-                  _userstate.user.stats['maxstreak'].toString() +
-                      '/' +
-                      _userstate.user.stage.objectives['streak'].toString(),
-                  style:
-                      Configuration.text('medium', Configuration.accentcolor),
-                ),
-                Text(
-                  'Meditation\nstreak',
-                  style: Configuration.text('small', Configuration.whitecolor),
-                  textAlign: TextAlign.center,
-                )
-              ],
-            ),
-            Column(
-              children: [
-                Text(
-                  '0' +
-                      '/' +
-                      _userstate.user.stage.objectives['meditation']['count']
-                          .toString(),
-                  style:
-                      Configuration.text('medium', Configuration.accentcolor),
-                ),
-                Text(
-                  _userstate.user.stage.objectives['meditation']['time']
-                          .toString() +
-                      ' min\nmeditations',
-                  style: Configuration.text('small', Configuration.whitecolor),
-                  textAlign: TextAlign.center,
-                )
-              ],
-            )
-          ],
-        ),
-        SizedBox(height: Configuration.height * 0.05),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          Column(
+    return Container(
+      height: Configuration.height,
+      width: Configuration.width,
+      color: Configuration.lightgrey,
+      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: Configuration.height * 0.025),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                _userstate.user.stats['totallecciones'].toString() +
-                    '/' +
-                    _userstate.user.stage.objectives['totallessons'].toString(),
-                style: Configuration.text('medium', Configuration.accentcolor),
-              ),
-              Text(
-                'Taken\nlessons',
-                style: Configuration.text('small', Configuration.whitecolor),
-                textAlign: TextAlign.center,
-              )
+              Text('You are currently on ',
+                  style: Configuration.text('smallmedium', Colors.black)),
+              Text('Stage ' + _userstate.user.stagenumber.toString(),
+                  style: Configuration.text(
+                      'smallmedium', Configuration.maincolor))
             ],
           ),
-          Column(
+          SizedBox(height: Configuration.height * 0.05),
+          porcentaje(),
+          SizedBox(height: Configuration.height * 0.05),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Text(
-                _userstate.user.stats['totalmeditaciones'].toString() +
-                    '/' +
-                    _userstate.user.stage.objectives['totalmeditations']
-                        .toString(),
-                style: Configuration.text('medium', Configuration.accentcolor),
-              ),
-              Text(
-                'Guided\nmeditations',
-                style: Configuration.text('small', Configuration.whitecolor),
-                textAlign: TextAlign.center,
-              )
+              _userstate.user.stage.objectives['totaltime'] != null ?
+              data(
+                  _userstate.user.stats['etapa']['tiempo'],
+                  _userstate.user.stage.objectives['totaltime'],
+                  'Min\nmeditated') : Container(),
+               _userstate.user.stage.objectives['streak'] != null ?
+              data(
+                  _userstate.user.stats['etapa']['maxstreak'],
+                  _userstate.user.stage.objectives['streak'],
+                  'Meditation\nstreak') : Container(),
+
+              _userstate.user.stage.objectives['meditation'].entries.length >0 ?    
+              data(
+                  _userstate.user.stats['etapa']['medittiempo'],
+                  _userstate.user.stage.objectives['meditation']['count'],
+                  _userstate.user.stage.objectives['meditation']['time']
+                          .toString() +
+                      ' min\nmeditations') : Container()
             ],
-          )
-        ]),
-        SizedBox(height: Configuration.height * 0.05),
-        goals()
-      ],
+          ),
+          SizedBox(height: Configuration.height * 0.05),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            data(
+                _userstate.user.stats['etapa']['lecciones'],
+                _userstate.user.stage.objectives['lecciones'],
+                'Taken\nlessons'),
+            data(
+                _userstate.user.stats['etapa']['meditguiadas'],
+                _userstate.user.stage.objectives['meditguiadas'],
+                'Guided\nmeditations')
+          ]),
+          SizedBox(height: Configuration.height * 0.05),
+          goals()
+        ],
+      ),
     );
   }
 }

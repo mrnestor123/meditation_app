@@ -25,18 +25,17 @@ class _LoadingState extends State<Loading> {
   Duration _duration = Duration(seconds: 15);
   bool started = false;
 
-  // UN TIMER PARA QUEEE 
+  // UN TIMER PARA QUEEE
   void startTimer() {
     const oneSec = const Duration(milliseconds: 200);
     _timer = new Timer.periodic(
         oneSec,
         (Timer timer) => setState(() {
-          started = true;
+              started = true;
               if (_duration.inMilliseconds == 0) {
                 if (count < itemsize.length - 1) {
                   size = itemsize[++count];
-                }
-                else{
+                } else {
                   count = 0;
                   size = itemsize[count];
                 }
@@ -45,7 +44,7 @@ class _LoadingState extends State<Loading> {
                 _duration = _duration - oneSec;
                 if (count < itemsize.length - 1) {
                   size = itemsize[++count];
-                }else{
+                } else {
                   count = 0;
                   size = itemsize[count];
                 }
@@ -62,39 +61,34 @@ class _LoadingState extends State<Loading> {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
     await _user.userisLogged();
-    _user.loggedin
+    _user.user != null
         ? Navigator.pushNamed(context, '/main')
         : Navigator.pushNamed(context, '/welcome');
-
-    /*reaction(
-        (_) => _user.loggedin,
-        (loggedin) => loggedin
-            ? Navigator.pushNamed(context, '/main')
-            : Navigator.pushNamed(context, '/welcome'));*/
   }
 
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<UserState>(context);
-    
+
     //comprobamos si el usuario esta loggeado
-    if(!started) {userisLogged(context); started = true;}
+    if (!started) {
+      userisLogged(context);
+      started = true;
+    }
     //startTimer();
 
     return Scaffold(
         body: Center(
-      child: Container(
-        width: 200,
-        height: 200,
-        child: CircularProgressIndicator())
-      
-      /*AnimatedContainer(
+            child: Container(
+                width: 200, height: 200, child: CircularProgressIndicator())
+
+            /*AnimatedContainer(
           duration: animatio nDuration,
           width: size,
           height: size,
           decoration: BoxDecoration(
             image: DecorationImage(image: AssetImage('assets/logo.jpg')),
           )),*/
-    ));
+            ));
   }
 }

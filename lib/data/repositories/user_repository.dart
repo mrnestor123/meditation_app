@@ -7,10 +7,12 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
@@ -20,10 +22,7 @@ class UserRepositoryImpl implements UserRepository {
   UserLocalDataSource localDataSource;
   NetworkInfo networkInfo;
 
-  UserRepositoryImpl(
-      {@required this.remoteDataSource,
-      @required this.localDataSource,
-      @required this.networkInfo});
+  UserRepositoryImpl({@required this.remoteDataSource,@required this.localDataSource,@required this.networkInfo});
 
   //Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
   @override
@@ -34,7 +33,8 @@ class UserRepositoryImpl implements UserRepository {
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on LoginException {
-        return Left(LoginFailure(error: 'No existe un usuario en la base de datos'));
+        return Left(
+            LoginFailure(error: 'No existe un usuario en la base de datos'));
       } on ServerException {
         return Left(ServerFailure());
       }
@@ -56,6 +56,26 @@ class UserRepositoryImpl implements UserRepository {
       return Right(user);
     } on Exception {
       return Left(CacheFailure(error: 'User is not in cache'));
+    }
+  }
+
+  Future<Either<Failure, User>> updateUser({User user,DataBase d, Meditation m}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m);
+        localDataSource.updateData(user);
+        return Right(newUser);
+      } on ServerException {
+        return Left(ServerFailure());
+      }
+    } else {
+      //Hay que arreglar este método
+      final localUser = await localDataSource.updateData(user);
+      if (localUser != null) {
+        return Right(localUser);
+      } else {
+        return Left(ServerFailure());
+      }
     }
   }
 

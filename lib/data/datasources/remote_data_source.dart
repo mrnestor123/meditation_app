@@ -29,7 +29,7 @@ abstract class UserRemoteDataSource {
 
   Future<UserModel> registerUser({FirebaseUser usuario});
 
-  Future meditate(MeditationModel m, UserModel user);
+  Future updateUser({UserModel user, DataBase data, MeditationModel m});
 
   //We get all the users data
   Future<DataBase> getData();
@@ -39,15 +39,8 @@ abstract class UserRemoteDataSource {
 
   Future changeStage(UserModel user);
 
-  Future addMeditation(MeditationModel m);
-
-  Future addLesson(LessonModel m);
-
   Future updateLessons(UserModel u);
 
-  Future takeLesson(UserModel user);
-
-  Future<void> updateMission(MissionModel m, UserModel u, bool requiredmission);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -85,14 +78,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           .getDocuments();
 
       StageModel s = new StageModel.fromJson(stage.documents[0].data);
-
-      if (s.stagenumber == 1) {
-        s.objectives.addAll({
-          'totaltime': 4,
-          'meditation': {'count': 5, 'time': 20},
-          'streak': 7
-        });
-      }
 
       loggeduser.setStage(s);
 
@@ -151,11 +136,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         position: 0,
         stage: one,
         stats: {
-          'totallecciones': 0,
-          'totalmeditaciones': 0,
-          'tiempo': 0,
+          'total': {
+            'lecciones': 0,
+            'meditaciones': 0,
+            'maxstreak': 0,
+            'tiempo': 0
+          },
+          'etapa': {
+            'lecciones': 0,
+            'medittiempo': 0,
+            'meditguiadas': 0,
+            'maxstreak': 0,
+            'tiempo': 0
+          },
           'racha': 0,
-          'ultimosleidos': []
+          'ultimosleidos': [],
+          'lastmeditated': ''
         });
 
     //añadimos al usuario en la base de datos de usuarios
@@ -163,36 +159,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await database.collection('userdata').add({'coduser': user.coduser});
 
     return user;
-  }
-
-  @override
-  Future meditate(MeditationModel m, UserModel user) async {
-    QuerySnapshot userquery = await database
-        .collection('users')
-        .where('coduser', isEqualTo: user.coduser)
-        .getDocuments();
-    await database
-        .collection('users')
-        .document(userquery.documents[0].documentID)
-        .updateData({});
-
-    QuerySnapshot usersnapshot = await database
-        .collection('userdata')
-        .where('coduser', isEqualTo: user.coduser)
-        .getDocuments();
-
-    DocumentReference meditations = await database
-        .collection('userdata')
-        .document(usersnapshot.documents[0].documentID)
-        .collection('meditations')
-        .add(m.toJson());
-
-    /* DocumentReference ref = await collectionGet("userdata")
-        .document(user.coduser)
-        .collection("meditations")
-        .add(m.toJson());
-    */
-    //Aquí le añadiríamos el nivel de ahora.
   }
 
   @override
@@ -220,40 +186,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return result;
   }
 
-  //ESTO DEBERÍAN SER LESSONMODELS Y USERMODELS
-  Future takeLesson(UserModel user) async {
-    QuerySnapshot userreference = await database
-        .collection('users')
-        .where('coduser', isEqualTo: user.coduser)
-        .getDocuments();
-    String documentId = userreference.documents[0].documentID;
-
-    await db.collection("users").document(documentId).updateData(user.toJson());
-  }
-
-  //FALTA POR IMPLEMENTAR, CUANDO HAYA CONEXION CON FIREBASE LO HAREMOS
-  @override
-  Future<void> updateMission(
-      MissionModel m, UserModel u, bool requiredmission) {
-    // TODO: implement updateMission
-    throw UnimplementedError();
-  }
-
-  @override
-  //adds a meditation to the database
-  Future addMeditation(MeditationModel m) async {
-    DocumentReference meditation =
-        await database.collection('meditations').add(m.toJson());
-    // TODO: implement addMeditation
-    throw UnimplementedError();
-  }
-
-  @override
-  Future addLesson(LessonModel l) async {
-    DocumentReference lesson =
-        await database.collection('lessons').add(l.toJson());
-  }
-
   @override
   Future<DataBase> getData() async {
     DataBase d = new DataBase();
@@ -262,13 +194,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     for (var stage in stages.documents) {
       StageModel s = new StageModel.fromJson(stage.data);
-      if (s.stagenumber == 1) {
-        s.objectives = {
-          'totaltime': '4h',
-          'meditations': [20, 20, 20, 20, 20],
-          'streak': 7
-        };
-      }
       d.stages.add(s);
     }
 
@@ -277,7 +202,41 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
+    d.users.sort((a,b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
 
     return d;
+  }
+
+  @override
+  //cada vez que los valores cambien del usuario lo updatearemos
+  Future updateUser({UserModel user, DataBase data, MeditationModel m}) async {
+    QuerySnapshot userreference = await database
+        .collection('users')
+        .where('coduser', isEqualTo: user.coduser)
+        .getDocuments();
+    String documentId = userreference.documents[0].documentID;
+
+    print(user.toRawJson());
+
+    await database
+        .collection("users")
+        .document(documentId)
+        .updateData(user.toJson());
+
+    //actualizamos la base de datos
+    if (data != null) {
+      QuerySnapshot users = await database.collection('users').getDocuments();
+      data.users.clear();
+
+      for (var user in users.documents) {
+        data.users.add(new UserModel.fromJson(user.data));
+      }
+    
+      data.users.sort((a,b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+    }
+
+    if (m != null) {
+      await database.collection('meditations').add(m.toJson());
+    }
   }
 }

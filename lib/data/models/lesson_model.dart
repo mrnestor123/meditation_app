@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 
 class LessonModel extends Lesson {
-  String codlesson, title, image, description, type;
+  String cod, title, image, description, type;
   final List<dynamic> text;
   final int stagenumber;
 
   LessonModel(
       {this.title,
-      this.codlesson,
+      this.cod,
       this.image,
       this.description,
       this.text,
@@ -21,7 +21,7 @@ class LessonModel extends Lesson {
       this.stagenumber})
       : super(
             title: title,
-            codlesson: codlesson,
+            cod: cod,
             image: image,
             description: description,
             type: type,
@@ -34,7 +34,7 @@ class LessonModel extends Lesson {
   String toRawJson() => json.encode(toJson());
 
   factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
-      codlesson: json["codlesson"] == null ? null : json["codlesson"],
+      cod: json["cod"] == null ? json['codlesson'] : json["cod"],
       title: json["title"] == null ? null : json["title"],
       image: json["image"] == null ? null : json["image"],
       description: json["description"] == null ? null : json["description"],
@@ -43,7 +43,7 @@ class LessonModel extends Lesson {
       stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]);
 
   Map<String, dynamic> toJson() => {
-        "codlesson": codlesson == null ? null : codlesson,
+        "cod": cod == null ? null : cod,
         "title": title == null ? null : title,
         "slider": image == null ? null : image,
         "description": description == null ? null : description,

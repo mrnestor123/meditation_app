@@ -39,6 +39,7 @@ class StageModel extends Stage {
 
   factory StageModel.fromJson(Map<String, dynamic> json) {
     int count = 0;
+    int meditationcount = 0;
     StageModel s = new StageModel(
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         description: json["description"] == null ? null : json["description"],
@@ -53,8 +54,8 @@ class StageModel extends Stage {
     if (s.objectives == null) {
       s.objectives = new Map();
     }
-    s.objectives['totallessons'] = 0;
-    s.objectives['totalmeditations'] = 0;
+    s.objectives['lecciones'] = 0;
+    s.objectives['meditguiadas'] = 0;
 
     if (json['path'] != null) {
       while (json['path'][count.toString()] != null) {
@@ -62,15 +63,23 @@ class StageModel extends Stage {
           if (s.path[count.toString()] == null) {
             s.path[count.toString()] = new ObservableList<Content>();
           }
-          if (content["type"] == "lesson") {
-            s.objectives['totallessons']++;
-            s.path[count.toString()].add(new LessonModel.fromJson(content));
-          } else {
-            s.objectives['totalmeditations']++;
-            s.path[count.toString()].add(new MeditationModel.fromJson(content));
-          }
+          s.objectives['lecciones']++;
+          s.path[count.toString()].add(new LessonModel.fromJson(content));
         }
         count++;
+      }
+    }
+
+    if (json['meditations'] != null) {
+      while (json['meditations'][meditationcount.toString()] != null) {
+        for (var content in json['meditations'][meditationcount.toString()]) {
+          if (s.meditpath[meditationcount.toString()] == null) {
+            s.meditpath[meditationcount.toString()] = new ObservableList<MeditationModel>();
+          }
+          s.objectives['meditguiadas']++;
+          s.meditpath[meditationcount.toString()].add(new MeditationModel.fromJson(content));
+        }
+        meditationcount++;
       }
     }
 

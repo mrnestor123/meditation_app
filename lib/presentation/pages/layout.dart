@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/more_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
@@ -10,6 +13,7 @@ import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../login_injection_container.dart';
+import 'commonWidget/radial_progress.dart';
 
 class Layout extends StatelessWidget {
   Layout();
@@ -39,37 +43,33 @@ class MobileLayout extends StatefulWidget {
 class _MobileLayoutState extends State<MobileLayout> {
   Widget child;
   int currentindex = 0;
+  PageController _c;
+
+  @override
+  void initState() {
+    _c = new PageController(
+      initialPage: currentindex,
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
     UserState _userstate = Provider.of<UserState>(context);
 
-    switch (currentindex) {
-      case 0:
-        child = MainScreen();
-        break;
-      case 1:
-        child = LearnScreen();
-        break;
-      case 2:
-        child = PathScreen();
-        break;
-    }
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Configuration.maincolor,
+        backgroundColor: Configuration.white,
         bottom: PreferredSize(
             child: Container(
               color: Colors.white,
               height: 1.0,
             ),
             preferredSize: Size.fromHeight(4.0)),
-        elevation: 0,
         leading: IconButton(
             icon: Icon(Icons.logout,
-                color: Colors.white, size: Configuration.smicon),
+                color: Colors.red, size: Configuration.smicon),
             onPressed: () async {
               await _userstate.logout();
               Navigator.pushReplacementNamed(context, '/welcome');
@@ -77,14 +77,32 @@ class _MobileLayoutState extends State<MobileLayout> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-              icon: Icon(Icons.account_circle, color: Colors.white),
-              iconSize: Configuration.medicon,
-              onPressed: null)
+              icon: Icon(Icons.ac_unit),
+              onPressed: () => Navigator.pushNamed(context, '/selectusername')),
+          Container(
+            margin: EdgeInsets.only(left: Configuration.medmargin),
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/profile'),
+              child: RadialProgress(
+                  width: Configuration.safeBlockHorizontal * 1,
+                  progressColor: Configuration.maincolor,
+                  goalCompleted: 1,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    backgroundImage: _userstate.user.image == null
+                        ? null
+                        : FileImage(File(_userstate.user.image)),
+                  )),
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 20.0,
         selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
-        unselectedLabelStyle: Configuration.text("tiny", Colors.white),
+        unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
+        unselectedItemColor: Colors.black,
+        type: BottomNavigationBarType.shifting,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -98,23 +116,26 @@ class _MobileLayoutState extends State<MobileLayout> {
             icon: Icon(Icons.terrain),
             label: 'Path',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'More')
         ],
         currentIndex: currentindex,
         selectedItemColor: Configuration.maincolor,
         onTap: (int index) {
           {
-            setState(() {
-              currentindex = index;
-            });
+            this._c.animateToPage(index,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut);
           }
         },
       ),
-      body: Container(
-        height: Configuration.height,
-        width: Configuration.width,
-        color: Configuration.maincolor,
-        padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-        child: child,
+      body: PageView(
+        controller: _c,
+        onPageChanged: (newPage) {
+          setState(() {
+            currentindex = newPage;
+          });
+        },
+        children: [MainScreen(), LearnScreen(), PathScreen(), MoreScreen()],
       ),
     );
   }

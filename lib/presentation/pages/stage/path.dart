@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:photo_view/photo_view.dart';
 
-class PathWidget extends StatelessWidget {
+class ImagePath extends StatelessWidget {
   ScrollController scrollController = new ScrollController(
     initialScrollOffset: Configuration.height,
   );
@@ -34,7 +34,7 @@ class PathWidget extends StatelessWidget {
               elevation: 0,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back,
-                    size: Configuration.iconSize, color: Colors.black),
+                    size: Configuration.smicon, color: Colors.black),
                 onPressed: () {
                   Navigator.pop(context);
                 },

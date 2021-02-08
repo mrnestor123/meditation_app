@@ -60,7 +60,7 @@ class _RadialProgressState extends State<RadialProgress>
   Widget build(BuildContext context) {
     return CustomPaint(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(5.0),
         child: widget.child,
       ),
       painter: RadialPainter(

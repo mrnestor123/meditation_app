@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -8,61 +10,73 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
 
-class LearnScreen extends StatelessWidget {
+class LearnScreen extends StatefulWidget {
   LearnScreen();
 
   @override
+  _LearnScreenState createState() => _LearnScreenState();
+}
+
+class _LearnScreenState extends State<LearnScreen> {
+  @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
-    return Column(
-      children: [
-        SizedBox(height: Configuration.height * 0.05),
-        Expanded(
-            child: GridView.builder(
-                itemCount: _userstate.data.stages.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2),
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => _userstate.user.stagenumber > index
-                        ? Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StageView(
-                                      stage: _userstate.data.stages[index],
-                                    )),
-                          )
-                        : null,
-                    child: Stack(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.all(Configuration.smmargin),
-                          decoration: BoxDecoration(
-                              color: Configuration.accentcolor,
-                              borderRadius: BorderRadius.circular(16.0)),
-                          child: Center(
-                              child: Text(
-                            'Stage ' +
-                                _userstate.data.stages[index].stagenumber
-                                    .toString(),
-                            style: Configuration.text("medium", Colors.white),
-                          )),
-                        ),
-                        _userstate.user.stagenumber > index
-                            ? Container()
-                            : Container(
-                                margin: EdgeInsets.all(Configuration.smmargin),
-                                decoration: BoxDecoration(
-                                    color: Colors.grey.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(16.0)),
-                              ),
-                      ],
-                    ),
-                  );
-                }))
-      ],
+    return Container(
+      height: Configuration.height,
+      width: Configuration.width,
+      color: Configuration.lightgrey,
+      padding: EdgeInsets.all(Configuration.medmargin),
+      child: Column(
+        children: [
+          Expanded(
+              child: GridView.builder(
+                  itemCount: _userstate.data.stages.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2),
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _userstate.user.stagenumber > index
+                          ? Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => StageView(
+                                        stage: _userstate.data.stages[index],
+                                      )),
+                            ).then((value) => setState(() => null))
+                          : null,
+                      child: Stack(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.all(Configuration.medmargin),
+                            decoration: BoxDecoration(
+                                color: Configuration.maincolor,
+                                borderRadius: BorderRadius.circular(16.0)),
+                            child: Center(
+                                child: Text(
+                              'Stage ' +
+                                  _userstate.data.stages[index].stagenumber
+                                      .toString(),
+                              style: Configuration.text("medium", Colors.white),
+                            )),
+                          ),
+                          AnimatedContainer(
+                            duration: Duration(seconds: 2),
+                            margin: EdgeInsets.all(Configuration.medmargin),
+                            decoration: BoxDecoration(
+                                color: _userstate.user.stagenumber < (index + 1)
+                                    ? Colors.grey
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(16.0)),
+                          ),
+                        ],
+                      ),
+                    );
+                  }))
+        ],
+      ),
     );
   }
 }
@@ -79,7 +93,11 @@ class StageView extends StatefulWidget {
 class _StageViewState extends State<StageView> {
   UserState _userstate;
 
-  var filter = ['lesson', 'meditation'];
+  var filter = ['all'];
+
+  FutureOr onGoBack(dynamic value) {
+    setState(() {});
+  }
 
   @override
   void initState() {
@@ -98,55 +116,70 @@ class _StageViewState extends State<StageView> {
           var configuration = createLocalImageConfiguration(context);
           image = new NetworkImage(content.image)..resolve(configuration);
         }
-        if (filter.contains(content.type)) {
+        if (filter.contains(content.type) || filter.contains('all')) {
           lessons.add(GestureDetector(
             onTap: () {
-              if (_userstate.user.position >= int.parse(key)) {
-                if (content.type == 'meditation') {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ContentView(
-                              meditation: content,
-                              content: content,
-                              slider: image)));
-                } else {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ContentView(
-                              content: content,
-                              lesson: content,
-                              slider: image)));
-                }
+              if (_userstate.user.position >= int.parse(key) ||
+                  _userstate.user.stagenumber > content.stagenumber) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ContentView(
+                            lesson: content,
+                            content: content,
+                            slider: image))).then(onGoBack);
               }
             },
             child: Container(
-              height: Configuration.height * 0.1,
+              height: Configuration.height * 0.13,
               margin: EdgeInsets.all(Configuration.medmargin),
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                color: Configuration.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 0.4,
+                    blurRadius: 0.4,
+                    offset: Offset(0.6, 0.6), // changes position of shadow
+                  ),
+                ],
+              ),
               child: Stack(
                 children: [
                   Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Stack(children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16),
+                            bottomRight: Radius.circular(16)),
+                        child: Image.network(content.image,
+                            height: Configuration.height * 0.13),
+                      ),
+                    ]),
+                  ),
+                  Positioned(
                       top: 0,
-                      right: 0,
+                      left: 0,
                       child: Padding(
                         padding: EdgeInsets.all(Configuration.smpadding),
                         child: Container(
                           width: Configuration.safeBlockHorizontal * 5,
                           height: Configuration.safeBlockHorizontal * 5,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: content.type == 'meditation'
-                                  ? Colors.green
-                                  : Colors.yellow),
+                          child: Icon(
+                              content.type == 'meditation'
+                                  ? Icons.self_improvement
+                                  : Icons.book,
+                              color: Colors.grey),
                         ),
                       )),
                   Positioned(
                       left: 0,
                       bottom: 0,
-                      child: Padding(
+                      child: Container(
+                        width: Configuration.width * 0.6,
                         padding: EdgeInsets.all(Configuration.smpadding),
                         child: Text(
                           content.title,
@@ -154,25 +187,25 @@ class _StageViewState extends State<StageView> {
                               "tiny", Colors.black, "bold", 1),
                         ),
                       )),
-                  _userstate.user.position < int.parse(key)
-                      ? Positioned(
-                          left: 0,
-                          bottom: 0,
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                              height: Configuration.height * 0.1,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  gradient: LinearGradient(
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                    colors: [
-                                      Colors.grey.withOpacity(0.6),
-                                      Colors.grey.withOpacity(0.6)
-                                    ],
-                                  ))))
-                      : Container()
+                  Positioned(
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    top: 0,
+                    child: AnimatedContainer(
+                      key: Key(content.cod),
+                      duration: Duration(seconds: 2),
+                      width: Configuration.height * 0.1,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: _userstate.user.position < int.parse(key) &&
+                                  _userstate.user.stagenumber <=
+                                      content.stagenumber
+                              ? Colors.grey.withOpacity(0.6)
+                              : Colors.transparent),
+                      curve: Curves.fastOutSlowIn,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -183,10 +216,13 @@ class _StageViewState extends State<StageView> {
 
     return Container(
       padding: EdgeInsets.all(Configuration.smpadding),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: lessons),
+      color: Configuration.lightgrey,
+      child: SingleChildScrollView(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: lessons),
+      ),
     );
   }
 
@@ -198,20 +234,21 @@ class _StageViewState extends State<StageView> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Stage ' + widget.stage.stagenumber.toString(),
-            style: Configuration.text('big', Colors.white)),
+            style: Configuration.text('big', Colors.black)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, size: Configuration.smicon),
+          icon: Icon(Icons.arrow_back,
+              size: Configuration.smicon, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        backgroundColor: Configuration.maincolor,
+        backgroundColor: Configuration.white,
         elevation: 0,
       ),
       body: Container(
         height: Configuration.height,
         width: Configuration.width,
-        color: Configuration.maincolor,
+        color: Configuration.white,
         child: Column(
           children: [
             Container(
@@ -220,33 +257,45 @@ class _StageViewState extends State<StageView> {
               margin: EdgeInsets.only(
                   left: Configuration.smmargin,
                   right: Configuration.smmargin,
-                  top: Configuration.medmargin,
-                  bottom: Configuration.bigmargin),
+                  top: Configuration.medmargin),
               decoration: BoxDecoration(
-                  color: Configuration.darkpurple,
+                  color: Configuration.lightpurple,
                   borderRadius: BorderRadius.circular(12.0)),
             ),
             Container(
-                padding:
-                    EdgeInsets.symmetric(horizontal: Configuration.medpadding),
+                padding: EdgeInsets.symmetric(
+                    horizontal: Configuration.medpadding,
+                    vertical: Configuration.tinpadding),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
                       'Filter',
-                      style: Configuration.text('small', Colors.white),
+                      style: Configuration.text('small', Colors.black),
                     ),
                     SizedBox(width: Configuration.width * 0.05),
                     OutlinedButton(
-                      onPressed: () => setState(() => filter.contains('lesson')
-                          ? filter.remove('lesson')
-                          : filter.add('lesson')),
-                      child: Text('Lesson',
-                          style: Configuration.text(
-                              'small',
-                              filter.contains('lesson')
-                                  ? Colors.black
-                                  : Colors.black.withOpacity(0.5))),
+                      onPressed: () => setState(
+                          () => filter.contains('all') ? '' : filter = ['all']),
+                      child: Icon(Icons.more_vert,
+                          color: filter.contains('all')
+                              ? Colors.black
+                              : Colors.black.withOpacity(0.5)),
+                      style: ButtonStyle(
+                        backgroundColor: filter.contains('all')
+                            ? MaterialStateProperty.all<Color>(Colors.white)
+                            : null,
+                      ),
+                    ),
+                    SizedBox(width: Configuration.width * 0.05),
+                    OutlinedButton(
+                      onPressed: () => setState(() {
+                        filter.contains('lesson') ? '' : filter = ['lesson'];
+                      }),
+                      child: Icon(Icons.book,
+                          color: filter.contains('lesson')
+                              ? Colors.black
+                              : Colors.black.withOpacity(0.5)),
                       style: ButtonStyle(
                         backgroundColor: filter.contains('lesson')
                             ? MaterialStateProperty.all<Color>(Colors.white)
@@ -257,14 +306,12 @@ class _StageViewState extends State<StageView> {
                     OutlinedButton(
                       onPressed: () => setState(() =>
                           filter.contains('meditation')
-                              ? filter.remove('meditation')
-                              : filter.add('meditation')),
-                      child: Text('Meditation',
-                          style: Configuration.text(
-                              'small',
-                              filter.contains('meditation')
-                                  ? Colors.black
-                                  : Colors.black.withOpacity(0.5))),
+                              ? ''
+                              : filter = ['meditation']),
+                      child: Icon(Icons.self_improvement,
+                          color: filter.contains('meditation')
+                              ? Colors.black
+                              : Colors.black.withOpacity(0.5)),
                       style: ButtonStyle(
                         backgroundColor: filter.contains('meditation')
                             ? MaterialStateProperty.all<Color>(Colors.white)
@@ -273,9 +320,6 @@ class _StageViewState extends State<StageView> {
                     ),
                   ],
                 )),
-            Divider(
-              color: Colors.white,
-            ),
             Expanded(child: getLessons(context))
           ],
         ),
@@ -297,9 +341,10 @@ class ContentView extends StatefulWidget {
 }
 
 class _ContentViewState extends State<ContentView> {
-  int _index = 0;
+  int _index = -1;
   var _userstate;
   Map<int, NetworkImage> textimages = new Map();
+  var reachedend = false;
 
   Widget portada() {
     return Column(children: [
@@ -327,7 +372,7 @@ class _ContentViewState extends State<ContentView> {
               ),
               Center(
                 child: GestureDetector(
-                  onTap: () => setState(() => _index = 1),
+                  onTap: () => setState(() => _index = 0),
                   child: Container(
                     width: Configuration.width * 0.25,
                     height: Configuration.width * 0.25,
@@ -354,10 +399,11 @@ class _ContentViewState extends State<ContentView> {
         itemBuilder: (context, index) {
           return Container(
             width: Configuration.width,
-            height: Configuration.height,
             color: Configuration.lightpurple,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: widget.lesson.text[index]['image'] == ''
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: [
                 Image.network(
                   widget.lesson.text[index]["image"],
@@ -366,9 +412,66 @@ class _ContentViewState extends State<ContentView> {
                 Container(
                     width: Configuration.width,
                     padding: EdgeInsets.all(Configuration.smpadding),
-                    child: Center(
-                        child: Text(widget.lesson.text[index]["text"],
-                            style: Configuration.text('small', Colors.white))))
+                    child: Text(widget.lesson.text[index]["text"],
+                        style: Configuration.text('small', Colors.white))),
+                Row(
+                    mainAxisAlignment: widget.lesson.type == 'meditation'
+                        ? MainAxisAlignment.spaceEvenly
+                        : MainAxisAlignment.center,
+                    children: [
+                      widget.lesson.type == 'meditation'
+                          ? GestureDetector(
+                              onTap: () async {
+                                await _userstate.takeLesson(widget.lesson);
+                                Navigator.pop(context, true);
+                              },
+                              child: AnimatedContainer(
+                                width:
+                                    reachedend ? Configuration.width * 0.5 : 0,
+                                padding:
+                                    EdgeInsets.all(Configuration.smpadding),
+                                decoration: BoxDecoration(
+                                    color: Configuration.maincolor,
+                                    shape: BoxShape.circle),
+                                duration: Duration(seconds: 1),
+                                curve: Curves.easeIn,
+                                child: reachedend
+                                    ? Center(
+                                        child: Text(
+                                          'Practice',
+                                          style: Configuration.text(
+                                              'medium', Colors.white),
+                                        ),
+                                      )
+                                    : Container(),
+                              ),
+                            )
+                          : Container(),
+                      GestureDetector(
+                        onTap: () async {
+                          await _userstate.takeLesson(widget.lesson);
+                          Navigator.pop(context, true);
+                        },
+                        child: AnimatedContainer(
+                          width: reachedend ? Configuration.width * 0.5 : 0,
+                          curve: Curves.easeIn,
+                          duration: Duration(seconds: 1),
+                          padding: EdgeInsets.all(Configuration.smpadding),
+                          decoration: BoxDecoration(
+                              color: Configuration.darkpurple,
+                              shape: BoxShape.circle),
+                          child: reachedend
+                              ? Center(
+                                  child: Text(
+                                    'Finish',
+                                    style: Configuration.text(
+                                        'medium', Colors.white),
+                                  ),
+                                )
+                              : Container(),
+                        ),
+                      ),
+                    ])
               ],
             ),
           );
@@ -380,25 +483,40 @@ class _ContentViewState extends State<ContentView> {
             enableInfiniteScroll: false,
             reverse: false,
             onPageChanged: (index, reason) {
-              if (index == widget.lesson.text.length - 1) {
-                setState(() {
-                  _index = 2;
-                });
-              } else {
-                if (_index == 2 && index < widget.lesson.text.length - 1) {
-                  setState(() {
-                    _index = 1;
-                  });
+              setState(() {
+                _index = index;
+                if (_index == widget.lesson.text.length - 1) {
+                  reachedend = true;
                 }
-              }
+              });
             }));
+  }
+
+  //esto se mezclará
+  Widget vistaMeditacion() {
+    return Container();
   }
 
   @override
   void initState() {
+    _index = -1;
     super.initState();
+  }
 
-    _index = 0;
+  @override
+  void didChangeDependencies() {
+    var configuration = createLocalImageConfiguration(context);
+
+    if (widget.content.type == 'lesson') {
+      widget.lesson.text.forEach((slide) {
+        print(slide['image']);
+        if (slide['image'] != '') {
+          new NetworkImage(slide['image'])..resolve(configuration);
+        }
+      });
+    }
+
+    super.didChangeDependencies();
   }
 
   @override
@@ -407,22 +525,44 @@ class _ContentViewState extends State<ContentView> {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-              icon: Icon(Icons.close, size: Configuration.smicon),
+              icon: Icon(Icons.close,
+                  size: Configuration.smicon, color: Colors.black),
               onPressed: () => Navigator.pop(context)),
           backgroundColor: Colors.transparent,
-          actions: [
-            _index == 2
-                ? IconButton(
-                    icon: Icon(Icons.check_circle),
-                    onPressed: () async {
-                      await _userstate.takeLesson(widget.lesson);
-                      Navigator.pop(context);
-                    })
-                : Container()
-          ],
           elevation: 0,
         ),
         extendBodyBehindAppBar: true,
-        body: _index == 0 ? portada() : vistaLeccion());
+        body: _index == -1
+            ? portada()
+            : widget.content.type != 'recording'
+                ? Stack(children: [
+                    vistaLeccion(),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        margin: EdgeInsets.all(Configuration.bigmargin),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: widget.lesson.text.map((url) {
+                            int index = widget.lesson.text.indexOf(url);
+                            return Container(
+                              width: Configuration.safeBlockHorizontal * 3,
+                              height: Configuration.safeBlockHorizontal * 3,
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 10.0, horizontal: 2.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _index == index
+                                    ? Color.fromRGBO(0, 0, 0, 0.9)
+                                    : Color.fromRGBO(0, 0, 0, 0.4),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ])
+                : vistaMeditacion());
   }
 }

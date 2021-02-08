@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -19,28 +20,21 @@ class TakeLessonUseCase extends UseCase<void, LessonParams> {
   //Hay que comprobar en el bloc antes de utilizar la función esta que el usuario ha acabado la lección.
   //Esto es en el caso de que la acabe.
   @override
-  Future<Either<Failure,void>> call(LessonParams params) {
+  Future<Either<Failure, void>> call(LessonParams params) {
     //añadimos la leccion al usuario
     //devolvemos una lista vacía si ya la ha leído
-
-    //take lesson devuelve una lección si hay alguna que desbloquear y pass mission devuelve la misión que se haya pasado
     bool aux;
-    params.user.takeLesson(params.lesson);
-    
-    // Aquí a lo mejor hay que comprobar los datos?. Añadirlo a alguna stage? Habrá que pasarle datos?
-    return repository.takeLesson(
-        user: params.user);
+    params.user.takeLesson(params.lesson, params.d);
+    return userRepository.updateUser(user: params.user, d: params.d);
   }
 }
 
 class LessonParams extends Equatable {
   final User user;
   final Lesson lesson;
+  final DataBase d;
 
-  LessonParams({
-    @required this.user,
-    @required this.lesson,
-  });
+  LessonParams({@required this.user, @required this.lesson, this.d});
 
   @override
   List<Object> get props => [this.user, this.lesson];

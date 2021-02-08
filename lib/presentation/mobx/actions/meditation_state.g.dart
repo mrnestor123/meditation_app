@@ -12,13 +12,13 @@ mixin _$MeditationState on _MeditationState, Store {
   final _$userAtom = Atom(name: '_MeditationState.user');
 
   @override
-  dynamic get user {
+  User get user {
     _$userAtom.reportRead();
     return super.user;
   }
 
   @override
-  set user(dynamic value) {
+  set user(User value) {
     _$userAtom.reportWrite(value, super.user, () {
       super.user = value;
     });
@@ -86,41 +86,60 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
-  final _$meditationphaseAtom = Atom(name: '_MeditationState.meditationphase');
+  final _$stateAtom = Atom(name: '_MeditationState.state');
 
   @override
-  String get meditationphase {
-    _$meditationphaseAtom.reportRead();
-    return super.meditationphase;
+  String get state {
+    _$stateAtom.reportRead();
+    return super.state;
   }
 
   @override
-  set meditationphase(String value) {
-    _$meditationphaseAtom.reportWrite(value, super.meditationphase, () {
-      super.meditationphase = value;
+  set state(String value) {
+    _$stateAtom.reportWrite(value, super.state, () {
+      super.state = value;
     });
+  }
+
+  final _$finishMeditationAsyncAction =
+      AsyncAction('_MeditationState.finishMeditation');
+
+  @override
+  Future<dynamic> finishMeditation() {
+    return _$finishMeditationAsyncAction.run(() => super.finishMeditation());
   }
 
   final _$_MeditationStateActionController =
       ActionController(name: '_MeditationState');
 
   @override
-  void startMeditation(Duration duration) {
+  void startMeditation(Duration dur, User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startMeditation');
     try {
-      return super.startMeditation(duration);
+      return super.startMeditation(dur, u, d);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void finishMeditation() {
+  void startTimer() {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
-        name: '_MeditationState.finishMeditation');
+        name: '_MeditationState.startTimer');
     try {
-      return super.finishMeditation();
+      return super.startTimer();
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void pause() {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.pause');
+    try {
+      return super.pause();
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
@@ -133,7 +152,7 @@ user: ${user},
 errorMessage: ${errorMessage},
 duration: ${duration},
 startedmeditation: ${startedmeditation},
-meditationphase: ${meditationphase}
+state: ${state}
     ''';
   }
 }

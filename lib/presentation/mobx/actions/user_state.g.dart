@@ -94,7 +94,7 @@ mixin _$UserState on _UserState, Store {
   final _$takeMeditationAsyncAction = AsyncAction('_UserState.takeMeditation');
 
   @override
-  Future<List<Mission>> takeMeditation(Duration d) {
+  Future<bool> takeMeditation(Duration d) {
     return _$takeMeditationAsyncAction.run(() => super.takeMeditation(d));
   }
 
@@ -117,6 +117,27 @@ mixin _$UserState on _UserState, Store {
   @override
   Future<dynamic> logout() {
     return _$logoutAsyncAction.run(() => super.logout());
+  }
+
+  final _$changeNameAsyncAction = AsyncAction('_UserState.changeName');
+
+  @override
+  Future<dynamic> changeName(String username) {
+    return _$changeNameAsyncAction.run(() => super.changeName(username));
+  }
+
+  final _$updateUserAsyncAction = AsyncAction('_UserState.updateUser');
+
+  @override
+  Future<dynamic> updateUser(String path, String type) {
+    return _$updateUserAsyncAction.run(() => super.updateUser(path, type));
+  }
+
+  final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');
+
+  @override
+  Future<dynamic> updateStage() {
+    return _$updateStageAsyncAction.run(() => super.updateStage());
   }
 
   final _$_UserStateActionController = ActionController(name: '_UserState');

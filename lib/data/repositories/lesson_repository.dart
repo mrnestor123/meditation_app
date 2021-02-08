@@ -26,8 +26,8 @@ class LessonRepositoryImpl implements LessonRepository {
   Future<Either<Failure, void>> takeLesson({UserModel user}) async {
     if (await networkInfo.isConnected) {
       try {
-        await remoteDataSource.takeLesson(user);
-        await localDataSource.takeLesson(user);
+        await remoteDataSource.updateUser(user:user);
+        await localDataSource.updateData(user);
         return Right(true);
       } on Exception {
         return Left(ServerFailure());
