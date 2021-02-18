@@ -7,7 +7,7 @@ class MeditationModel extends Meditation {
   final Duration duration;
   final DateTime day;
   int stagenumber;
-  final Map<int,dynamic> content;
+  final Map<dynamic,dynamic> content;
 
 
 

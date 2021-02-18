@@ -534,8 +534,7 @@ class _ContentViewState extends State<ContentView> {
         extendBodyBehindAppBar: true,
         body: _index == -1
             ? portada()
-            : widget.content.type != 'recording'
-                ? Stack(children: [
+            :Stack(children: [
                     vistaLeccion(),
                     Align(
                       alignment: Alignment.bottomCenter,
@@ -563,6 +562,6 @@ class _ContentViewState extends State<ContentView> {
                       ),
                     ),
                   ])
-                : vistaMeditacion());
+                );
   }
 }
