@@ -78,9 +78,11 @@ class _MobileLayoutState extends State<MobileLayout> {
         actions: [
           IconButton(
               icon: Icon(Icons.ac_unit),
+              color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),
           Container(
-            margin: EdgeInsets.only(left: Configuration.medmargin),
+            margin: EdgeInsets.only(
+                left: Configuration.medmargin, right: Configuration.bigmargin),
             child: GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/profile'),
               child: RadialProgress(
@@ -88,10 +90,13 @@ class _MobileLayoutState extends State<MobileLayout> {
                   progressColor: Configuration.maincolor,
                   goalCompleted: 1,
                   child: CircleAvatar(
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: _userstate.user.image == null
+                        ? Configuration.lightgrey
+                        : Colors.transparent,
                     backgroundImage: _userstate.user.image == null
                         ? null
-                        : FileImage(File(_userstate.user.image)),
+                        : null ,
+                        //: FileImage(File(_userstate.user.image)),
                   )),
             ),
           ),
@@ -115,8 +120,7 @@ class _MobileLayoutState extends State<MobileLayout> {
           BottomNavigationBarItem(
             icon: Icon(Icons.terrain),
             label: 'Path',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'More')
+          )
         ],
         currentIndex: currentindex,
         selectedItemColor: Configuration.maincolor,
@@ -135,7 +139,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             currentindex = newPage;
           });
         },
-        children: [MainScreen(), LearnScreen(), PathScreen(), MoreScreen()],
+        children: [MainScreen(), LearnScreen(), PathScreen()],
       ),
     );
   }

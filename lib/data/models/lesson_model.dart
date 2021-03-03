@@ -9,7 +9,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 class LessonModel extends Lesson {
   String cod, title, image, description, type;
   final List<dynamic> text;
-  final int stagenumber;
+  int stagenumber, position;
 
   LessonModel(
       {this.title,
@@ -18,7 +18,8 @@ class LessonModel extends Lesson {
       this.description,
       this.text,
       this.type,
-      this.stagenumber})
+      this.stagenumber,
+      this.position})
       : super(
             title: title,
             cod: cod,
@@ -26,7 +27,8 @@ class LessonModel extends Lesson {
             description: description,
             type: type,
             text: text,
-            stagenumber: stagenumber);
+            stagenumber: stagenumber,
+            position: position);
 
   factory LessonModel.fromRawJson(String str) =>
       LessonModel.fromJson(json.decode(str));
@@ -35,6 +37,7 @@ class LessonModel extends Lesson {
 
   factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
       cod: json["cod"] == null ? json['codlesson'] : json["cod"],
+      position: json['position'] == null ? null : json['position'],
       title: json["title"] == null ? null : json["title"],
       image: json["image"] == null ? null : json["image"],
       description: json["description"] == null ? null : json["description"],

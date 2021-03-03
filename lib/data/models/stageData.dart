@@ -57,7 +57,7 @@ class StageModel extends Stage {
     s.objectives['lecciones'] = 0;
     s.objectives['meditguiadas'] = 0;
 
-    if (json['path'] != null) {
+   /* if (json['path'] != null) {
       while (json['path'][count.toString()] != null) {
         for (var content in json['path'][count.toString()]) {
           if (s.path[count.toString()] == null) {
@@ -68,7 +68,7 @@ class StageModel extends Stage {
         }
         count++;
       }
-    }
+    }*/
 
     if (json['meditations'] != null) {
       while (json['meditations'][meditationcount.toString()] != null) {

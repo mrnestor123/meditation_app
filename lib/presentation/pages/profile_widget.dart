@@ -6,7 +6,11 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:charts_flutter/flutter.dart';
+
+import 'package:charts_flutter/src/text_element.dart' as TextElement;
+import 'package:charts_flutter/src/text_style.dart' as style;
+
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -62,30 +66,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         top: Configuration.blockSizeVertical * 2),
                     child: ListView(
                       children: <Widget>[
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.pets_sharp,
-                                  size: Configuration.bigicon),
-                              SizedBox(
-                                  height: Configuration.blockSizeVertical * 10)
-                            ]),
                         Table(children: [
                           TableRow(children: [
                             ProfileInfoBigCard(
-                              firstText: _userstate.user.stats['total']['meditaciones']
+                              firstText: _userstate
+                                  .user.stats['total']['meditaciones']
                                   .toString(),
                               secondText: "Meditations\ncompleted",
                               icon: Icon(Icons.self_improvement),
                             ),
                             ProfileInfoBigCard(
-                                firstText: _userstate.user.stats['total']['lecciones']
+                                firstText: _userstate
+                                    .user.stats['total']['lecciones']
                                     .toString(),
                                 secondText: "Lessons\ncompleted",
                                 icon: Icon(Icons.book))
                           ]),
                         ]),
-                        SizedBox(height: Configuration.blockSizeVertical*3),
+                        SizedBox(height: Configuration.blockSizeVertical * 3),
                         Padding(
                             padding: EdgeInsets.all(Configuration.smpadding),
                             child: Text('Meditation record',
@@ -225,6 +223,14 @@ class _MyInfoState extends State<MyInfo> {
                 _userstate.user.nombre,
                 style: Configuration.text('small', Colors.white),
               ),
+              IconButton(
+                onPressed: () => Navigator.pushNamed(context, '/settings'),
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: Configuration.smicon,
+                ),
+              )
             ],
           ),
         ],
@@ -321,22 +327,35 @@ class TwoLineItem extends StatelessWidget {
 }
 
 class SimpleBarChart extends StatelessWidget {
-  final List<charts.Series> seriesList;
+  final List<Series> seriesList;
   final bool animate;
 
   SimpleBarChart({this.seriesList, this.animate});
 
   @override
   Widget build(BuildContext context) {
-    return new charts.BarChart(
+    return BarChart(
       _createSampleData(),
+      behaviors: [
+         LinePointHighlighter(
+          symbolRenderer: CircleSymbolRenderer()
+        )
+      ],
+      selectionModels: [
+        SelectionModelConfig(changedListener: (SelectionModel model) {
+          if (model.hasDatumSelection)
+            print(model.selectedSeries[0]
+                .measureFn(model.selectedDatum[0].index));
+        })
+      ],
+
       // Disable animations for image tests.
       animate: true,
     );
   }
 
   /// Create one series with sample hard coded data.
-  static List<charts.Series<Ordinal, String>> _createSampleData() {
+  static List<Series<Ordinal, String>> _createSampleData() {
     final data = [
       new Ordinal('M', 5),
       new Ordinal('T', 25),
@@ -348,9 +367,9 @@ class SimpleBarChart extends StatelessWidget {
     ];
 
     return [
-      new charts.Series<Ordinal, String>(
+      new Series<Ordinal, String>(
         id: 'Time meditated',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+        colorFn: (_, __) => MaterialPalette.blue.shadeDefault,
         domainFn: (Ordinal sales, _) => sales.day,
         measureFn: (Ordinal sales, _) => sales.min,
         data: data,
@@ -358,6 +377,10 @@ class SimpleBarChart extends StatelessWidget {
     ];
   }
 }
+
+
+
+
 
 /// Sample ordinal data type.
 class Ordinal {

@@ -76,14 +76,14 @@ abstract class _UserState with Store {
       user = u;
       loggedin = true;
     });
-  } 
-
+  }
 
   //SE PUEDE BORRARRR
-  @action 
+  @action
   Future<bool> takeMeditation(Duration d) async {
     int currentposition = user.position;
-    Either<Failure, User> meditation =await meditate.call(Params(duration: d, user: user, d: data));
+    Either<Failure, User> meditation =
+        await meditate.call(Params(duration: d, user: user, d: data));
 
     List<Mission> m = new List<Mission>();
 
@@ -115,6 +115,11 @@ abstract class _UserState with Store {
     result.fold((Failure f) => print(f.error), (DataBase d) {
       data = d;
     });
+  }
+
+  @action
+  Future follow(User u, bool follow) async {
+    final following = updateUserUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));
   }
 
   @action

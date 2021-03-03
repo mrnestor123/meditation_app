@@ -40,7 +40,6 @@ abstract class UserRemoteDataSource {
   Future changeStage(UserModel user);
 
   Future updateLessons(UserModel u);
-
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -194,6 +193,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     for (var stage in stages.documents) {
       StageModel s = new StageModel.fromJson(stage.data);
+      QuerySnapshot lessons = await database
+          .collection('content')
+          .where('stagenumber', isEqualTo: s.stagenumber)
+          .getDocuments();
+
+      for (var lesson in lessons.documents) {
+        if (lesson.data['position'] != null) {
+          s.path.add(LessonModel.fromJson(lesson.data));
+        }
+      }
+
+      s.path.sort((a, b) => a.position - b.position);
       d.stages.add(s);
     }
 
@@ -202,37 +213,34 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
-    d.users.sort((a,b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+    d.users.sort((a, b) =>
+        b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
 
     return d;
   }
 
   @override
-  //cada vez que los valores cambien del usuario lo updatearemos
   Future updateUser({UserModel user, DataBase data, MeditationModel m}) async {
     QuerySnapshot userreference = await database
         .collection('users')
         .where('coduser', isEqualTo: user.coduser)
         .getDocuments();
     String documentId = userreference.documents[0].documentID;
-
-    print(user.toRawJson());
-
     await database
         .collection("users")
         .document(documentId)
         .updateData(user.toJson());
 
-    //actualizamos la base de datos
+    //actualizamos la base de datos. habrá que mirarlo esto
     if (data != null) {
       QuerySnapshot users = await database.collection('users').getDocuments();
       data.users.clear();
-
       for (var user in users.documents) {
         data.users.add(new UserModel.fromJson(user.data));
       }
-    
-      data.users.sort((a,b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+
+      data.users.sort((a, b) =>
+          b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
     }
 
     if (m != null) {

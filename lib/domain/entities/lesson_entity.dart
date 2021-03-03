@@ -6,7 +6,7 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 class Lesson extends Content {
   String cod, title, image, description, type;
   List<dynamic> text;
-  int stagenumber;
+  int stagenumber,position;
   Map<String, String> lessontext = new Map();
 
   Lesson(
@@ -15,6 +15,7 @@ class Lesson extends Content {
       this.image,
       this.stagenumber,
       this.type,
+      this.position,
       @required this.description,
       @required this.text})
       : super(
@@ -23,7 +24,8 @@ class Lesson extends Content {
             type: type,
             image: image,
             stagenumber: stagenumber,
-            description: description);
+            description: description,
+            position: position);
 
 //  @override
   //List<Object> get props =>

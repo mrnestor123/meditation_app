@@ -27,7 +27,7 @@ class Configuration {
 
   //the purple color
   static Color maincolor =
-      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+      !nightmode ? Color.fromRGBO(224, 213, 182, 1.0) : Colors.black;
   static Color darkpurple = Colors.deepPurple;
   static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
 

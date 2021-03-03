@@ -24,8 +24,12 @@ class _MeditationScreenState extends State<MeditationScreen> {
   MeditationState _meditationstate;
   int _index;
 
+  //podriamos utilizar meditationstate de arriba
   var meditationtype = 'free';
   Meditation selectedmeditation;
+  var selectedstage = 1;
+  var selectedtype = 'Meditation';
+  var finished = false;
 
   Widget initialPage(context) {
     Widget freeMeditation() {
@@ -61,22 +65,26 @@ class _MeditationScreenState extends State<MeditationScreen> {
     Widget guidedMeditation() {
       List<Widget> meditations() {
         List<Widget> meditations = new List<Widget>();
-
-        _userstate.data.stages[0].meditpath.forEach((key, list) {
+        _userstate.data.stages[selectedstage - 1].meditpath
+            .forEach((key, list) {
           for (var meditation in list) {
             meditations.add(GestureDetector(
-                onTap: () => selectedmeditation = meditation,
+                onTap: () => setState(() => selectedmeditation = meditation),
                 child: Column(children: [
                   Container(
                       height: Configuration.height * 0.1,
                       width: Configuration.height * 0.1,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.0),
+                          border: selectedmeditation != null &&
+                                  selectedmeditation.cod == meditation.cod
+                              ? Border.all(color: Configuration.maincolor)
+                              : null,
                           image: DecorationImage(
                               image: NetworkImage(meditation.image)))),
                   Text(
                     meditation.title,
-                    style: Configuration.text('small', Colors.white),
+                    style: Configuration.text('small', Colors.black),
                     textAlign: TextAlign.center,
                   )
                 ])));
@@ -86,19 +94,93 @@ class _MeditationScreenState extends State<MeditationScreen> {
         return meditations;
       }
 
+      Widget stages() {
+        var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        var types = ['Meditation', 'Game'];
+
+        return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(children: [
+                Text(
+                  'Stage',
+                  style: Configuration.text('small', Colors.black),
+                ),
+                SizedBox(width: Configuration.blockSizeVertical * 1),
+                DropdownButton<int>(
+                    value: selectedstage,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 0,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (int newValue) {
+                      setState(() {
+                        selectedstage = newValue;
+                      });
+                    },
+                    items: stages.map<DropdownMenuItem<int>>((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text(value.toString()),
+                      );
+                    }).toList())
+              ]),
+              Row(children: [
+                Text(
+                  'Type',
+                  style: Configuration.text('small', Colors.black),
+                ),
+                SizedBox(width: Configuration.blockSizeVertical * 1),
+                DropdownButton<String>(
+                    value: selectedtype,
+                    elevation: 16,
+                    style: TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 0,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        selectedtype = newValue;
+                      });
+                    },
+                    items: types.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value.toString()),
+                      );
+                    }).toList())
+              ]),
+            ]);
+      }
+
       return SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Choose the meditation',
-                style: Configuration.text('medium', Colors.white)),
             Container(
-                height: Configuration.height * 0.4,
-                child: GridView(
-                    padding: EdgeInsets.all(Configuration.medpadding),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2),
-                    children: meditations())),
+                height: Configuration.height * 0.45,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.0)),
+                margin: EdgeInsets.all(Configuration.bigmargin),
+                child: Column(children: [
+                  Container(
+                    height: Configuration.height * 0.05,
+                    child: stages(),
+                  ),
+                  Container(
+                    height: Configuration.height * 0.4,
+                    child: GridView(
+                        padding: EdgeInsets.all(Configuration.medpadding),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2),
+                        children: meditations()),
+                  )
+                ])),
             GestureDetector(
               onTap: () => {_meditationstate.state = 'pre_guided'},
               child: Container(
@@ -123,12 +205,24 @@ class _MeditationScreenState extends State<MeditationScreen> {
     }
 
     return Column(children: [
-      SizedBox(height: Configuration.height * 0.05),
-      Text(
-        '''Choose the\n meditation type ''',
-        style: Configuration.text('medium', Colors.white),
-        textAlign: TextAlign.center,
-      ),
+      Container(
+          width: Configuration.width,
+          decoration: BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                blurRadius: 0.5,
+                offset: Offset(0, 1),
+                spreadRadius: 0.5,
+                color: Colors.black.withOpacity(0.2))
+          ]),
+          padding: EdgeInsets.all(Configuration.smpadding),
+          child: Column(children: [
+            SizedBox(height: Configuration.height * 0.04),
+            Text(
+              '''Choose the\n meditation ''',
+              style: Configuration.text('medium', Colors.black),
+              textAlign: TextAlign.center,
+            )
+          ])),
       SizedBox(height: Configuration.height * 0.05),
       Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
         GestureDetector(
@@ -138,11 +232,16 @@ class _MeditationScreenState extends State<MeditationScreen> {
               height: Configuration.height * 0.1,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.0),
-                  color: Colors.white),
+                  color: meditationtype == 'guided'
+                      ? Colors.white
+                      : Configuration.maincolor),
               child: Center(
                   child: Text('Free',
                       style: Configuration.text(
-                          'medium', Configuration.maincolor))),
+                          'medium',
+                          meditationtype == 'guided'
+                              ? Colors.black
+                              : Colors.white))),
             )),
         GestureDetector(
             onTap: () => {setState(() => meditationtype = 'guided')},
@@ -151,11 +250,16 @@ class _MeditationScreenState extends State<MeditationScreen> {
               height: Configuration.height * 0.1,
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.0),
-                  color: Colors.white),
+                  color: meditationtype == 'guided'
+                      ? Configuration.maincolor
+                      : Colors.white),
               child: Center(
                   child: Text('Guided',
                       style: Configuration.text(
-                          'medium', Configuration.maincolor))),
+                          'medium',
+                          meditationtype == 'free'
+                              ? Colors.black
+                              : Colors.white))),
             ))
       ]),
       SizedBox(height: Configuration.height * 0.05),
@@ -239,21 +343,60 @@ class _MeditationScreenState extends State<MeditationScreen> {
     List<Widget> getBalls() {
       List<Widget> res = new List();
       selectedmeditation.content.forEach((key, value) {
-          int index = int.parse(key);
-          res.add(Container(
-            width: Configuration.safeBlockHorizontal * 3,
-            height: Configuration.safeBlockHorizontal * 3,
-            margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _index == index
-                  ? Color.fromRGBO(0, 0, 0, 0.9)
-                  : Color.fromRGBO(0, 0, 0, 0.4),
-            ),
-          ));
+        int index = int.parse(key);
+        res.add(Container(
+          width: Configuration.safeBlockHorizontal * 3,
+          height: Configuration.safeBlockHorizontal * 3,
+          margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _index == index
+                ? Color.fromRGBO(0, 0, 0, 0.9)
+                : Color.fromRGBO(0, 0, 0, 0.4),
+          ),
+        ));
       });
-
       return res;
+    }
+
+    List<Widget> getContent(index) {
+      List<Widget> l = new List();
+
+      if (selectedmeditation.content[index.toString()]['title'] != null) {
+        l.add(Text(selectedmeditation.content[index.toString()]['title'],
+            style: Configuration.text('medium', Colors.black)));
+      }
+
+      if (selectedmeditation.content[index.toString()]['image'] != null) {
+        l.add(Image(
+            image: NetworkImage(
+                selectedmeditation.content[index.toString()]['image'])));
+      }
+
+      if (selectedmeditation.content[index.toString()]['text'] != null) {
+        l.add(Text(selectedmeditation.content[index.toString()]['text'],
+            style: Configuration.text('small', Colors.black)));
+      }
+
+      if (finished) {
+        l.add(SizedBox(height: Configuration.height * 0.03));
+        l.add(GestureDetector(
+          onTap: ()=> {_meditationstate.startMeditation(selectedmeditation.duration, _userstate.user, _userstate.data)} ,
+          child: Container(
+            child: Text(
+              'Start',
+              style: Configuration.text('medium', Colors.white),
+            ),
+            padding: EdgeInsets.all(Configuration.medpadding),
+            height: Configuration.height * 0.1,
+            decoration: BoxDecoration(
+                color: Configuration.maincolor,
+                borderRadius: BorderRadius.circular(14)),
+          ),
+        ));
+      }
+
+      return l;
     }
 
     return Stack(children: [
@@ -263,14 +406,10 @@ class _MeditationScreenState extends State<MeditationScreen> {
             return Container(
                 width: Configuration.width,
                 height: Configuration.height,
-                color: Configuration.lightpurple,
                 padding: EdgeInsets.all(Configuration.medpadding),
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(selectedmeditation.content[index.toString()]['text'],
-                          style: Configuration.text('small', Colors.white)),
-                    ]));
+                    children: getContent(index)));
           },
           options: CarouselOptions(
               height: Configuration.height,
@@ -281,6 +420,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
               onPageChanged: (index, reason) {
                 setState(() {
                   _index = index;
+                  if (_index == selectedmeditation.content.entries.length - 1) {
+                    finished = true;
+                  }
                 });
               })),
       Align(
@@ -302,11 +444,26 @@ class _MeditationScreenState extends State<MeditationScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        leading: _meditationstate.state == 'initial'
+            ? IconButton(
+                icon: Icon(Icons.arrow_back_sharp),
+                color: Colors.black,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            : IconButton(
+                icon: Icon(Icons.close),
+                color: Colors.black,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
       ),
       extendBodyBehindAppBar: true,
       body: Container(
           height: Configuration.height,
-          color: Configuration.maincolor,
+          color: Configuration.lightgrey,
           width: Configuration.width,
           child: Observer(
             builder: (BuildContext context) {

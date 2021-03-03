@@ -109,108 +109,106 @@ class _StageViewState extends State<StageView> {
     List<Widget> lessons = new List();
     List<Image> imagelist = new List();
 
-    widget.stage.path.forEach((key, list) {
-      for (var content in list) {
-        var image;
-        if (content.image != null) {
-          var configuration = createLocalImageConfiguration(context);
-          image = new NetworkImage(content.image)..resolve(configuration);
-        }
-        if (filter.contains(content.type) || filter.contains('all')) {
-          lessons.add(GestureDetector(
-            onTap: () {
-              if (_userstate.user.position >= int.parse(key) ||
-                  _userstate.user.stagenumber > content.stagenumber) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ContentView(
-                            lesson: content,
-                            content: content,
-                            slider: image))).then(onGoBack);
-              }
-            },
-            child: Container(
-              height: Configuration.height * 0.13,
-              margin: EdgeInsets.all(Configuration.medmargin),
-              decoration: BoxDecoration(
-                color: Configuration.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 0.4,
-                    blurRadius: 0.4,
-                    offset: Offset(0.6, 0.6), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Stack(children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16),
-                            bottomRight: Radius.circular(16)),
-                        child: Image.network(content.image,
-                            height: Configuration.height * 0.13),
-                      ),
-                    ]),
-                  ),
-                  Positioned(
-                      top: 0,
-                      left: 0,
-                      child: Padding(
-                        padding: EdgeInsets.all(Configuration.smpadding),
-                        child: Container(
-                          width: Configuration.safeBlockHorizontal * 5,
-                          height: Configuration.safeBlockHorizontal * 5,
-                          child: Icon(
-                              content.type == 'meditation'
-                                  ? Icons.self_improvement
-                                  : Icons.book,
-                              color: Colors.grey),
-                        ),
-                      )),
-                  Positioned(
-                      left: 0,
-                      bottom: 0,
+    widget.stage.path.forEach((content) {
+      var image;
+      if (content.image != null) {
+        var configuration = createLocalImageConfiguration(context);
+        image = new NetworkImage(content.image)..resolve(configuration);
+      }
+      if (filter.contains(content.type) || filter.contains('all')) {
+        lessons.add(GestureDetector(
+          onTap: () {
+            if (_userstate.user.position >= content.position ||
+                _userstate.user.stagenumber > content.stagenumber) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ContentView(
+                          lesson: content,
+                          content: content,
+                          slider: image))).then(onGoBack);
+            }
+          },
+          child: Container(
+            height: Configuration.height * 0.13,
+            margin: EdgeInsets.all(Configuration.medmargin),
+            decoration: BoxDecoration(
+              color: Configuration.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 0.4,
+                  blurRadius: 0.4,
+                  offset: Offset(0.6, 0.6), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Stack(children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(16),
+                          bottomRight: Radius.circular(16)),
+                      child: Image.network(content.image,
+                          height: Configuration.height * 0.13),
+                    ),
+                  ]),
+                ),
+                Positioned(
+                    top: 0,
+                    left: 0,
+                    child: Padding(
+                      padding: EdgeInsets.all(Configuration.smpadding),
                       child: Container(
-                        width: Configuration.width * 0.6,
-                        padding: EdgeInsets.all(Configuration.smpadding),
-                        child: Text(
-                          content.title,
-                          style: Configuration.text(
-                              "tiny", Colors.black, "bold", 1),
-                        ),
-                      )),
-                  Positioned(
+                        width: Configuration.safeBlockHorizontal * 5,
+                        height: Configuration.safeBlockHorizontal * 5,
+                        child: Icon(
+                            content.type == 'meditation'
+                                ? Icons.self_improvement
+                                : Icons.book,
+                            color: Colors.grey),
+                      ),
+                    )),
+                Positioned(
                     left: 0,
                     bottom: 0,
-                    right: 0,
-                    top: 0,
-                    child: AnimatedContainer(
-                      key: Key(content.cod),
-                      duration: Duration(seconds: 2),
-                      width: Configuration.height * 0.1,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          color: _userstate.user.position < int.parse(key) &&
-                                  _userstate.user.stagenumber <=
-                                      content.stagenumber
-                              ? Colors.grey.withOpacity(0.6)
-                              : Colors.transparent),
-                      curve: Curves.fastOutSlowIn,
-                    ),
+                    child: Container(
+                      width: Configuration.width * 0.6,
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      child: Text(
+                        content.title,
+                        style:
+                            Configuration.text("tiny", Colors.black, "bold", 1),
+                      ),
+                    )),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  top: 0,
+                  child: AnimatedContainer(
+                    key: Key(content.cod),
+                    duration: Duration(seconds: 2),
+                    width: Configuration.height * 0.1,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: _userstate.user.position < content.position &&
+                                _userstate.user.stagenumber <=
+                                    content.stagenumber
+                            ? Colors.grey.withOpacity(0.6)
+                            : Colors.transparent),
+                    curve: Curves.fastOutSlowIn,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ));
-        }
+          ),
+        ));
       }
     });
 
@@ -259,7 +257,7 @@ class _StageViewState extends State<StageView> {
                   right: Configuration.smmargin,
                   top: Configuration.medmargin),
               decoration: BoxDecoration(
-                  color: Configuration.lightpurple,
+                  color: Configuration.lightgrey,
                   borderRadius: BorderRadius.circular(12.0)),
             ),
             Container(
@@ -352,13 +350,12 @@ class _ContentViewState extends State<ContentView> {
         Image(image: widget.slider),
         Container(
             width: Configuration.width,
-            color: Configuration.darkpurple.withOpacity(0.9),
+            color: Configuration.grey.withOpacity(0.7),
             height: Configuration.height * 0.5),
       ]),
-      Divider(color: Colors.white, height: 1),
+      Divider(color: Colors.black, height: 1),
       Expanded(
         child: Container(
-          color: Configuration.lightpurple,
           width: Configuration.width,
           child: Stack(
             children: [
@@ -368,7 +365,7 @@ class _ContentViewState extends State<ContentView> {
                     right: Configuration.smpadding,
                     top: Configuration.smpadding),
                 child: Text(widget.content.title,
-                    style: Configuration.text('medium', Colors.white)),
+                    style: Configuration.text('medium', Colors.black)),
               ),
               Center(
                 child: GestureDetector(
@@ -377,11 +374,10 @@ class _ContentViewState extends State<ContentView> {
                     width: Configuration.width * 0.25,
                     height: Configuration.width * 0.25,
                     decoration: BoxDecoration(
-                        shape: BoxShape.circle, color: Colors.white),
+                        shape: BoxShape.circle, color: Configuration.maincolor),
                     child: Center(
                       child: Text('Start',
-                          style: Configuration.text(
-                              'medium', Configuration.lightpurple)),
+                          style: Configuration.text('medium', Colors.white)),
                     ),
                   ),
                 ),
@@ -399,7 +395,7 @@ class _ContentViewState extends State<ContentView> {
         itemBuilder: (context, index) {
           return Container(
             width: Configuration.width,
-            color: Configuration.lightpurple,
+            color: Configuration.lightgrey,
             child: Column(
               mainAxisAlignment: widget.lesson.text[index]['image'] == ''
                   ? MainAxisAlignment.center
@@ -413,7 +409,7 @@ class _ContentViewState extends State<ContentView> {
                     width: Configuration.width,
                     padding: EdgeInsets.all(Configuration.smpadding),
                     child: Text(widget.lesson.text[index]["text"],
-                        style: Configuration.text('small', Colors.white))),
+                        style: Configuration.text('small', Colors.black))),
                 Row(
                     mainAxisAlignment: widget.lesson.type == 'meditation'
                         ? MainAxisAlignment.spaceEvenly
@@ -447,7 +443,68 @@ class _ContentViewState extends State<ContentView> {
                               ),
                             )
                           : Container(),
-                      GestureDetector(
+                      reachedend
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                  MaterialButton(
+                                    onPressed: () async {
+                                      await _userstate
+                                          .takeLesson(widget.lesson);
+                                      Navigator.pop(context, true);
+                                    },
+                                    color: Configuration.maincolor,
+                                    textColor: Colors.white,
+                                    child: Text(
+                                      'Next lesson',
+                                      style: Configuration.text(
+                                          'medium', Colors.white),
+                                    ),
+                                    padding: EdgeInsets.all(
+                                        Configuration.medpadding),
+                                    shape: CircleBorder(),
+                                  ),
+                                  MaterialButton(
+                                    onPressed: () async {
+                                      await _userstate
+                                          .takeLesson(widget.lesson);
+                                      Navigator.pop(context, true);
+                                    },
+                                    color: Configuration.maincolor,
+                                    textColor: Colors.white,
+                                    child: Text(
+                                      'Finish',
+                                      style: Configuration.text(
+                                          'medium', Colors.white),
+                                    ),
+                                    padding: EdgeInsets.all(
+                                        Configuration.medpadding),
+                                    shape: CircleBorder(),
+                                  ),
+
+                                  /*ClipOval(
+                                    child: Material(
+                                      color: Configuration
+                                          .maincolor, // button color
+                                      child: InkWell(
+                                        splashColor:
+                                            Colors.red, // inkwell color
+                                        child: SizedBox(
+                                            width: Configuration.width*0.2,
+                                            height: Configuration.width*0.2,
+                                            child: Center(child: Text('Finish', style: Configuration.text('medium',Colors.white),))),
+                                        onTap: () async {
+                                          await _userstate
+                                              .takeLesson(widget.lesson);
+                                          Navigator.pop(context, true);
+                                        },
+                                      ),
+                                    ),
+                                  ),*/
+                                ])
+                          : Container(),
+
+                      /*GestureDetector(
                         onTap: () async {
                           await _userstate.takeLesson(widget.lesson);
                           Navigator.pop(context, true);
@@ -470,7 +527,7 @@ class _ContentViewState extends State<ContentView> {
                                 )
                               : Container(),
                         ),
-                      ),
+                      ) : Container(),*/
                     ])
               ],
             ),
@@ -534,34 +591,33 @@ class _ContentViewState extends State<ContentView> {
         extendBodyBehindAppBar: true,
         body: _index == -1
             ? portada()
-            :Stack(children: [
-                    vistaLeccion(),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        margin: EdgeInsets.all(Configuration.bigmargin),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: widget.lesson.text.map((url) {
-                            int index = widget.lesson.text.indexOf(url);
-                            return Container(
-                              width: Configuration.safeBlockHorizontal * 3,
-                              height: Configuration.safeBlockHorizontal * 3,
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 10.0, horizontal: 2.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _index == index
-                                    ? Color.fromRGBO(0, 0, 0, 0.9)
-                                    : Color.fromRGBO(0, 0, 0, 0.4),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
+            : Stack(children: [
+                vistaLeccion(),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.all(Configuration.bigmargin),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: widget.lesson.text.map((url) {
+                        int index = widget.lesson.text.indexOf(url);
+                        return Container(
+                          width: Configuration.safeBlockHorizontal * 3,
+                          height: Configuration.safeBlockHorizontal * 3,
+                          margin: EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 2.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _index == index
+                                ? Color.fromRGBO(0, 0, 0, 0.9)
+                                : Color.fromRGBO(0, 0, 0, 0.4),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ])
-                );
+                  ),
+                ),
+              ]));
   }
 }

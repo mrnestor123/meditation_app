@@ -15,6 +15,7 @@ import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/settings_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
@@ -73,7 +74,8 @@ class MyApp extends StatelessWidget {
               '/path': (context) => PathScreen(),
               '/learn': (BuildContext context) => Provider(
                   create: (context) => sl<LessonState>(), child: LearnScreen()),
-              '/selectusername': (BuildContext context) => SetUserData()
+              '/selectusername': (BuildContext context) => SetUserData(),
+              '/settings': (BuildContext context) => Settings() 
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),
               // '/feed': (BuildContext context) => FeedWidget(0),

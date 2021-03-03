@@ -8,7 +8,7 @@ import 'meditation_entity.dart';
 class Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery;
-  Map<String, List<Content>> path = new Map();
+  ObservableList<Content> path = new ObservableList();
   Map<String, List<Meditation>> meditpath = new Map();
   Map<String, dynamic> objectives = new Map();
   List<Meditation> meditations = new ObservableList();

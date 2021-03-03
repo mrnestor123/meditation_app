@@ -5,7 +5,7 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class Meditation extends Content {
   String codmed, title, description, image, recording, type, coduser;
-  int stagenumber;
+  int stagenumber, position;
   Duration duration;
   DateTime day;
 
@@ -25,6 +25,7 @@ class Meditation extends Content {
       this.description,
       this.image,
       this.title,
+      this.position,
       this.coduser,
       this.content
       //this.userId
@@ -35,5 +36,6 @@ class Meditation extends Content {
             image: image,
             title: title,
             stagenumber: stagenumber,
+            position: position,
             type: type);
 }

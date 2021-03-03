@@ -14,15 +14,15 @@ class UpdateUserUseCase extends UseCase<User, UParams> {
   Future<Either<Failure, User>> call(UParams params) async {
     if (params.type == "name") {
       params.user.nombre = params.nombre;
-    }
-
-    //updateamos la stage
-    if (params.type == 'stage') {
+    } else if (params.type == 'stage') {
+      //updateamos la stage
       params.user.updateStage(params.db);
-    }
-
-    if (params.type == 'image') {
+    } else if (params.type == 'image') {
       params.user.image = params.image;
+    } else if (params.type == 'follow') {
+      params.user.follow(params.followeduser);
+    } else if (params.type == 'unfollow') {
+      params.user.unfollow(params.followeduser);
     }
 
     return repository.updateUser(user: params.user, d: params.db);
@@ -31,10 +31,17 @@ class UpdateUserUseCase extends UseCase<User, UParams> {
 
 class UParams {
   final User user;
+  final User followeduser;
   final String nombre;
   final String type;
   final DataBase db;
   final String image;
 
-  UParams({this.user, this.nombre, this.type, this.db, this.image});
+  UParams(
+      {this.user,
+      this.nombre,
+      this.type,
+      this.db,
+      this.image,
+      this.followeduser});
 }
