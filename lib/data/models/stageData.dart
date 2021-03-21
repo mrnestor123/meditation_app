@@ -4,7 +4,7 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
-import 'package:observable/observable.dart';
+import 'package:mobx/mobx.dart';
 
 class StageModel extends Stage {
   int stagenumber, userscount;
@@ -55,33 +55,7 @@ class StageModel extends Stage {
       s.objectives = new Map();
     }
     s.objectives['lecciones'] = 0;
-    s.objectives['meditguiadas'] = 0;
-
-   /* if (json['path'] != null) {
-      while (json['path'][count.toString()] != null) {
-        for (var content in json['path'][count.toString()]) {
-          if (s.path[count.toString()] == null) {
-            s.path[count.toString()] = new ObservableList<Content>();
-          }
-          s.objectives['lecciones']++;
-          s.path[count.toString()].add(new LessonModel.fromJson(content));
-        }
-        count++;
-      }
-    }*/
-
-    if (json['meditations'] != null) {
-      while (json['meditations'][meditationcount.toString()] != null) {
-        for (var content in json['meditations'][meditationcount.toString()]) {
-          if (s.meditpath[meditationcount.toString()] == null) {
-            s.meditpath[meditationcount.toString()] = new ObservableList<MeditationModel>();
-          }
-          s.objectives['meditguiadas']++;
-          s.meditpath[meditationcount.toString()].add(new MeditationModel.fromJson(content));
-        }
-        meditationcount++;
-      }
-    }
+    s.objectives['meditguiadas'] = 0;   
 
     return s;
   }

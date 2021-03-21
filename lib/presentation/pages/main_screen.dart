@@ -18,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
   UserState _userstate;
 
   Color darken(Color c, [int percent = 0]) {
-    assert(1 <= percent && percent <= 100);
+    assert(0 <= percent && percent <= 100);
     var f = 1 - percent / 100;
     return Color.fromARGB(c.alpha, (c.red * f).round(), (c.green * f).round(),
         (c.blue * f).round());
@@ -94,25 +94,32 @@ class _MainScreenState extends State<MainScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: Configuration.height * 0.025),
-            GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/imagepath'),
-              child: Container(
-                  width: Configuration.width * 0.9,
-                  height: Configuration.height * 0.2,
-                  padding: EdgeInsets.all(Configuration.smpadding),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(blurRadius: 1.5,offset: Offset(1.5,1.5), spreadRadius: 0.4)],
-                      color: darken(Configuration.maincolor, 10 * (9-_userstate.user.stagenumber))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Stage ' + _userstate.user.stagenumber.toString(),style: Configuration.text('small', Colors.white), ),
-                      Expanded(
-                          child: Image(
-                              image: AssetImage('assets/stage 1/stage 1.png'))),
-                    ],
-                  )),
+            Container(
+              margin: EdgeInsets.all(Configuration.medmargin),
+              width: Configuration.width * 0.9,
+              height: Configuration.height * 0.2,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+              child: ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/imagepath'),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Stage ' + _userstate.user.stagenumber.toString(),
+                      style: Configuration.text('small', Colors.white),
+                    ),
+                    Expanded(
+                        child: Image(
+                            image: AssetImage('assets/stage 1/stage 1.png'))),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                    primary: Configuration.maincolor,
+                    onPrimary: Colors.white,
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    minimumSize: Size(double.infinity, double.infinity)),
+              ),
             ),
             SizedBox(height: Configuration.height * 0.05),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [

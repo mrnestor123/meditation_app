@@ -2,14 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 import 'package:charts_flutter/flutter.dart';
-
-import 'package:charts_flutter/src/text_element.dart' as TextElement;
-import 'package:charts_flutter/src/text_style.dart' as style;
 
 
 class ProfileScreen extends StatefulWidget {
@@ -92,7 +90,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Container(
                             width: Configuration.width,
                             height: Configuration.height * 0.2,
-                            child: SimpleBarChart())
+                            child: SimpleBarChart(
+                              date: DateTime.now().subtract(
+                                  Duration(days: DateTime.now().weekday - 1)),
+                            ))
                       ],
                     ),
                   ),
@@ -141,19 +142,25 @@ class _MyInfoState extends State<MyInfo> {
 
   _imgFromCamera() async {
     PickedFile image = await _picker.getImage(source: ImageSource.camera);
-
+    
+    if(image != null){
+    _userstate.updateUser(image, 'image');
+    
     setState(() {
       _image = image;
     });
+    }
   }
 
   _imgFromGallery() async {
     PickedFile image = await _picker.getImage(source: ImageSource.gallery);
 
-    _userstate.updateUser(image.path, 'image');
-    setState(() {
-      _image = image;
-    });
+     if(image != null){
+    _userstate.updateUser(image, 'image');
+      setState(() {
+        _image = image;
+      });
+     }
   }
 
   void _showPicker(context) {
@@ -204,7 +211,7 @@ class _MyInfoState extends State<MyInfo> {
                     backgroundColor: Colors.transparent,
                     backgroundImage: _userstate.user.image == null
                         ? null
-                        : FileImage(File(_userstate.user.image)),
+                        : NetworkImage(_userstate.user.image),
                     child: Icon(
                       Icons.camera_alt_outlined,
                       size: Configuration.medpadding,
@@ -329,18 +336,17 @@ class TwoLineItem extends StatelessWidget {
 class SimpleBarChart extends StatelessWidget {
   final List<Series> seriesList;
   final bool animate;
+  DateTime date;
+  UserState _userstate;
 
-  SimpleBarChart({this.seriesList, this.animate});
+  SimpleBarChart({this.seriesList, this.animate, this.date});
 
   @override
   Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
     return BarChart(
-      _createSampleData(),
-      behaviors: [
-         LinePointHighlighter(
-          symbolRenderer: CircleSymbolRenderer()
-        )
-      ],
+      _createSampleData(_userstate.user),
+      behaviors: [LinePointHighlighter(symbolRenderer: CircleSymbolRenderer())],
       selectionModels: [
         SelectionModelConfig(changedListener: (SelectionModel model) {
           if (model.hasDatumSelection)
@@ -355,16 +361,22 @@ class SimpleBarChart extends StatelessWidget {
   }
 
   /// Create one series with sample hard coded data.
-  static List<Series<Ordinal, String>> _createSampleData() {
-    final data = [
-      new Ordinal('M', 5),
-      new Ordinal('T', 25),
-      new Ordinal('W', 100),
-      new Ordinal('TH', 75),
-      new Ordinal('F', 75),
-      new Ordinal('S', 75),
-      new Ordinal('S', 75),
-    ];
+  List<Series<Ordinal, String>> _createSampleData(User user) {
+    final days = ['M', 'T', 'W', 'TH', 'F', 'S', 'S'];
+    final data = List<Ordinal>.empty(growable: true);
+
+    for (var day in days) {
+      var time = user.stats['meditationtime'];
+      var datestring = date.day.toString() + '-' + date.month.toString();
+      date = date.add(Duration(days: 1));
+      data.add(new Ordinal(
+          day,
+          time != null
+              ? time[datestring] != null
+                  ? time[datestring]
+                  : 0
+              : 0));
+    }
 
     return [
       new Series<Ordinal, String>(
@@ -377,10 +389,6 @@ class SimpleBarChart extends StatelessWidget {
     ];
   }
 }
-
-
-
-
 
 /// Sample ordinal data type.
 class Ordinal {

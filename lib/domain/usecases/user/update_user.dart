@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
@@ -18,7 +19,8 @@ class UpdateUserUseCase extends UseCase<User, UParams> {
       //updateamos la stage
       params.user.updateStage(params.db);
     } else if (params.type == 'image') {
-      params.user.image = params.image;
+      Either<Failure,String> image = await repository.updateImage(params.image, params.user);
+      image.fold((l) => print('error al subir imagen'), (r) => params.user.image = r);
     } else if (params.type == 'follow') {
       params.user.follow(params.followeduser);
     } else if (params.type == 'unfollow') {
@@ -35,7 +37,7 @@ class UParams {
   final String nombre;
   final String type;
   final DataBase db;
-  final String image;
+  final PickedFile image;
 
   UParams(
       {this.user,

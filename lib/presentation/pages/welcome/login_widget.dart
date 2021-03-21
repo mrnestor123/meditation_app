@@ -3,11 +3,9 @@
 * 
 */
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
@@ -64,12 +62,8 @@ class LoginWidget extends StatelessWidget {
                       child: Center(
                           child: Text(
                         'LOGIN',
-                        style: GoogleFonts.roboto(
-                            textStyle: TextStyle(
-                                color: Colors.white,
-                                fontSize:
-                                    Configuration.blockSizeHorizontal * 5)),
-                      )),
+                        style: Configuration.text('big', Colors.black)),
+                      ),
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: MediaQuery.of(context).size.height * 0.08,
                       decoration: BoxDecoration(

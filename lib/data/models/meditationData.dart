@@ -6,7 +6,7 @@ class MeditationModel extends Meditation {
   String codmed, recording, title, type, image, coduser;
   final Duration duration;
   final DateTime day;
-  int stagenumber;
+  int stagenumber, position;
   final Map<dynamic,dynamic> content;
 
 
@@ -21,7 +21,8 @@ class MeditationModel extends Meditation {
       this.image,
       this.stagenumber,
       this.coduser,
-      this.content
+      this.content,
+      this.position
       })
       : super(
             codmed: codmed,
@@ -32,7 +33,8 @@ class MeditationModel extends Meditation {
             day: day,
             type: type,
             image: image,
-            stagenumber: stagenumber);
+            stagenumber: stagenumber,
+            position: position);
 
   factory MeditationModel.fromRawJson(String str) =>
       MeditationModel.fromJson(json.decode(str));
@@ -49,6 +51,7 @@ class MeditationModel extends Meditation {
           type: json["type"] == null ? null : json["type"],
           image: json["image"] == null ? null : json['image'],
           stagenumber: json['stagenumber'] == null ? null : json['stagenumber'],
+          position: json['position'] == null ? null : json['position'],
           coduser: json['coduser'] == null ? null : json['coduser'],
           content: json['content'] == null ? null: json['content']
           //userId: json["userId"] == null ? null : json["userId"],

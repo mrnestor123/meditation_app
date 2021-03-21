@@ -1,6 +1,4 @@
 //Class that stores all the configuration of the project. The colors of the leters the
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:flutter/material.dart';
 
 class Configuration {

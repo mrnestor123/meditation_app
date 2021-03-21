@@ -37,42 +37,39 @@ class _LearnScreenState extends State<LearnScreen> {
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2),
                   itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () => _userstate.user.stagenumber > index
-                          ? Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => StageView(
-                                        stage: _userstate.data.stages[index],
-                                      )),
-                            ).then((value) => setState(() => null))
-                          : null,
-                      child: Stack(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.all(Configuration.medmargin),
-                            decoration: BoxDecoration(
-                                color: Configuration.maincolor,
-                                borderRadius: BorderRadius.circular(16.0)),
-                            child: Center(
-                                child: Text(
+                    return Stack(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.all(Configuration.medmargin),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16.0)),
+                          child: ElevatedButton(
+                            onPressed: _userstate.user.stagenumber > index
+                                ?  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => StageView(
+                                              stage:
+                                                  _userstate.data.stages[index],
+                                            )),
+                                  ).then((value) => setState(() => null))
+                                : null,
+                            child: _userstate.user.stagenumber > index ? Text(
                               'Stage ' +
                                   _userstate.data.stages[index].stagenumber
                                       .toString(),
                               style: Configuration.text("medium", Colors.white),
-                            )),
+                            ) : Container(),
+                            style: ElevatedButton.styleFrom(
+                                primary: Configuration.maincolor,
+                                onPrimary: Colors.white,
+                                padding:
+                                    EdgeInsets.all(Configuration.smpadding),
+                                minimumSize:
+                                    Size(double.infinity, double.infinity)),
                           ),
-                          AnimatedContainer(
-                            duration: Duration(seconds: 2),
-                            margin: EdgeInsets.all(Configuration.medmargin),
-                            decoration: BoxDecoration(
-                                color: _userstate.user.stagenumber < (index + 1)
-                                    ? Colors.grey
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(16.0)),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     );
                   }))
         ],
@@ -116,38 +113,36 @@ class _StageViewState extends State<StageView> {
         image = new NetworkImage(content.image)..resolve(configuration);
       }
       if (filter.contains(content.type) || filter.contains('all')) {
-        lessons.add(GestureDetector(
-          onTap: () {
-            if (_userstate.user.position >= content.position ||
-                _userstate.user.stagenumber > content.stagenumber) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ContentView(
-                          lesson: content,
-                          content: content,
-                          slider: image))).then(onGoBack);
-            }
-          },
-          child: Container(
-            height: Configuration.height * 0.13,
-            margin: EdgeInsets.all(Configuration.medmargin),
-            decoration: BoxDecoration(
-              color: Configuration.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 0.4,
-                  blurRadius: 0.4,
-                  offset: Offset(0.6, 0.6), // changes position of shadow
-                ),
-              ],
-            ),
+        lessons.add(Container(
+          height: Configuration.height * 0.13,
+          margin: EdgeInsets.all(Configuration.medmargin),
+          decoration: BoxDecoration(
+            color: Configuration.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ElevatedButton(
+          
+            onPressed: () {
+              if (_userstate.user.position >= content.position ||
+                  _userstate.user.stagenumber > content.stagenumber) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ContentView(
+                            lesson: content,
+                            content: content,
+                            slider: image))).then(onGoBack);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.all(0),
+                primary: Colors.white,
+                onPrimary: Colors.white,
+                minimumSize: Size(double.infinity, double.infinity)),
             child: Stack(
               children: [
                 Positioned(
-                  right: 0,
+                  right: 15,
                   bottom: 0,
                   child: Stack(children: [
                     ClipRRect(
@@ -161,9 +156,9 @@ class _StageViewState extends State<StageView> {
                 ),
                 Positioned(
                     top: 0,
-                    left: 0,
+                    left: 15,
                     child: Padding(
-                      padding: EdgeInsets.all(Configuration.smpadding),
+                      padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
                       child: Container(
                         width: Configuration.safeBlockHorizontal * 5,
                         height: Configuration.safeBlockHorizontal * 5,
@@ -175,15 +170,16 @@ class _StageViewState extends State<StageView> {
                       ),
                     )),
                 Positioned(
-                    left: 0,
+                    left: 15,
                     bottom: 0,
                     child: Container(
-                      width: Configuration.width * 0.6,
-                      padding: EdgeInsets.all(Configuration.smpadding),
+                      width: Configuration.width * 0.5,
+                      padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
                       child: Text(
                         content.title,
                         style:
-                            Configuration.text("tiny", Colors.black, "bold", 1),
+                            Configuration.text("tiny", _userstate.user.position < content.position &&
+                                _userstate.user.stagenumber <= content.stagenumber  ?Colors.grey : Colors.black, "bold", 1),
                       ),
                     )),
                 Positioned(
@@ -192,11 +188,10 @@ class _StageViewState extends State<StageView> {
                   right: 0,
                   top: 0,
                   child: AnimatedContainer(
+                    padding: EdgeInsets.all(0),
                     key: Key(content.cod),
                     duration: Duration(seconds: 2),
-                    width: Configuration.height * 0.1,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
                         color: _userstate.user.position < content.position &&
                                 _userstate.user.stagenumber <=
                                     content.stagenumber
@@ -214,12 +209,14 @@ class _StageViewState extends State<StageView> {
 
     return Container(
       padding: EdgeInsets.all(Configuration.smpadding),
+      width: Configuration.width,
       color: Configuration.lightgrey,
       child: SingleChildScrollView(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: lessons),
+            children:
+                lessons.length > 0 ? lessons : [Text('There are no lessons')]),
       ),
     );
   }
@@ -257,7 +254,7 @@ class _StageViewState extends State<StageView> {
                   right: Configuration.smmargin,
                   top: Configuration.medmargin),
               decoration: BoxDecoration(
-                  color: Configuration.lightgrey,
+                  color: Configuration.maincolor,
                   borderRadius: BorderRadius.circular(12.0)),
             ),
             Container(
@@ -277,11 +274,12 @@ class _StageViewState extends State<StageView> {
                           () => filter.contains('all') ? '' : filter = ['all']),
                       child: Icon(Icons.more_vert,
                           color: filter.contains('all')
-                              ? Colors.black
+                              ? Colors.white
                               : Colors.black.withOpacity(0.5)),
                       style: ButtonStyle(
                         backgroundColor: filter.contains('all')
-                            ? MaterialStateProperty.all<Color>(Colors.white)
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
                             : null,
                       ),
                     ),
@@ -292,11 +290,12 @@ class _StageViewState extends State<StageView> {
                       }),
                       child: Icon(Icons.book,
                           color: filter.contains('lesson')
-                              ? Colors.black
+                              ? Colors.white
                               : Colors.black.withOpacity(0.5)),
                       style: ButtonStyle(
                         backgroundColor: filter.contains('lesson')
-                            ? MaterialStateProperty.all<Color>(Colors.white)
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
                             : null,
                       ),
                     ),
@@ -308,11 +307,12 @@ class _StageViewState extends State<StageView> {
                               : filter = ['meditation']),
                       child: Icon(Icons.self_improvement,
                           color: filter.contains('meditation')
-                              ? Colors.black
+                              ? Colors.white
                               : Colors.black.withOpacity(0.5)),
                       style: ButtonStyle(
                         backgroundColor: filter.contains('meditation')
-                            ? MaterialStateProperty.all<Color>(Colors.white)
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
                             : null,
                       ),
                     ),

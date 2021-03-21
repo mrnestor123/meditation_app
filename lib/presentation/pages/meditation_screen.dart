@@ -64,10 +64,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
     Widget guidedMeditation() {
       List<Widget> meditations() {
-        List<Widget> meditations = new List<Widget>();
-        _userstate.data.stages[selectedstage - 1].meditpath
-            .forEach((key, list) {
-          for (var meditation in list) {
+        List<Widget> meditations = new List.empty(growable:true);
+          for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
             meditations.add(GestureDetector(
                 onTap: () => setState(() => selectedmeditation = meditation),
                 child: Column(children: [
@@ -89,7 +87,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   )
                 ])));
           }
-        });
 
         return meditations;
       }
@@ -501,7 +498,7 @@ class _TimePickerState extends State<TimePicker> {
     return SingleCircularSlider(
       95,
       1,
-      baseColor: Colors.transparent,
+      baseColor: Colors.grey.withOpacity(0.6),
       handlerColor: Configuration.maincolor,
       onSelectionChange: (a, b, c) {
         setState(() {
@@ -521,16 +518,6 @@ class _TimePickerState extends State<TimePicker> {
   }
 }
 
-//REFACTORIZAR ESTO CON EL TIEMPO!!
-List<Map> weekDays = [
-  {'day': "M", 'meditated': false, 'index': 1},
-  {'day': 'T', 'meditated': false, 'index': 2},
-  {'day': 'W', 'meditated': false, 'index': 3},
-  {'day': 'TH', 'meditated': false, 'index': 4},
-  {'day': 'F', 'meditated': false, 'index': 5},
-  {'day': 'S', 'meditated': false, 'index': 6},
-  {'day': 'S', 'meditated': false, 'index': 7}
-];
 
 class WeekList extends StatefulWidget {
   @override
@@ -539,6 +526,17 @@ class WeekList extends StatefulWidget {
 
 class _WeekListState extends State<WeekList> {
   UserState _userstate;
+  //REFACTORIZAR ESTO CON EL TIEMPO!!
+  List<Map> weekDays = [
+    {'day': "M", 'meditated': false, 'index': 1},
+    {'day': 'T', 'meditated': false, 'index': 2},
+    {'day': 'W', 'meditated': false, 'index': 3},
+    {'day': 'TH', 'meditated': false, 'index': 4},
+    {'day': 'F', 'meditated': false, 'index': 5},
+    {'day': 'S', 'meditated': false, 'index': 6},
+    {'day': 'S', 'meditated': false, 'index': 7}
+  ];
+
 
   List<Widget> getDays() {
     List<Widget> result = new List();

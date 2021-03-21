@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:observable/observable.dart';
 import 'package:provider/provider.dart';
 
 class LeaderBoard extends StatefulWidget {
@@ -18,18 +17,17 @@ class _LeaderBoardState extends State<LeaderBoard> {
   var time = '';
 
   void sortUsers(sortparameter) {
-    _userstate.data.users.sort(
-        (a, b) => a.stats['total']['tiempo'] - b.stats['total']['tiempo']);
+    _userstate.data.users.sort((a, b) => a.stats['total']['tiempo'] - b.stats['total']['tiempo']);
   }
 
-  Widget createTable(ObservableList<User> list, following) {
+  Widget createTable(List<User> list, following) {
     String sortTime(time) {
       if (time > 1440) {
-        return (time / (60 * 24)).toString() + ' d';
+        return (time / (60 * 24)).toStringAsFixed(1) + ' d';
       }
 
       if (time > 60) {
-        return (time / 60).toString() + ' h';
+        return (time / 60).toStringAsFixed(0) + ' h';
       }
 
       return time.toString() + ' m';

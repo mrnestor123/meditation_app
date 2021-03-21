@@ -6,7 +6,7 @@ import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
-import 'package:observable/observable.dart';
+import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
 import 'lesson_entity.dart';
 import 'level.dart';
@@ -14,7 +14,7 @@ import 'meditation_entity.dart';
 
 class User {
   String coduser, nombre, role, image;
-  FirebaseUser user;
+  var user;
   int stagenumber, position, meditposition;
   Stage stage;
   bool classic;
@@ -57,24 +57,27 @@ class User {
   int getStageNumber() => this.stagenumber;
 
   void setAction(String type, {dynamic attribute}) {
-    
     var types = {
-      "follow": ()=> "followed " + attribute,
-      "unfollow": ()=> "unfollowed " + attribute,
-      "meditation": ()=> 'meditated for ' + attribute[0].toString() + ' min',
-      "guided_meditation":()=> "took" + attribute[0].toString() + ' for ' + attribute[1].toString() + ' min',
-      "update_stage":()=> "climbed up one stage to" + attribute,
-      'game': ()=> 'played',
-      'lesson': ()=> 'read ' + attribute
+      "follow": () => "followed " + attribute,
+      "unfollow": () => "unfollowed " + attribute,
+      "meditation": () => 'meditated for ' + attribute[0].toString() + ' min',
+      "guided_meditation": () =>
+          "took" +
+          attribute[0].toString() +
+          ' for ' +
+          attribute[1].toString() +
+          ' min',
+      "updatestage": () => "climbed up one stage to" + attribute,
+      'game': () => 'played',
+      'lesson': () => 'read ' + attribute
     };
 
-    String date =
-        DateTime.now().day.toString() + '-' + DateTime.now().month.toString();
+    String date = DateTime.now().day.toString() + '-' + DateTime.now().month.toString();
     String hour = DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
     String message = types[type]();
 
     if (this.actions[date] == null) {
-      this.actions[date] = new List();
+      this.actions[date] = new List.empty(growable:true);
       this.actions[date].add({
         'message': message,
         'type': type,
@@ -116,7 +119,7 @@ class User {
     this.position = 0;
     this.stats['etapa'].forEach((key, value) => {this.stats['etapa'][key] = 0});
 
-    setAction("updatestage", attribute: this.stagenumber);
+    setAction("updatestage", attribute: this.stagenumber.toString());
   }
 
   bool lessoninStage(Lesson l) {
@@ -135,7 +138,8 @@ class User {
       if (l.stagenumber == this.stagenumber && lessoninStage(l)) {
         this.stats['etapa']['lecciones']++;
         this.stats['total']['lecciones']++;
-        if (this.stage.path[position] == this.stats['ultimosleidos'].length + 1) {
+        if (this.stage.path[position] ==
+            this.stats['ultimosleidos'].length + 1) {
           this.position += 1;
           this.stats['ultimosleidos'] = [];
           return true;
@@ -155,6 +159,7 @@ class User {
     return false;
   }
 
+  //se puede refactorizar esto
   bool takeMeditation(Meditation m, DataBase d) {
     this.totalMeditations.add(m);
 
@@ -164,6 +169,12 @@ class User {
       //si meditamos ayer
       if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
         this.stats['racha']++;
+         if (this.stats['etapa']['maxstreak'] < this.stats['racha']) {
+            this.stats['etapa']['maxstreak'] = this.stats['racha'];
+          }
+          if (this.stats['total']['maxstreak'] < this.stats['racha']) {
+            this.stats['total']['maxstreak'] = this.stats['racha'];
+          }
       } else if (lastmeditation.day != m.day.day) {
         this.stats['racha'] = 1;
       }
@@ -175,12 +186,14 @@ class User {
     this.stats['etapa']['tiempo'] += m.duration.inMinutes;
     this.stats['total']['tiempo'] += m.duration.inMinutes;
 
-    if (this.stats['etapa']['maxstreak'] < this.stats['racha']) {
-      this.stats['etapa']['maxstreak'] = this.stats['racha'];
+    if (this.stats['meditationtime'] == null) {
+      this.stats['meditationtime'] = {};
     }
 
-    if (this.stats['total']['maxstreak'] < this.stats['racha']) {
-      this.stats['total']['maxstreak'] = this.stats['racha'];
+    if (this.stats['meditationtime'][m.day.day.toString() + '-' + m.day.month.toString()] == null) {
+      this.stats['meditationtime'][m.day.day.toString() + '-' + m.day.month.toString()] = m.duration.inMinutes;
+    } else {
+      this.stats['meditationtime'][m.day.day.toString() + '-' + m.day.month.toString()] +=  m.duration.inMinutes;
     }
 
     // si la meditación es free

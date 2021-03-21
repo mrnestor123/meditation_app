@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:mobx/mobx.dart';
@@ -20,13 +19,13 @@ abstract class _LoginState with Store {
   LoginUseCase _loginusecase;
 
   @observable
-  Either<Failure, User> log;
+  Either<Failure, dynamic> log;
 
   @observable
-  User loggeduser;
+  dynamic loggeduser;
 
   @observable
-  Future<Either<Failure, User>> _userFuture;
+  Future<Either<Failure, dynamic>> _userFuture;
 
   @observable
   String errorMessage = "";
@@ -42,7 +41,7 @@ abstract class _LoginState with Store {
   }
 
   @action
-  Future login(FirebaseUser user) async {
+  Future login(var user) async {
     startedlogin = true;
     // Reset the possible previous error message.
     try {
@@ -50,7 +49,7 @@ abstract class _LoginState with Store {
       _userFuture = _loginusecase(UserParams(usuario: user));
       log = await _userFuture;
       log.fold(
-          (Failure f) => errorMessage = f.error, (User u) => loggeduser = u);
+          (Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
     } on Failure {
       errorMessage = 'Could not log user';
     }
@@ -58,12 +57,11 @@ abstract class _LoginState with Store {
 
   // instead of returning true or false
 // returning user to directly access UserID
-  Future signin(
-      String email, String password) async {
+  Future signin(String email, String password) async {
     try {
-      AuthResult result =
-          await auth.signInWithEmailAndPassword(email: email, password: email);
-      FirebaseUser user = result.user;
+      UserCredential result = await auth.signInWithEmailAndPassword(email: email, password: email);
+      var user = result.user;
+      
       await login(user);
 
       // return Future.value(true);
@@ -108,13 +106,13 @@ abstract class _LoginState with Store {
         GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(
+        AuthCredential credential = GoogleAuthProvider.credential(
             idToken: googleSignInAuthentication.idToken,
             accessToken: googleSignInAuthentication.accessToken);
 
-        AuthResult result = await auth.signInWithCredential(credential);
+        UserCredential result = await auth.signInWithCredential(credential);
 
-        FirebaseUser user = await auth.currentUser();
+        var user = auth.currentUser;
 
         await login(user);
 
@@ -128,7 +126,7 @@ abstract class _LoginState with Store {
   }
 
   Future loginWithFacebook(String token) async {
-    final facebookAuthCred = FacebookAuthProvider.getCredential(accessToken: token);
+    final facebookAuthCred = FacebookAuthProvider.credential(token);
     final user = await auth.signInWithCredential(facebookAuthCred);
     await login(user.user);
   }

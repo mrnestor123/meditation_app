@@ -2,7 +2,7 @@
 
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:observable/observable.dart';
+import 'package:mobx/mobx.dart';
 
 //habrá que ir añadiéndole datos
 class DataBase {

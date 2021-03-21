@@ -10,7 +10,6 @@ import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
-import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/update_user.dart';
 import 'package:mobx/mobx.dart';
 
@@ -131,21 +130,18 @@ abstract class _UserState with Store {
 
   @action
   Future changeName(String username) async {
-    Either<Failure, User> _addedname = await updateUserUseCase
-        .call(UParams(user: user, nombre: username, type: "name"));
+    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, nombre: username, type: "name"));
 
     return true;
   }
 
   @action
-  Future updateUser(String path, String type) async {
-    Either<Failure, User> _addedname = await updateUserUseCase
-        .call(UParams(user: user, type: type, image: path));
+  Future updateUser(dynamic variable, String type) async {
+    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, type: type, image: variable));
   }
 
   @action
   Future updateStage() async {
-    Either<Failure, User> _addedname = await updateUserUseCase
-        .call(UParams(user: user, type: "stage", db: data));
+    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, type: "stage", db: data));
   }
 }

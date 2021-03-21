@@ -112,6 +112,13 @@ mixin _$UserState on _UserState, Store {
     return _$getDataAsyncAction.run(() => super.getData());
   }
 
+  final _$followAsyncAction = AsyncAction('_UserState.follow');
+
+  @override
+  Future<dynamic> follow(User u, bool follow) {
+    return _$followAsyncAction.run(() => super.follow(u, follow));
+  }
+
   final _$logoutAsyncAction = AsyncAction('_UserState.logout');
 
   @override
@@ -129,8 +136,8 @@ mixin _$UserState on _UserState, Store {
   final _$updateUserAsyncAction = AsyncAction('_UserState.updateUser');
 
   @override
-  Future<dynamic> updateUser(String path, String type) {
-    return _$updateUserAsyncAction.run(() => super.updateUser(path, type));
+  Future<dynamic> updateUser(dynamic variable, String type) {
+    return _$updateUserAsyncAction.run(() => super.updateUser(variable, type));
   }
 
   final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');

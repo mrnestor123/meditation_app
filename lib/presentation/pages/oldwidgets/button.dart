@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
 class ButtonContainer extends StatelessWidget {
@@ -17,7 +16,7 @@ class ButtonContainer extends StatelessWidget {
     return GestureDetector(
         child: Container(
           child: Center(
-              child: Text(text, style: GoogleFonts.roboto(textStyle: TextStyle(color: Colors.white, fontSize: Configuration.blockSizeHorizontal*5)),)),
+              child: Text(text, style: Configuration.text('big', Colors.white))),
           width: MediaQuery.of(context).size.width * 0.9,
           height: MediaQuery.of(context).size.height * 0.08,
           decoration: BoxDecoration(

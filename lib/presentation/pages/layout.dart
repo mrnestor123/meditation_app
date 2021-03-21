@@ -95,7 +95,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                         : Colors.transparent,
                     backgroundImage: _userstate.user.image == null
                         ? null
-                        : null ,
+                        : NetworkImage(_userstate.user.image) ,
                         //: FileImage(File(_userstate.user.image)),
                   )),
             ),

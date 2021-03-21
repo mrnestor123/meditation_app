@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
@@ -13,7 +12,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 class UserModel extends User {
   int stagenumber, position, minutesmeditated, meditposition;
   String coduser, role, nombre, image;
-  FirebaseUser user;
+  var user;
   Stage stage;
   Map<String, dynamic> stats = {};
   bool classic;

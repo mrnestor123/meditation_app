@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:observable/observable.dart';
+import 'package:mobx/mobx.dart';
 
+import 'lesson_entity.dart';
 import 'meditation_entity.dart';
 
 class Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery;
   ObservableList<Content> path = new ObservableList();
-  Map<String, List<Meditation>> meditpath = new Map();
+  ObservableList<Meditation> meditpath = new ObservableList();
   Map<String, dynamic> objectives = new Map();
-  List<Meditation> meditations = new ObservableList();
 
   Stage(
       {@required this.stagenumber,
@@ -46,5 +46,21 @@ class Stage {
     }
 
     return true;
+  }
+
+
+  void addContent(Content c){
+    if(c.type== 'meditation' || c.type =='lesson'){
+      if(this.objectives['lecciones'] == null) {this.objectives['lecciones'] = 0;}
+      this.objectives['lecciones']++;
+      path.add(c);
+      path.sort((a, b) => a.position - b.position);
+    } else {
+       if(this.objectives['meditguiadas'] == null) {this.objectives['meditguiadas'] = 0;}
+      this.objectives['meditguiadas']++;
+      meditpath.add(c);
+      
+      meditpath.sort((a, b) => a.position - b.position);
+    }
   }
 }

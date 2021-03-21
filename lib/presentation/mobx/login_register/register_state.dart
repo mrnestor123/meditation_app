@@ -62,13 +62,13 @@ abstract class _RegisterState with Store {
   // }
 
   //Una vez registrados en firebase auth
-  Future<UserModel> userRegistered(FirebaseUser firebaseuser) async {
+  Future<UserModel> userRegistered(dynamic firebaseuser) async {
     firebaseuser.sendEmailVerification();
     var register = await _registerusecase.call(UserParams(user: firebaseuser));
 
     register.fold((Failure failure) {
       errorMessage = _mapFailureToMessage(failure);
-    }, (User u) {
+    }, (dynamic u) {
       user = u;
       //user = u;
     });
@@ -83,15 +83,16 @@ abstract class _RegisterState with Store {
     String email,
   ) async {
     try {
-      AuthResult result =
+      UserCredential result =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: confirmpassword,
       );
-      FirebaseUser user = result.user;
-      var userUpdateInfo = UserUpdateInfo();
-      userUpdateInfo.displayName = username;
-      user.updateProfile(userUpdateInfo);
+      dynamic user = result.user;
+
+   //   var userUpdateInfo = UserUpdateInfo();
+     // userUpdateInfo.displayName = username;
+    //  user.updateProfile(userUpdateInfo);
       await userRegistered(user);
     } catch (e) {
       if (e.code == 'weak-password') {
@@ -121,7 +122,7 @@ abstract class _RegisterState with Store {
 
   Future registerWithFacebook(String token) async {
     final facebookAuthCred =
-        FacebookAuthProvider.getCredential(accessToken: token);
+        FacebookAuthProvider.credential( token);
     final user = await auth.signInWithCredential(facebookAuthCred);
     await userRegistered(user.user);
   }
@@ -135,14 +136,14 @@ abstract class _RegisterState with Store {
         GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(
+        AuthCredential credential = GoogleAuthProvider.credential(
             idToken: googleSignInAuthentication.idToken,
             accessToken: googleSignInAuthentication.accessToken);
 
-        AuthResult result = await auth.signInWithCredential(credential);
+        UserCredential result = await auth.signInWithCredential(credential);
 
-        FirebaseUser user = await auth.currentUser();
-        print('registered user');
+        dynamic user = auth.currentUser;
+        
         await userRegistered(user);
       }
     } catch (e) {

@@ -12,13 +12,13 @@ mixin _$LoginState on _LoginState, Store {
   final _$logAtom = Atom(name: '_LoginState.log');
 
   @override
-  Either<Failure, User> get log {
+  Either<Failure, dynamic> get log {
     _$logAtom.reportRead();
     return super.log;
   }
 
   @override
-  set log(Either<Failure, User> value) {
+  set log(Either<Failure, dynamic> value) {
     _$logAtom.reportWrite(value, super.log, () {
       super.log = value;
     });
@@ -27,13 +27,13 @@ mixin _$LoginState on _LoginState, Store {
   final _$loggeduserAtom = Atom(name: '_LoginState.loggeduser');
 
   @override
-  User get loggeduser {
+  dynamic get loggeduser {
     _$loggeduserAtom.reportRead();
     return super.loggeduser;
   }
 
   @override
-  set loggeduser(User value) {
+  set loggeduser(dynamic value) {
     _$loggeduserAtom.reportWrite(value, super.loggeduser, () {
       super.loggeduser = value;
     });
@@ -42,13 +42,13 @@ mixin _$LoginState on _LoginState, Store {
   final _$_userFutureAtom = Atom(name: '_LoginState._userFuture');
 
   @override
-  Future<Either<Failure, User>> get _userFuture {
+  Future<Either<Failure, dynamic>> get _userFuture {
     _$_userFutureAtom.reportRead();
     return super._userFuture;
   }
 
   @override
-  set _userFuture(Future<Either<Failure, User>> value) {
+  set _userFuture(Future<Either<Failure, dynamic>> value) {
     _$_userFutureAtom.reportWrite(value, super._userFuture, () {
       super._userFuture = value;
     });
@@ -87,7 +87,7 @@ mixin _$LoginState on _LoginState, Store {
   final _$loginAsyncAction = AsyncAction('_LoginState.login');
 
   @override
-  Future<dynamic> login(FirebaseUser user) {
+  Future<dynamic> login(dynamic user) {
     return _$loginAsyncAction.run(() => super.login(user));
   }
 

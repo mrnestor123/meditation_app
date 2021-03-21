@@ -7,6 +7,7 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 class Loading extends StatefulWidget {
   @override
@@ -24,6 +25,7 @@ class _LoadingState extends State<Loading> {
   Timer _timer;
   Duration _duration = Duration(seconds: 15);
   bool started = false;
+  VideoPlayerController _controller;
 
   // UN TIMER PARA QUEEE
   void startTimer() {
@@ -55,6 +57,12 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
+     _controller = VideoPlayerController.asset(
+        'assets/test.mp4')
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() { });
+      });
   }
 
   void userisLogged(context) async {
@@ -80,8 +88,11 @@ class _LoadingState extends State<Loading> {
     return Scaffold(
         body: Center(
             child: Container(
-                width: 200, height: 200, child: CircularProgressIndicator())
-
+                width: 200, height: 200, child: AspectRatio(
+                  aspectRatio: _controller.value.aspectRatio,
+                  child: VideoPlayer(_controller),
+                )
+              )
             /*AnimatedContainer(
           duration: animatio nDuration,
           width: size,

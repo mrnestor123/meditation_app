@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/network/network_info.dart';
@@ -20,7 +20,7 @@ class UserRepositoryImpl implements UserRepository {
 
   //Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
   @override
-  Future<Either<Failure, User>> loginUser({FirebaseUser usuario}) async {
+  Future<Either<Failure, User>> loginUser({var usuario}) async {
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.loginUser(usuario: usuario);
@@ -53,7 +53,7 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  Future<Either<Failure, User>> updateUser({User user,DataBase d, Meditation m}) async {
+  Future<Either<Failure, User>> updateUser({var user, DataBase d, Meditation m}) async {
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m);
@@ -77,7 +77,7 @@ class UserRepositoryImpl implements UserRepository {
     Hay que comprobar si el usuario ya existe antes de registrarlo y hacer nada
   */
   @override
-  Future<Either<Failure, User>> registerUser({FirebaseUser usuario}) async {
+  Future<Either<Failure, User>> registerUser({var usuario}) async {
     //si esta conectado lo añadimos a la base de datos. Si no lo añadimos a nuestra caché. Devolvemos el usuario guardado
     if (await networkInfo.isConnected) {
       try {
@@ -132,13 +132,18 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+ 
   @override
-  Future<Either<Failure, bool>> changeStage(User user) async {
-    if (await networkInfo.isConnected) {
-      remoteDataSource.changeStage(user);
-      return Right(true);
-    } else {
-      return Left(ServerFailure());
+  Future<Either<Failure, String>> updateImage(PickedFile image, User u) async{
+    var string = await remoteDataSource.updateImage(image, u);
+
+    if(string != null) {
+      return Right(string);
+    }else{
+      return Left(ConnectionFailure(error: 'No se ha podido subir'));
     }
+
+
+    // TODO: implement updateImage
   }
 }
