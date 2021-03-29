@@ -63,10 +63,10 @@ class _LearnScreenState extends State<LearnScreen> {
                             style: ElevatedButton.styleFrom(
                                 primary: Configuration.maincolor,
                                 onPrimary: Colors.white,
-                                padding:
-                                    EdgeInsets.all(Configuration.smpadding),
-                                minimumSize:
-                                    Size(double.infinity, double.infinity)),
+                                padding: EdgeInsets.all(Configuration.smpadding),
+                                minimumSize:Size(double.infinity, double.infinity),
+                                animationDuration: Duration(milliseconds: 50)        
+                                ),
                           ),
                         ),
                       ],

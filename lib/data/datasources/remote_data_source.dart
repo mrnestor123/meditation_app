@@ -76,7 +76,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       loggeduser.setStage(s);
 
-      QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: loggeduser.coduser).get.data()();
+      QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: loggeduser.coduser).get();
 
       if (meditations.docs.length > 0) {
         for (DocumentSnapshot doc in meditations.docs) {
@@ -165,23 +165,21 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
-    d.users.sort((a, b) =>
-        b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+    d.users.sort((a, b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
 
     return d;
   }
 
 
   Future<String> updateImage(PickedFile image, User u) async {
-    Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}');
+      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}');
 
-    final UploadTask storageUpload = ref.putData(await image.readAsBytes());
+      final UploadTask storageUpload = ref.putData(await image.readAsBytes());
 
-    final urlString = await (await storageUpload.whenComplete(()=> null));
-    String profilepath = await ref.getDownloadURL();
+      final urlString = await (await storageUpload.whenComplete(()=> null));
+      String profilepath = await ref.getDownloadURL();
 
-    return profilepath;
-
+      return profilepath;
   }
 
   @override

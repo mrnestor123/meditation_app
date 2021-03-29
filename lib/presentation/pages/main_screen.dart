@@ -31,31 +31,30 @@ class _MainScreenState extends State<MainScreen> {
           _userstate.user.actions[day].length > 0) {
         print(_userstate.user.actions);
 
-        for (var action in _userstate.user.actions[day]) {
+        for (var action in _userstate.user.acciones) {
           widgets.add(
             Row(mainAxisAlignment: MainAxisAlignment.start, children: [
               CircleAvatar(
                 backgroundColor: Colors.transparent,
                 foregroundColor: Colors.lightBlue,
-                child: Icon(action['type'].contains('meditat') ||
-                        action['type'].contains('game')
-                    ? Icons.self_improvement
-                    : action['type'].contains('less')
-                        ? Icons.book
-                        : action['type'].contains('unfollow')
-                            ? Icons.person_add
-                            : Icons.person_remove),
+                child: Icon(action.icono),
               ),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(
-                    (action['user'] == _userstate.user.nombre
-                            ? 'You'
-                            : action['user']) +
-                        ' ' +
-                        action['message'],
-                    style: Configuration.text('small', Colors.black)),
-                Text(action['hour'],
-                    style: Configuration.text('tiny', Configuration.grey))
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start, 
+                children: [
+                  Container(
+                    width: Configuration.width*0.62,
+                    child: Text((action.username == _userstate.user.nombre
+                                ? 'You '
+                                : action.username) +
+                            '' +
+                            action.message,
+                        style: Configuration.text('small', Colors.black),
+                        overflow: TextOverflow.fade,
+                        ),
+                  ),
+                  Text(action.hour,
+                      style: Configuration.text('tiny', Configuration.grey))
               ])
             ]),
           );

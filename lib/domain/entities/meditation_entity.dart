@@ -17,7 +17,7 @@ class Meditation extends Content {
 
   Meditation(
       {this.codmed,
-      this.duration,
+      @required this.duration,
       this.recording,
       this.day,
       this.type,
@@ -30,12 +30,13 @@ class Meditation extends Content {
       this.content
       //this.userId
       })
-      : super(
-            cod: codmed,
+      : super(cod: codmed,
             description: description,
             image: image,
             title: title,
             stagenumber: stagenumber,
             position: position,
             type: type);
+
+  void setDay(DateTime d) => this.day = d;
 }

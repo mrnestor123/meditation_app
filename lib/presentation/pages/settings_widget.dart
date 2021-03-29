@@ -10,11 +10,26 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Settings'),),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text('Settings', 
+          style: Configuration.text('medium', Colors.black)
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context), color: Colors.black),
+      ),
       body: ListView(
+        padding: EdgeInsets.all(Configuration.smpadding),
         children: [
-          RaisedButton(
-          onPressed: () => showGeneralDialog(
+          SizedBox(height: Configuration.height*0.1,),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Configuration.grey,
+              padding: EdgeInsets.all(Configuration.smpadding)
+            ),
+            onPressed: () =>showGeneralDialog(
               barrierColor: Colors.black.withOpacity(0.5),
               transitionBuilder: (context, a1, a2, widget) {
                 return Transform.scale(
@@ -29,13 +44,10 @@ class Settings extends StatelessWidget {
               barrierDismissible: true,
               barrierLabel: '',
               context: context,
-              pageBuilder: (context, animation1, animation2) {}),
-          child: Padding(
-            padding: EdgeInsets.all(Configuration.smpadding),
+              pageBuilder: (context, animation1, animation2) {}) ,             
             child: Text('Increase Stage',
-                style: Configuration.text('big', Colors.white)),
-          ),
-        )
+                style: Configuration.text('big', Colors.white) )
+          )
         ],
       ),    
     );
@@ -65,8 +77,8 @@ class IncreaseScreenDialog extends StatelessWidget {
               Text('Are you sure?',
                   style: Configuration.text('small', Colors.black)),
               SizedBox(height: Configuration.height * 0.01),
-              RaisedButton(
-                  onPressed: ()=> _userstate.updateStage(),
+              ElevatedButton(
+                  onPressed: (){_userstate.updateStage(); Navigator.pop(context);},
                   child: Padding(
                     padding: EdgeInsets.all(Configuration.smpadding),
                     child: Text('Yes'),

@@ -24,6 +24,21 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$selmeditationAtom = Atom(name: '_MeditationState.selmeditation');
+
+  @override
+  Meditation get selmeditation {
+    _$selmeditationAtom.reportRead();
+    return super.selmeditation;
+  }
+
+  @override
+  set selmeditation(Meditation value) {
+    _$selmeditationAtom.reportWrite(value, super.selmeditation, () {
+      super.selmeditation = value;
+    });
+  }
+
   final _$_meditationFutureAtom =
       Atom(name: '_MeditationState._meditationFuture');
 
@@ -113,11 +128,11 @@ mixin _$MeditationState on _MeditationState, Store {
       ActionController(name: '_MeditationState');
 
   @override
-  void startMeditation(Duration dur, User u, DataBase d) {
+  void startMeditation(Meditation m, User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startMeditation');
     try {
-      return super.startMeditation(dur, u, d);
+      return super.startMeditation(m, u, d);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
@@ -149,6 +164,7 @@ mixin _$MeditationState on _MeditationState, Store {
   String toString() {
     return '''
 user: ${user},
+selmeditation: ${selmeditation},
 errorMessage: ${errorMessage},
 duration: ${duration},
 startedmeditation: ${startedmeditation},

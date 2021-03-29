@@ -77,22 +77,6 @@ abstract class _UserState with Store {
     });
   }
 
-  //SE PUEDE BORRARRR
-  @action
-  Future<bool> takeMeditation(Duration d) async {
-    int currentposition = user.position;
-    Either<Failure, User> meditation =
-        await meditate.call(Params(duration: d, user: user, d: data));
-
-    List<Mission> m = new List<Mission>();
-
-    if (currentposition < user.position) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   //Esto tiene que ser LESSONNNNNNNN
   @action
   Future<bool> takeLesson(LessonModel l) async {
@@ -116,6 +100,7 @@ abstract class _UserState with Store {
     });
   }
 
+  //todos los del updateuserusecase se podrían juntar !!!!!!!!!
   @action
   Future follow(User u, bool follow) async {
     final following = updateUserUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));

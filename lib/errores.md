@@ -1,0 +1,1 @@
+1. Las etapas en las que no hay objetivos se sube de etapa al hacer algo.

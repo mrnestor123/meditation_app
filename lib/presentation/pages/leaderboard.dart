@@ -69,9 +69,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         ),
                       ),
                       CircleAvatar(
-                        backgroundImage:
-                            u.image != null ? FileImage(File(u.image)) : null,
-                        child: u.image == null ? Icon(Icons.person) : null,
+                        backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
+                        backgroundImage: u.image != null ? NetworkImage(u.image) : null,
+                        child: u.image == null ? null : null,
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

@@ -24,6 +24,9 @@ abstract class _MeditationState with Store {
   DataBase data;
 
   @observable
+  Meditation selmeditation;
+
+  @observable
   Future<Either<Failure, Meditation>> _meditationFuture;
 
   @observable
@@ -47,11 +50,12 @@ abstract class _MeditationState with Store {
   _MeditationState({this.meditate});
 
   @action
-  void startMeditation(Duration dur, User u, DataBase d) {
+  void startMeditation(Meditation m, User u, DataBase d) {
     this.user = u;
     this.data = d;
-    this.totalduration = dur;
-    this.duration = dur;
+    this.totalduration = m.duration;
+    this.duration = m.duration;
+    this.selmeditation = m;
     finishMeditation();
     //startTimer();
   }
@@ -80,7 +84,7 @@ abstract class _MeditationState with Store {
   @action
   Future finishMeditation() async {
     int currentposition = user.position;
-    Either<Failure, User> meditation = await meditate.call(Params(duration: totalduration, user: user, d: data));
+    Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation, user: user, d: data));
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
     this.state = 'finished';
   }

@@ -10,42 +10,6 @@ class PathScreen extends StatelessWidget {
   UserState _userstate;
 
   Widget porcentaje() {
-    double goal;
-    int achieveduser = 0;
-    var stageobj = _userstate.user.stage.objectives;
-    var userst = _userstate.user.stats;
-    int stageobjective = _userstate.user.stage.objectives.length ;
-
-    if (stageobj['totaltime'] != null) {
-      if (userst['etapa']['tiempo'] >= stageobj['totaltime']) {
-        achieveduser++;
-      }
-    }
-
-    if (stageobj['streak']  != null) {
-      if (userst['etapa']['maxstreak'] >= stageobj['streak']) {
-        achieveduser++;
-      }
-    }
-
-    if (stageobj['meditation']['count']  != null) {
-      if (userst['etapa']['medittiempo'] >= stageobj['meditation']['count']) {
-        achieveduser++;
-      }
-    }
-
-    if (stageobj['lecciones']  != null) {
-      if (userst['etapa']['lecciones'] >= stageobj['lecciones']) {
-        achieveduser++;
-      }
-    }
-
-    if (stageobj['meditguiadas']  != null) {
-      if (userst['etapa']['meditguiadas'] >= stageobj['meditguiadas']) {
-        achieveduser++;
-      }
-    }
-
     return RadialProgress(
       goalCompleted: 100.0,
       progressColor: Colors.transparent,
@@ -53,13 +17,13 @@ class PathScreen extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
         child: RadialProgress(
-          goalCompleted: (achieveduser / stageobjective),
+          goalCompleted: _userstate.user.percentage/100,
           progressColor: Configuration.maincolor,
           progressBackgroundColor: Colors.transparent,
           child: Container(
             padding: EdgeInsets.all(Configuration.medpadding),
             child: Text(
-              (achieveduser * 100 / stageobjective).round().toString() + '%',
+              _userstate.user.percentage.toString() + '%',
               style: Configuration.text('medium', Colors.black),
             ),
           ),
@@ -79,7 +43,8 @@ class PathScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
-          Row(children: [
+          Row(children:
+          [
             Text(
               'Goals ',
               style: Configuration.text('small', Colors.black),
@@ -140,6 +105,24 @@ class PathScreen extends StatelessWidget {
     );
   }
 
+  Widget labels(){
+    return GridView.count(
+      crossAxisSpacing: 1.5,
+      crossAxisCount: 3,
+      physics: NeverScrollableScrollPhysics(),
+      children: _userstate.user.passedObjectives.keys.map((key) => 
+        Column(
+          children: [
+            _userstate.user.passedObjectives[key] == true ? 
+            Icon(Icons.check_circle, size: Configuration.medpadding, color: Configuration.maincolor):
+            Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
+            SizedBox(height: Configuration.blockSizeVertical * 0.2),
+            Text( key, style: Configuration.text('small',Colors.black), textAlign: TextAlign.center)
+          ],)
+      ).toList()
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
@@ -168,42 +151,9 @@ class PathScreen extends StatelessWidget {
             SizedBox(height: Configuration.height * 0.05),
             porcentaje(),
             SizedBox(height: Configuration.height * 0.05),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _userstate.user.stage.objectives['totaltime'] != null
-                    ? data(
-                        _userstate.user.stats['etapa']['tiempo'],
-                        _userstate.user.stage.objectives['totaltime'],
-                        'Min\nmeditated')
-                    : Container(),
-                _userstate.user.stage.objectives['streak'] != null
-                    ? data(
-                        _userstate.user.stats['etapa']['maxstreak'],
-                        _userstate.user.stage.objectives['streak'],
-                        'Meditation\nstreak')
-                    : Container(),
-                _userstate.user.stage.objectives['meditation'].entries.length > 0
-                    ? data(
-                        _userstate.user.stats['etapa']['medittiempo'],
-                        _userstate.user.stage.objectives['meditation']['count'],
-                        _userstate.user.stage.objectives['meditation']['time']
-                                .toString() +
-                            ' min\nmeditations')
-                    : Container()
-              ],
+            Container(height: Configuration.height * 0.1,
+              child:labels()
             ),
-            SizedBox(height: Configuration.height * 0.05),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-              data(
-                  _userstate.user.stats['etapa']['lecciones'],
-                  _userstate.user.stage.objectives['lecciones'],
-                  'Taken\nlessons'),
-              data(
-                  _userstate.user.stats['etapa']['meditguiadas'],
-                  _userstate.user.stage.objectives['meditguiadas'],
-                  'Guided\nmeditations')
-            ]),
             SizedBox(height: Configuration.height * 0.05),
             goals()
           ],

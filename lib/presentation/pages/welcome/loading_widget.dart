@@ -60,6 +60,7 @@ class _LoadingState extends State<Loading> {
      _controller = VideoPlayerController.asset(
         'assets/test.mp4')
       ..initialize().then((_) {
+        _controller.play();
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() { });
       });

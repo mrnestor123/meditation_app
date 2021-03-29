@@ -13,6 +13,7 @@ class Stage {
   ObservableList<Meditation> meditpath = new ObservableList();
   Map<String, dynamic> objectives = new Map();
 
+
   Stage(
       {@required this.stagenumber,
       this.description,
@@ -47,6 +48,7 @@ class Stage {
 
     return true;
   }
+
 
 
   void addContent(Content c){

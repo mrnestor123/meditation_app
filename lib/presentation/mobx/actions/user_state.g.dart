@@ -91,13 +91,6 @@ mixin _$UserState on _UserState, Store {
     return _$userisLoggedAsyncAction.run(() => super.userisLogged());
   }
 
-  final _$takeMeditationAsyncAction = AsyncAction('_UserState.takeMeditation');
-
-  @override
-  Future<bool> takeMeditation(Duration d) {
-    return _$takeMeditationAsyncAction.run(() => super.takeMeditation(d));
-  }
-
   final _$takeLessonAsyncAction = AsyncAction('_UserState.takeLesson');
 
   @override

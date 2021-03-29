@@ -19,18 +19,17 @@ class MeditateUseCase extends UseCase<User, Params> {
   @override
   Future<Either<Failure, User>> call(Params params) async {
    int stagenumber = params.user.stagenumber;
-   MeditationModel m = new MeditationModel(duration:params.duration, day:DateTime.now(), coduser: params.user.coduser);
-   params.user.takeMeditation(m, params.d);
-   return await userRepository.updateUser(user:params.user, d:params.d, m: m);
+   params.user.takeMeditation(params.meditation, params.d);
+   return await userRepository.updateUser(user:params.user, d:params.d, m: params.meditation);
   }
 }
 
 class Params {
-  Duration duration;
+  Meditation meditation;
   User user;
   DataBase d;
 
-  Params({this.duration, this.user, this.d});
+  Params({this.meditation, this.user, this.d});
 
-  List<Object> get props => [duration, user];
+  List<Object> get props => [meditation, user];
 }

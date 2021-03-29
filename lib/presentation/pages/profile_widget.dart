@@ -68,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           TableRow(children: [
                             ProfileInfoBigCard(
                               firstText: _userstate
-                                  .user.stats['total']['meditaciones']
+                                  .user.totalMeditations.length
                                   .toString(),
                               secondText: "Meditations\ncompleted",
                               icon: Icon(Icons.self_improvement),
