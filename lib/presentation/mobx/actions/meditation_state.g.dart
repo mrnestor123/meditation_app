@@ -27,13 +27,13 @@ mixin _$MeditationState on _MeditationState, Store {
   final _$selmeditationAtom = Atom(name: '_MeditationState.selmeditation');
 
   @override
-  Meditation get selmeditation {
+  MeditationModel get selmeditation {
     _$selmeditationAtom.reportRead();
     return super.selmeditation;
   }
 
   @override
-  set selmeditation(Meditation value) {
+  set selmeditation(MeditationModel value) {
     _$selmeditationAtom.reportWrite(value, super.selmeditation, () {
       super.selmeditation = value;
     });
@@ -128,7 +128,7 @@ mixin _$MeditationState on _MeditationState, Store {
       ActionController(name: '_MeditationState');
 
   @override
-  void startMeditation(Meditation m, User u, DataBase d) {
+  void startMeditation(MeditationModel m, User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startMeditation');
     try {

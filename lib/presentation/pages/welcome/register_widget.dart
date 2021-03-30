@@ -39,6 +39,7 @@ class RegisterWidget extends StatelessWidget {
     final _registerstate = Provider.of<RegisterState>(context);
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
@@ -55,7 +56,7 @@ class RegisterWidget extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Image.asset('assets/logo.jpg', fit: BoxFit.cover),
+                Image.asset('assets/logo.png', width: Configuration.width*0.4,),
                 // spacer
                 SizedBox(height: 12.0),
                 WidgetTextField(

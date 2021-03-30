@@ -9,18 +9,18 @@ class WelcomeWidget extends StatelessWidget {
     Configuration().init(context);
     return new Scaffold(
       body: Container(
-        padding: EdgeInsets.symmetric(vertical: 64, horizontal: 16),
-        margin: EdgeInsets.symmetric(vertical: 64, horizontal: 16),
+        padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
+        margin: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Image.asset('assets/logo.png', fit: BoxFit.cover),
+              Image.asset('assets/logo.png', width: Configuration.width*0.6),
               ButtonContainer(
                   text: 'LOGIN',
                   color: Configuration.maincolor,
                   route: '/login'),
-              SizedBox(height: 16.0),
+              SizedBox(height: Configuration.height*0.03),
               ButtonContainer(
                   text: 'REGISTER',
                   color: Configuration.maincolor,

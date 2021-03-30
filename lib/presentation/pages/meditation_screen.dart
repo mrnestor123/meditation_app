@@ -4,6 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -38,7 +39,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           SizedBox(height: Configuration.height * 0.1),
           GestureDetector(
             onTap: () {
-              _meditationstate.startMeditation(Meditation(duration:Duration(minutes: seltime)), _userstate.user, _userstate.data);
+              _meditationstate.startMeditation(MeditationModel(duration:Duration(minutes: seltime)), _userstate.user, _userstate.data);
             },
             child: Container(
               decoration: BoxDecoration(
@@ -321,15 +322,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              GestureDetector(
-                  onTap: () => _meditationstate.finishMeditation(),
-                  child: Text('hola')),
               WeekList(),
               SizedBox(height: Configuration.height * 0.05),
-              Text(
-                  'Total meditations: ' +
+              Text('Total meditations: ' +
                       (_userstate.user.totalMeditations.length).toString(),
-                  style: Configuration.text('medium', Colors.white))
+                  style: Configuration.text('medium', Colors.black))
             ],
           ),
         )
@@ -540,20 +537,33 @@ class _WeekListState extends State<WeekList> {
 
 
   List<Widget> getDays() {
-    List<Widget> result = new List();
+    List<Widget> result = new List.empty(growable: true);
     var dayOfWeek = 1;
     DateTime today = DateTime.now();
     var weekday = today.weekday;
-    //   var monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
-    var meditationstreak = 0;
+    var monday = today.subtract(Duration(days: today.weekday - dayOfWeek)).weekday;
+    var meditationstreak = _userstate.user.stats['racha'];
 
-    List<Meditation> meditations = _userstate.user.totalMeditations;
+   //List<Meditation> meditations = _userstate.user.totalMeditations;
+
+
+  /*  while(monday.day != today.day){
+      if(_userstate.user.stats.meditationtime[monday.day + '-' + monday.month]){
+        weekDays
+      }
+
+
+    }*/
+
+    print(meditationstreak);
 
     if (meditationstreak == 1) {
       weekDays[--weekday]['meditated'] = true;
     } else {
-      while (meditationstreak-- != 0 && weekday > 1) {
-        weekDays[weekday--]['meditated'] = true;
+      while (meditationstreak != 0 && (weekday + 1) != monday) {
+        weekDays[(monday-1)]['meditated'] = true;
+        monday++;
+        meditationstreak--;
       }
     }
 
@@ -611,7 +621,7 @@ class _WeekItemState extends State<WeekItem> {
       curve: Curves.easeIn,
       decoration: new BoxDecoration(
         color: widget.meditated && !widget.animate || widget.animate && changed
-            ? Colors.white
+            ? Configuration.maincolor
             : Configuration.grey,
         shape: BoxShape.circle,
       ),

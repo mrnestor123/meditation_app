@@ -9,8 +9,6 @@ class MeditationModel extends Meditation {
   int stagenumber, position;
   final Map<dynamic,dynamic> content;
 
-
-
   MeditationModel(
       {this.codmed,
       this.title,

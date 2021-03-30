@@ -52,8 +52,7 @@ class UserModel extends User {
       position: json['position'] == null ? 0 : json['position'],
       meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
       image: json['image'] == null ? null : json['image'],
-      stage:
-          json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
+      stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
       stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
       role: json["role"] == null ? null : json["role"],
       classic: json["classic"] == null ? true : json["classic"],

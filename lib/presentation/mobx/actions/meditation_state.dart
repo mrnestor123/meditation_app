@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -24,7 +25,7 @@ abstract class _MeditationState with Store {
   DataBase data;
 
   @observable
-  Meditation selmeditation;
+  MeditationModel selmeditation;
 
   @observable
   Future<Either<Failure, Meditation>> _meditationFuture;
@@ -50,7 +51,7 @@ abstract class _MeditationState with Store {
   _MeditationState({this.meditate});
 
   @action
-  void startMeditation(Meditation m, User u, DataBase d) {
+  void startMeditation(MeditationModel m, User u, DataBase d) {
     this.user = u;
     this.data = d;
     this.totalduration = m.duration;

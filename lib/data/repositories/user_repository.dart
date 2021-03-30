@@ -53,7 +53,7 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  Future<Either<Failure, User>> updateUser({var user, DataBase d, Meditation m}) async {
+  Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic m}) async {
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m);

@@ -20,35 +20,27 @@ class User {
 
   Map<String, dynamic> stats = {};
 
-  //para saber las acciones del usuario
-  Map<String, dynamic> actions = new Map();
-
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
   int percentage;
 
+  final List<UserAction> lastactions = new List.empty(growable: true);
 
   final ObservableList<User> following = new ObservableList();
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
   final ObservableList<Meditation> guidedMeditations = new ObservableList();
+
+  
   final ObservableList<UserAction> acciones = new ObservableList();
 
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
-  User({this.coduser,
-      this.nombre,
-      this.user,
-      this.position,
-      this.image,
-      @required this.stagenumber,
-      this.stage,
-      this.role,
-      this.classic,
-      this.meditposition,
-      this.stats}) {
+  User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,
+      this.stage, this.role,this.classic,this.meditposition,this.stats}) {
+        
     if (coduser == null) {
       var uuid = Uuid();
       this.coduser = uuid.v1();
@@ -76,13 +68,16 @@ class User {
   int getStageNumber() => this.stagenumber;
 
   void setAction(String type, {dynamic attribute}) {
-    UserAction a = new UserAction(type: type, action: attribute, user: this);
+    UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now(), coduser: this.coduser);
     this.acciones.add(a);
+    this.lastactions.add(a);
   }
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
+  void setActions(List<UserAction> a) => acciones.addAll(a);
+  void addAction(UserAction a) => acciones.add(a);
   void setStage(StageModel s) {
     this.stage = s ;
     setPercentage(s);

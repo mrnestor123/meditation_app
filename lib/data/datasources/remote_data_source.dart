@@ -6,6 +6,7 @@ import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
@@ -84,6 +85,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         }
       }
 
+      /* HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTE MES!!! DE MOMENTO SE SACAN TODAS
+      */
+      QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: loggeduser.coduser).get();
+
+      if (actions.docs.length > 0) {
+        for (DocumentSnapshot doc in actions.docs) {
+          loggeduser.addAction(new UserAction.fromJson(doc.data()));
+        }
+      }
+
       return loggeduser;
     } else {
       throw LoginException();
@@ -110,6 +121,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         role: "meditator",
         position: 0,
         stage: one,
+        //hay que mejorar estoo !!!!!!!!! crear clase STATS !!!!!
         stats: {
           'total': {
             'lecciones': 0,
@@ -144,14 +156,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     for (var stage in stages.docs) {
       StageModel s = new StageModel.fromJson(stage.data());
-      QuerySnapshot lessons = await database
-          .collection('content')
-          .where('stagenumber', isEqualTo: s.stagenumber)
-          .get();
+      QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
 
       for (var content in lessons.docs) {
         if (content.data()['position'] != null) {
-           content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
+          content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
           s.addContent(MeditationModel.fromJson(content.data())):
           s.addContent(LessonModel.fromJson(content.data()));
         }
@@ -183,12 +192,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future updateUser({UserModel user, DataBase data, MeditationModel m}) async {
+  Future updateUser({UserModel user, DataBase data, dynamic m}) async {
     QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
 
-    //actualizamos la base de datos. habrá que mirarlo esto
+    //actualizamos la base de datos. habrá que mirarlo esto!!!!
     if (data != null) {
       QuerySnapshot users = await database.collection('users').get();
       data.users.clear();
@@ -199,7 +208,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     if (m != null) {
-      await database.collection('meditations').add(m.toJson());
+      await database.collection('meditations').add(m.toJson()); 
+    }
+
+    if(user.lastactions.length > 0){
+      for(UserAction a in user.lastactions){
+        await database.collection('actions').add(a.toJson());
+      }
+      user.lastactions.clear();
     }
   }
 }

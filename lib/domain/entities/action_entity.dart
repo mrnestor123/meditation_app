@@ -5,12 +5,11 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserAction {
   IconData icono;
-  String username, message, type, hour;
-  User user;
+  String username, message, type, hour, coduser;
   dynamic action;
   DateTime time;
 
-  UserAction({this.type, this.time, this.action, this.user}){
+  UserAction({this.type, this.time, this.action, this.username, this.coduser}){
     var icons = {
       'follow' : Icons.person_add,
       'unfollow': Icons.person_remove,
@@ -31,19 +30,31 @@ class UserAction {
     };
 
     if(time == null){
+      this.time = DateTime.now();
       hour = DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
     }else{
-      hour = time.hour.toString() + ':' + time.minute.toString();
+      var localdate = time.toUtc().toLocal();
+      hour = localdate.hour.toString() + ':' + localdate.minute.toString();
     }
-    this.username = user.nombre;
+
     this.message = types[type]();    
     this.icono = icons[type];
   }
   
+  //un pateo crear otra clase para estos dos
   Map<String, dynamic> toJson() => {
       "time": time == null ? null : time.toIso8601String(),
-      'message': message == null ? null : message,
-      'hour': hour == null ? null : hour
+      "type": type == null ? null: type,
+      "username": username == null ? null : username,
+      "action": action == null ? null : action,
+      "coduser": coduser == null ? null: coduser
   };
+
+  factory UserAction.fromJson(Map<String, dynamic> json) => UserAction(
+      time: json["time"] == null ? null : DateTime.parse(json["time"]),
+      type: json["type"] == null ? null : json["type"],
+      username: json["username"] == null ? null : json["username"],
+      coduser: json['coduser'] == null ? null : json['coduser'],
+      action: json['action'] == null ? null : json['action']);
 
 }

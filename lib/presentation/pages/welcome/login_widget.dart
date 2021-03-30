@@ -24,6 +24,7 @@ class LoginWidget extends StatelessWidget {
     final _loginstate = Provider.of<LoginState>(context);
     final _userstate = Provider.of<UserState>(context);
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -38,10 +39,8 @@ class LoginWidget extends StatelessWidget {
           padding: EdgeInsets.all(8),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Image.asset('assets/logo.jpg', fit: BoxFit.cover),
-                SizedBox(height: 20.0),
+                Image.asset('assets/logo.png', width: Configuration.width*0.4),
                 WidgetTextField(
                     text: 'username',
                     icon: Icon(Icons.person),
@@ -62,7 +61,7 @@ class LoginWidget extends StatelessWidget {
                       child: Center(
                           child: Text(
                         'LOGIN',
-                        style: Configuration.text('big', Colors.black)),
+                        style: Configuration.text('big', Colors.white)),
                       ),
                       width: MediaQuery.of(context).size.width * 0.9,
                       height: MediaQuery.of(context).size.height * 0.08,

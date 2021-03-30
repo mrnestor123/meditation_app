@@ -25,12 +25,11 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget timeline() {
-    List<Widget> getMessages(String day) {
-      List<Widget> widgets = new List();
-      if (_userstate.user.actions[day] != null &&
-          _userstate.user.actions[day].length > 0) {
-        print(_userstate.user.actions);
 
+    //Hay que crear un filtro de acciones !!!!!!!
+    List<Widget> getMessages(String day) {
+      List<Widget> widgets = new List.empty(growable: true);
+      if (_userstate.user.acciones.length > 0) {
         for (var action in _userstate.user.acciones) {
           widgets.add(
             Row(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -60,6 +59,8 @@ class _MainScreenState extends State<MainScreen> {
           );
           widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
         }
+      }else{
+        widgets.add(Center(child: Text('No actions realized today', style: Configuration.text('small', Colors.grey))));
       }
 
       return widgets;
@@ -72,6 +73,7 @@ class _MainScreenState extends State<MainScreen> {
         color: Colors.white,
         child: Column(children: [
           Text('Today', style: Configuration.text('medium', Colors.black)),
+          SizedBox(height: Configuration.height*0.02),
           Expanded(
               child: ListView(
                   children: getMessages(DateTime.now().day.toString() +
@@ -88,81 +90,82 @@ class _MainScreenState extends State<MainScreen> {
       width: Configuration.width,
       color: Configuration.lightgrey,
       padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: Configuration.height * 0.025),
-            Container(
-              margin: EdgeInsets.all(Configuration.medmargin),
-              width: Configuration.width * 0.9,
-              height: Configuration.height * 0.2,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-              child: ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/imagepath'),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      child: SingleChildScrollView(
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: Configuration.height * 0.025),
+              Container(
+                margin: EdgeInsets.all(Configuration.medmargin),
+                width: Configuration.width * 0.9,
+                height: Configuration.height * 0.23,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pushNamed(context, '/imagepath'),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Stage ' + _userstate.user.stagenumber.toString(),
+                        style: Configuration.text('small', Colors.white),
+                      ),
+                      Expanded(child: Image(image: AssetImage('assets/stage 1/stage 1.png'))),
+                    ],
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: Configuration.maincolor,
+                      onPrimary: Colors.white,
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      minimumSize: Size(double.infinity, double.infinity)),
+                ),
+              ),
+              SizedBox(height: Configuration.height * 0.05),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                Column(
                   children: [
-                    Text(
-                      'Stage ' + _userstate.user.stagenumber.toString(),
-                      style: Configuration.text('small', Colors.white),
+                    RawMaterialButton(
+                      fillColor: Configuration.maincolor,
+                      child: Icon(Icons.timer,
+                          color: Colors.white, size: Configuration.bigicon),
+                      padding: EdgeInsets.all(4.0),
+                      shape: CircleBorder(),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/premeditation')
+                            .then((value) => setState(() => null));
+                      },
                     ),
-                    Expanded(
-                        child: Image(
-                            image: AssetImage('assets/stage 1/stage 1.png'))),
+                    Container(
+                      child: Text('Meditate',
+                          style: Configuration.text('large', Colors.black)),
+                      margin: EdgeInsets.only(top: 10),
+                    )
                   ],
                 ),
-                style: ElevatedButton.styleFrom(
-                    primary: Configuration.maincolor,
-                    onPrimary: Colors.white,
-                    padding: EdgeInsets.all(Configuration.smpadding),
-                    minimumSize: Size(double.infinity, double.infinity)),
-              ),
-            ),
-            SizedBox(height: Configuration.height * 0.05),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              Column(
-                children: [
+                Column(children: [
                   RawMaterialButton(
                     fillColor: Configuration.maincolor,
-                    child: Icon(Icons.timer,
+                    child: Icon(Icons.emoji_events,
                         color: Colors.white, size: Configuration.bigicon),
                     padding: EdgeInsets.all(4.0),
                     shape: CircleBorder(),
                     onPressed: () {
-                      Navigator.pushNamed(context, '/premeditation')
+                      Navigator.pushNamed(context, '/leaderboard')
                           .then((value) => setState(() => null));
                     },
                   ),
                   Container(
-                    child: Text('Meditate',
-                        style: Configuration.text('large', Colors.black)),
-                    margin: EdgeInsets.only(top: 10),
-                  )
-                ],
-              ),
-              Column(children: [
-                RawMaterialButton(
-                  fillColor: Configuration.maincolor,
-                  child: Icon(Icons.emoji_events,
-                      color: Colors.white, size: Configuration.bigicon),
-                  padding: EdgeInsets.all(4.0),
-                  shape: CircleBorder(),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/leaderboard')
-                        .then((value) => setState(() => null));
-                  },
-                ),
-                Container(
-                    child: Text('Explore',
-                        style: Configuration.text('large', Colors.black)),
-                    margin: EdgeInsets.only(top: 10)),
-              ])
+                      child: Text('Explore',
+                          style: Configuration.text('large', Colors.black)),
+                      margin: EdgeInsets.only(top: 10)),
+                ])
+              ]),
+              SizedBox(height: Configuration.height * 0.05),
+              timeline(),
+              SizedBox(height: Configuration.height*0.05)
             ]),
-            SizedBox(height: Configuration.height * 0.05),
-            timeline()
-          ]),
+      ),
     );
   }
 }

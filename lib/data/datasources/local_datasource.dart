@@ -8,6 +8,7 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,26 +33,30 @@ const CACHED_USER = 'CACHED_USER';
 const CACHED_MEDITATIONS = 'CACHED_MEDITATIONS';
 const CACHED_LESSONS = 'CACHED_LESSONS';
 const CACHED_STAGE = 'CACHED_STAGE';
+const CACHED_ACTIONS= 'CACHED_ACTIONS';
 const REQUIRED_MISSIONS = 'REQUIRED_MISSIONS';
 const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
 
-  List<String> usermeditations = new List<String>();
-  List<String> userlessons = new List<String>();
-  List<String> stagemissions = new List<String>();
+  List<String> usermeditations = new List.empty(growable: true);
+  List<String> userlessons = new List.empty(growable: true);
+  List<String> stagemissions = new List.empty(growable: true);
+  List<String> useractions = new List.empty(growable: true);
   Stage cachedStage;
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
   @override
   Future updateData(UserModel user) async {
-    final jsonUser =
-        sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
+    final jsonUser = sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
 
     StageModel stage = user.stage;
     sharedPreferences.setString(CACHED_STAGE, json.encode(stage.toJson()));
+
+    // HAY QUE AÑADIR LAS MEDITACIONES A LA CACHE!!!!
+    // HAY QUE AÑADIR LAS ACCIONES A LA CACHE!!!!!
 
     if (jsonUser == null) {
       throw CacheException();
@@ -67,6 +72,11 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       usermeditations.add(m.toRawJson());
     }
 
+    for(UserAction a in userToCache.acciones){
+      useractions.add(json.encode(a.toJson()));
+    }
+
+    sharedPreferences.setStringList(CACHED_ACTIONS, useractions);
     sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
 
     StageModel stage = userToCache.stage;
@@ -78,8 +88,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
     if (jsonUser != null) {
       usermeditations.add(json.encode(meditation.toJson()));
-      await sharedPreferences.setStringList(
-          CACHED_MEDITATIONS, usermeditations);
+      await sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
       updateData(user);
     } else {
       throw CacheException();
@@ -95,6 +104,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     return usermeditations;
   }
 
+  // HAY QUE GUARDAR LAS ACCIONES TMB EN LA CACHE !!!!
   @override
   Future<UserModel> getUser([String usuario]) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
@@ -102,20 +112,25 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       UserModel user = UserModel.fromJson(json.decode(jsonUser));
 
       if (sharedPreferences.getString(CACHED_STAGE) != null) {
-        user.setStage(new StageModel.fromRawJson(
-            sharedPreferences.getString(CACHED_STAGE)));
+        user.setStage(new StageModel.fromRawJson(sharedPreferences.getString(CACHED_STAGE)));
       }
 
       if (sharedPreferences.getStringList(CACHED_MEDITATIONS) != null) {
         usermeditations = sharedPreferences.getStringList(CACHED_MEDITATIONS);
 
         if (usermeditations != null && usermeditations.length > 0) {
-          user.setMeditations((usermeditations)
-              .map((meditation) =>
-                  MeditationModel.fromJson(json.decode(meditation)))
-              .toList());
+          user.setMeditations((usermeditations).map((meditation) => MeditationModel.fromJson(json.decode(meditation))).toList());
         }
       }
+
+      if (sharedPreferences.getStringList(CACHED_ACTIONS) != null) {
+        useractions = sharedPreferences.getStringList(CACHED_ACTIONS);
+
+        if (useractions != null && useractions.length > 0) {
+          user.setActions((useractions).map((action) => UserAction.fromJson(json.decode(action))).toList());
+        }
+      }
+
       return Future.value(user);
     } else {
       throw Exception();
