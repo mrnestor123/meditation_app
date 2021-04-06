@@ -27,7 +27,7 @@ class LessonRepositoryImpl implements LessonRepository {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.updateUser(user:user);
-        await localDataSource.updateData(user);
+        await localDataSource.updateData(user:user);
         return Right(true);
       } on Exception {
         return Left(ServerFailure());

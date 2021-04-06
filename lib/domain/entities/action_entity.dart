@@ -5,7 +5,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserAction {
   IconData icono;
-  String username, message, type, hour, coduser;
+  String username, message, type, hour, coduser, day;
   dynamic action;
   DateTime time;
 
@@ -32,15 +32,17 @@ class UserAction {
     if(time == null){
       this.time = DateTime.now();
       hour = DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
+      day = DateTime.now().day.toString() + '-' + DateTime.now().month.toString();
     }else{
-      var localdate = time.toUtc().toLocal();
-      hour = localdate.hour.toString() + ':' + localdate.minute.toString();
+      var localdate = time.toLocal();
+      hour = localdate.hour.toString() + ':' + (localdate.minute.toString().length > 1 ? localdate.minute.toString() : '0' + localdate.minute.toString() );
+      day = localdate.day.toString() + '-' + localdate.month.toString();
     }
 
     this.message = types[type]();    
     this.icono = icons[type];
   }
-  
+
   //un pateo crear otra clase para estos dos
   Map<String, dynamic> toJson() => {
       "time": time == null ? null : time.toIso8601String(),

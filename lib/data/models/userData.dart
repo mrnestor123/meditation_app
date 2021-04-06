@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
+import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserModel extends User {
@@ -16,6 +17,7 @@ class UserModel extends User {
   Stage stage;
   Map<String, dynamic> stats = {};
   bool classic;
+  UserStats userStats;
 
   UserModel(
       {this.coduser,
@@ -28,6 +30,7 @@ class UserModel extends User {
       this.position,
       this.classic,
       this.meditposition,
+      this.userStats,
       this.stats})
       : super(
             coduser: coduser,
@@ -39,6 +42,7 @@ class UserModel extends User {
             meditposition: meditposition,
             stage: stage,
             classic: classic,
+            userStats: userStats,
             stats: stats);
 
   factory UserModel.fromRawJson(String str) =>
@@ -46,17 +50,27 @@ class UserModel extends User {
 
   String toRawJson() => json.encode(toJson());
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-      coduser: json["coduser"] == null ? null : json["coduser"],
-      nombre: json['nombre'] == null ? null : json['nombre'],
-      position: json['position'] == null ? 0 : json['position'],
-      meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
-      image: json['image'] == null ? null : json['image'],
-      stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
-      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
-      role: json["role"] == null ? null : json["role"],
-      classic: json["classic"] == null ? true : json["classic"],
-      stats: json['stats'] == null ? null : json['stats']);
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    UserModel u = UserModel(
+        coduser: json["coduser"] == null ? null : json["coduser"],
+        nombre: json['nombre'] == null ? null : json['nombre'],
+        position: json['position'] == null ? 0 : json['position'],
+        meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
+        image: json['image'] == null ? null : json['image'],
+        stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
+        stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
+        role: json["role"] == null ? null : json["role"],
+        classic: json["classic"] == null ? true : json["classic"],
+        userStats:json['stats'] == null ? null : UserStats.fromJson(json['stats']),
+        stats: json['stats'] == null ? null : json['stats']);
+
+    // u.setFollowedUsers(json['following']);
+    if(json['following'] != null){
+        u.setFollowedUsers(json['following']);
+    }
+
+    return u;
+  }
 
   Map<String, dynamic> toJson() => {
         "coduser": coduser == null ? null : coduser,
@@ -67,6 +81,7 @@ class UserModel extends User {
         "nombre": nombre == null ? null : nombre,
         "classic": classic == null ? null : classic,
         'stats': stats == null ? null : stats,
-        'image': image == null ? null : image
+        'image': image == null ? null : image,
+        "following": following.map((element) => element.coduser).toList()
       };
 }

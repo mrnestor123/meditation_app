@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
+import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
+import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
 import 'lesson_entity.dart';
@@ -12,7 +14,7 @@ import 'meditation_entity.dart';
 import 'action_entity.dart';
 
 class User {
-  String coduser, nombre, role, image;
+  String coduser, nombre, role, image, timemeditated;
   var user;
   int stagenumber, position, meditposition;
   Stage stage;
@@ -20,13 +22,20 @@ class User {
 
   Map<String, dynamic> stats = {};
 
+  //estadísticas
+  UserStats userStats;
+
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
   int percentage;
 
   final List<UserAction> lastactions = new List.empty(growable: true);
 
-  final ObservableList<User> following = new ObservableList();
+  //códigos de los usuarios a los que sigue el usuario
+  final List<dynamic> followedcods = new List.empty(growable: true);
+  //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
+  final ObservableList<UserModel> following = new ObservableList();
+  final ObservableList<UserModel> unfollowing = new ObservableList();
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
@@ -39,7 +48,18 @@ class User {
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
   User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,
-      this.stage, this.role,this.classic,this.meditposition,this.stats}) {
+      this.stage, this.role,this.classic,this.meditposition,this.stats, this.userStats}) {
+
+      
+    var time = this.stats['total']['tiempo'];
+    
+    if (time > 1440) {
+      timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
+    }else if (time > 60) {
+      timemeditated = (time / 60).toStringAsFixed(0) + ' h';
+    }else {
+      timemeditated = time.toString() + ' m';
+    }
         
     if (coduser == null) {
       var uuid = Uuid();
@@ -68,15 +88,18 @@ class User {
   int getStageNumber() => this.stagenumber;
 
   void setAction(String type, {dynamic attribute}) {
-    UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now(), coduser: this.coduser);
+    UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     this.acciones.add(a);
     this.lastactions.add(a);
   }
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
+  void addUnFollower(User u) => unfollowing.add(u);
+  void addFollower(User u) => following.add(u);
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setActions(List<UserAction> a) => acciones.addAll(a);
+  void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
   void addAction(UserAction a) => acciones.add(a);
   void setStage(StageModel s) {
     this.stage = s ;

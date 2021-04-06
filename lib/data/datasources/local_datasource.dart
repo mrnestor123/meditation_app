@@ -26,7 +26,7 @@ abstract class UserLocalDataSource {
 
   Future takeLesson(UserModel user);
 
-  Future updateData(UserModel user);
+  Future updateData({UserModel user, dynamic m});
 }
 
 const CACHED_USER = 'CACHED_USER';
@@ -49,13 +49,28 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
   @override
-  Future updateData(UserModel user) async {
+  Future updateData({UserModel user, dynamic m}) async {
     final jsonUser = sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
 
     StageModel stage = user.stage;
     sharedPreferences.setString(CACHED_STAGE, json.encode(stage.toJson()));
 
     // HAY QUE AÑADIR LAS MEDITACIONES A LA CACHE!!!!
+    
+    if (m != null) {
+       usermeditations.add(m.toRawJson());
+       sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations.map((e) => e).toList());
+    }
+
+    if(user.lastactions.length > 0){
+      for(UserAction a in user.lastactions){
+        useractions.add(json.encode(a.toJson()));
+      }
+      
+      sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
+    }
+
+
     // HAY QUE AÑADIR LAS ACCIONES A LA CACHE!!!!!
 
     if (jsonUser == null) {
@@ -83,13 +98,14 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     sharedPreferences.setString(CACHED_STAGE, stage.toRawJson());
   }
 
+  //borrar. creo que ya no se utiliza
   Future addMeditation(MeditationModel meditation, UserModel user) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);
 
     if (jsonUser != null) {
       usermeditations.add(json.encode(meditation.toJson()));
       await sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
-      updateData(user);
+      updateData(user:user);
     } else {
       throw CacheException();
     }

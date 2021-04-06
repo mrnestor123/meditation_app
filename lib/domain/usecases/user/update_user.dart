@@ -23,6 +23,7 @@ class UpdateUserUseCase extends UseCase<User, UParams> {
       image.fold((l) => print('error al subir imagen'), (r) => params.user.image = r);
     } else if (params.type == 'follow') {
       params.user.follow(params.followeduser);
+     // repository.follow(user:params.user, following:params.followeduser);
     } else if (params.type == 'unfollow') {
       params.user.unfollow(params.followeduser);
     }

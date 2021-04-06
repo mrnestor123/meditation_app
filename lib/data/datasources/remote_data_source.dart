@@ -57,9 +57,26 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: usuario.uid).get();
 
     UserModel loggeduser;
+    QuerySnapshot unfollowed;
 
     if (user.docs.length > 0) {
       loggeduser = new UserModel.fromJson(user.docs[0].data());
+
+      if(loggeduser.followedcods.length > 0 ){
+        for(String cod in loggeduser.followedcods){
+          QuerySnapshot followed = await database.collection('users').where('coduser', isEqualTo: cod).get();
+          loggeduser.addFollower(new UserModel.fromJson(followed.docs[0].data()));
+        }
+        //unfollowed = await database.collection('users').where('coduser',loggeduser.followedcods);
+        } else {
+       // unfollowed = await database.collection('users').get();
+      }     
+      
+     // if(unfollowed.docs.length > 0 ){
+       // for(var user in unfollowed.docs){
+         // loggeduser.addUnFollower(new UserModel.fromJson(user.data()));
+        //}
+     // }
 
       QuerySnapshot stage = await database.collection('stages').where('stagenumber', isEqualTo: loggeduser.stagenumber).get();
 
@@ -84,6 +101,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           loggeduser.addMeditation(new MeditationModel.fromJson(doc.data()));
         }
       }
+
+
+
+
+
+
 
       /* HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTE MES!!! DE MOMENTO SE SACAN TODAS
       */
@@ -197,7 +220,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
 
-    //actualizamos la base de datos. habrá que mirarlo esto!!!!
+    //actualizamos la base de datos. habrá que mirarlo esto !!!!!!!!!
     if (data != null) {
       QuerySnapshot users = await database.collection('users').get();
       data.users.clear();
@@ -215,7 +238,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       for(UserAction a in user.lastactions){
         await database.collection('actions').add(a.toJson());
       }
-      user.lastactions.clear();
+      Future.delayed(Duration(seconds: 5), ()=> user.lastactions.clear());
     }
+    
+
   }
 }

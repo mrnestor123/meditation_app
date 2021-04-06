@@ -21,26 +21,11 @@ class _LeaderBoardState extends State<LeaderBoard> {
   }
 
   Widget createTable(List<User> list, following) {
-    String sortTime(time) {
-      if (time > 1440) {
-        return (time / (60 * 24)).toStringAsFixed(1) + ' d';
-      }
-
-      if (time > 60) {
-        return (time / 60).toStringAsFixed(0) + ' h';
-      }
-
-      return time.toString() + ' m';
-    }
-
+  
     Widget texticon(IconData icon, String text) {
       return Row(children: [
         Icon(icon),
-        Text(text,
-            style: Configuration.text(
-              'small',
-              Colors.black,
-            ))
+        Text(text,style: Configuration.text('small',Colors.black))
       ]);
     }
 
@@ -50,8 +35,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
           0: FractionColumnWidth(0.05),
           2: FractionColumnWidth(0.42)
         },
-        children: list
-            .map((u) => TableRow(
+        children: list.map((u) => TableRow(
                     decoration: BoxDecoration(
                         color: u.coduser == _userstate.user.coduser
                             ? Colors.grey.withOpacity(0.1)
@@ -77,19 +61,15 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(u.nombre == null ? 'Anónimo' : u.nombre,
-                              style: Configuration.text(
-                                  'small', Colors.black, 'bold')),
+                              style: Configuration.text('small', Colors.black, 'bold')),
                           Text('Stage ' + u.stagenumber.toString(),
                               style: Configuration.text('tiny', Colors.grey))
                         ],
                       ),
                       //el sortTime se podría hacer en el user entity
-                      texticon(
-                          Icons.timer, sortTime(u.stats['total']['tiempo'])),
+                      texticon(Icons.timer, u.timemeditated),
                       //REFINAR ESTAS CONDICIONES
-                      following ||
-                              u.coduser == _userstate.user.coduser ||
-                              _userstate.user.following.contains(u)
+                      following || u.coduser == _userstate.user.coduser || _userstate.user.following.contains(u)
                           ? GestureDetector(
                               onTap: () async {
                                 await _userstate.follow(u, false);
@@ -142,10 +122,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         leading: IconButton(
             icon: Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.pop(context)),
-        title: Text(
-          'Leaderboard',
-          style: Configuration.text('medium', Colors.white),
-        ),
+        title: Text('Leaderboard',style: Configuration.text('medium', Colors.white)),
       ),
       body: DefaultTabController(
         length: 2,
@@ -179,8 +156,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           )
                         ]),
                     SizedBox(height: Configuration.safeBlockVertical * 2),
-                    Expanded(
-                        child: TabBarView(children: [
+                    Expanded(child: TabBarView(children: [
                       createTable(_userstate.data.users, false),
                       createTable(_userstate.user.following, true)
                     ]))

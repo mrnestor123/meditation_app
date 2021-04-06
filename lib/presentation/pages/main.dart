@@ -6,9 +6,7 @@ import 'package:meditation_app/presentation/mobx/login_register/login_state.dart
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:meditation_app/presentation/pages/leaderboard.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
-
 import 'package:meditation_app/login_injection_container.dart' as di;
-
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';

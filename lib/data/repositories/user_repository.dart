@@ -57,14 +57,14 @@ class UserRepositoryImpl implements UserRepository {
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m);
-        localDataSource.updateData(user);
+        localDataSource.updateData(user:user, m: m);
         return Right(newUser);
       } on ServerException {
         return Left(ServerFailure());
       }
     } else {
       //Hay que arreglar este método
-      final localUser = await localDataSource.updateData(user);
+      final localUser = await localDataSource.updateData(user:user, m: m);
       if (localUser != null) {
         return Right(localUser);
       } else {

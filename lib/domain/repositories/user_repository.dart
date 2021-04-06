@@ -20,4 +20,5 @@ abstract class UserRepository {
   Future<Either<Failure, User>> updateUser({User user,DataBase d, dynamic m});
 
   Future<Either<Failure,String>> updateImage(PickedFile image, User u);
+
 }

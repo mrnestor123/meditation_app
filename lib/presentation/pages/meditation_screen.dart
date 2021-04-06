@@ -547,16 +547,17 @@ class _WeekListState extends State<WeekList> {
    //List<Meditation> meditations = _userstate.user.totalMeditations;
 
 
-  /*  while(monday.day != today.day){
-      if(_userstate.user.stats.meditationtime[monday.day + '-' + monday.month]){
+  /*    while(monday != today){
+      if(_userstate.user.stats['meditationtime'][monday.day.toString() + '-' + monday.month.toString()]){
         weekDays
       }
+
 
 
     }*/
 
     print(meditationstreak);
-
+  
     if (meditationstreak == 1) {
       weekDays[--weekday]['meditated'] = true;
     } else {
