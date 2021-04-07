@@ -542,7 +542,7 @@ class _WeekListState extends State<WeekList> {
     DateTime today = DateTime.now();
     var weekday = today.weekday;
     var monday = today.subtract(Duration(days: today.weekday - dayOfWeek)).weekday;
-    var meditationstreak = _userstate.user.stats['racha'];
+    var meditationstreak = _userstate.user.userStats.streak;
 
    //List<Meditation> meditations = _userstate.user.totalMeditations;
 

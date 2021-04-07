@@ -33,10 +33,13 @@ const CACHED_USER = 'CACHED_USER';
 const CACHED_MEDITATIONS = 'CACHED_MEDITATIONS';
 const CACHED_LESSONS = 'CACHED_LESSONS';
 const CACHED_STAGE = 'CACHED_STAGE';
+const CACHED_STAGELESSONS = 'CACHED_STAGELESSONS';
+const CACHED_STAGEMEDITATIONS = 'CACHED_STAGEMEDITATIONS';
 const CACHED_ACTIONS= 'CACHED_ACTIONS';
 const REQUIRED_MISSIONS = 'REQUIRED_MISSIONS';
 const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 
+//puede ser que guarde demasiadas cosas en la cachee !!
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
 
@@ -44,6 +47,9 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   List<String> userlessons = new List.empty(growable: true);
   List<String> stagemissions = new List.empty(growable: true);
   List<String> useractions = new List.empty(growable: true);
+  List<String> stagepath = new List.empty(growable: true);
+  List<String> meditpath = new List.empty(growable: true);
+
   Stage cachedStage;
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
@@ -96,6 +102,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
     StageModel stage = userToCache.stage;
     sharedPreferences.setString(CACHED_STAGE, stage.toRawJson());
+    
   }
 
   //borrar. creo que ya no se utiliza

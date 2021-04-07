@@ -96,7 +96,7 @@ class _StageViewState extends State<StageView> {
   }
 
   Widget getLessons(context) {
-    List<Widget> lessons = new List();
+    List<Widget> lessons = new List.empty(growable: true);
 
     widget.stage.path.forEach((content) {
       var image;
@@ -133,39 +133,27 @@ class _StageViewState extends State<StageView> {
                   minimumSize: Size(double.infinity, double.infinity)),
               child: Stack(
                 children: [
-                  Positioned.fill(
-                    left: 150,
-                    right: 0,
-                    top: 2,
-                    bottom: 2,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16),
-                          bottomRight: Radius.circular(16)),
-                      child: Image.network(content.image),
-                    ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Image.network(content.image),
                   ),
                   Positioned(
-                      top: 0,
+                      top: 15,
                       left: 15,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
-                        child: Container(
-                          width: Configuration.safeBlockHorizontal * 5,
-                          height: Configuration.safeBlockHorizontal * 5,
-                          child: Icon(
-                              content.type == 'meditation'
-                                  ? Icons.self_improvement
-                                  : Icons.book,
-                              color: Colors.grey),
-                        ),
+                      child: Container(
+                        width: Configuration.safeBlockHorizontal * 5,
+                        height: Configuration.safeBlockHorizontal * 5,
+                        child: Icon(
+                            content.type == 'meditation'
+                                ? Icons.self_improvement
+                                : Icons.book,
+                            color: Colors.grey),
                       )),
                   Positioned(
                       left: 15,
-                      bottom: 0,
+                      bottom: 15,
                       child: Container(
                         width: Configuration.width * 0.5,
-                        padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
                         child: Text(
                           content.title,
                           style:
@@ -237,29 +225,29 @@ class _StageViewState extends State<StageView> {
         color: Configuration.white,
         child: Column(
           children: [
-            Container(
-              height: Configuration.height * 0.2,
-              width: Configuration.width,
-              margin: EdgeInsets.only(
-                  left: Configuration.smmargin,
-                  right: Configuration.smmargin,
-                  top: Configuration.medmargin),
-              decoration: BoxDecoration(
-                  color: Configuration.maincolor,
-                  borderRadius: BorderRadius.circular(12.0)),
+            AspectRatio(
+              aspectRatio: 9/4,
+                          child: Container(
+                width: Configuration.width,
+                margin: EdgeInsets.only(
+                    left: Configuration.smmargin,
+                    right: Configuration.smmargin,
+                    top: Configuration.medmargin),
+                decoration: BoxDecoration(
+                    color: Configuration.maincolor,
+                    borderRadius: BorderRadius.circular(12.0)),
+              ),
             ),
             Container(
                 padding: EdgeInsets.symmetric(
-                    horizontal: Configuration.medpadding,
                     vertical: Configuration.tinpadding),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       'Filter',
                       style: Configuration.text('small', Colors.black),
                     ),
-                    SizedBox(width: Configuration.width * 0.05),
                     OutlinedButton(
                       onPressed: () => setState(
                           () => filter.contains('all') ? '' : filter = ['all']),
@@ -274,7 +262,6 @@ class _StageViewState extends State<StageView> {
                             : null,
                       ),
                     ),
-                    SizedBox(width: Configuration.width * 0.05),
                     OutlinedButton(
                       onPressed: () => setState(() {
                         filter.contains('lesson') ? '' : filter = ['lesson'];
@@ -290,7 +277,6 @@ class _StageViewState extends State<StageView> {
                             : null,
                       ),
                     ),
-                    SizedBox(width: Configuration.width * 0.05),
                     OutlinedButton(
                       onPressed: () => setState(() =>
                           filter.contains('meditation')
@@ -338,13 +324,12 @@ class _ContentViewState extends State<ContentView> {
   Widget portada() {
     return Column(children: [
       Stack(children: [
-        Image(image: widget.slider),
+        Center(child: Image(image: widget.slider,height: Configuration.height*0.5,)),
         Container(
-            width: Configuration.width,
-            color: Configuration.grey.withOpacity(0.7),
-            height: Configuration.height * 0.5),
+          width: Configuration.width,
+          color: Configuration.grey.withOpacity(0.7),
+          height: Configuration.height * 0.5),
       ]),
-      Divider(color: Colors.black, height: 1),
       Expanded(
         child: Container(
           width: Configuration.width,
@@ -359,18 +344,18 @@ class _ContentViewState extends State<ContentView> {
                     style: Configuration.text('medium', Colors.black)),
               ),
               Center(
-                child: GestureDetector(
-                  onTap: () => setState(() => _index = 0),
-                  child: Container(
-                    width: Configuration.width * 0.25,
-                    height: Configuration.width * 0.25,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle, color: Configuration.maincolor),
-                    child: Center(
-                      child: Text('Start',
-                          style: Configuration.text('medium', Colors.white)),
-                    ),
+                child: MaterialButton(
+                  onPressed: () async {
+                    setState(() => _index = 0);
+                  },
+                  color: Configuration.maincolor,
+                  textColor: Colors.white,
+                  child: Text(
+                    'Start',
+                    style: Configuration.text('medium', Colors.white),
                   ),
+                  padding: EdgeInsets.all(Configuration.medpadding),
+                  shape: CircleBorder(),
                 ),
               )
             ],

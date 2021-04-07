@@ -45,12 +45,15 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, User>> islogged() async {
-    try {
-      final user = await localDataSource.getUser();
-      return Right(user);
-    } on Exception {
-      return Left(CacheFailure(error: 'User is not in cache'));
-    }
+    if (await networkInfo.isConnected) {
+      try {
+        final user = await localDataSource.getUser();
+        user.setStage(await remoteDataSource.getStage(user.stagenumber));
+        return Right(user);
+      } on Exception {
+        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      }
+    } 
   }
 
   Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic m}) async {
@@ -96,8 +99,7 @@ class UserRepositoryImpl implements UserRepository {
         final localUser = await localDataSource.getUser();
         return Right(localUser);
       } on ServerException {*/
-      return Left(
-          ConnectionFailure(error: "User is not connected to the internet"));
+      return Left(ConnectionFailure(error: "User is not connected to the internet"));
     }
   }
 
@@ -112,8 +114,8 @@ class UserRepositoryImpl implements UserRepository {
         return Left(ServerFailure());
       }
     } else {
-      return Left(
-          ConnectionFailure(error: "User is not connected to the internet"));
+      //habrá que hacer algo cuando el usuario no tenga internet.. Mostrar un modal con PONTE INTERNET
+      return Left(ConnectionFailure(error: "User is not connected to the internet"));
     }
   }
 

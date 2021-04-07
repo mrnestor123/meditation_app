@@ -20,17 +20,15 @@ class User {
   Stage stage;
   bool classic;
 
-  Map<String, dynamic> stats = {};
-
   //estadísticas
   UserStats userStats;
 
+  //passed objectives también estará en stats
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
   int percentage;
 
   final List<UserAction> lastactions = new List.empty(growable: true);
-
   //códigos de los usuarios a los que sigue el usuario
   final List<dynamic> followedcods = new List.empty(growable: true);
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
@@ -40,18 +38,14 @@ class User {
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
   final ObservableList<Meditation> guidedMeditations = new ObservableList();
-
-  
   final ObservableList<UserAction> acciones = new ObservableList();
 
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
-  User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,
-      this.stage, this.role,this.classic,this.meditposition,this.stats, this.userStats}) {
+  User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,this.stage, this.role,this.classic,this.meditposition,this.userStats}) {
 
-      
-    var time = this.stats['total']['tiempo'];
+    var time = this.userStats.total.timemeditated;
     
     if (time > 1440) {
       timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
@@ -73,10 +67,10 @@ class User {
 
   //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
   void inituser() {
-    if(this.stats['racha'] > 0) {
-      var lastmeditated = DateTime.parse(this.stats['lastmeditated']);
+    if(this.userStats.streak > 0) {
+      var lastmeditated = DateTime.parse(this.userStats.lastmeditated);
       if(lastmeditated.day != DateTime.now().day && lastmeditated.day != DateTime.now().subtract(Duration(days: 1)).day){
-        this.stats['racha'] = 0;
+        userStats.streak = 0;
       }
     } 
   }
@@ -103,7 +97,7 @@ class User {
   void addAction(UserAction a) => acciones.add(a);
   void setStage(StageModel s) {
     this.stage = s ;
-    setPercentage(s);
+    setPercentage();
   }
   
   void follow(User u) {
@@ -125,7 +119,7 @@ class User {
 
     this.stagenumber = this.stage.stagenumber;
     this.position = 0;
-    this.stats['etapa'].forEach((key, value) => {this.stats['etapa'][key] = 0});
+    userStats.stage.reset();
 
     setAction("updatestage", attribute: this.stagenumber.toString());
   }
@@ -141,7 +135,11 @@ class User {
 
   //este método se repite en la etapa también ... Moverlo todo aquí.
   //!!!! REFACTORIZAR !!!!
-  void setPercentage(Stage s) {
+  // HACE FALTA PASAR LA ETAPA QUE YA LA TENEMOS ???
+  void setPercentage() {
+    Stage s = this.stage;
+
+    //en el momento que se cambie la nomenclatura estos métodos van a fallar !!!!! :(
     var labels = {
       'meditation': 'Meditaciones',
       'totaltime': 'Tiempo total',
@@ -151,34 +149,34 @@ class User {
     };
 
     var objectiveCheck = {
-      'totaltime': () => this.stats['etapa']['tiempo'] >= s.objectives['totaltime'] ? true : this.stats['etapa']['tiempo'].toString() + '/' + s.objectives['totaltime'].toString() ,
-      'meditation': () => this.stats['etapa']['medittiempo'] >= s.objectives['meditation']['count'] ? true : this.stats['etapa']['medittiempo'].toString() + '/' +  s.objectives['meditation']['count'].toString(),
-      'streak': () => this.stats['etapa']['maxstreak'] >= s.objectives['streak'] ? true : this.stats['etapa']['maxstreak'].toString() + '/' + s.objectives['streak'].toString() ,
-      'lecciones': () => this.stats['etapa']['lecciones'] >= s.objectives['lecciones'] ? true : this.stats['etapa']['lecciones'].toString() + '/' + s.objectives['lecciones'].toString(),
-      'meditguiadas': () => this.stats['etapa']['meditguiadas'] >= s.objectives['meditguiadas'] ? true : this.stats['etapa']['meditguiadas'].toString() + '/' + s.objectives['meditguiadas'].toString() 
+      'totaltime': () => userStats.stage.timemeditated >= s.objectives['totaltime'] ? true : userStats.stage.timemeditated.toString() + '/' + s.objectives['totaltime'].toString() ,
+      'meditation': () => userStats.stage.timemeditations >= s.objectives['meditation']['count'] ? true : userStats.stage.timemeditations.toString() + '/' +  s.objectives['meditation']['count'].toString(),
+      'streak': () => userStats.stage.maxstreak >= s.objectives['streak'] ? true : userStats.stage.maxstreak.toString() + '/' + s.objectives['streak'].toString() ,
+      'lecciones': () => userStats.stage.lessons >= s.objectives['lecciones'] ? true : userStats.stage.lessons.toString() + '/' + s.objectives['lecciones'].toString(),
+      'meditguiadas': () => userStats.stage.guidedmeditations >= s.objectives['meditguiadas'] ? true : userStats.stage.guidedmeditations.toString() + '/' + s.objectives['meditguiadas'].toString() 
     };
 
     var percentageCheck = {
-      'Tiempo total': () =>  s.objectives['totaltime'] / this.stats['etapa']['tiempo'],
-      'Meditaciones': () => s.objectives['meditation']['count'] / this.stats['etapa']['medittiempo'],
-      'Racha': () => s.objectives['streak'] / this.stats['etapa']['maxstreak'],
-      'Lecciones': () => s.objectives['lecciones'] / this.stats['etapa']['lecciones'],
-      'Meditaciones guiadas': () => s.objectives['meditguiadas'] / this.stats['etapa']['meditguiadas']  
+      'Tiempo total': () => userStats.stage.timemeditated / s.objectives['totaltime'] ,
+      'Meditaciones': () => userStats.stage.timemeditations / s.objectives['meditation']['count']  ,
+      'Racha': () => userStats.stage.maxstreak / s.objectives['streak'],
+      'Lecciones': () => userStats.stage.lessons / s.objectives['lecciones'],
+      'Meditaciones guiadas': () => userStats.stage.guidedmeditations / s.objectives['meditguiadas']   
     };
 
     double passedcount = 0;
 
     s.objectives.forEach((key, value) { 
-      passedObjectives[labels[key]] = objectiveCheck[key]();
-    });
+      passedObjectives[labels[key]] = objectiveCheck[key](); 
+    }); 
 
     passedObjectives.forEach((key, value) { 
       if(value == true) {
         passedcount += 1;
-      }else {
+      } else {
         var passed = percentageCheck[key]();
-        passedcount += passed != double.infinity ?  passed : 0;
-     }
+        passedcount += passed < 1 ?  passed : 0;
+      }
     });
 
     this.percentage = ((passedcount / s.objectives.length) * 100).floor();
@@ -187,22 +185,23 @@ class User {
   bool takeLesson(Lesson l, DataBase d) {
     List<Lesson> lessons = List.empty(growable:true);
 
-    try {
-      if (l.stagenumber == this.stagenumber && lessoninStage(l)) {
-        this.stats['etapa']['lecciones']++;
-        this.stats['total']['lecciones']++;
-        if (this.stage.path[position] == this.stats['ultimosleidos'].length + 1) {
-          this.position += 1;
-          this.stats['ultimosleidos'] = [];
-          return true;
-        } else {
-          this.stats['ultimosleidos'].add({'cod': l.cod});
-          return false;
-        }
+    //no se para que hace falta lessoninStage
+    if (l.stagenumber == this.stagenumber && this.position <= l.position) {
+      this.userStats.takeLesson();
+      setPercentage();
+      if (this.stage.path.where((c) => c.position == this.position).length == this.userStats.lastread.length + 1) {
+        this.position += 1;
+        this.userStats.lastread.clear();
+        return true;
+      } else {
+        this.userStats.lastread.add({'cod': l.cod});
+        return false;
       }
-    } catch (Exception) {}
 
-    if (this.stage.checkifPassedStage(this)) {
+    }
+    
+
+    if (this.percentage == 100) {
       this.updateStage(d);
     }
 
@@ -216,57 +215,40 @@ class User {
     Meditation aux = new Meditation(title: m.title, duration: m.duration, day: DateTime.now());
     this.totalMeditations.add(m);
 
-    if (this.stats['racha'] > 0) {
-      DateTime lastmeditation = DateTime.parse(this.stats['lastmeditated']);
+    if (this.userStats.streak > 0) {
+      DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
       //si meditamos ayer
       if (lastmeditation.add(Duration(days: 1)).day == aux.day.day) {
-        this.stats['racha']++;
-         if (this.stats['etapa']['maxstreak'] < this.stats['racha']) {
-            this.stats['etapa']['maxstreak'] = this.stats['racha'];
-          }
-          if (this.stats['total']['maxstreak'] < this.stats['racha']) {
-            this.stats['total']['maxstreak'] = this.stats['racha'];
-          }
+        this.userStats.streakUp();
       } else if (lastmeditation.day != aux.day.day) {
-        this.stats['racha'] = 1;
+        this.userStats.streak = 1;
       }
     } else {
-      this.stats['racha'] = 1;
+      this.userStats.streakUp();
     }
     
-    this.stats['lastmeditated'] = DateTime.now().toIso8601String();
-    
-    this.stats['etapa']['tiempo'] += aux.duration.inMinutes;
-    this.stats['total']['tiempo'] += aux.duration.inMinutes;
-    this.stats['total']['meditaciones']++;
+    this.userStats.meditate(aux);
 
-    if (this.stats['meditationtime'] == null) {
-      this.stats['meditationtime'] = {};
-    }
-
-    if (this.stats['meditationtime'][aux.day.day.toString() + '-' + aux.day.month.toString()] == null) {
-      this.stats['meditationtime'][aux.day.day.toString() + '-' + aux.day.month.toString()] = m.duration.inMinutes;
-    } else {
-      this.stats['meditationtime'][aux.day.day.toString() + '-' + aux.day.month.toString()] +=  m.duration.inMinutes;
-    }
 
     // si la meditación es free
     if (aux.title == null) {
       if (this.stage.objectives['meditation'] != null && this.stage.objectives['meditation']['time'] != null && this.stage.objectives['meditation']['time'] <= aux.duration.inMinutes) {
-        this.stats['etapa']['medittiempo']++;
+        this.userStats.stage.timemeditations++;
       }
       setAction('meditation', attribute: [aux.duration.inMinutes]);
     } else {
       //no se si esto funcionará bien
       if (!guidedMeditations.contains(m)) {
-        this.stats['etapa']['meditguiadas']++;
+        this.userStats.stage.lessons++;
         guidedMeditations.add(m);
       }
 
       setAction("guided_meditation", attribute: [aux.title, aux.duration.inMinutes]);
     }
 
-    if (this.stage.stagenumber != 10 && this.stage.checkifPassedStage(this)) {
+    this.setPercentage();
+
+    if (this.percentage >= 100) {
       this.updateStage(d);
     }
 

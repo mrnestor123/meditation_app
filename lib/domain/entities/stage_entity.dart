@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
+import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
 
@@ -11,6 +12,7 @@ class Stage {
   String description, image, goals, obstacles, skills, mastery;
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
+  StageStats stobjectives; 
   Map<String, dynamic> objectives = new Map();
 
 
@@ -27,17 +29,11 @@ class Stage {
 
   bool checkifPassedStage(User u) {
     var objectiveCheck = {
-      'totaltime': () =>
-          u.stats['etapa']['tiempo'] >= this.objectives['totaltime'],
-      'meditation': () =>
-          u.stats['etapa']['medittiempo'] >=
-          this.objectives['meditation']['count'],
-      'streak': () =>
-          u.stats['etapa']['maxstreak'] >= this.objectives['streak'],
-      'lecciones': () =>
-          u.stats['etapa']['lecciones'] >= this.objectives['lecciones'],
-      'meditguiadas': () =>
-          u.stats['etapa']['meditguiadas'] >= this.objectives['meditguiadas']
+      'totaltime': () => u.userStats.stage.timemeditated >= this.objectives['totaltime'],
+      'meditation': () =>u.userStats.stage.timemeditations >= this.objectives['meditation']['count'],
+      'streak': () =>u.userStats.stage.maxstreak >= this.objectives['streak'],
+      'lecciones': () => u.userStats.stage.lessons >= this.objectives['lecciones'],
+      'meditguiadas': () => u.userStats.stage.guidedmeditations >= this.objectives['meditguiadas']
     };
 
     for (var key in this.objectives.keys) {
@@ -48,8 +44,6 @@ class Stage {
 
     return true;
   }
-
-
 
   void addContent(Content c){
     if(c.type== 'meditation' || c.type =='lesson'){

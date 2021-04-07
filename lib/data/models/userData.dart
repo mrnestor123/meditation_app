@@ -42,8 +42,7 @@ class UserModel extends User {
             meditposition: meditposition,
             stage: stage,
             classic: classic,
-            userStats: userStats,
-            stats: stats);
+            userStats: userStats);
 
   factory UserModel.fromRawJson(String str) =>
       UserModel.fromJson(json.decode(str));
@@ -61,12 +60,13 @@ class UserModel extends User {
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
         classic: json["classic"] == null ? true : json["classic"],
-        userStats:json['stats'] == null ? null : UserStats.fromJson(json['stats']),
-        stats: json['stats'] == null ? null : json['stats']);
+        userStats:json['stats'] == null ? null : UserStats.fromJson(json['stats'])
+      );
 
     // u.setFollowedUsers(json['following']);
+    // POrque no puede ser una list dynamic ???
     if(json['following'] != null){
-        u.setFollowedUsers(json['following']);
+      u.setFollowedUsers(json['following']);
     }
 
     return u;
@@ -80,7 +80,7 @@ class UserModel extends User {
         "meditposition": meditposition == null ? null : meditposition,
         "nombre": nombre == null ? null : nombre,
         "classic": classic == null ? null : classic,
-        'stats': stats == null ? null : stats,
+        'stats': userStats == null ? null : userStats.toJson(),
         'image': image == null ? null : image,
         "following": following.map((element) => element.coduser).toList()
       };

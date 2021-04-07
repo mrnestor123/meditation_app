@@ -45,8 +45,7 @@ class PathScreen extends StatelessWidget {
         children: [
           Row(children:
           [
-            Text(
-              'Goals ',
+            Text('Goals ',
               style: Configuration.text('small', Colors.black),
             ),
             Flexible(child:Text(_userstate.user.stage.goals,
@@ -112,6 +111,7 @@ class PathScreen extends StatelessWidget {
       physics: NeverScrollableScrollPhysics(),
       children: _userstate.user.passedObjectives.keys.map((key) => 
         Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _userstate.user.passedObjectives[key] == true ? 
             Icon(Icons.check_circle, size: Configuration.medpadding, color: Configuration.maincolor):
@@ -130,7 +130,7 @@ class PathScreen extends StatelessWidget {
       height: Configuration.height,
       width: Configuration.width,
       color: Configuration.lightgrey,
-      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
+      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding,vertical: Configuration.smpadding),
       child: SingleChildScrollView(
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,7 +151,7 @@ class PathScreen extends StatelessWidget {
             SizedBox(height: Configuration.height * 0.05),
             porcentaje(),
             SizedBox(height: Configuration.height * 0.05),
-            Container(height: Configuration.height * 0.1,
+            Container(height: _userstate.user.passedObjectives.length > 3 ? Configuration.height * 0.3 : Configuration.height * 0.2,
               child:labels()
             ),
             SizedBox(height: Configuration.height * 0.05),

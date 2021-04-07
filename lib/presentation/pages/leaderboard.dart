@@ -16,10 +16,6 @@ class _LeaderBoardState extends State<LeaderBoard> {
   UserState _userstate;
   var time = '';
 
-  void sortUsers(sortparameter) {
-    _userstate.data.users.sort((a, b) => a.stats['total']['tiempo'] - b.stats['total']['tiempo']);
-  }
-
   Widget createTable(List<User> list, following) {
   
     Widget texticon(IconData icon, String text) {

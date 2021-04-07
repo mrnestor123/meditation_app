@@ -38,8 +38,6 @@ class StageModel extends Stage {
   String toRawJson() => json.encode(toJson());
 
   factory StageModel.fromJson(Map<String, dynamic> json) {
-    int count = 0;
-    int meditationcount = 0;
     StageModel s = new StageModel(
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         description: json["description"] == null ? null : json["description"],
@@ -50,13 +48,7 @@ class StageModel extends Stage {
         skills: json["skills"] == null ? null : json["skills"],
         mastery: json["mastery"] == null ? null : json["mastery"],
         objectives: json['objectives'] == null ? null : json['objectives']);
-
-    if (s.objectives == null) {
-      s.objectives = new Map();
-    }
-    s.objectives['lecciones'] = 0;
-    s.objectives['meditguiadas'] = 0;   
-
+        
     return s;
   }
 

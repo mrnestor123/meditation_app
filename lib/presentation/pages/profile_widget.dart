@@ -75,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             ProfileInfoBigCard(
                                 firstText: _userstate
-                                    .user.stats['total']['lecciones']
+                                    .user.userStats.total.lessons
                                     .toString(),
                                 secondText: "Lessons\ncompleted",
                                 icon: Icon(Icons.book))
@@ -366,7 +366,7 @@ class SimpleBarChart extends StatelessWidget {
     final data = List<Ordinal>.empty(growable: true);
 
     for (var day in days) {
-      var time = user.stats['meditationtime'];
+      var time = user.userStats.meditationtime;
       var datestring = date.day.toString() + '-' + date.month.toString();
       date = date.add(Duration(days: 1));
       data.add(new Ordinal(

@@ -35,6 +35,12 @@ abstract class UserRemoteDataSource {
 
   Future updateLessons(UserModel u);
 
+   //sacamos la información del usuario de la base de datos una vez sabemos que está en la caché. PARA EL FUTURO!!!
+  Future<UserModel> getUser({String cod});
+
+
+  Future<StageModel> getStage(int stagenumber);
+
   Future updateImage(PickedFile image, User u);
 }
 
@@ -80,17 +86,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       QuerySnapshot stage = await database.collection('stages').where('stagenumber', isEqualTo: loggeduser.stagenumber).get();
 
-      StageModel s = new StageModel.fromJson(stage.docs[0].data());
-
-      QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
-
-      for (var content in lessons.docs) {
-        if (content.data()['position'] != null) {
-          content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
-          s.addContent(MeditationModel.fromJson(content.data())):
-          s.addContent(LessonModel.fromJson(content.data()));
-        }
-      }
+      StageModel s = await populateStage(stage.docs[0].data());
 
       loggeduser.setStage(s);
 
@@ -101,12 +97,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           loggeduser.addMeditation(new MeditationModel.fromJson(doc.data()));
         }
       }
-
-
-
-
-
-
 
       /* HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTE MES!!! DE MOMENTO SE SACAN TODAS
       */
@@ -171,6 +161,27 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return user;
   }
 
+  //sacamos la información del usuario de la base de datos
+  Future<UserModel> getUser({String cod}) async {
+
+  }
+
+  Future<StageModel> populateStage(json) async {
+    StageModel s = new StageModel.fromJson(json);
+    QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
+
+    for (var content in lessons.docs) {
+      if (content.data()['position'] != null) {
+        content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
+        s.addContent(MeditationModel.fromJson(content.data())):
+        s.addContent(LessonModel.fromJson(content.data()));
+      }
+    }
+
+    return s;
+  }
+
+
   @override
   Future<DataBase> getData() async  {
     DataBase d = new DataBase();
@@ -178,17 +189,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot users = await database.collection('users').get();
 
     for (var stage in stages.docs) {
-      StageModel s = new StageModel.fromJson(stage.data());
-      QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
-
-      for (var content in lessons.docs) {
-        if (content.data()['position'] != null) {
-          content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
-          s.addContent(MeditationModel.fromJson(content.data())):
-          s.addContent(LessonModel.fromJson(content.data()));
-        }
-      }
-      
+      StageModel s = await populateStage(stage.data());
       d.stages.add(s);
     }
 
@@ -197,7 +198,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
 
     d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
-    d.users.sort((a, b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+    d.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
 
     return d;
   }
@@ -227,7 +228,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       for (var user in users.docs) {
         data.users.add(new UserModel.fromJson(user.data()));
       }
-      data.users.sort((a, b) => b.stats['total']['tiempo'].compareTo(a.stats['total']['tiempo']));
+      data.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
     }
 
     if (m != null) {
@@ -242,5 +243,15 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
     
 
+  }
+
+  @override
+  Future<StageModel> getStage(int stagenumber) async{
+
+    QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:stagenumber).get();
+
+    StageModel s =  await populateStage(stage.docs[0].data());
+
+    return s;
   }
 }
