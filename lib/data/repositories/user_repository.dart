@@ -48,7 +48,7 @@ class UserRepositoryImpl implements UserRepository {
     if (await networkInfo.isConnected) {
       try {
         final user = await localDataSource.getUser();
-        user.setStage(await remoteDataSource.getStage(user.stagenumber));
+        remoteDataSource.getUserData(user);
         return Right(user);
       } on Exception {
         return Left(ConnectionFailure(error: "User is not connected to the internet"));
@@ -56,11 +56,11 @@ class UserRepositoryImpl implements UserRepository {
     } 
   }
 
-  Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic m}) async {
+  Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic m, dynamic actions}) async {
     if (await networkInfo.isConnected) {
       try {
-        final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m);
-        localDataSource.updateData(user:user, m: m);
+        final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m, actions: actions);
+        localDataSource.updateData(user:user, m: m, actions: actions);
         return Right(newUser);
       } on ServerException {
         return Left(ServerFailure());

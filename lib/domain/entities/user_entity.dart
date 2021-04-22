@@ -18,7 +18,7 @@ class User {
   var user;
   int stagenumber, position, meditposition;
   Stage stage;
-  bool classic;
+  bool classic, follows;
 
   //estadísticas
   UserStats userStats;
@@ -34,6 +34,7 @@ class User {
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
   final ObservableList<UserModel> following = new ObservableList();
   final ObservableList<UserModel> unfollowing = new ObservableList();
+  final ObservableList<UserModel> allusers = new ObservableList();
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
@@ -44,9 +45,7 @@ class User {
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
   User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,this.stage, this.role,this.classic,this.meditposition,this.userStats}) {
-
     var time = this.userStats.total.timemeditated;
-    
     if (time > 1440) {
       timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
     }else if (time > 60) {
@@ -88,26 +87,52 @@ class User {
   }
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
-  void addUnFollower(User u) => unfollowing.add(u);
-  void addFollower(User u) => following.add(u);
+  void addFollower(User u) { u.follows = true; following.add(u); allusers.add(u);}
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setActions(List<UserAction> a) => acciones.addAll(a);
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
   void addAction(UserAction a) => acciones.add(a);
+  void addUnfollower(User u) {u.follows= false; allusers.add(u); }
   void setStage(StageModel s) {
     this.stage = s ;
     setPercentage();
   }
+
+  //se le podrán dar parámetros... por etapa, por tiempo meditado total, por tiempo meditado en la etapa
+  void sortFollowers() {
+    this.allusers.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
+    this.following.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
+  }
   
   void follow(User u) {
-    setAction("follow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
-    following.add(u);
+    this.lastactions.clear();
+   
+    for(User user in allusers){
+      if(user.coduser == u.coduser){
+        user.follows = true;
+      }
+    }
+    
+    if(!following.contains(u)){
+      setAction("follow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
+      following.add(u);
+    }
   }
 
   void unfollow(User u) {
-    setAction("unfollow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
-    following.remove(u);
+    this.lastactions.clear();
+     
+    for(User user in allusers){
+      if(user.coduser == u.coduser){
+        user.follows = false;
+      }
+    }
+
+    if(following.contains(u)){
+      setAction("unfollow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
+      following.remove(u);
+    }
   }
 
   void updateStage(DataBase data) {
@@ -183,6 +208,8 @@ class User {
   }
 
   bool takeLesson(Lesson l, DataBase d) {
+    
+    this.lastactions.clear();
     List<Lesson> lessons = List.empty(growable:true);
 
     //no se para que hace falta lessoninStage
@@ -212,30 +239,33 @@ class User {
 
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
   bool takeMeditation(Meditation m,[DataBase d]) {
-    Meditation aux = new Meditation(title: m.title, duration: m.duration, day: DateTime.now());
+    m.coduser = this.coduser;
+    
+    this.lastactions.clear();
     this.totalMeditations.add(m);
 
+    //comprobamos la racha
     if (this.userStats.streak > 0) {
       DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
       //si meditamos ayer
-      if (lastmeditation.add(Duration(days: 1)).day == aux.day.day) {
+      if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
         this.userStats.streakUp();
-      } else if (lastmeditation.day != aux.day.day) {
+      } else if (lastmeditation.day != m.day.day) {
         this.userStats.streak = 1;
       }
     } else {
       this.userStats.streakUp();
     }
     
-    this.userStats.meditate(aux);
+    this.userStats.meditate(m);
 
 
     // si la meditación es free
-    if (aux.title == null) {
-      if (this.stage.objectives['meditation'] != null && this.stage.objectives['meditation']['time'] != null && this.stage.objectives['meditation']['time'] <= aux.duration.inMinutes) {
+    if (m.title == null) {
+      if (this.stage.objectives['meditation'] != null && this.stage.objectives['meditation']['time'] != null && this.stage.objectives['meditation']['time'] <= m.duration.inMinutes) {
         this.userStats.stage.timemeditations++;
       }
-      setAction('meditation', attribute: [aux.duration.inMinutes]);
+      setAction('meditation', attribute: [m.duration.inMinutes]);
     } else {
       //no se si esto funcionará bien
       if (!guidedMeditations.contains(m)) {
@@ -243,7 +273,7 @@ class User {
         guidedMeditations.add(m);
       }
 
-      setAction("guided_meditation", attribute: [aux.title, aux.duration.inMinutes]);
+      setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);
     }
 
     this.setPercentage();

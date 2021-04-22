@@ -15,7 +15,6 @@ class Stage {
   StageStats stobjectives; 
   Map<String, dynamic> objectives = new Map();
 
-
   Stage(
       {@required this.stagenumber,
       this.description,

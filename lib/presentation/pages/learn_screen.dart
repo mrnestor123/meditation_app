@@ -8,6 +8,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
@@ -172,8 +173,7 @@ class _StageViewState extends State<StageView> {
                       duration: Duration(seconds: 2),
                       decoration: BoxDecoration(
                           color: _userstate.user.position < content.position &&
-                                  _userstate.user.stagenumber <=
-                                      content.stagenumber
+                                  _userstate.user.stagenumber <= content.stagenumber
                               ? Colors.grey.withOpacity(0.6)
                               : Colors.transparent),
                       curve: Curves.fastOutSlowIn,
@@ -227,7 +227,7 @@ class _StageViewState extends State<StageView> {
           children: [
             AspectRatio(
               aspectRatio: 9/4,
-                          child: Container(
+                child: Container(
                 width: Configuration.width,
                 margin: EdgeInsets.only(
                     left: Configuration.smmargin,
@@ -344,19 +344,11 @@ class _ContentViewState extends State<ContentView> {
                     style: Configuration.text('medium', Colors.black)),
               ),
               Center(
-                child: MaterialButton(
-                  onPressed: () async {
-                    setState(() => _index = 0);
-                  },
-                  color: Configuration.maincolor,
-                  textColor: Colors.white,
-                  child: Text(
-                    'Start',
-                    style: Configuration.text('medium', Colors.white),
-                  ),
-                  padding: EdgeInsets.all(Configuration.medpadding),
-                  shape: CircleBorder(),
-                ),
+                child: StartButton(
+                  onPressed: () async{
+                      setState(() => _index = 0);
+                  } 
+                )
               )
             ],
           ),
@@ -398,10 +390,8 @@ class _ContentViewState extends State<ContentView> {
                                 Navigator.pop(context, true);
                               },
                               child: AnimatedContainer(
-                                width:
-                                    reachedend ? Configuration.width * 0.5 : 0,
-                                padding:
-                                    EdgeInsets.all(Configuration.smpadding),
+                                width: reachedend ? Configuration.width * 0.5 : 0,
+                                padding: EdgeInsets.all(Configuration.smpadding),
                                 decoration: BoxDecoration(
                                     color: Configuration.maincolor,
                                     shape: BoxShape.circle),
@@ -419,11 +409,10 @@ class _ContentViewState extends State<ContentView> {
                               ),
                             )
                           : Container(),
-                      reachedend
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                       Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                  MaterialButton(
+                                  /*MaterialButton(
                                     onPressed: () async {
                                       await _userstate
                                           .takeLesson(widget.lesson);
@@ -439,23 +428,25 @@ class _ContentViewState extends State<ContentView> {
                                     padding: EdgeInsets.all(
                                         Configuration.medpadding),
                                     shape: CircleBorder(),
-                                  ),
-                                  MaterialButton(
-                                    onPressed: () async {
-                                      await _userstate
-                                          .takeLesson(widget.lesson);
-                                      Navigator.pop(context, true);
-                                    },
-                                    color: Configuration.maincolor,
-                                    textColor: Colors.white,
-                                    child: Text(
-                                      'Finish',
-                                      style: Configuration.text(
-                                          'medium', Colors.white),
+                                  ),*/
+                                  AnimatedOpacity(
+                                    opacity: reachedend ? 1.0 : 0.0, 
+                                    duration: Duration(seconds: 1),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        await _userstate.takeLesson(widget.lesson);
+                                        Navigator.pop(context, true);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Configuration.maincolor,
+                                        shape: CircleBorder(),
+                                        padding: EdgeInsets.all(Configuration.medpadding)
+                                      ), 
+                                      child: Text(
+                                        'Finish',
+                                        style: Configuration.text('medium', Colors.white),
+                                      )
                                     ),
-                                    padding: EdgeInsets.all(
-                                        Configuration.medpadding),
-                                    shape: CircleBorder(),
                                   ),
 
                                   /*ClipOval(
@@ -478,7 +469,7 @@ class _ContentViewState extends State<ContentView> {
                                     ),
                                   ),*/
                                 ])
-                          : Container(),
+                          ,
 
                       /*GestureDetector(
                         onTap: () async {
@@ -519,7 +510,7 @@ class _ContentViewState extends State<ContentView> {
               setState(() {
                 _index = index;
                 if (_index == widget.lesson.text.length - 1) {
-                  reachedend = true;
+                  Future.delayed(Duration(seconds: 2),() => setState(()=> reachedend = true));
                 }
               });
             }));

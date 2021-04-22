@@ -17,7 +17,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
   var time = '';
 
   Widget createTable(List<User> list, following) {
-  
+    var count = 0;
+
     Widget texticon(IconData icon, String text) {
       return Row(children: [
         Icon(icon),
@@ -43,7 +44,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                             vertical: Configuration.smpadding,
                             horizontal: Configuration.tinpadding),
                         child: Text(
-                          (list.indexOf(u) + 1).toString(),
+                          (++count).toString(),
                           style: Configuration.text('small', Colors.black),
                           textAlign: TextAlign.center,
                         ),
@@ -65,7 +66,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                       //el sortTime se podría hacer en el user entity
                       texticon(Icons.timer, u.timemeditated),
                       //REFINAR ESTAS CONDICIONES
-                      following || u.coduser == _userstate.user.coduser || _userstate.user.following.contains(u)
+                      following || u.coduser == _userstate.user.coduser || u.follows
                           ? GestureDetector(
                               onTap: () async {
                                 await _userstate.follow(u, false);
@@ -111,6 +112,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -130,6 +132,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
               height: Configuration.height * 0.25,
               width: Configuration.width,
               color: Configuration.maincolor,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.user.allusers[1], large: false, position: 2,)),
+                  Align(child: UserProfile(user: _userstate.user.allusers[0], large: true, position: 1,)),
+                  Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.user.allusers[2], large:false, position: 3))
+                ],
+              ),
             ),
             Expanded(
               child: Container(
@@ -147,13 +157,12 @@ class _LeaderBoardState extends State<LeaderBoard> {
                                       'small', Colors.black))),
                           Tab(
                             child: Text('Following',
-                                style:
-                                    Configuration.text('small', Colors.black)),
+                                style:Configuration.text('small', Colors.black)),
                           )
                         ]),
                     SizedBox(height: Configuration.safeBlockVertical * 2),
                     Expanded(child: TabBarView(children: [
-                      createTable(_userstate.data.users, false),
+                      createTable(_userstate.user.allusers, false),
                       createTable(_userstate.user.following, true)
                     ]))
                   ])),
@@ -161,6 +170,49 @@ class _LeaderBoardState extends State<LeaderBoard> {
           ]),
         ),
       ),
+    );
+  }
+}
+
+class UserProfile extends StatelessWidget {
+  final User user;
+  final int position;
+  final bool large;
+
+  UserProfile({this.user,this.large, this.position});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+            padding: EdgeInsets.all(2.0),
+            decoration: BoxDecoration(
+              image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+              border: Border.all(color: Colors.white, width: 2.5),
+              shape: BoxShape.circle
+              ),
+            height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
+            width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
+            ),
+             Positioned(
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.all(Configuration.tinpadding),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
+                child: Text(position.toString(), style: Configuration.text('small', Colors.white)),
+              )
+            ),
+          ],
+        ),
+        SizedBox(height: 4.0),
+        Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.white)),
+        SizedBox(height: 2.0),
+        Text(user.timemeditated, style: Configuration.text('tiny', Colors.grey))
+        
+      ],
     );
   }
 }

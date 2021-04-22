@@ -57,21 +57,21 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-     _controller = VideoPlayerController.asset(
-        'assets/test.mp4')
+     _controller = VideoPlayerController.asset('assets/animacion.webm')
       ..initialize().then((_) {
         _controller.play();
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() { });
       });
+
   }
 
   void userisLogged(context) async {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
     await _user.userisLogged();
-    _user.user != null
-        ? Navigator.pushNamed(context, '/main')
+    _user.user != null ? 
+        Navigator.pushNamed(context, '/main')
         : Navigator.pushNamed(context, '/welcome');
   }
 
@@ -84,7 +84,6 @@ class _LoadingState extends State<Loading> {
       userisLogged(context);
       started = true;
     }
-    //startTimer();
 
     return Scaffold(
         body: Center(

@@ -28,7 +28,7 @@ class UpdateUserUseCase extends UseCase<User, UParams> {
       params.user.unfollow(params.followeduser);
     }
 
-    return repository.updateUser(user: params.user, d: params.db);
+    return repository.updateUser(user: params.user, d: params.db, actions: params.user.lastactions);
   }
 }
 

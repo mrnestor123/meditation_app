@@ -23,7 +23,7 @@ class UserStats{
       stage: json['etapa'] == null ? StageStats.empty() : StageStats.fromJson(json['etapa']),
       total: json['total'] == null ? TotalStats.empty() : TotalStats.fromJson(json['total']),
       streak: json['racha'] == null ? 0 : json['racha'],
-      meditationtime: json['meditationtime'] == null ? null : json['meditationtime'],
+      meditationtime: json['meditationtime'] == null ? new Map() : json['meditationtime'],
       lastmeditated: json['lastmeditated'] == null ? null : json['lastmeditated'],
       lastread: json['lastread'] == null ? null : json['lastread']
     );  
@@ -59,10 +59,10 @@ class UserStats{
     this.total.timemeditated += m.duration.inMinutes;
     this.total.meditations++;
 
-    if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] == null) {
-      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] = m.duration.inMinutes;
+    if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] != null) {
+      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] += m.duration.inMinutes;
     } else {
-      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] +=  m.duration.inMinutes;
+      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] =  m.duration.inMinutes;
     }
   }
 
@@ -75,7 +75,7 @@ class Stats{
   Stats({this.timemeditated,this.lessons,this.maxstreak,this.guidedmeditations,this.timemeditations});
 }
 
-//estadísticas de la etapa y estadísticas del total !!! PARA HACER
+//estas dos deberían extender stats!!! lo quite!! hay que volverlo a meter
 class StageStats {
     int timemeditated, lessons, maxstreak, guidedmeditations, timemeditations;
 
@@ -93,20 +93,20 @@ class StageStats {
 
     factory StageStats.fromJson(Map<String, dynamic> json) =>
       StageStats(
-        timemeditated: json["tiempo"] == null ? null : json["tiempo"],
-        lessons: json['lecciones'] == null ? null : json['lecciones'],
-        maxstreak: json['maxstreak'] == null ? null : json['maxstreak'],
-        guidedmeditations: json['meditguiadas'] == null ? null : json['meditguiadas'],
-        timemeditations: json['medittiempo'] == null ? null : json['medittiempo']
+        timemeditated: json["tiempo"] == null ? 0 : json["tiempo"],
+        lessons: json['lecciones'] == null ? 0 : json['lecciones'],
+        maxstreak: json['maxstreak'] == null ? 0 : json['maxstreak'],
+        guidedmeditations: json['meditguiadas'] == 0 ? 0 : json['meditguiadas'],
+        timemeditations: json['medittiempo'] == 0 ? 0 : json['medittiempo']
       );
   
 
     Map<String, dynamic> toJson() => {
-      "meditguiadas": guidedmeditations == null ? null : guidedmeditations,
-      "medittiempo": timemeditations == null ? null : timemeditations,
-      "maxstreak": maxstreak == null ? null : maxstreak,
-      "lecciones": lessons == null ? null : lessons,
-      "tiempo": timemeditated == null ? null : timemeditated
+      "meditguiadas": guidedmeditations == null ? 0 : guidedmeditations,
+      "medittiempo": timemeditations == null ? 0 : timemeditations,
+      "maxstreak": maxstreak == null ? 0 : maxstreak,
+      "lecciones": lessons == null ? 0 : lessons,
+      "tiempo": timemeditated == null ? 0 : timemeditated
     };    
 
     void reset() {
@@ -134,16 +134,16 @@ class TotalStats{
 
   factory TotalStats.fromJson(Map<String, dynamic> json) =>
     TotalStats(
-        timemeditated: json["tiempo"] == null ? null : json["tiempo"],
-        lessons: json['lecciones'] == null ? null : json['lecciones'],
-        maxstreak: json['maxstreak'] == null ? null : json['maxstreak'],
-        meditations: json['meditaciones'] == null ? null : json['meditaciones']
+        timemeditated: json["tiempo"] == null ? 0 : json["tiempo"],
+        lessons: json['lecciones'] == null ? 0 : json['lecciones'],
+        maxstreak: json['maxstreak'] == null ? 0 : json['maxstreak'],
+        meditations: json['meditaciones'] == null ? 0 : json['meditaciones']
     );
   
   Map<String, dynamic> toJson() => {
-    "meditaciones": meditations == null ? null : meditations,
-    "maxstreak": maxstreak == null ? null : maxstreak,
-    "lecciones": lessons == null ? null : lessons,
-    "tiempo": timemeditated == null ? null : timemeditated
+    "meditaciones": meditations == null ? 0 : meditations,
+    "maxstreak": maxstreak == null ? 0 : maxstreak,
+    "lecciones": lessons == null ? 0 : lessons,
+    "tiempo": timemeditated == null ? 0 : timemeditated
   };
 }

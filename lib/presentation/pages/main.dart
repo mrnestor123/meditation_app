@@ -43,11 +43,12 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
+          Provider<MeditationState>(create: (context) => sl<MeditationState>())
         ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
-            routes: <String, WidgetBuilder>{
+            routes: <String, WidgetBuilder> {
               '/welcome': (BuildContext context) => WelcomeWidget(),
               //      '/brain': (BuildContext context) => Provider(
               //        create: (context) => sl<LessonState>(), child: BrainScreen()),
@@ -61,17 +62,14 @@ class MyApp extends StatelessWidget {
               '/imagepath': (BuildContext context) => ImagePath(),
               '/leaderboard':(BuildContext context) => LeaderBoard(),
               //'/main': (BuildContext context) => ContainerAnimated(),
-              '/main': (BuildContext context) => Layout(),
+              '/main': (BuildContext context) => Layout() ,
               '/main2': (BuildContext context) => MainScreen(),
-              '/premeditation': (BuildContext context) => Provider(
-                  create: (context) => sl<MeditationState>(),
-                  child: MeditationScreen()),
+              '/countdown': (BuildContext context) => Countdown(),
              // '/premeditation': (BuildContext context) => Provider(
                //   create: (context) => sl<MeditationState>(),
                  // child: SetMeditation()),
               '/path': (context) => PathScreen(),
-              '/learn': (BuildContext context) => Provider(
-                  create: (context) => sl<LessonState>(), child: LearnScreen()),
+              '/learn': (BuildContext context) => Provider(create: (context) => sl<LessonState>(), child: LearnScreen()),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings() 
               //'/meditating':(BuildContext context) => MeditationinProgress()

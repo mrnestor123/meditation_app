@@ -4,39 +4,40 @@ import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class Meditation extends Content {
-  String codmed, title, description, image, recording, type, coduser;
-  int stagenumber, position;
+  String coduser;
   Duration duration;
   DateTime day;
 
-  List<String> sentences;
   Map<dynamic, dynamic> content;
 
   //for referencing the user.
   //final String userId;
 
   Meditation(
-      {this.codmed,
+      {
       @required this.duration,
-      this.recording,
       this.day,
-      this.type,
-      this.stagenumber,
-      this.description,
-      this.image,
-      this.title,
-      this.position,
       this.coduser,
-      this.content
+      this.content,
+      recording,
+      cod,
+      type,
+      stagenumber,
+      description,
+      image,
+      title,
+      position,
       //this.userId
       })
-      : super(cod: codmed,
+      : super(cod: cod,
             description: description,
             image: image,
             title: title,
             stagenumber: stagenumber,
             position: position,
-            type: type);
+            type: type) {
+        day == null ? day = DateTime.now() : null;
+      }
 
   void setDay(DateTime d) => this.day = d;
 }

@@ -3,27 +3,23 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
 class MeditationModel extends Meditation {
-  String codmed, recording, title, type, image, coduser;
-  final Duration duration;
-  final DateTime day;
-  int stagenumber, position;
-  final Map<dynamic,dynamic> content;
 
   MeditationModel(
-      {this.codmed,
-      this.title,
-      this.duration,
-      this.recording,
-      this.day,
-      this.type,
-      this.image,
-      this.stagenumber,
-      this.coduser,
-      this.content,
-      this.position
+      {String cod,
+      String title,
+      Duration duration,
+      recording,
+      day,
+      String type,
+      image,
+      int stagenumber,
+      String coduser,
+      content,
+      int position
       })
       : super(
-            codmed: codmed,
+            cod: cod,
+            title: title,
             coduser: coduser,
             duration: duration,
             recording: recording,
@@ -41,7 +37,7 @@ class MeditationModel extends Meditation {
 
   factory MeditationModel.fromJson(Map<String, dynamic> json) =>
       MeditationModel(
-          codmed: json["codmed"] == null ? null : json["codmed"],
+          cod: json["cod"] == null ? null : json["cod"],
           title: json["title"] == null ? null : json["title"],
           duration:json["duration"] == null ? null : json['duration'] is String ? parseDuration(json['duration']) : Duration(minutes: json['duration']),
           day: json["day"] == null ? null : DateTime.parse(json["day"]),

@@ -11,30 +11,23 @@ import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserModel extends User {
-  int stagenumber, position, minutesmeditated, meditposition;
-  String coduser, role, nombre, image;
-  var user;
-  Stage stage;
-  Map<String, dynamic> stats = {};
-  bool classic;
-  UserStats userStats;
-
   UserModel(
-      {this.coduser,
-      @required this.stagenumber,
-      this.user,
-      this.nombre,
-      this.image,
-      this.stage,
-      this.role,
-      this.position,
-      this.classic,
-      this.meditposition,
-      this.userStats,
-      this.stats})
+      {String coduser,
+      @required int stagenumber,
+      user,
+      String nombre,
+      String image,
+      Stage stage,
+      String role,
+      int position,
+      bool classic,
+      int meditposition,
+      UserStats userStats,
+      stats})
       : super(
             coduser: coduser,
             user: user,
+            image: image,
             role: role,
             stagenumber: stagenumber,
             nombre: nombre,
@@ -63,11 +56,14 @@ class UserModel extends User {
         userStats:json['stats'] == null ? null : UserStats.fromJson(json['stats'])
       );
 
+      u.setFollowedUsers(json['following'] != null ? json['following'] : []);
+
     // u.setFollowedUsers(json['following']);
     // POrque no puede ser una list dynamic ???
-    if(json['following'] != null){
-      u.setFollowedUsers(json['following']);
-    }
+   // if(json['following'] != null){
+    
+    //    u.setFollowedUsers(json['following'].map((usr) => UserModel.fromJson(usr)).toList());
+    //}
 
     return u;
   }

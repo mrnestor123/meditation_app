@@ -128,11 +128,22 @@ mixin _$MeditationState on _MeditationState, Store {
       ActionController(name: '_MeditationState');
 
   @override
-  void startMeditation(MeditationModel m, User u, DataBase d) {
+  void setMeditation(MeditationModel m, User u, DataBase d) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.setMeditation');
+    try {
+      return super.setMeditation(m, u, d);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void startMeditation() {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startMeditation');
     try {
-      return super.startMeditation(m, u, d);
+      return super.startMeditation();
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }

@@ -7,20 +7,17 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:mobx/mobx.dart';
 
 class StageModel extends Stage {
-  int stagenumber, userscount;
-  String description, image, goals, obstacles, skills, mastery;
-  Map<String, dynamic> objectives;
 
   StageModel(
-      {this.stagenumber,
-      this.userscount,
-      this.description,
-      this.image,
-      this.goals,
-      this.obstacles,
-      this.skills,
-      this.mastery,
-      this.objectives})
+      {int stagenumber,
+      userscount,
+      description,
+      image,
+      String goals,
+      String obstacles,
+      String skills,
+      String mastery,
+      objectives})
       : super(
             stagenumber: stagenumber,
             userscount: userscount,

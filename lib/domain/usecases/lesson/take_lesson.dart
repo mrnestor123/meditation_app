@@ -24,8 +24,9 @@ class TakeLessonUseCase extends UseCase<void, LessonParams> {
     //añadimos la leccion al usuario
     //devolvemos una lista vacía si ya la ha leído
     bool aux;
+    // se podría meter en el updateuser todo
     params.user.takeLesson(params.lesson, params.d);
-    return userRepository.updateUser(user: params.user, d: params.d);
+    return userRepository.updateUser(user: params.user, d: params.d, actions: params.user.lastactions);
   }
 }
 

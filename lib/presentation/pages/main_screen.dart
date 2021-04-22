@@ -26,7 +26,6 @@ class _MainScreenState extends State<MainScreen> {
         (c.blue * f).round());
   }
 
-
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
@@ -68,26 +67,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
               SizedBox(height: Configuration.height * 0.05),
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Column(
-                  children: [
-                    RawMaterialButton(
-                      fillColor: Configuration.maincolor,
-                      child: Icon(Icons.timer,
-                          color: Colors.white, size: Configuration.bigicon),
-                      padding: EdgeInsets.all(4.0),
-                      shape: CircleBorder(),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/premeditation')
-                            .then((value) => setState(() => null));
-                      },
-                    ),
-                    Container(
-                      child: Text('Meditate',
-                          style: Configuration.text('large', Colors.black)),
-                      margin: EdgeInsets.only(top: 10),
-                    )
-                  ],
-                ),
                 Column(children: [
                   RawMaterialButton(
                     fillColor: Configuration.maincolor,
@@ -96,8 +75,7 @@ class _MainScreenState extends State<MainScreen> {
                     padding: EdgeInsets.all(4.0),
                     shape: CircleBorder(),
                     onPressed: () {
-                      Navigator.pushNamed(context, '/leaderboard')
-                          .then((value) => setState(() => null));
+                      Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
                     },
                   ),
                   Container(
@@ -132,7 +110,6 @@ class __TimelineState extends State<_Timeline> {
       List<UserAction> sortedlist = _userstate.user.acciones.where((a) => mode == 'today' && a.time.year == filtereddate.year && a.time.day == filtereddate.day && a.time.month == filtereddate.month || mode == 'thisweek' && filtereddate.compareTo(a.time) <= 0 ).toList();
       List<Widget> widgets = new List.empty(growable: true);
 
-
       if (sortedlist.length > 0) {
         for (var action in sortedlist) {
           widgets.add(
@@ -165,7 +142,6 @@ class __TimelineState extends State<_Timeline> {
 
       return widgets;
     }
-
 
   @override
   Widget build(BuildContext context) {

@@ -1,24 +1,15 @@
 import 'package:meditation_app/domain/entities/mission.dart';
 
 class MissionModel extends Mission {
-  String codmission;
-  String description;
-  String image;
-  String type;
-  String requirement;
-  bool requiredmission;
-  bool done;
-  int xp;
-
   MissionModel(
-      {this.codmission,
-      this.description,
-      this.type,
-      this.image,
-      this.requirement,
-      this.requiredmission,
-      this.done,
-      this.xp})
+      {String codmission,
+      String description,
+      String type,
+      image,
+      requirement,
+      requiredmission,
+      bool done,
+      xp})
       : super(
             codmission: codmission,
             description: description,

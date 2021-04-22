@@ -13,6 +13,8 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
 
+//ESTO ES VIEJO !!!
+//NO MIRAR!!
 class SetMeditation extends StatefulWidget {
   @override
   _SetMeditationState createState() => _SetMeditationState();
@@ -153,10 +155,7 @@ class _SetMeditationState extends State<SetMeditation> {
         Text(
             'Total meditations: ' +
                 (_loginstate.user.totalMeditations.length).toString(),
-            style: GoogleFonts.montserrat(
-                textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: Configuration.blockSizeHorizontal * 7))),
+            style: Configuration.text('small',Colors.white)),
       ],
     );
   }

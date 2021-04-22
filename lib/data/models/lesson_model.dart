@@ -7,19 +7,15 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 
 class LessonModel extends Lesson {
-  String cod, title, image, description, type;
-  final List<dynamic> text;
-  int stagenumber, position;
-
   LessonModel(
-      {this.title,
-      this.cod,
-      this.image,
-      this.description,
-      this.text,
-      this.type,
-      this.stagenumber,
-      this.position})
+      {String title,
+      String cod,
+      image,
+      String description,
+      text,
+      type,
+      int stagenumber,
+      int position})
       : super(
             title: title,
             cod: cod,

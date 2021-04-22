@@ -35,49 +35,39 @@ class PathScreen extends StatelessWidget {
   Widget goals() {
     return Container(
       width: Configuration.width,
-      padding: EdgeInsets.symmetric(
-          vertical: Configuration.smpadding,
-          horizontal: Configuration.smpadding),
+      padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
       decoration: BoxDecoration(
           color: Configuration.maincolor,
           borderRadius: BorderRadius.circular(16)),
-      child: Column(
+      child: Table(
+        columnWidths: {0: FractionColumnWidth(0.3)},
         children: [
-          Row(children:
+          TableRow(children:
           [
             Text('Goals ',
               style: Configuration.text('small', Colors.black),
             ),
-            Flexible(child:Text(_userstate.user.stage.goals,
-                style: Configuration.text('small', Colors.white)))
+            Text(_userstate.user.stage.goals,
+                style: Configuration.text('small', Colors.white))
           ]),
-          SizedBox(height: Configuration.safeBlockVertical * 1),
-          Row(children: [
+          TableRow(children: [
             Text('Obstacles ',
                 style: Configuration.text('small', Colors.black)),
-            Flexible(
-                          child: Text(_userstate.user.stage.obstacles,
-                  style: Configuration.text('small', Colors.white)),
-            )
+            Text(_userstate.user.stage.obstacles,
+                  style: Configuration.text('small', Colors.white))
           ]),
-          SizedBox(height: Configuration.safeBlockVertical * 1),
-          Row(children: [
+          TableRow(children: [
             Text('Skills ',
                 style: Configuration.text('small', Colors.black)),
-            Flexible(
-                  child: Text(_userstate.user.stage.skills,
-                  style: Configuration.text('small', Colors.white)),
-            )
+            Text(_userstate.user.stage.skills,
+            style: Configuration.text('small', Colors.white))
           ]),
-          SizedBox(height: Configuration.safeBlockVertical * 1),
-          Row(children: [
+          TableRow(children: [
             Text('Mastery ',
                 style: Configuration.text('small', Colors.black)),
-            Flexible(
-                  child: Text(_userstate.user.stage.mastery,
-                  style: Configuration.text('small', Colors.white),
-                  overflow: TextOverflow.visible),
-            )
+            Text(_userstate.user.stage.mastery,
+            style: Configuration.text('small', Colors.white),
+            overflow: TextOverflow.visible)
           ]),
         ],
       ),
@@ -130,7 +120,7 @@ class PathScreen extends StatelessWidget {
       height: Configuration.height,
       width: Configuration.width,
       color: Configuration.lightgrey,
-      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding,vertical: Configuration.smpadding),
+      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding,),
       child: SingleChildScrollView(
               child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

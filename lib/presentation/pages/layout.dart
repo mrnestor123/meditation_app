@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/more_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
@@ -57,7 +58,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   Widget build(BuildContext context) {
     Configuration().init(context);
     UserState _userstate = Provider.of<UserState>(context);
-
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Configuration.white,
@@ -118,6 +119,10 @@ class _MobileLayoutState extends State<MobileLayout> {
             label: 'Learn',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.self_improvement),
+            label:'Meditate'
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.terrain),
             label: 'Path',
           )
@@ -139,7 +144,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             currentindex = newPage;
           });
         },
-        children: [MainScreen(), LearnScreen(), PathScreen()],
+        children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
       ),
     );
   }

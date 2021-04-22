@@ -13,6 +13,11 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/** idea. 
+ * GUARDAR SOLO EL CÓDIGO DEL USUARIO
+ * 
+*/
+
 abstract class UserLocalDataSource {
   /// Gets the cached [User] which was gotten the last time
   /// the user connected to the phone.
@@ -26,7 +31,7 @@ abstract class UserLocalDataSource {
 
   Future takeLesson(UserModel user);
 
-  Future updateData({UserModel user, dynamic m});
+  Future updateData({UserModel user, dynamic m, dynamic actions});
 }
 
 const CACHED_USER = 'CACHED_USER';
@@ -55,7 +60,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
   @override
-  Future updateData({UserModel user, dynamic m}) async {
+  Future updateData({UserModel user, dynamic m, dynamic actions}) async {
     final jsonUser = sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
 
     StageModel stage = user.stage;
@@ -68,7 +73,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
        sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations.map((e) => e).toList());
     }
 
-    if(user.lastactions.length > 0){
+    if(actions.length > 0){
       for(UserAction a in user.lastactions){
         useractions.add(json.encode(a.toJson()));
       }

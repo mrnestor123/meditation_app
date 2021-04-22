@@ -51,14 +51,22 @@ abstract class _MeditationState with Store {
   _MeditationState({this.meditate});
 
   @action
-  void startMeditation(MeditationModel m, User u, DataBase d) {
+  void setMeditation(MeditationModel m, User u, DataBase d) {
     this.user = u;
     this.data = d;
     this.totalduration = m.duration;
     this.duration = m.duration;
     this.selmeditation = m;
-    finishMeditation();
-    //startTimer();
+    if(timer != null){
+      timer.cancel();
+    }
+    startMeditation();
+  }
+
+  @action
+  void startMeditation() {
+    //finishMeditation();
+    startTimer();
   }
 
   @action
