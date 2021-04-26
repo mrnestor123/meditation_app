@@ -14,6 +14,7 @@ import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../login_injection_container.dart';
+import 'commonWidget/progress_dialog.dart';
 import 'commonWidget/radial_progress.dart';
 
 class Layout extends StatelessWidget {

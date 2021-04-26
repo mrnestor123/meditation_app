@@ -57,23 +57,24 @@ abstract class _MeditationState with Store {
     this.totalduration = m.duration;
     this.duration = m.duration;
     this.selmeditation = m;
-    if(timer != null){
-      timer.cancel();
-    }
-    startMeditation();
+    finishMeditation();
+    //startMeditation();
   }
 
   @action
   void startMeditation() {
-    //finishMeditation();
     startTimer();
   }
 
   @action
   void startTimer() {
-    this.state = 'started';
     var oneSec = new Duration(seconds: 1);
-    timer = Timer.periodic(oneSec, (timer) {
+    if(timer != null){
+      timer.cancel();
+    }
+    this.state = 'started';
+
+    timer = new Timer.periodic(oneSec, (timer) {
       if (this.duration.inSeconds < 2) {
         finishMeditation();
         state = 'finished';

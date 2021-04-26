@@ -5,6 +5,7 @@ import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/progress_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:mobx/mobx.dart';
@@ -20,6 +21,9 @@ class User {
   Stage stage;
   bool classic, follows;
 
+  //para el modal de progreso
+  Progress progress;
+
   //estadísticas
   UserStats userStats;
 
@@ -28,6 +32,7 @@ class User {
   //cuanto le queda por pasar de etapa
   int percentage;
 
+  // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
   final List<UserAction> lastactions = new List.empty(growable: true);
   //códigos de los usuarios a los que sigue el usuario
   final List<dynamic> followedcods = new List.empty(growable: true);
@@ -166,11 +171,11 @@ class User {
 
     //en el momento que se cambie la nomenclatura estos métodos van a fallar !!!!! :(
     var labels = {
-      'meditation': 'Meditaciones',
-      'totaltime': 'Tiempo total',
-      'streak': 'Racha',
-      'lecciones': 'Lecciones',
-      'meditguiadas':'Meditaciones guiadas'
+      'meditation': s.objectives['meditation']['time'].toString() + ' min meditations' ,
+      'totaltime': 'Total time',
+      'streak': 'Streak',
+      'lecciones': 'Lessons',
+      'meditguiadas':'Guided meditations'
     };
 
     var objectiveCheck = {
@@ -182,11 +187,11 @@ class User {
     };
 
     var percentageCheck = {
-      'Tiempo total': () => userStats.stage.timemeditated / s.objectives['totaltime'] ,
-      'Meditaciones': () => userStats.stage.timemeditations / s.objectives['meditation']['count']  ,
-      'Racha': () => userStats.stage.maxstreak / s.objectives['streak'],
-      'Lecciones': () => userStats.stage.lessons / s.objectives['lecciones'],
-      'Meditaciones guiadas': () => userStats.stage.guidedmeditations / s.objectives['meditguiadas']   
+      'Total time': () => userStats.stage.timemeditated / s.objectives['totaltime'] ,
+       s.objectives['meditation']['time'].toString() + ' min meditations': () => userStats.stage.timemeditations / s.objectives['meditation']['count']  ,
+      'Streak': () => userStats.stage.maxstreak / s.objectives['streak'],
+      'Lessons': () => userStats.stage.lessons / s.objectives['lecciones'],
+      'Guided meditations': () => userStats.stage.guidedmeditations / s.objectives['meditguiadas']   
     };
 
     double passedcount = 0;
@@ -208,13 +213,18 @@ class User {
   }
 
   bool takeLesson(Lesson l, DataBase d) {
-    
+
     this.lastactions.clear();
     List<Lesson> lessons = List.empty(growable:true);
 
     //no se para que hace falta lessoninStage
     if (l.stagenumber == this.stagenumber && this.position <= l.position) {
       this.userStats.takeLesson();
+      this.progress = Progress(
+        done: this.userStats.stage.lessons,
+        total: this.stage.objectives['lecciones'], 
+        what: ' Lessons'
+      );
       setPercentage();
       if (this.stage.path.where((c) => c.position == this.position).length == this.userStats.lastread.length + 1) {
         this.position += 1;
@@ -264,13 +274,23 @@ class User {
     if (m.title == null) {
       if (this.stage.objectives['meditation'] != null && this.stage.objectives['meditation']['time'] != null && this.stage.objectives['meditation']['time'] <= m.duration.inMinutes) {
         this.userStats.stage.timemeditations++;
+        progress = Progress(
+          done: this.userStats.stage.timemeditations,
+          total: this.stage.objectives['meditation']['count'], 
+          what: this.stage.objectives['meditation']['time'].toString() + ' min meditations'
+        );
       }
       setAction('meditation', attribute: [m.duration.inMinutes]);
     } else {
       //no se si esto funcionará bien
       if (!guidedMeditations.contains(m)) {
-        this.userStats.stage.lessons++;
+        this.userStats.stage.guidedmeditations++;
+        this.meditposition++;
         guidedMeditations.add(m);
+        progress = Progress(
+          done: this.userStats.stage.guidedmeditations,
+          total: this.stage.objectives['meditguiadas'], 
+          what: ' guided meditations');
       }
 
       setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);

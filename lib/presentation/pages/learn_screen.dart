@@ -98,8 +98,10 @@ class _StageViewState extends State<StageView> {
 
   Widget getLessons(context) {
     List<Widget> lessons = new List.empty(growable: true);
+    var count = 0;
 
     widget.stage.path.forEach((content) {
+      count++;
       var image;
       if (content.image != null) {
         var configuration = createLocalImageConfiguration(context);
@@ -124,7 +126,8 @@ class _StageViewState extends State<StageView> {
                           builder: (context) => ContentView(
                               lesson: content,
                               content: content,
-                              slider: image))).then(onGoBack);
+                              slider: image
+                              ))).then(onGoBack);
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -136,7 +139,7 @@ class _StageViewState extends State<StageView> {
                 children: [
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Image.network(content.image),
+                    child: Hero(tag: content.cod ,child: Image.network(content.image)),
                   ),
                   Positioned(
                       top: 15,
@@ -324,11 +327,7 @@ class _ContentViewState extends State<ContentView> {
   Widget portada() {
     return Column(children: [
       Stack(children: [
-        Center(child: Image(image: widget.slider,height: Configuration.height*0.5,)),
-        Container(
-          width: Configuration.width,
-          color: Configuration.grey.withOpacity(0.7),
-          height: Configuration.height * 0.5),
+        Center(child: Hero(tag: widget.content.cod, child: Image(image: widget.slider,width: Configuration.width,))),
       ]),
       Expanded(
         child: Container(
