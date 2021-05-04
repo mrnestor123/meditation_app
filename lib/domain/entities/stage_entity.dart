@@ -4,6 +4,7 @@ import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
 
+import 'game_entity.dart';
 import 'lesson_entity.dart';
 import 'meditation_entity.dart';
 
@@ -12,6 +13,7 @@ class Stage {
   String description, image, goals, obstacles, skills, mastery;
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
+  ObservableList<Game> games = new ObservableList();
   StageStats stobjectives; 
   Map<String, dynamic> objectives = new Map();
 
@@ -50,12 +52,13 @@ class Stage {
       this.objectives['lecciones']++;
       path.add(c);
       path.sort((a, b) => a.position - b.position);
-    } else {
+    } else if(c.type =='meditation-practice') {
        if(this.objectives['meditguiadas'] == null) {this.objectives['meditguiadas'] = 0;}
       this.objectives['meditguiadas']++;
       meditpath.add(c);
-      
       meditpath.sort((a, b) => a.position - b.position);
+    }else {
+      games.add(c);
     }
   }
 }

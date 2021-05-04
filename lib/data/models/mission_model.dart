@@ -43,8 +43,7 @@ class MissionModel extends Mission {
         "done": done == null ? false : done,
         "xp": xp == null ? null : xp,
         "required": requiredmission == null ? null : requiredmission,
-        "requirements":
-            requirements == null ? null : requirements.map((e) => e).toList()
+        "requirements": requirements == null ? null : requirements.map((e) => e).toList()
       };
 
 }

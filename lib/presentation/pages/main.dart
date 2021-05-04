@@ -23,6 +23,7 @@ import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../login_injection_container.dart';
+import 'game_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +72,8 @@ class MyApp extends StatelessWidget {
               '/path': (context) => PathScreen(),
               '/learn': (BuildContext context) => Provider(create: (context) => sl<LessonState>(), child: LearnScreen()),
               '/selectusername': (BuildContext context) => SetUserData(),
-              '/settings': (BuildContext context) => Settings() 
+              '/settings': (BuildContext context) => Settings(),
+              '/gamestarted': (BuildContext context) => GameStarted()
               //'/meditating':(BuildContext context) => MeditationinProgress()
               // '/meditate': (BuildContext context) => MeditationWidget(),
               // '/feed': (BuildContext context) => FeedWidget(0),

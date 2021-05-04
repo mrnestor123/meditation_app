@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/game_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/more_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -126,6 +127,10 @@ class _MobileLayoutState extends State<MobileLayout> {
           BottomNavigationBarItem(
             icon: Icon(Icons.terrain),
             label: 'Path',
+          ),
+          BottomNavigationBarItem(
+            icon:Icon(Icons.gamepad),
+            label: "Play"
           )
         ],
         currentIndex: currentindex,
@@ -145,7 +150,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             currentindex = newPage;
           });
         },
-        children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+        children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen(), GameScreen()],
       ),
     );
   }

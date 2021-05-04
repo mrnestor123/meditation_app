@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
+import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
@@ -117,16 +118,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<UserModel> registerUser({var usuario}) async {
     //Sacamos la primera etapa
-    QuerySnapshot firststage = await database
-        .collection('stages')
-        .where('stagenumber', isEqualTo: 1)
-        .get();
+    QuerySnapshot firststage = await database.collection('stages').where('stagenumber', isEqualTo: 1).get();
     StageModel one;
 
     for (DocumentSnapshot doc in firststage.docs) {
       one = new StageModel.fromJson(doc.data());
     }
 
+    //hay que pasar esto al nuevo setting con UserStats
     UserModel user = new UserModel(
         coduser: usuario.uid,
         user: usuario,
@@ -167,10 +166,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
 
     for (var content in lessons.docs) {
-      if (content.data()['position'] != null) {
-        content.data()['type'] == 'meditation-practice' || content.data()['type'] == 'game' ?
-        s.addContent(MeditationModel.fromJson(content.data())):
-        s.addContent(LessonModel.fromJson(content.data()));
+      if (content.data()['position'] != null || content.data()['type'] == 'meditation-game') {
+        content.data()['type'] == 'meditation-practice' ?
+          s.addContent(MeditationModel.fromJson(content.data())):
+        content.data()['type'] == 'meditation-game' ?
+          s.addContent(GameModel.fromJson(content.data())):
+          s.addContent(LessonModel.fromJson(content.data()));
       }
     }
 
@@ -243,10 +244,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:u.stagenumber).get();
     StageModel s =  await populateStage(stage.docs[0].data());
     u.setStage(s);
-
     await addfollowers(u);
-
-
-
   }
 }

@@ -35,7 +35,7 @@ class _MainScreenState extends State<MainScreen> {
       color: Configuration.lightgrey,
       padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
       child: SingleChildScrollView(
-              child: Column(
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -66,25 +66,6 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               SizedBox(height: Configuration.height * 0.05),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Column(children: [
-                  RawMaterialButton(
-                    fillColor: Configuration.maincolor,
-                    child: Icon(Icons.emoji_events,
-                        color: Colors.white, size: Configuration.bigicon),
-                    padding: EdgeInsets.all(4.0),
-                    shape: CircleBorder(),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
-                    },
-                  ),
-                  Container(
-                      child: Text('Explore',
-                          style: Configuration.text('large', Colors.black)),
-                      margin: EdgeInsets.only(top: 10)),
-                ])
-              ]),
-              SizedBox(height: Configuration.height * 0.05),
               _Timeline(),
               SizedBox(height: Configuration.height*0.05)
             ]),
@@ -102,12 +83,13 @@ class _Timeline extends StatefulWidget {
 class __TimelineState extends State<_Timeline> {
   UserState _userstate;
   String mode = 'today'; 
+  var states = ['today','this week'];
 
    //Hay que crear un filtro de acciones !!!!!!!
   List<Widget> getMessages() {
       DateTime today = DateTime.now();
       DateTime filtereddate = mode == 'today' ? today : DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
-      List<UserAction> sortedlist = _userstate.user.acciones.where((a) => mode == 'today' && a.time.year == filtereddate.year && a.time.day == filtereddate.day && a.time.month == filtereddate.month || mode == 'thisweek' && filtereddate.compareTo(a.time) <= 0 ).toList();
+      List<UserAction> sortedlist = _userstate.user.acciones.where((a) => mode == 'today' && a.time.year == filtereddate.year && a.time.day == filtereddate.day && a.time.month == filtereddate.month || mode == 'this week' && filtereddate.compareTo(a.time) <= 0 ).toList();
       List<Widget> widgets = new List.empty(growable: true);
 
       if (sortedlist.length > 0) {
@@ -149,27 +131,45 @@ class __TimelineState extends State<_Timeline> {
 
     return Container(
         width: Configuration.width * 0.8,
-        height: Configuration.height * 0.3,
+        height: Configuration.height * 0.4,
+        decoration: BoxDecoration(color:Colors.white, borderRadius: BorderRadius.circular(16.0)),
         padding: EdgeInsets.all(Configuration.tinpadding),
-        color: Colors.white,
         child: Column(children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
            children:[ 
-              OutlinedButton(
-                onPressed: ()=> setState(()=> mode = 'thisweek'),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: mode == 'thisweek' ? Configuration.maincolor : Colors.white
-                ), 
-                child: Text('THIS WEEK', style: Configuration.text('tiny', mode == 'thisweek' ? Colors.white : Colors.black))
-              ),
-              OutlinedButton(
-                onPressed: ()=> setState(()=> mode = 'today'), 
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: mode == 'today' ? Configuration.maincolor : Colors.white,
+              DropdownButton<String>(
+                    value: mode,
+                    elevation: 16,
+                    style: Configuration.text('small', Colors.black),
+                    underline: Container(
+                      height: 0,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String newValue) {
+                      setState(() {
+                        mode = newValue;
+                      });
+                    },
+                    items: states.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()
                 ),
-                child: Text('TODAY', style: Configuration.text('tiny', mode == 'today' ? Colors.white : Colors.black))
-              ),
+              RawMaterialButton(
+                    fillColor: Configuration.maincolor,
+                    child: Icon(Icons.emoji_events,
+                        color: Colors.white, size: Configuration.smicon),
+                    padding: EdgeInsets.all(4.0),
+                    shape: CircleBorder(),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/leaderboard')
+                          .then((value) => setState(() => null));
+                    },
+                  ),
+            
             ]
           ),
           Divider(),
