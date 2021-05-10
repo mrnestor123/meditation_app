@@ -29,7 +29,7 @@ abstract class UserRemoteDataSource {
 
   Future<UserModel> registerUser({var usuario});
 
-  Future updateUser({UserModel user, DataBase data, MeditationModel m, dynamic actions});
+  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type});
 
   //We get all the users data
   Future<DataBase> getData();
@@ -52,24 +52,24 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
 
-  addfollowers(loggeduser) async{
-    QuerySnapshot unfollowed;
+  addfollowers(User loggeduser) async{
+    QuerySnapshot following = await database.collection('following').where('coduser',isEqualTo: loggeduser.coduser).get();
+    QuerySnapshot followsyou = await database.collection('following').where('following',arrayContains: loggeduser.coduser).get();
 
-    if(loggeduser.followedcods.length > 0 ){
-        for(dynamic cod in loggeduser.followedcods){
-          QuerySnapshot followed = await database.collection('users').where('coduser', isEqualTo: cod).get();
-          loggeduser.addFollower(new UserModel.fromJson(followed.docs[0].data()));
-        }
-        unfollowed = await database.collection('users').where('coduser', whereNotIn: loggeduser.followedcods).get();
-        } else {
-        unfollowed = await database.collection('users').get();
-      }       
-
-      for(DocumentSnapshot doc in unfollowed.docs){
-        loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
+    if(following.docs.length > 0){
+      for(DocumentSnapshot doc in following.docs){
+        //simplemente añado los cods. habría que hacer un read
+        loggeduser.addfollow(UserModel.fromJson(doc.data()));
       }
+    }
 
-      loggeduser.sortFollowers();
+    if(followsyou.docs.length > 0){
+       for(DocumentSnapshot doc in followsyou.docs){
+        loggeduser.addFollower(UserModel.fromJson(doc.data()));
+      }
+    }    
+
+    loggeduser.sortFollowers();
   }
 
   //sacamos todos los datos del usuario.
@@ -155,7 +155,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
-    await database.collection('userdata').add({'coduser': user.coduser});
 
     return user;
   }
@@ -213,12 +212,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future updateUser({UserModel user, DataBase data, MeditationModel m, dynamic actions}) async {
+  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
     QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
 
-    //actualizamos la base de datos. habrá que mirarlo esto !!!!!!!!!
+    //actualizamos la base de datos. habrá que mirarlo esto !!!!!!!!!. ESTO NO LO HARÍA ASÍ . HABRÁ QUE CAMBIAR ESTOO!!!
     if (data != null) {
       QuerySnapshot users = await database.collection('users').get();
       data.users.clear();
@@ -228,13 +227,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       data.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
     }
 
-    if (m != null) {
-      await database.collection('meditations').add(m.toJson()); 
-    }
-
-    if(actions != null && actions.length > 0){
-      for(UserAction a in user.lastactions){
+    //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
+    if (type == 'meditate') {
+      await database.collection('meditations').add(toAdd[0].toJson());
+      for(UserAction a in toAdd[1]){
         await database.collection('actions').add(a.toJson());
+      }
+    } else if(type == 'lesson'){
+      for(UserAction a in toAdd){
+        await database.collection('actions').add(a.toJson());
+      }
+    } else if(type =='follow' || type =='unfollow'){
+      QuerySnapshot userfollow = await database.collection('following').where('coduser', isEqualTo: user.coduser).get();
+      if(userfollow.docs.length > 0){
+        await database.collection('following').doc(userfollow.docs[0].id).update({'following': user.following.map((u) => u.toRawJson()).toList()});
+      } else {
+        await database.collection('following').add({'coduser':user.coduser,'following': user.following.map((u)=> u.toRawJson()).toList()});
       }
     }
   }

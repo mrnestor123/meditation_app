@@ -129,7 +129,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             label: 'Path',
           ),
           BottomNavigationBarItem(
-            icon:Icon(Icons.gamepad),
+            icon:Icon(Icons.videogame_asset),
             label: "Play"
           )
         ],

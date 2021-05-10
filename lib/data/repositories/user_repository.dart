@@ -56,18 +56,18 @@ class UserRepositoryImpl implements UserRepository {
     } 
   }
 
-  Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic m, dynamic actions}) async {
+  Future<Either<Failure, User>> updateUser({var user, DataBase d, dynamic toAdd, String type}) async {
     if (await networkInfo.isConnected) {
       try {
-        final newUser = await remoteDataSource.updateUser(user:user,data: d,m:m, actions: actions);
-        localDataSource.updateData(user:user, m: m, actions: actions);
+        final newUser = await remoteDataSource.updateUser(user:user,data: d, toAdd: toAdd, type: type);
+        localDataSource.updateData(user:user, toAdd: toAdd, type: type);
         return Right(newUser);
       } on ServerException {
         return Left(ServerFailure());
       }
     } else {
       //Hay que arreglar este método
-      final localUser = await localDataSource.updateData(user:user, m: m);
+      final localUser = await localDataSource.updateData(user:user, toAdd: toAdd, type: type);
       if (localUser != null) {
         return Right(localUser);
       } else {

@@ -57,8 +57,8 @@ abstract class _MeditationState with Store {
     this.totalduration = m.duration;
     this.duration = m.duration;
     this.selmeditation = m;
-    finishMeditation();
-    //startMeditation();
+    //finishMeditation();
+    startMeditation();
   }
 
   @action

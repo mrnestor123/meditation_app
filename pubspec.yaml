@@ -89,7 +89,20 @@ flutter:
   fonts: 
     - family: Gotham
       fonts:
+        - asset: fonts/Gotham-regular.otf
+
+    - family: Gotham-rounded
+      fonts:
         - asset: fonts/GothamRounded.ttf
+    
+    - family: Helvetica
+      fonts: 
+        - asset: fonts/Helvetica.ttf
+    
+    - family: Gotham-bold
+      fonts:
+        - asset: fonts/GothamBold.ttf
+
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

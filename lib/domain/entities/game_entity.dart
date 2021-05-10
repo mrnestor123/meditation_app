@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'content_entity.dart';
 
 class Game extends Content {
-  List<Question> questions = new List.empty(growable: true);
+  final List<Question> questions = new List.empty(growable: true);
 
   String video;
 
@@ -17,7 +17,6 @@ class Game extends Content {
       type,
       position,
       @required description,
-      this.questions,
       this.video
       })
       : super(
@@ -31,7 +30,9 @@ class Game extends Content {
 
 
   void setQuestions(json) {
-    json.map((j) => this.questions.add(Question.fromJson(j)));
+    for(var question in json){
+      questions.add(Question.fromJson(question));
+    }
   }
 
 }

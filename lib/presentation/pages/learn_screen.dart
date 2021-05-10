@@ -30,44 +30,78 @@ class _LearnScreenState extends State<LearnScreen> {
       width: Configuration.width,
       color: Configuration.lightgrey,
       padding: EdgeInsets.all(Configuration.medmargin),
-      child: Column(
-        children: [
-          Expanded(
-              child: GridView.builder(
-                  itemCount: _userstate.data.stages.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.all(Configuration.medmargin),
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-                      child: ElevatedButton(
-                        onPressed: _userstate.user.stagenumber > index
-                            ?  () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => StageView(
-                                          stage:
-                                              _userstate.data.stages[index],
-                                        )),
-                              ).then((value) => setState(() => null))
-                            : null,
-                        child: _userstate.user.stagenumber > index ? 
-                        Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
-                          style: Configuration.text("medium", Colors.white),
-                        ) : Container(),
-                        style: ElevatedButton.styleFrom(
-                            primary: Configuration.maincolor,
-                            onPrimary: Colors.white,
-                            padding: EdgeInsets.all(Configuration.smpadding),
-                            minimumSize:Size(double.infinity, double.infinity),
-                            animationDuration: Duration(milliseconds: 50)        
-                            ),
-                      ),
-                    );
-                  }))
-        ],
-      ),
+      child: Expanded(
+          child: GridView.builder(
+              itemCount: _userstate.data.stages.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: EdgeInsets.all(Configuration.medmargin),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+                  child: ElevatedButton(
+                    onPressed: _userstate.user.stagenumber > index
+                        ?  () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => StageView(
+                                      stage:_userstate.data.stages[index],
+                                    )),
+                          ).then((value) => setState(() => null))
+                        : null,
+                    child: 
+                    Stack(
+                      children: [
+                        Center(
+                          child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
+                            style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: AspectRatio(
+                           aspectRatio: 9/1,
+                           child: Container(  
+                             decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(color:Colors.grey), 
+                                color: Colors.white
+                              ), 
+                             child: Stack(
+                               children: [
+                                 Container(
+                                   decoration: BoxDecoration(
+                                     borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0.0,
+                                    left: 0.0 ,
+                                    right:0.0,
+                                    top:0.0,
+                                    child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                      border: Border.all(color:Colors.grey), 
+                                      color: Colors.green
+                                      ))
+                                  ),
+                               ],
+                             ),
+                           )
+                          )
+                        ),
+                      ]
+                    ) ,
+                    style: ElevatedButton.styleFrom(
+                        primary: Configuration.maincolor,
+                        onPrimary: Colors.white,
+                        padding: EdgeInsets.all(Configuration.smpadding),
+                        minimumSize:Size(double.infinity, double.infinity),
+                        animationDuration: Duration(milliseconds: 50)        
+                        ),
+                  ),
+                );
+              })),
     );
   }
 }
@@ -161,8 +195,9 @@ class _StageViewState extends State<StageView> {
                         child: Text(
                           content.title,
                           style:
-                              Configuration.text("tiny", _userstate.user.position < content.position &&
-                                  _userstate.user.stagenumber <= content.stagenumber  ?Colors.grey : Colors.black, "bold", 1),
+                              Configuration.text("verytiny", _userstate.user.position < content.position &&
+                                  _userstate.user.stagenumber <= content.stagenumber ? Colors.grey : Colors.black, 
+                                   ),
                         ),
                       )),
                   Positioned(
@@ -211,7 +246,7 @@ class _StageViewState extends State<StageView> {
       appBar: AppBar(
         centerTitle: true,
         title: Text('Stage ' + widget.stage.stagenumber.toString(),
-            style: Configuration.text('big', Colors.black)),
+            style: Configuration.text('medium', Colors.black)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
               size: Configuration.smicon, color: Colors.black),
@@ -247,9 +282,8 @@ class _StageViewState extends State<StageView> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text(
-                      'Filter',
-                      style: Configuration.text('small', Colors.black),
+                    Text('Filter',
+                      style: Configuration.text('tiny', Colors.black),
                     ),
                     OutlinedButton(
                       onPressed: () => setState(
@@ -334,13 +368,17 @@ class _ContentViewState extends State<ContentView> {
           width: Configuration.width,
           child: Stack(
             children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    left: Configuration.smpadding,
-                    right: Configuration.smpadding,
-                    top: Configuration.smpadding),
-                child: Text(widget.content.title,
-                    style: Configuration.text('medium', Colors.black)),
+              Align(
+                alignment: Alignment.topCenter,
+                  child: Padding(
+                  padding: EdgeInsets.only(
+                      left: Configuration.smpadding,
+                      right: Configuration.smpadding,
+                      top: Configuration.smpadding),
+                  child: Text(widget.content.title,
+                      textAlign: TextAlign.center,
+                      style: Configuration.text('small', Colors.black)),
+                ),
               ),
               Center(
                 child: StartButton(
@@ -376,7 +414,7 @@ class _ContentViewState extends State<ContentView> {
                     width: Configuration.width,
                     padding: EdgeInsets.all(Configuration.smpadding),
                     child: Text(widget.lesson.text[index]["text"],
-                        style: Configuration.text('small', Colors.black))),
+                        style: Configuration.text('small', Colors.black, font: 'Helvetica'))),
                 Row(
                     mainAxisAlignment: widget.lesson.type == 'meditation'
                         ? MainAxisAlignment.spaceEvenly

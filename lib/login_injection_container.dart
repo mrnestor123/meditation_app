@@ -24,6 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'data/repositories/lesson_repository.dart';
 import 'domain/repositories/lesson_repository.dart';
 import 'domain/usecases/user/log_out.dart';
+import 'presentation/mobx/actions/game_state.dart';
 import 'presentation/mobx/actions/lesson_state.dart';
 import 'presentation/mobx/actions/meditation_state.dart';
 import 'presentation/mobx/actions/menu_state.dart';
@@ -56,6 +57,10 @@ Future<void> init() async {
 
   sl.registerFactory(
     () => MenuState(sidebarRoute: '/main',bottomenuindex: 1),
+  );
+
+  sl.registerFactory(
+    () => GameState(),
   );
 
 

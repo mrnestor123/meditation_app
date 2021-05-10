@@ -11,19 +11,25 @@ class StartButton extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-    onPressed: () async {
-      onPressed();
-    },
-    style: ElevatedButton.styleFrom(
-      primary: Configuration.maincolor,
-      shape: CircleBorder(),
-      padding: EdgeInsets.all(Configuration.medpadding)
-    ),
-    child: Text(
-      'Start',
-      style: Configuration.text('medium', Colors.white),
-    ),
-      );
+    return Container(
+      width: Configuration.width*0.6,
+      child: AspectRatio(
+        aspectRatio: 9/2,
+        child: ElevatedButton(
+        onPressed: () async {
+          onPressed();
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 0.0,
+          primary: Configuration.maincolor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0))
+        ),
+        child: Text(
+          'Start',
+          style: Configuration.text('small', Colors.white),
+        ),
+          ),
+      ),
+    );
   }
 }

@@ -203,7 +203,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
               child: Center(
                   child: Text('Free',
                       style: Configuration.text(
-                          'medium',
+                          'smallmedium',
                           meditationtype == 'guided'
                               ? Colors.black
                               : Colors.white)))
@@ -224,7 +224,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   child: Center(
                       child: Text('Guided',
                           style: Configuration.text(
-                              'medium',
+                              'smallmedium',
                               meditationtype == 'free'
                                   ? Colors.black
                                   : Colors.white)))),
@@ -335,7 +335,7 @@ class _CountdownState extends State<Countdown> {
 
       if (_meditationstate.selmeditation.content[index.toString()]['text'] != null) {
         l.add(Text(_meditationstate.selmeditation.content[index.toString()]['text'],
-            style: Configuration.text('small', Colors.black)));
+            style: Configuration.text('tiny', Colors.white,font:'Helvetica')));
       }
 
       if (finished) {
@@ -407,16 +407,17 @@ class _CountdownState extends State<Countdown> {
               Container(
                 height: Configuration.height*0.35,
                 width: Configuration.height*0.35,
-                child: Image(image: NetworkImage(_meditationstate.selmeditation.image)),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+                child: Image(image: NetworkImage(_meditationstate.selmeditation.image),fit: BoxFit.cover),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
               ),
-              Text(_meditationstate.selmeditation.title,style: Configuration.text('medium',Colors.black))
+              SizedBox(height: Configuration.blockSizeVertical*3),
+              Text(_meditationstate.selmeditation.title,style: Configuration.text('small',Colors.white))
             ],
           ):  Container(
             height: Configuration.blockSizeHorizontal * 60,
             width: Configuration.blockSizeHorizontal * 60,
             decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
-            child: Center(child: Text('free meditation', style:Configuration.text('small', Colors.white))),
+            child: Center(child: Text('free meditation', style:Configuration.text('smallmedium', Colors.white))),
           ),
         ),
         /*SizedBox(height: Configuration.height *0.05),
@@ -437,7 +438,7 @@ class _CountdownState extends State<Countdown> {
           child: Column(children: [
             Slider(
               activeColor: Configuration.maincolor,
-              inactiveColor: Configuration.grey,
+              inactiveColor: Colors.white,
               min: 0.0,
               max: _meditationstate.selmeditation.duration.inMinutes.toDouble(),
               onChanged: (a)=> null, 
@@ -482,17 +483,29 @@ class _CountdownState extends State<Countdown> {
           ),
       ),
       extendBodyBehindAppBar: true,
-      body: Observer(
-            builder: (BuildContext context) {
-              if (_meditationstate.state == 'pre_guided') {
-                return guided(context);
-              } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused') {
-                return countdown(context);
-              } else {
-                return finish(context);
+      body: Container(
+        decoration:  BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [
+                Color.fromRGBO(23,23,23,100),
+                Configuration.maincolor,
+              ],
+            )
+          ),
+        child: Observer(
+              builder: (BuildContext context) {
+                if (_meditationstate.state == 'pre_guided') {
+                  return guided(context);
+                } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused') {
+                  return countdown(context);
+                } else {
+                  return finish(context);
+                }
               }
-            }
-          )
+            ),
+      )
         );
   }
 }
@@ -528,7 +541,7 @@ class _TimePickerState extends State<TimePicker> {
       child: Center(
           child: Text(
         seltime.toString() + ' min',
-        style: Configuration.text('medium', Colors.black),
+        style: Configuration.text('smallmedium', Colors.black),
       )),
     );
   }

@@ -31,7 +31,7 @@ abstract class UserLocalDataSource {
 
   Future takeLesson(UserModel user);
 
-  Future updateData({UserModel user, dynamic m, dynamic actions});
+  Future updateData({UserModel user, dynamic toAdd, String type});
 }
 
 const CACHED_USER = 'CACHED_USER';
@@ -60,7 +60,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
   @override
-  Future updateData({UserModel user, dynamic m, dynamic actions}) async {
+  Future updateData({UserModel user, dynamic toAdd, String type}) async {
     final jsonUser = sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
 
     StageModel stage = user.stage;
@@ -68,18 +68,24 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
     // HAY QUE AÑADIR LAS MEDITACIONES A LA CACHE!!!!
     
-    if (m != null) {
-       usermeditations.add(m.toRawJson());
+    if(type == 'meditate'){
+       usermeditations.add(toAdd[0].toRawJson());
        sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations.map((e) => e).toList());
-    }
 
-    if(actions.length > 0){
-      for(UserAction a in user.lastactions){
+       for(UserAction a in toAdd[1]){
         useractions.add(json.encode(a.toJson()));
       }
-      
-      sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
     }
+
+    //de momento toAdd siempre es un userAction menos cuando se medita
+    if(toAdd != null && type!='meditate') {
+      for(UserAction a in toAdd){
+        useractions.add(json.encode(a.toJson()));
+      }
+    }
+      
+      
+    sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
 
 
     // HAY QUE AÑADIR LAS ACCIONES A LA CACHE!!!!!

@@ -46,6 +46,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.white,
                             onPressed: () => Navigator.pop(context),
                           ),
+                          actions: [
+                            IconButton(
+                              padding: EdgeInsets.all(0.0),
+                              onPressed: () => Navigator.pushNamed(context, '/settings'),
+                              icon: Icon(
+                                Icons.settings,
+                                color: Colors.white,
+                                size: Configuration.smicon,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       MyInfo(),
@@ -64,6 +75,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         top: Configuration.blockSizeVertical * 2),
                     child: ListView(
                       children: <Widget>[
+                        SizedBox(height: Configuration.blockSizeVertical*2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                              children: [
+                                Text('Following', style: Configuration.text('tiny', Colors.black)),
+                                Text(_userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                              ],
+                            ),
+                          Column(
+                            children: [
+                              Text('Followers', style: Configuration.text('tiny', Colors.black)),
+                              Text(_userstate.user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.black))
+                            ],
+                          ) 
+                        ],
+                        ),
+                        SizedBox(height: Configuration.blockSizeVertical*3),
                         Table(children: [
                           TableRow(children: [
                             ProfileInfoBigCard(
@@ -201,6 +231,7 @@ class _MyInfoState extends State<MyInfo> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          SizedBox(height: Configuration.blockSizeVertical*1),
           RadialProgress(
               width: Configuration.safeBlockHorizontal * 1,
               goalCompleted: _userstate.user.stage.stagenumber / 10,
@@ -227,17 +258,9 @@ class _MyInfoState extends State<MyInfo> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                _userstate.user.nombre,
-                style: Configuration.text('small', Colors.white),
+                  _userstate.user.nombre,
+                  style: Configuration.text('medium', Colors.white),
               ),
-              IconButton(
-                onPressed: () => Navigator.pushNamed(context, '/settings'),
-                icon: Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                  size: Configuration.smicon,
-                ),
-              )
             ],
           ),
         ],
@@ -259,11 +282,10 @@ class ProfileInfoBigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
+      border: Border.all(color: Colors.grey, width: 0.35)
       ),
       child: Padding(
         padding: EdgeInsets.all(Configuration.smpadding),
@@ -274,8 +296,8 @@ class ProfileInfoBigCard extends StatelessWidget {
               alignment: Alignment.topRight,
               child: icon,
             ),
-            Text(firstText, style: Configuration.text('medium', Colors.black)),
-            Text(secondText, style: Configuration.text('small', Colors.black)),
+            Text(firstText, style: Configuration.text('small', Colors.black)),
+            Text(secondText, style: Configuration.text('tiny', Colors.black)),
           ],
         ),
       ),

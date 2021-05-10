@@ -6,6 +6,10 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 
+/*
+  acercar letra a barra de tabbar
+  linea bajo del tabbar
+*/
 class LeaderBoard extends StatefulWidget {
   @override
   _LeaderBoardState createState() => _LeaderBoardState();
@@ -30,7 +34,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
         columnWidths: {
           0: FractionColumnWidth(0.05),
-          2: FractionColumnWidth(0.42)
+          2: FractionColumnWidth(0.35)
         },
         children: list.map((u) => TableRow(
                     decoration: BoxDecoration(
@@ -57,15 +61,15 @@ class _LeaderBoardState extends State<LeaderBoard> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(u.nombre == null ? 'Anónimo' : u.nombre,
-                              style: Configuration.text('small', Colors.black, 'bold')),
-                          Text('Stage ' + u.stagenumber.toString(),
-                              style: Configuration.text('tiny', Colors.grey))
+                          Text(u.nombre == null ? 'Anónimo' : u.nombre,style: Configuration.text('small', Colors.black)),
+                          SizedBox(height: Configuration.safeBlockVertical*0.6,),
+                          Text('Stage ' + u.stagenumber.toString(),style: Configuration.text('verytiny', Colors.grey, font: 'Helvetica'))
                         ],
                       ),
                       //el sortTime se podría hacer en el user entity
                       texticon(Icons.timer, u.timemeditated),
                       //REFINAR ESTAS CONDICIONES
+                      /*
                       following || u.coduser == _userstate.user.coduser || u.follows
                           ? GestureDetector(
                               onTap: () async {
@@ -100,6 +104,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                                       shape: BoxShape.circle),
                                   child: Icon(Icons.person_add)),
                             )
+                      */
                     ]))
             .toList());
   }
@@ -115,6 +120,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         elevation: 0,
         backgroundColor: Configuration.maincolor,
         leading: IconButton(
@@ -135,20 +141,20 @@ class _LeaderBoardState extends State<LeaderBoard> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.user.allusers[1], large: false, position: 2,)),
-                  Align(child: UserProfile(user: _userstate.user.allusers[0], large: true, position: 1,)),
-                  Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.user.allusers[2], large:false, position: 3))
+                  Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.data.users[1], large: false, position: 2,)),
+                  Align(child: UserProfile(user: _userstate.data.users[0], large: true, position: 1,)),
+                  Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.data.users[2], large:false, position: 3))
                 ],
               ),
             ),
             Expanded(
               child: Container(
-                  padding: EdgeInsets.all(Configuration.smpadding),
                   color: Colors.white,
                   child: Column(children: [
                     TabBar(
                         indicatorSize: TabBarIndicatorSize.label,
-                        indicatorWeight: 4.0,
+                        indicatorWeight: 3.0,
+
                         indicatorColor: Configuration.maincolor,
                         tabs: [
                           Tab(
@@ -161,8 +167,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           )
                         ]),
                     SizedBox(height: Configuration.safeBlockVertical * 2),
-                    Expanded(child: TabBarView(children: [
-                      createTable(_userstate.user.allusers, false),
+                    Expanded(child: 
+                    TabBarView(children: [
+                      createTable(_userstate.data.users, false),
                       createTable(_userstate.user.following, true)
                     ]))
                   ])),
@@ -202,15 +209,15 @@ class UserProfile extends StatelessWidget {
               child: Container(
                 padding: EdgeInsets.all(Configuration.tinpadding),
                 decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                child: Text(position.toString(), style: Configuration.text('small', Colors.white)),
+                child: Text(position.toString(), style: Configuration.text('tiny', Colors.white)),
               )
             ),
           ],
         ),
         SizedBox(height: 4.0),
-        Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.white)),
+        Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.black)),
         SizedBox(height: 2.0),
-        Text(user.timemeditated, style: Configuration.text('tiny', Colors.grey))
+        Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
         
       ],
     );

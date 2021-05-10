@@ -44,9 +44,13 @@ class _MainScreenState extends State<MainScreen> {
                 aspectRatio: 16/9,
                   child: Container(
                   margin: EdgeInsets.all(Configuration.medmargin),
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-                  child: ElevatedButton(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16.0),
+
+                  
+                  
+                  ),
+                  child: TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/imagepath'),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +62,9 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                     style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
                         primary: Configuration.maincolor,
+                        elevation: 0.0,
                         onPrimary: Colors.white,
                         padding: EdgeInsets.all(Configuration.smpadding),
                         minimumSize: Size(double.infinity, double.infinity)),
@@ -82,8 +88,8 @@ class _Timeline extends StatefulWidget {
 
 class __TimelineState extends State<_Timeline> {
   UserState _userstate;
-  String mode = 'today'; 
-  var states = ['today','this week'];
+  String mode = 'Today'; 
+  var states = ['Today','This week'];
 
    //Hay que crear un filtro de acciones !!!!!!!
   List<Widget> getMessages() {
@@ -107,19 +113,19 @@ class __TimelineState extends State<_Timeline> {
                   Container(
                     width: Configuration.width*0.62,
                     child: Text((action.username == _userstate.user.nombre ? 'You ': action.username) + action.message,
-                        style: Configuration.text('small', Colors.black),
+                        style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                         overflow: TextOverflow.fade,
                         ),
                   ),
-                  Text((mode == 'today' ? ' ' : action.day + ' ') +   action.hour,
-                      style: Configuration.text('tiny', Configuration.grey))
+                  Text((mode == 'today' ? '' : action.day + ' ') +   action.hour,
+                      style: Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
               ])
             ]),
           );
           widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
         }
       } else {
-        widgets.add(Center(child: Text('No actions realized ' + (mode == 'today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey))));
+        widgets.add(Center(child: Text('No actions realized ' + (mode == 'today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
 
       return widgets;
@@ -132,7 +138,10 @@ class __TimelineState extends State<_Timeline> {
     return Container(
         width: Configuration.width * 0.8,
         height: Configuration.height * 0.4,
-        decoration: BoxDecoration(color:Colors.white, borderRadius: BorderRadius.circular(16.0)),
+        decoration: BoxDecoration(
+          color:Colors.white, 
+          borderRadius: BorderRadius.circular(16.0), 
+          border: Border.all(color: Colors.grey, width: 0.15)),
         padding: EdgeInsets.all(Configuration.tinpadding),
         child: Column(children: [
           Row(
@@ -160,10 +169,14 @@ class __TimelineState extends State<_Timeline> {
                 ),
               RawMaterialButton(
                     fillColor: Configuration.maincolor,
-                    child: Icon(Icons.emoji_events,
-                        color: Colors.white, size: Configuration.smicon),
+                    child: Row(
+                      children: [
+                        Icon(Icons.leaderboard, color: Colors.white, size: Configuration.smicon),
+                        Icon(Icons.person, color: Colors.white,size: Configuration.smicon)
+                      ],
+                    ),
                     padding: EdgeInsets.all(4.0),
-                    shape: CircleBorder(),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
                     onPressed: () {
                       Navigator.pushNamed(context, '/leaderboard')
                           .then((value) => setState(() => null));

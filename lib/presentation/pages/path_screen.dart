@@ -45,28 +45,28 @@ class PathScreen extends StatelessWidget {
           TableRow(children:
           [
             Text('Goals ',
-              style: Configuration.text('small', Colors.black),
+              style: Configuration.text('tiny', Colors.black),
             ),
             Text(_userstate.user.stage.goals,
-                style: Configuration.text('small', Colors.white))
+                style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
           ]),
           TableRow(children: [
             Text('Obstacles ',
-                style: Configuration.text('small', Colors.black)),
+                style: Configuration.text('tiny', Colors.black)),
             Text(_userstate.user.stage.obstacles,
-                  style: Configuration.text('small', Colors.white))
+                  style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
           ]),
           TableRow(children: [
             Text('Skills ',
-                style: Configuration.text('small', Colors.black)),
+                style: Configuration.text('tiny', Colors.black)),
             Text(_userstate.user.stage.skills,
-            style: Configuration.text('small', Colors.white))
+            style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
           ]),
           TableRow(children: [
             Text('Mastery ',
-                style: Configuration.text('small', Colors.black)),
+                style: Configuration.text('tiny', Colors.black)),
             Text(_userstate.user.stage.mastery,
-            style: Configuration.text('small', Colors.white),
+            style: Configuration.text('tiny', Colors.white, font: 'Helvetica'),
             overflow: TextOverflow.visible)
           ]),
         ],
@@ -82,12 +82,12 @@ class PathScreen extends StatelessWidget {
                 size: Configuration.medpadding, color: Configuration.maincolor)
             : Text(
                 (value).toString() + '/' + (valuestage).toString(),
-                style: Configuration.text('medium', Configuration.maincolor),
+                style: Configuration.text('tiny', Configuration.maincolor),
               ),
         SizedBox(height: Configuration.blockSizeVertical * 0.2),
         Text(
           text,
-          style: Configuration.text('small', Colors.black),
+          style: Configuration.text('tiny', Colors.black),
           textAlign: TextAlign.center,
         )
       ],
@@ -107,7 +107,7 @@ class PathScreen extends StatelessWidget {
             Icon(Icons.check_circle, size: Configuration.medpadding, color: Configuration.maincolor):
             Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
             SizedBox(height: Configuration.blockSizeVertical * 0.2),
-            Text( key, style: Configuration.text('small',Colors.black), textAlign: TextAlign.center)
+            Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
           ],)
       ).toList()
       );
@@ -130,14 +130,13 @@ class PathScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('You are currently on ',
-                    style: Configuration.text('smallmedium', Colors.black)),
+                    style: Configuration.text('small', Colors.black)),
                 Text('Stage ' + _userstate.user.stagenumber.toString(),
-                    style: Configuration.text(
-                        'medium', Configuration.maincolor))
+                    style: Configuration.text('smallmedium', Configuration.maincolor))
               ],
             ),
             SizedBox(height: Configuration.height * 0.01),
-            Text(_userstate.user.stage.description, style: Configuration.text('smallmedium',Colors.black), textAlign: TextAlign.center,),
+            Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.black), textAlign: TextAlign.center,),
             SizedBox(height: Configuration.height * 0.05),
             porcentaje(),
             SizedBox(height: Configuration.height * 0.05),

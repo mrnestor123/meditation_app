@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -44,7 +45,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
-          Provider<MeditationState>(create: (context) => sl<MeditationState>())
+          Provider<MeditationState>(create: (context) => sl<MeditationState>()),
+          Provider<GameState>(create: (context) => sl<GameState>())
         ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,

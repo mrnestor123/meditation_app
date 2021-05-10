@@ -20,8 +20,7 @@ class Configuration {
   //buttoncolor ??
 
   // scaffoldcolor ??
-  static Color scaffoldcolor =
-      !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
+  static Color scaffoldcolor = !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
 
   //the purple color
   static Color maincolor = !nightmode ? Color.fromRGBO(216, 187, 120, 1.0) : Colors.black;
@@ -55,11 +54,17 @@ class Configuration {
   static double bigmargin;
 
   //textstyles
+  /*
+
+    fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
+  */
   static TextStyle text(String size, Color color,
-      [String style, double spacing]) {
+      {String style, double spacing, String font}) {
     var px;
     var weight = FontWeight.normal;
     double letterspacing = 0;
+
+    String fontfamily = 'Gotham-rounded';
 
     if (style == "bold") {
       weight = FontWeight.bold;
@@ -69,9 +74,16 @@ class Configuration {
       letterspacing = spacing;
     }
 
+    if(font != null){
+      fontfamily = font;
+    }
+
     switch (size) {
-      case "tiny":
+      case 'verytiny':
         px = safeBlockHorizontal * 3;
+        break;
+      case "tiny":
+        px = safeBlockHorizontal * 3.5;
         break;
       case "small":
         px = safeBlockHorizontal * 4;
@@ -91,7 +103,7 @@ class Configuration {
     }
 
     return TextStyle(
-        fontFamily: 'Gotham',
+        fontFamily: fontfamily,
         fontSize: px,
         color: color,
         fontWeight: weight,

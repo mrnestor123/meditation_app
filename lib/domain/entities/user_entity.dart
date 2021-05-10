@@ -38,7 +38,7 @@ class User {
   final List<dynamic> followedcods = new List.empty(growable: true);
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
   final ObservableList<UserModel> following = new ObservableList();
-  final ObservableList<UserModel> unfollowing = new ObservableList();
+  final ObservableList<UserModel> followsyou = new ObservableList();
   final ObservableList<UserModel> allusers = new ObservableList();
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
@@ -98,7 +98,8 @@ class User {
   void setActions(List<UserAction> a) => acciones.addAll(a);
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
   void addAction(UserAction a) => acciones.add(a);
-  void addUnfollower(User u) {u.follows= false; allusers.add(u); }
+  void addfollow(User u) => { following.add(u) };
+  void addUnfollower(User u) { followsyou.add(u); }
   void setStage(StageModel s) {
     this.stage = s ;
     setPercentage();

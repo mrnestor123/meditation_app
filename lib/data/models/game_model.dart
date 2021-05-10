@@ -14,7 +14,6 @@ class GameModel extends Game {
       text,
       type,
       int stagenumber,
-      questions,
       int position})
       : super(
             title: title,
@@ -23,7 +22,6 @@ class GameModel extends Game {
             image: image,
             description: description,
             type: type,
-            questions: questions,
             stagenumber: stagenumber,
             position: position);
 
