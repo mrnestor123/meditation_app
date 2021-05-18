@@ -98,6 +98,17 @@ mixin _$GameState on _GameState, Store {
   }
 
   @override
+  void startgame() {
+    final _$actionInfo =
+        _$_GameStateActionController.startAction(name: '_GameState.startgame');
+    try {
+      return super.startgame();
+    } finally {
+      _$_GameStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void userAnswer(String answer) {
     final _$actionInfo =
         _$_GameStateActionController.startAction(name: '_GameState.userAnswer');

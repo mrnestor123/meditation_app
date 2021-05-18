@@ -9,7 +9,54 @@ class UserAction {
   dynamic action;
   DateTime time;
 
-  UserAction({this.type, this.time, this.action, this.username, this.coduser}){
+  String getAction(action) {
+    String str = '';
+
+    if(action is List){
+      for(var a in action){
+        str += a;
+      }
+    } else {
+      str = action;
+    }
+
+    return str;
+  }
+
+
+  void setAction(action){ 
+    if(this.action is List) {
+      this.action.add(action[0]);
+    }
+
+    this.message += ', ' + action[0];
+  }
+
+  UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message}){
+    if(this.message == null){
+   
+    var types = {
+      "follow": () => "followed " + getAction(action),
+      "unfollow": () => "unfollowed " + getAction(action),
+      "meditation": () => 'meditated for ' + action[0].toString() + ' min',
+      "guided_meditation": () => "took " + action[0].toString() + ' for ' + action[1].toString() + ' min',
+      "updatestage": () => "climbed up one stage to " + action,
+      'game': () => 'played ',
+      'lesson': () => 'read ' + getAction(action)
+    };
+    this.message = types[type]();   
+    } 
+
+    if(time == null){
+      this.time = DateTime.now();
+      hour = DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
+      day = DateTime.now().day.toString() + '-' + DateTime.now().month.toString();
+    } else {
+      var localdate = time.toLocal();
+      hour = localdate.hour.toString() + ':' + (localdate.minute.toString().length > 1 ? localdate.minute.toString() : '0' + localdate.minute.toString() );
+      day = localdate.day.toString() + '-' + localdate.month.toString();
+    }
+
     var icons = {
       'follow' : Icons.person_add,
       'unfollow': Icons.person_remove,
@@ -19,28 +66,8 @@ class UserAction {
       'game': Icons.games,
       'lesson' : Icons.book
     };
-    var types = {
-      "follow": () => "followed " + action,
-      "unfollow": () => "unfollowed " + action,
-      "meditation": () => 'meditated for ' + action[0].toString() + ' min',
-      "guided_meditation": () => "took " + action[0].toString() + ' for ' + action[1].toString() + ' min',
-      "updatestage": () => "climbed up one stage to " + action,
-      'game': () => 'played ',
-      'lesson': () => 'read ' + action
-    };
-
-    if(time == null){
-      this.time = DateTime.now();
-      hour = DateTime.now().hour.toString() + ':' + DateTime.now().minute.toString();
-      day = DateTime.now().day.toString() + '-' + DateTime.now().month.toString();
-    }else{
-      var localdate = time.toLocal();
-      hour = localdate.hour.toString() + ':' + (localdate.minute.toString().length > 1 ? localdate.minute.toString() : '0' + localdate.minute.toString() );
-      day = localdate.day.toString() + '-' + localdate.month.toString();
-    }
-
-    this.message = types[type]();    
     this.icono = icons[type];
+    
   }
 
   //un pateo crear otra clase para estos dos
@@ -49,11 +76,13 @@ class UserAction {
       "type": type == null ? null: type,
       "username": username == null ? null : username,
       "action": action == null ? null : action,
+      "message": message == null ? null : message,
       "coduser": coduser == null ? null: coduser
   };
 
   factory UserAction.fromJson(Map<String, dynamic> json) => UserAction(
       time: json["time"] == null ? null : DateTime.parse(json["time"]),
+      message: json['message'] == null ? null : json['message'],
       type: json["type"] == null ? null : json["type"],
       username: json["username"] == null ? null : json["username"],
       coduser: json['coduser'] == null ? null : json['coduser'],

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 
@@ -91,11 +92,14 @@ class __TimelineState extends State<_Timeline> {
   String mode = 'Today'; 
   var states = ['Today','This week'];
 
-   //Hay que crear un filtro de acciones !!!!!!!
   List<Widget> getMessages() {
-      DateTime today = DateTime.now();
-      DateTime filtereddate = mode == 'today' ? today : DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
-      List<UserAction> sortedlist = _userstate.user.acciones.where((a) => mode == 'today' && a.time.year == filtereddate.year && a.time.day == filtereddate.day && a.time.month == filtereddate.month || mode == 'this week' && filtereddate.compareTo(a.time) <= 0 ).toList();
+      List<User> following = _userstate.user.following;
+      List<UserAction> sortedlist = mode == 'Today' ? _userstate.user.todayactions : _userstate.user.thisweekactions;
+      //ESTO NO LO DEBERÍA DE HACER MÁS DE UNA VEZ
+      for(User u in following) {
+        sortedlist.addAll(u.todayactions);
+      }
+
       List<Widget> widgets = new List.empty(growable: true);
 
       if (sortedlist.length > 0) {
@@ -125,7 +129,7 @@ class __TimelineState extends State<_Timeline> {
           widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
         }
       } else {
-        widgets.add(Center(child: Text('No actions realized ' + (mode == 'today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
+        widgets.add(Center(child: Text('No actions realized ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
 
       return widgets;
@@ -139,7 +143,7 @@ class __TimelineState extends State<_Timeline> {
         width: Configuration.width * 0.8,
         height: Configuration.height * 0.4,
         decoration: BoxDecoration(
-          color:Colors.white, 
+          color:Colors.white,  
           borderRadius: BorderRadius.circular(16.0), 
           border: Border.all(color: Colors.grey, width: 0.15)),
         padding: EdgeInsets.all(Configuration.tinpadding),

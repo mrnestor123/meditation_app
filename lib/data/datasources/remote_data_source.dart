@@ -58,8 +58,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     if(following.docs.length > 0){
       for(DocumentSnapshot doc in following.docs){
+        var user = UserModel.fromJson(doc.data());
         //simplemente añado los cods. habría que hacer un read
-        loggeduser.addfollow(UserModel.fromJson(doc.data()));
+        loggeduser.addfollow(user);
+        QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: user.coduser).get();
+
+        if (actions.docs.length > 0) {
+          for (DocumentSnapshot doc in actions.docs) {
+            user.addAction(new UserAction.fromJson(doc.data()));
+          }
+        }
       }
     }
 
@@ -99,7 +107,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         }
       }
 
-      /* HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTE MES!!! DE MOMENTO SE SACAN TODAS
+      /* 
+        HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTA SEMANA!!! DE MOMENTO SE SACAN TODAS
       */
       QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: loggeduser.coduser).get();
 
@@ -230,13 +239,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
     if (type == 'meditate') {
       await database.collection('meditations').add(toAdd[0].toJson());
-      for(UserAction a in toAdd[1]){
-        await database.collection('actions').add(a.toJson());
-      }
-    } else if(type == 'lesson'){
-      for(UserAction a in toAdd){
-        await database.collection('actions').add(a.toJson());
-      }
     } else if(type =='follow' || type =='unfollow'){
       QuerySnapshot userfollow = await database.collection('following').where('coduser', isEqualTo: user.coduser).get();
       if(userfollow.docs.length > 0){
@@ -244,6 +246,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       } else {
         await database.collection('following').add({'coduser':user.coduser,'following': user.following.map((u)=> u.toRawJson()).toList()});
       }
+    }
+
+    for(UserAction a in user.lastactions) {
+        await database.collection('actions').add(a.toJson());
     }
   }
 
@@ -253,5 +259,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     StageModel s =  await populateStage(stage.docs[0].data());
     u.setStage(s);
     await addfollowers(u);
+
+    QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: u.coduser).get();
+
+    if (actions.docs.length > 0) {
+      for (DocumentSnapshot doc in actions.docs) {
+        u.addAction(new UserAction.fromJson(doc.data()));
+      }
+    }
   }
 }

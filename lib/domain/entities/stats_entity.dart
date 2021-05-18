@@ -8,7 +8,7 @@ import 'lesson_entity.dart';
 
 //Hacer un método para añadir a meditation time
 //agrupa todas las estadísticas del usuario
-class UserStats{
+class UserStats {
   StageStats stage;
   TotalStats total;
   List<dynamic> lastread;
@@ -18,6 +18,13 @@ class UserStats{
 
   UserStats({this.stage,this.total,this.lastread,this.streak,this.lastmeditated,this.meditationtime});
     
+  factory UserStats.empty() => UserStats(
+     stage: StageStats.empty(),
+     total: TotalStats.empty() ,
+     streak: 0,
+     meditationtime:  new Map(),
+    );
+
   factory UserStats.fromJson(Map<String, dynamic> json) =>
     UserStats(
       stage: json['etapa'] == null ? StageStats.empty() : StageStats.fromJson(json['etapa']),

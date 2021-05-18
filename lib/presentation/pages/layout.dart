@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
@@ -137,13 +138,12 @@ class _MobileLayoutState extends State<MobileLayout> {
         selectedItemColor: Configuration.maincolor,
         onTap: (int index) {
           {
-            this._c.animateToPage(index,
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut);
+            this._c.jumpToPage(index);
           }
         },
       ),
       body: PageView(
+        physics: NeverScrollableScrollPhysics(),
         controller: _c,
         onPageChanged: (newPage) {
           setState(() {

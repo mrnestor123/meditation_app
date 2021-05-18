@@ -529,6 +529,7 @@ class _TimePickerState extends State<TimePicker> {
       1,
       baseColor: Colors.grey.withOpacity(0.6),
       handlerColor: Configuration.maincolor,
+      
       onSelectionChange: (a, b, c) {
         setState(() {
           seltime = b;

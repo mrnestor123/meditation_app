@@ -35,6 +35,8 @@ class _LearnScreenState extends State<LearnScreen> {
               itemCount: _userstate.data.stages.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (context, index) {
+                var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.objectives['lecciones'])*6).round();
+
                 return Container(
                   margin: EdgeInsets.all(Configuration.medmargin),
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
@@ -56,40 +58,42 @@ class _LearnScreenState extends State<LearnScreen> {
                             style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
                           ),
                         ),
+                        _userstate.user.stagenumber > index ? 
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: AspectRatio(
                            aspectRatio: 9/1,
                            child: Container(  
-                             decoration: BoxDecoration(
+                             decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
                                 borderRadius: BorderRadius.circular(16.0),
                                 border: Border.all(color:Colors.grey), 
                                 color: Colors.white
-                              ), 
-                             child: Stack(
+                              ) : BoxDecoration(color: Colors.transparent), 
+                             child: Row(
+                               mainAxisAlignment: MainAxisAlignment.center,
                                children: [
-                                 Container(
-                                   decoration: BoxDecoration(
-                                     borderRadius: BorderRadius.circular(16.0),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 0.0,
-                                    left: 0.0 ,
-                                    right:0.0,
-                                    top:0.0,
+                                 flex < 6 && _userstate.user.stagenumber == (index +1) ? 
+                                 Flexible(
+                                   flex: flex,
                                     child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16.0),
-                                      border: Border.all(color:Colors.grey), 
-                                      color: Colors.green
-                                      ))
-                                  ),
-                               ],
+                                      decoration: BoxDecoration(
+                                        color: Colors.green, 
+                                        borderRadius: BorderRadius.circular(16.0)
+                                      ),
+                                    ) ,
+                                 ) : Padding(
+                                   padding: const EdgeInsets.only(bottom:16.0),
+                                   child: Icon(Icons.check_circle,color: Colors.green),
+                                 ),
+                                flex < 6 && _userstate.user.stagenumber == (index +1) ?
+                                 Flexible(
+                                   child: Container(),
+                                   flex:6-flex
+                                  ) : Container()
+                             ])
                              ),
                            )
-                          )
-                        ),
+                          ) : Container()
                       ]
                     ) ,
                     style: ElevatedButton.styleFrom(
@@ -469,20 +473,25 @@ class _ContentViewState extends State<ContentView> {
                                   AnimatedOpacity(
                                     opacity: reachedend ? 1.0 : 0.0, 
                                     duration: Duration(seconds: 1),
-                                    child: ElevatedButton(
-                                      onPressed: () async {
-                                        await _userstate.takeLesson(widget.lesson);
-                                        Navigator.pop(context, true);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        primary: Configuration.maincolor,
-                                        shape: CircleBorder(),
-                                        padding: EdgeInsets.all(Configuration.medpadding)
-                                      ), 
-                                      child: Text(
-                                        'Finish',
-                                        style: Configuration.text('medium', Colors.white),
-                                      )
+                                    child: Container(
+                                      width: Configuration.width*0.5,
+                                      child: AspectRatio(
+                                        aspectRatio: 9/2,
+                                        child: ElevatedButton(
+                                            onPressed: () async {
+                                            await _userstate.takeLesson(widget.lesson);
+                                            Navigator.pop(context, true);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Configuration.maincolor,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                                          ), 
+                                          child: Text(
+                                            'Finish',
+                                            style: Configuration.text('small', Colors.white),
+                                          )
+                                        ),
+                                      ),
                                     ),
                                   ),
 

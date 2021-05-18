@@ -14,6 +14,7 @@ class Stage {
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
+  //hay que empezar a utilizar stobjectives!!
   StageStats stobjectives; 
   Map<String, dynamic> objectives = new Map();
 

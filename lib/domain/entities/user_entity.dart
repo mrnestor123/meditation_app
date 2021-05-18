@@ -34,6 +34,10 @@ class User {
 
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
   final List<UserAction> lastactions = new List.empty(growable: true);
+  final List<UserAction> todayactions = new ObservableList();
+  final List<UserAction> thisweekactions = new ObservableList();
+  final ObservableList<UserAction> acciones = new ObservableList();
+
   //códigos de los usuarios a los que sigue el usuario
   final List<dynamic> followedcods = new List.empty(growable: true);
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
@@ -44,19 +48,20 @@ class User {
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
   final ObservableList<Meditation> guidedMeditations = new ObservableList();
-  final ObservableList<UserAction> acciones = new ObservableList();
 
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
-  User({this.coduser, this.nombre,this.user,this.position, this.image, @required this.stagenumber,this.stage, this.role,this.classic,this.meditposition,this.userStats}) {
-    var time = this.userStats.total.timemeditated;
-    if (time > 1440) {
-      timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
-    }else if (time > 60) {
-      timemeditated = (time / 60).toStringAsFixed(0) + ' h';
-    }else {
-      timemeditated = time.toString() + ' m';
+  User({this.coduser, this.nombre, this.user, this.position, this.image, @required this.stagenumber,this.stage, this.role,this.classic,this.meditposition,this.userStats}) {
+    if(userStats != null){
+      var time = this.userStats.total.timemeditated;
+      if (time > 1440) {
+        timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
+      }else if (time > 60) {
+        timemeditated = (time / 60).toStringAsFixed(0) + ' h';
+      }else {
+        timemeditated = time.toString() + ' m';
+      }
     }
         
     if (coduser == null) {
@@ -65,7 +70,8 @@ class User {
     } else {
       this.coduser = coduser;
     }
-
+      
+    // SE EJECUTA SIEMPRE
     inituser();
   }
 
@@ -77,6 +83,7 @@ class User {
         userStats.streak = 0;
       }
     } 
+
   }
 
   /* @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
@@ -88,6 +95,21 @@ class User {
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     this.acciones.add(a);
+    if(this.todayactions.length > 0 ){
+      for(UserAction a in this.todayactions) {
+        if(type !='meditation' && a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
+          a.setAction(attribute);
+          a.time = DateTime.now().toLocal();
+          return;
+        }
+      }
+      
+      this.todayactions.add(a);
+    }else{
+      this.todayactions.add(a);
+    }
+
+    this.thisweekactions.add(a);
     this.lastactions.add(a);
   }
 
@@ -95,11 +117,31 @@ class User {
   void addFollower(User u) { u.follows = true; following.add(u); allusers.add(u);}
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
-  void setActions(List<UserAction> a) => acciones.addAll(a);
+  void setActions(List<UserAction> a) { 
+    acciones.addAll(a);
+    DateTime today = DateTime.now();
+    DateTime thismonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
+    todayactions.addAll(this.acciones.where((a) => a.time.year == today.year && a.time.day == today.day && a.time.month == today.month).toList());
+    thisweekactions.addAll(this.acciones.where((a) => thismonday.compareTo(a.time) <= 0).toList());
+  }
+
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
-  void addAction(UserAction a) => acciones.add(a);
+  void addAction(UserAction a) { 
+    DateTime today = DateTime.now();
+    DateTime thismonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
+
+    if(today.day == a.time.day && today.month == a.time.month) {
+      todayactions.add(a);
+    }
+
+    if(thismonday.compareTo(a.time) <= 0){
+      thisweekactions.add(a);
+    }
+
+    acciones.add(a);
+  }
   void addfollow(User u) => { following.add(u) };
-  void addUnfollower(User u) { followsyou.add(u); }
+  void addUnfollower(User u) { followsyou.add(u);}
   void setStage(StageModel s) {
     this.stage = s ;
     setPercentage();
@@ -121,7 +163,7 @@ class User {
     }
     
     if(!following.contains(u)){
-      setAction("follow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
+      setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
       following.add(u);
     }
   }
@@ -136,7 +178,7 @@ class User {
     }
 
     if(following.contains(u)){
-      setAction("unfollow", attribute: u.nombre != null ? u.nombre : 'Anónimo');
+      setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
       following.remove(u);
     }
   }
@@ -166,7 +208,6 @@ class User {
 
   //este método se repite en la etapa también ... Moverlo todo aquí.
   //!!!! REFACTORIZAR !!!!
-  // HACE FALTA PASAR LA ETAPA QUE YA LA TENEMOS ???
   void setPercentage() {
     Stage s = this.stage;
 
@@ -218,7 +259,6 @@ class User {
     this.lastactions.clear();
     List<Lesson> lessons = List.empty(growable:true);
 
-    //no se para que hace falta lessoninStage
     if (l.stagenumber == this.stagenumber && this.position <= l.position) {
       this.userStats.takeLesson();
       this.progress = Progress(
@@ -227,6 +267,7 @@ class User {
         what: ' Lessons'
       );
       setPercentage();
+
       if (this.stage.path.where((c) => c.position == this.position).length == this.userStats.lastread.length + 1) {
         this.position += 1;
         this.userStats.lastread.clear();
@@ -235,7 +276,6 @@ class User {
         this.userStats.lastread.add({'cod': l.cod});
         return false;
       }
-
     }
     
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:provider/provider.dart';
 
 /*
@@ -18,95 +19,174 @@ class LeaderBoard extends StatefulWidget {
 //aquí habrá que mostrar un mínimo
 class _LeaderBoardState extends State<LeaderBoard> {
   UserState _userstate;
-  var time = '';
+  final TextEditingController _searchController = new TextEditingController();
 
-  Widget createTable(List<User> list, following) {
+  List<User> users;
+
+  var time = '';
+  TabController _tabController;
+  bool searching = false;
+
+  dynamic showUserProfile(User user,context) {
+   return showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          bool following = _userstate.user.following.contains(user);
+
+          return StatefulBuilder(
+              builder:(BuildContext context, StateSetter setState ) {
+              return  Container(
+              height: 250,
+              color: Configuration.maincolor,
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Column(
+                            children: [
+                              Center(
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(2.0),
+                                      decoration: BoxDecoration(
+                                        image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+                                        border: Border.all(color: Colors.white, width: 2.5),
+                                        shape: BoxShape.circle
+                                        ),
+                                      height: Configuration.width* 0.25,
+                                      width:  Configuration.width* 0.25,
+                                    ),
+                                    SizedBox(height: 4.0),
+                                    Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.white)),
+                                    SizedBox(height: 2.0),
+                                    Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Text('Following', style: Configuration.text('tiny', Colors.white)),
+                                  Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.white))   
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Text('Followers', style: Configuration.text('tiny', Colors.white)),
+                                  Text(user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.white))
+                                ],
+                              )
+                          ])
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          ProfileInfoBigCard(
+                                firstText: user.userStats.total.meditations.toString(),
+                                secondText: "Meditations\ncompleted",
+                                icon: Icon(Icons.self_improvement, color: Colors.lightBlue),
+                                color: 'white',
+                          ),
+                          ProfileInfoBigCard(
+                              firstText: user.userStats.total.lessons.toString(),
+                              secondText: "Lessons\ncompleted",
+                              icon: Icon(Icons.book, color: Colors.lightBlue),
+                              color: 'white',
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      OutlinedButton(
+                        onPressed: () => setState((){
+                          following= !following;  
+                          _userstate.follow(user, following);}), 
+                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.text('tiny', Colors.lightBlue)),
+                        style: OutlinedButton.styleFrom(
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              )
+            );
+            }
+          );
+        },
+    );
+  }
+
+
+  Widget createTable(List<User> list, following, context) {
     var count = 0;
 
     Widget texticon(IconData icon, String text) {
-      return Row(children: [
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         Icon(icon),
-        Text(text,style: Configuration.text('small',Colors.black))
+        Text(text,style: Configuration.text('tiny',Colors.black))
       ]);
     }
 
-    return Table(
-        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-        columnWidths: {
-          0: FractionColumnWidth(0.05),
-          2: FractionColumnWidth(0.35)
-        },
-        children: list.map((u) => TableRow(
-                    decoration: BoxDecoration(
-                        color: u.coduser == _userstate.user.coduser
-                            ? Colors.grey.withOpacity(0.1)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12.0)),
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: Configuration.smpadding,
-                            horizontal: Configuration.tinpadding),
-                        child: Text(
-                          (++count).toString(),
-                          style: Configuration.text('small', Colors.black),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      CircleAvatar(
-                        backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
-                        backgroundImage: u.image != null ? NetworkImage(u.image) : null,
-                        child: u.image == null ? null : null,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(u.nombre == null ? 'Anónimo' : u.nombre,style: Configuration.text('small', Colors.black)),
-                          SizedBox(height: Configuration.safeBlockVertical*0.6,),
-                          Text('Stage ' + u.stagenumber.toString(),style: Configuration.text('verytiny', Colors.grey, font: 'Helvetica'))
-                        ],
-                      ),
-                      //el sortTime se podría hacer en el user entity
-                      texticon(Icons.timer, u.timemeditated),
-                      //REFINAR ESTAS CONDICIONES
-                      /*
-                      following || u.coduser == _userstate.user.coduser || u.follows
-                          ? GestureDetector(
-                              onTap: () async {
-                                await _userstate.follow(u, false);
-                                setState(() => null);
-                              },
-                              child: Container(
-                                margin: EdgeInsets.symmetric(
-                                    vertical: Configuration.smmargin),
-                                padding:
-                                    EdgeInsets.all(Configuration.tinpadding),
-                                child: u.coduser == _userstate.user.coduser
-                                    ? Container()
-                                    : !following
-                                        ? Icon(Icons.done)
-                                        : Icon(Icons.person_remove),
-                              ),
-                            )
-                          : GestureDetector(
-                              onTap: () async {
-                                await _userstate.follow(u, true);
-                                setState(() => null);
-                              },
-                              child: Container(
-                                  margin: EdgeInsets.symmetric(
-                                      vertical: Configuration.smmargin),
-                                  padding:
-                                      EdgeInsets.all(Configuration.tinpadding),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: Configuration.maincolor),
-                                      shape: BoxShape.circle),
-                                  child: Icon(Icons.person_add)),
-                            )
-                      */
-                    ]))
-            .toList());
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder:(context, index) {
+        var u = list[index];
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Flexible(
+              flex: 1,
+              child:Container(
+              padding: EdgeInsets.symmetric(
+                  vertical: Configuration.smpadding,
+                  horizontal: Configuration.tinpadding),
+              child: Text(
+                (++index).toString(),
+                style: Configuration.text('small', Colors.black),
+                textAlign: TextAlign.center,
+              ),
+            )),
+            Flexible(
+              flex:1,
+              child:CircleAvatar(
+              backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
+              backgroundImage: u.image != null ? NetworkImage(u.image) : null,
+              child: u.image == null ? null : null,
+            )),
+            Flexible(
+              flex:2,
+              child:Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(u.nombre == null ? 'Anónimo' : u.nombre,style: Configuration.text('small', Colors.black)),
+                SizedBox(height: Configuration.safeBlockVertical*0.6,),
+                Text('Stage ' + u.stagenumber.toString(),style: Configuration.text('verytiny', Colors.grey, font: 'Helvetica'))
+              ],
+            )),
+            //el sortTime se podría hacer en el user entity
+            Flexible(flex:1,child: texticon(Icons.timer, u.timemeditated)),
+
+            Flexible(flex:1,child: IconButton(icon: Icon(Icons.person), onPressed: () async { await showUserProfile(u,context); setState((){});}))
+          ],
+        );
+
+
+      });
   }
 
   @override
@@ -115,8 +195,23 @@ class _LeaderBoardState extends State<LeaderBoard> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies(){
+    super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    users = _userstate.data.users;
+  }
+
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is removed from the
+    // widget tree.
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(
@@ -126,7 +221,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         leading: IconButton(
             icon: Icon(Icons.arrow_back_rounded),
             onPressed: () => Navigator.pop(context)),
-        title: Text('Leaderboard',style: Configuration.text('medium', Colors.white)),
+        title: Text('Leaderboard', style: Configuration.text('medium', Colors.white)),
       ),
       body: DefaultTabController(
         length: 2,
@@ -134,45 +229,88 @@ class _LeaderBoardState extends State<LeaderBoard> {
           height: Configuration.height,
           width: Configuration.width,
           child: Column(children: [
-            Container(
-              height: Configuration.height * 0.25,
-              width: Configuration.width,
-              color: Configuration.maincolor,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.data.users[1], large: false, position: 2,)),
-                  Align(child: UserProfile(user: _userstate.data.users[0], large: true, position: 1,)),
-                  Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.data.users[2], large:false, position: 3))
-                ],
+            Flexible(
+              flex: 2,
+                child: Container(
+                width: Configuration.width,
+                color: Configuration.maincolor,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.data.users[1], large: false, position: 2,)),
+                    Align(child: UserProfile(user: _userstate.data.users[0], large: true, position: 1,)),
+                    Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.data.users[2], large:false, position: 3))
+                  ],
+                ),
               ),
             ),
-            Expanded(
-              child: Container(
-                  color: Colors.white,
-                  child: Column(children: [
-                    TabBar(
-                        indicatorSize: TabBarIndicatorSize.label,
-                        indicatorWeight: 3.0,
-
-                        indicatorColor: Configuration.maincolor,
-                        tabs: [
-                          Tab(
-                              child: Text('All users',
-                                  style: Configuration.text(
-                                      'small', Colors.black))),
-                          Tab(
-                            child: Text('Following',
-                                style:Configuration.text('small', Colors.black)),
+            Flexible(
+              flex: 4,
+              child: Column(children: [
+                Container(
+                  decoration: BoxDecoration(color: Configuration.grey),
+                  child: Row(
+                    children: [
+                      Container(
+                      width: Configuration.width*0.85,
+                      child: searching ? 
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal:16.0),
+                          child: AspectRatio(
+                            aspectRatio: 9/1,
+                              child: TextField(
+                              onChanged: (string) {
+                                setState(() {
+                                  if(string != null || string != ''){
+                                    users =  _userstate.data.users.where((u) => u.nombre != null && u.nombre.contains(string)).toList();
+                                  }else{
+                                    users = _userstate.data.users;
+                                  }
+                                });
+                              },
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Username',
+                                border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
+                              ),
+                            ),
+                          ),
+                        )
+                      : TabBar(
+                          controller: _tabController,
+                          indicatorSize: TabBarIndicatorSize.label,
+                          indicatorWeight: 2.5,
+                          indicatorColor: Configuration.maincolor,
+                          tabs: [
+                            Tab(
+                                child: Text('All users',
+                                    style: Configuration.text(
+                                        'small', Colors.black))),
+                            Tab(
+                              child: Text('Following',
+                                  style:Configuration.text('small', Colors.black)),
+                            ),
+                          ]),
+                      ),
+                      Container( 
+                        width: Configuration.width *0.1,
+                        child: IconButton(
+                          icon: Icon(searching ? Icons.close : Icons.search), 
+                          onPressed: ()=> setState(()=> searching = !searching)
                           )
-                        ]),
-                    SizedBox(height: Configuration.safeBlockVertical * 2),
-                    Expanded(child: 
-                    TabBarView(children: [
-                      createTable(_userstate.data.users, false),
-                      createTable(_userstate.user.following, true)
-                    ]))
-                  ])),
+                        )
+                    ],
+                  ),
+                ),
+                Expanded(child: 
+                TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: _tabController,
+                  children: [
+                  createTable(users, false, context),
+                  createTable(_userstate.user.following, true, context),
+                ]))
+              ]),
             )
           ]),
         ),
@@ -186,7 +324,7 @@ class UserProfile extends StatelessWidget {
   final int position;
   final bool large;
 
-  UserProfile({this.user,this.large, this.position});
+  UserProfile({this.user,this.large = false, this.position});
 
   @override
   Widget build(BuildContext context) {
@@ -204,22 +342,25 @@ class UserProfile extends StatelessWidget {
             height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
             width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
             ),
-             Positioned(
+            position != null ?
+            Positioned(
               top: 0,
               child: Container(
                 padding: EdgeInsets.all(Configuration.tinpadding),
                 decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
                 child: Text(position.toString(), style: Configuration.text('tiny', Colors.white)),
               )
-            ),
+            ) : Container(),
           ],
         ),
         SizedBox(height: 4.0),
         Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.black)),
         SizedBox(height: 2.0),
         Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
-        
       ],
     );
   }
 }
+
+
+

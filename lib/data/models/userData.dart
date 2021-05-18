@@ -53,7 +53,7 @@ class UserModel extends User {
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
         classic: json["classic"] == null ? true : json["classic"],
-        userStats:json['stats'] == null ? null : UserStats.fromJson(json['stats'])
+        userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       );
 
       u.setFollowedUsers(json['following'] != null ? json['following'] : []);

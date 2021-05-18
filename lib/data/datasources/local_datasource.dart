@@ -40,7 +40,7 @@ const CACHED_LESSONS = 'CACHED_LESSONS';
 const CACHED_STAGE = 'CACHED_STAGE';
 const CACHED_STAGELESSONS = 'CACHED_STAGELESSONS';
 const CACHED_STAGEMEDITATIONS = 'CACHED_STAGEMEDITATIONS';
-const CACHED_ACTIONS= 'CACHED_ACTIONS';
+//const CACHED_ACTIONS= 'CACHED_ACTIONS';
 const REQUIRED_MISSIONS = 'REQUIRED_MISSIONS';
 const OPTIONAL_MISSIONS = 'OPTIONAL_MISSIONS';
 
@@ -85,7 +85,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
     }
       
       
-    sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
+    //sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
 
 
     // HAY QUE AÑADIR LAS ACCIONES A LA CACHE!!!!!
@@ -108,7 +108,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       useractions.add(json.encode(a.toJson()));
     }
 
-    sharedPreferences.setStringList(CACHED_ACTIONS, useractions);
+    //sharedPreferences.setStringList(CACHED_ACTIONS, useractions);
     sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations);
 
     StageModel stage = userToCache.stage;
@@ -157,13 +157,13 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
         }
       }
 
-      if (sharedPreferences.getStringList(CACHED_ACTIONS) != null) {
-        useractions = sharedPreferences.getStringList(CACHED_ACTIONS);
+     // if (sharedPreferences.getStringList(CACHED_ACTIONS) != null) {
+       // useractions = sharedPreferences.getStringList(CACHED_ACTIONS);
 
-        if (useractions != null && useractions.length > 0) {
-          user.setActions((useractions).map((action) => UserAction.fromJson(json.decode(action))).toList());
-        }
-      }
+       // if (useractions != null && useractions.length > 0) {
+         // user.setActions((useractions).map((action) => UserAction.fromJson(json.decode(action))).toList());
+       // }
+     // }
 
       return Future.value(user);
     } else {

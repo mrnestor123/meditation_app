@@ -97,9 +97,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Table(children: [
                           TableRow(children: [
                             ProfileInfoBigCard(
-                              firstText: _userstate
-                                  .user.totalMeditations.length
-                                  .toString(),
+                              firstText: _userstate.user.userStats.total.meditations.toString(),
                               secondText: "Meditations\ncompleted",
                               icon: Icon(Icons.self_improvement),
                             ),
@@ -270,13 +268,14 @@ class _MyInfoState extends State<MyInfo> {
 }
 
 class ProfileInfoBigCard extends StatelessWidget {
-  final String firstText, secondText;
+  final String firstText, secondText, color;
   final Widget icon;
 
   const ProfileInfoBigCard(
       {Key key,
       @required this.firstText,
       @required this.secondText,
+      this.color,
       @required this.icon})
       : super(key: key);
 
@@ -285,19 +284,20 @@ class ProfileInfoBigCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
-      border: Border.all(color: Colors.grey, width: 0.35)
+      border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
       ),
       child: Padding(
         padding: EdgeInsets.all(Configuration.smpadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Align(
-              alignment: Alignment.topRight,
-              child: icon,
-            ),
-            Text(firstText, style: Configuration.text('small', Colors.black)),
-            Text(secondText, style: Configuration.text('tiny', Colors.black)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(firstText, style: Configuration.text('small', color != null ? Colors.white: Colors.black)),
+                Align(alignment: Alignment.centerRight, child: icon),
+            ]),
+            Text(secondText, style: Configuration.text('tiny', color != null ? Colors.white : Colors.black)),
           ],
         ),
       ),
