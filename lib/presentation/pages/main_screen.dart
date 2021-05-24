@@ -46,10 +46,7 @@ class _MainScreenState extends State<MainScreen> {
                   child: Container(
                   margin: EdgeInsets.all(Configuration.medmargin),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0),
-
-                  
-                  
+                    borderRadius: BorderRadius.circular(16.0)
                   ),
                   child: TextButton(
                     onPressed: () => Navigator.pushNamed(context, '/imagepath'),
@@ -95,9 +92,14 @@ class __TimelineState extends State<_Timeline> {
   List<Widget> getMessages() {
       List<User> following = _userstate.user.following;
       List<UserAction> sortedlist = mode == 'Today' ? _userstate.user.todayactions : _userstate.user.thisweekactions;
+
       //ESTO NO LO DEBERÍA DE HACER MÁS DE UNA VEZ
       for(User u in following) {
-        sortedlist.addAll(u.todayactions);
+        if(mode == 'Today'){
+          sortedlist.addAll(u.todayactions);
+        } else {
+          sortedlist.addAll(u.thisweekactions);
+        }
       }
 
       List<Widget> widgets = new List.empty(growable: true);

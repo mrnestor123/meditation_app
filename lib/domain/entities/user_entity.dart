@@ -14,6 +14,7 @@ import 'lesson_entity.dart';
 import 'meditation_entity.dart';
 import 'action_entity.dart';
 
+//MIRAR DE REFACTORIZAR ESTA CLASE !!!!!
 class User {
   String coduser, nombre, role, image, timemeditated;
   var user;
@@ -57,9 +58,9 @@ class User {
       var time = this.userStats.total.timemeditated;
       if (time > 1440) {
         timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
-      }else if (time > 60) {
+      } else if (time > 60) {
         timemeditated = (time / 60).toStringAsFixed(0) + ' h';
-      }else {
+      } else {
         timemeditated = time.toString() + ' m';
       }
     }
@@ -77,7 +78,7 @@ class User {
 
   //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
   void inituser() {
-    if(this.userStats.streak > 0) {
+    if(this.userStats != null && this.userStats.streak > 0) {
       var lastmeditated = DateTime.parse(this.userStats.lastmeditated);
       if(lastmeditated.day != DateTime.now().day && lastmeditated.day != DateTime.now().subtract(Duration(days: 1)).day){
         userStats.streak = 0;
@@ -86,7 +87,8 @@ class User {
 
   }
 
-  /* @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
+  /* 
+    @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
   */
 
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
@@ -126,6 +128,7 @@ class User {
   }
 
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
+
   void addAction(UserAction a) { 
     DateTime today = DateTime.now();
     DateTime thismonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));

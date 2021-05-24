@@ -16,6 +16,8 @@ import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
+import 'package:meditation_app/domain/usecases/user/update_image.dart';
+import 'package:meditation_app/domain/usecases/user/update_stage.dart';
 import 'package:meditation_app/domain/usecases/user/update_user.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
@@ -23,6 +25,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/repositories/lesson_repository.dart';
 import 'domain/repositories/lesson_repository.dart';
+import 'domain/usecases/user/change_data.dart';
 import 'domain/usecases/user/log_out.dart';
 import 'presentation/mobx/actions/game_state.dart';
 import 'presentation/mobx/actions/lesson_state.dart';
@@ -73,9 +76,10 @@ Future<void> init() async {
   sl.registerLazySingleton(()=> GetDataUseCase(sl()));
   sl.registerLazySingleton(() => LogOutUseCase(sl()));
   sl.registerLazySingleton(()=> TakeLessonUseCase(sl(),sl()));
-  sl.registerLazySingleton(() => UpdateUserUseCase(sl()));
-
-
+  sl.registerLazySingleton(() => FollowUseCase(sl()));
+  sl.registerLazySingleton(()=> ChangeDataUseCase(sl()));
+  sl.registerLazySingleton(()=> UpdateStageUseCase(sl()));
+  sl.registerLazySingleton(()=> UpdateImageUseCase(sl()));
 
   //Repositories
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(

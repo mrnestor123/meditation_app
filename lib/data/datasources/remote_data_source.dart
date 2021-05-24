@@ -9,6 +9,7 @@ import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 
@@ -53,7 +54,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 
   addfollowers(User loggeduser) async{
-    QuerySnapshot following = await database.collection('following').where('coduser',isEqualTo: loggeduser.coduser).get();
+    QuerySnapshot following = await database.collection('following').where('coduser', isEqualTo: loggeduser.coduser).get();
     QuerySnapshot followsyou = await database.collection('following').where('following',arrayContains: loggeduser.coduser).get();
 
     if(following.docs.length > 0){
@@ -142,25 +143,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         role: "meditator",
         position: 0,
         stage: one,
-        //hay que mejorar estoo !!!!!!!!! crear clase STATS !!!!!
-        stats: {
-          'total': {
-            'lecciones': 0,
-            'meditaciones': 0,
-            'maxstreak': 0,
-            'tiempo': 0
-          },
-          'etapa': {
-            'lecciones': 0,
-            'medittiempo': 0,
-            'meditguiadas': 0,
-            'maxstreak': 0,
-            'tiempo': 0
-          },
-          'racha': 0,
-          'ultimosleidos': [],
-          'lastmeditated': ''
-        });
+        userStats: UserStats.empty()
+      );
 
     //añadimos al usuario en la base de datos de usuarios
     await database.collection('users').add(user.toJson());
@@ -242,9 +226,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     } else if(type =='follow' || type =='unfollow'){
       QuerySnapshot userfollow = await database.collection('following').where('coduser', isEqualTo: user.coduser).get();
       if(userfollow.docs.length > 0){
-        await database.collection('following').doc(userfollow.docs[0].id).update({'following': user.following.map((u) => u.toRawJson()).toList()});
+        await database.collection('following').doc(userfollow.docs[0].id).update({'following': user.following.map((u) => u.toJson()).toList()});
       } else {
-        await database.collection('following').add({'coduser':user.coduser,'following': user.following.map((u)=> u.toRawJson()).toList()});
+        await database.collection('following').add({'coduser':user.coduser,'following': user.following.map((u)=> u.toJson()).toList()});
       }
     }
 

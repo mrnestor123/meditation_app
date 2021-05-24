@@ -26,7 +26,6 @@ abstract class _LeaderBoardController with Store {
   @observable 
   List<User> followedusers;
 
-
   @action 
   void search(){
     isSearching = !isSearching;
@@ -43,7 +42,6 @@ abstract class _LeaderBoardController with Store {
 
 
   }
-
 
 
   //todo. ask question ??
