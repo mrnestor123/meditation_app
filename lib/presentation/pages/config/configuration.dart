@@ -44,6 +44,9 @@ class Configuration {
   static double bigpadding;
 
   //icons
+  static double tinicon;
+  static double tablettinicon;
+  static double tabletsmicon;
   static double smicon;
   static double medicon;
   static double bigicon;
@@ -110,6 +113,67 @@ class Configuration {
         letterSpacing: letterspacing);
   }
 
+
+  //textstyles
+  /*
+
+    fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
+  */
+  static TextStyle tabletText(String size, Color color,
+      {String style, double spacing, String font}) {
+    var px;
+    var weight = FontWeight.normal;
+    double letterspacing = 0;
+
+    String fontfamily = 'Gotham-rounded';
+
+    if (style == "bold") {
+      weight = FontWeight.bold;
+    }
+
+    if (spacing != null) {
+      letterspacing = spacing;
+    }
+
+    if(font != null){
+      fontfamily = font;
+    }
+
+    switch (size) {
+      case 'verytiny':
+        px = safeBlockHorizontal * 1.5;
+        break;
+      case "tiny":
+        px = safeBlockHorizontal * 2;
+        break;
+      case "small":
+        px = safeBlockHorizontal * 2.5;
+        break;
+      case "smallmedium":
+        px = safeBlockHorizontal * 3;
+        break;
+      case "medium":
+        px = safeBlockHorizontal * 1.5;
+        break;
+      case "big":
+        px = safeBlockHorizontal * 1.6;
+        break;
+      case "huge":
+        px = safeBlockHorizontal * 1.7;
+        break;
+    }
+
+    return TextStyle(
+        fontFamily: fontfamily,
+        fontSize: px,
+        color: color,
+        fontWeight: weight,
+        letterSpacing: letterspacing);
+  }
+
+  
+
+
   static List<Color> slidegradient = [
     Colors.grey[300],
     Colors.grey[400],
@@ -136,6 +200,8 @@ class Configuration {
     bigpadding = blockSizeHorizontal * 10;
 
     //icons
+    tablettinicon = safeBlockHorizontal *2;
+    tabletsmicon= safeBlockHorizontal *2.5;
     smicon = safeBlockHorizontal * 6;
     medicon = safeBlockHorizontal * 11;
     bigicon = safeBlockHorizontal * 15;

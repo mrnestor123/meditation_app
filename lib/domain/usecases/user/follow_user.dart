@@ -5,6 +5,7 @@ import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/domain/usecases/user/change_data.dart';
 
 class FollowUseCase extends UseCase<User, UParams> {
   UserRepository repository;
@@ -22,15 +23,4 @@ class FollowUseCase extends UseCase<User, UParams> {
 
     return repository.updateUser(user: params.user, toAdd: params.user.lastactions, type:params.type);
   }
-}
-
-class UParams {
-  final User user;
-  final User followeduser;
-  final String type;
-
-  UParams(
-      {this.user,
-      this.type,
-      this.followeduser});
 }

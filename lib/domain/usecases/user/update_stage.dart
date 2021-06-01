@@ -5,6 +5,7 @@ import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/domain/usecases/user/change_data.dart';
 
 class UpdateStageUseCase extends UseCase<User, UParams> {
   UserRepository repository;
@@ -20,13 +21,3 @@ class UpdateStageUseCase extends UseCase<User, UParams> {
   }
 }
 
-class UParams {
-  final User user;
-  final DataBase db;
-
-  UParams(
-      {
-        this.user,
-        this.db
-      });
-}

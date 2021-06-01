@@ -4,7 +4,6 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
@@ -173,7 +172,7 @@ class _SetMeditationState extends State<SetMeditation> {
   }
 
   void takeMeditation() async {
-    await _loginstate.takeMeditation(duration);
+    //await _loginstate.takeMeditation(duration);
   }
 
   @override
@@ -512,14 +511,7 @@ class _WeekListState extends State<WeekList> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: getDays()),
           SizedBox(height: Configuration.height * 0.05),
-          Text(
-            'to change',
-            //_userstate.user.meditationstreak.toString() + ' consecutive days',
-            style: GoogleFonts.montserrat(
-                textStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: Configuration.blockSizeHorizontal * 7)),
-          ),
+          
         ],
       ),
     );

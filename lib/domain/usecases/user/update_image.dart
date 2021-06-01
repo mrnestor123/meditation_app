@@ -5,6 +5,7 @@ import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/domain/usecases/user/change_data.dart';
 
 class UpdateImageUseCase extends UseCase<User, UParams> {
   UserRepository repository;
@@ -20,15 +21,4 @@ class UpdateImageUseCase extends UseCase<User, UParams> {
 
     return repository.updateUser(user: params.user, toAdd: params.user.lastactions);
   }
-}
-
-class UParams {
-  final User user;
-  final PickedFile image;
-
-  UParams(
-      {
-        this.user,
-        this.image
-      });
 }

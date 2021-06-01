@@ -7,10 +7,13 @@ import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
+import 'package:meditation_app/domain/usecases/user/change_data.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
-import 'package:meditation_app/domain/usecases/user/update_user.dart';
+import 'package:meditation_app/domain/usecases/user/update_image.dart';
+import 'package:meditation_app/domain/usecases/user/update_stage.dart';
+import 'package:meditation_app/domain/usecases/user/follow_user.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
@@ -22,14 +25,22 @@ class UserState extends _UserState with _$UserState {
       LogOutUseCase logout,
       GetDataUseCase data,
       TakeLessonUseCase lesson,
-      UpdateUserUseCase updateUserUseCase})
+      FollowUseCase updateUserUseCase,
+      UpdateImageUseCase updateImageUseCase,
+      UpdateStageUseCase updateStageUseCase,
+      ChangeDataUseCase changeDataUseCase
+      })
       : super(
             cachedUser: cachedUseCase,
             meditate: meditate,
             getdata: data,
             logoutusecase: logout,
             lesson: lesson,
-            updateUserUseCase: updateUserUseCase);
+            followUseCase: updateUserUseCase,
+            updateStageUseCase: updateStageUseCase,
+            imageUseCase: updateImageUseCase,
+            changeDataUseCase: changeDataUseCase
+            );
 }
 
 abstract class _UserState with Store {
@@ -38,7 +49,11 @@ abstract class _UserState with Store {
   GetDataUseCase getdata;
   TakeLessonUseCase lesson;
   LogOutUseCase logoutusecase;
-  UpdateUserUseCase updateUserUseCase;
+  FollowUseCase followUseCase;
+  UpdateImageUseCase imageUseCase;
+  UpdateStageUseCase updateStageUseCase;
+  ChangeDataUseCase changeDataUseCase;
+
 
   _UserState(
       {this.cachedUser,
@@ -46,7 +61,11 @@ abstract class _UserState with Store {
       this.getdata,
       this.logoutusecase,
       this.lesson,
-      this.updateUserUseCase});
+      this.followUseCase,
+      this.imageUseCase,
+      this.updateStageUseCase, 
+      this.changeDataUseCase
+      });
 
   @observable
   User user;
@@ -103,7 +122,7 @@ abstract class _UserState with Store {
   //todos los del updateuserusecase se podrían juntar !!!!!!!!!
   @action
   Future follow(User u, bool follow) async {
-    final following = updateUserUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));
+    final following = followUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));
   }
 
   @action
@@ -115,18 +134,18 @@ abstract class _UserState with Store {
 
   @action
   Future changeName(String username) async {
-    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, nombre: username, type: "name"));
-
+    Either<Failure, User> _addedname = await changeDataUseCase.call(UParams(user: user, nombre: username, type: "name"));
     return true;
   }
 
+  //DE AQUI HAY QUE QUITAR EL CHANGE IMAGE
   @action
   Future updateUser(dynamic variable, String type) async {
-    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, type: type, image: variable));
+    Either<Failure, User> _addedname = await followUseCase.call(UParams(user: user, type: type, image: variable));
   }
 
   @action
   Future updateStage() async {
-    Either<Failure, User> _addedname = await updateUserUseCase.call(UParams(user: user, type: "stage", db: data));
+    Either<Failure, User> _addedname = await updateStageUseCase.call(UParams(user: user,db: data));
   }
 }

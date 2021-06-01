@@ -18,7 +18,7 @@ import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/domain/usecases/user/update_image.dart';
 import 'package:meditation_app/domain/usecases/user/update_stage.dart';
-import 'package:meditation_app/domain/usecases/user/update_user.dart';
+import 'package:meditation_app/domain/usecases/user/follow_user.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';

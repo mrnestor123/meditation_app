@@ -14,6 +14,8 @@ import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
 
+import 'commonWidget/progress_dialog.dart';
+
 class LearnScreen extends StatefulWidget {
   LearnScreen();
 
@@ -48,7 +50,9 @@ class _LearnScreenState extends State<LearnScreen> {
                                 builder: (context) => StageView(
                                       stage:_userstate.data.stages[index],
                                     )),
-                          ).then((value) => setState(() => null))
+                          ).then((value) => setState(() { 
+                            
+                        }))
                         : null,
                     child: 
                     Stack(
@@ -125,7 +129,7 @@ class _StageViewState extends State<StageView> {
   var filter = ['all'];
 
   FutureOr onGoBack(dynamic value) {
-    setState(() {});
+    setState(() {if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user.progress);});
   }
 
   @override
@@ -569,8 +573,8 @@ class _ContentViewState extends State<ContentView> {
 
   @override
   void initState() {
-    _index = -1;
     super.initState();
+    _index = -1;
   }
 
   @override
@@ -632,5 +636,549 @@ class _ContentViewState extends State<ContentView> {
                   ),
                 ),
               ]));
+  }
+}
+
+
+
+
+
+//VISTAS DE TABLET
+class TabletLearnScreen extends StatefulWidget {
+  @override
+  _TabletLearnScreenState createState() => _TabletLearnScreenState();
+}
+
+class _TabletLearnScreenState extends State<TabletLearnScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+    return Container(
+      height: Configuration.height,
+      width: Configuration.width,
+      color: Configuration.lightgrey,
+      padding: EdgeInsets.all(Configuration.medmargin),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+              child: GridView.builder(
+                  itemCount: _userstate.data.stages.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+                  itemBuilder: (context, index) {
+                    var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.objectives['lecciones'])*6).round();
+
+                    return Container(
+                      margin: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+                      child: ElevatedButton(
+                        onPressed: _userstate.user.stagenumber > index
+                            ?  () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => TabletStageView(
+                                          stage:_userstate.data.stages[index],
+                                        )),
+                              ).then((value) => setState(() {}))
+                            : null,
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
+                                style: Configuration.tabletText("tiny", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
+                              ),
+                            ),
+                            _userstate.user.stagenumber > index ? 
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: AspectRatio(
+                               aspectRatio: 9/1,
+                               child: Container(  
+                                 decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16.0),
+                                    border: Border.all(color:Colors.grey), 
+                                    color: Colors.white
+                                  ) : BoxDecoration(color: Colors.transparent), 
+                                 child: Row(
+                                   mainAxisAlignment: MainAxisAlignment.center,
+                                   children: [
+                                     flex < 6 && _userstate.user.stagenumber == (index +1) ? 
+                                     Flexible(
+                                       flex: flex,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.green, 
+                                            borderRadius: BorderRadius.circular(16.0)
+                                          ),
+                                        ) ,
+                                     ) : Padding(
+                                       padding: const EdgeInsets.only(bottom:16.0),
+                                       child: Icon(Icons.check_circle,color: Colors.green),
+                                     ),
+                                    flex < 6 && _userstate.user.stagenumber == (index +1) ?
+                                     Flexible(
+                                       child: Container(),
+                                       flex:6-flex
+                                      ) : Container()
+                                 ])
+                                 ),
+                               )
+                              ) : Container()
+                          ]
+                        ) ,
+                        style: ElevatedButton.styleFrom(
+                            primary: Configuration.maincolor,
+                            onPrimary: Colors.white,
+                            padding: EdgeInsets.all(16.0),
+                            minimumSize:Size(double.infinity, double.infinity),
+                            animationDuration: Duration(milliseconds: 50)        
+                            ),
+                      ),
+                    );
+                  })),
+        ],
+      ),
+    );
+  }
+}
+
+class TabletStageView extends StatefulWidget {
+   Stage stage;
+
+   TabletStageView({this.stage});
+
+  @override
+  _TabletStageViewState createState() => _TabletStageViewState();
+}
+
+class _TabletStageViewState extends State<TabletStageView> {
+
+  UserState _userstate;
+
+  var filter = ['all'];
+
+  FutureOr onGoBack(dynamic value) {
+    setState(() {if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user.progress);});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    print('init');
+  }
+
+  Widget getLessons(context) {
+    List<Widget> lessons = new List.empty(growable: true);
+
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3), 
+      padding: EdgeInsets.all(0.0),
+      itemCount: widget.stage.path.length,
+      itemBuilder: (context,index) {
+        var content = widget.stage.path[index];
+        var image;
+        if (content.image != null) {
+          var configuration = createLocalImageConfiguration(context);
+          image = new NetworkImage(content.image)..resolve(configuration);
+        }
+
+        return Container(
+        margin: EdgeInsets.only(left:16.0,right:16.0,bottom: 32.0),
+        decoration: BoxDecoration(
+          color: Configuration.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: ElevatedButton(
+          onPressed: () {
+            if (_userstate.user.position >= content.position ||
+                _userstate.user.stagenumber > content.stagenumber) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TabletContentView(
+                          lesson: content,
+                          content: content,
+                          slider: image
+                          ))).then(onGoBack);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.all(0),
+              primary: Colors.white,
+              onPrimary: Colors.white,
+              minimumSize: Size(double.infinity, double.infinity)),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Hero(tag: content.cod ,child: Image.network(content.image)),
+              ),
+              Positioned(
+                  top: 15,
+                  left: 15,
+                  child: Container(
+                    child: Icon(
+                        content.type == 'meditation'
+                            ? Icons.self_improvement
+                            : Icons.book,
+                        color: Colors.grey,
+                        size: Configuration.tabletsmicon,
+                        ),
+                  )),
+              Positioned(
+                  left: 15,
+                  bottom: 15,
+                  child: Container(
+                    width: Configuration.width*0.23,
+                    child: Text(
+                      content.title,
+                      style:
+                          Configuration.tabletText("verytiny", _userstate.user.position < content.position &&
+                              _userstate.user.stagenumber <= content.stagenumber ? Colors.grey : Colors.black, 
+                               ),
+                    ),
+                  )),
+              Positioned(
+                left: 0,
+                bottom: 0,
+                right: 0,
+                top: 0,
+                child: AnimatedContainer(
+                  padding: EdgeInsets.all(0),
+                  key: Key(content.cod),
+                  duration: Duration(seconds: 2),
+                  decoration: BoxDecoration(
+                      color: _userstate.user.position < content.position &&
+                              _userstate.user.stagenumber <= content.stagenumber
+                          ? Colors.grey.withOpacity(0.6)
+                          : Colors.transparent),
+                  curve: Curves.fastOutSlowIn,
+                ),
+              ),
+            ],
+          ),
+        )
+        );
+      });
+    
+    
+    
+    //lessons.length > 0 ? Container(child: Text('hello'), height: Configuration.height*0.1, width: Configuration.width*0.5) : Text('There are no lessons');
+          
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,
+              size: Configuration.tabletsmicon, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        height: Configuration.height,
+        width: Configuration.width,
+        color: Configuration.lightgrey,
+        padding: EdgeInsets.only(top:Configuration.height*0.07,left:16.0,right:16.0,bottom: 16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              width: Configuration.width*0.3,
+              child: Column(
+                children: [
+                  Container(
+                  height: Configuration.height* 0.4,
+                  width: Configuration.width,
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('Stage ' + widget.stage.stagenumber.toString(), style: Configuration.tabletText('small', Colors.white),),
+                  decoration: BoxDecoration(
+                      color: Configuration.maincolor,
+                      borderRadius: BorderRadius.circular(12.0)),
+                  ),
+                  Text('Filter',
+                      style: Configuration.tabletText('tiny', Colors.black),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => setState(
+                          () => filter.contains('all') ? '' : filter = ['all']),
+                      child: Icon(Icons.more_vert,
+                          color: filter.contains('all')
+                              ? Colors.white
+                              : Colors.black.withOpacity(0.5)),
+                      style: ButtonStyle(
+                        backgroundColor: filter.contains('all')
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
+                            : null,
+                      ),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => setState(() {
+                        filter.contains('lesson') ? '' : filter = ['lesson'];
+                      }),
+                      child: Icon(Icons.book,
+                          color: filter.contains('lesson')
+                              ? Colors.white
+                              : Colors.black.withOpacity(0.5)),
+                      style: ButtonStyle(
+                        backgroundColor: filter.contains('lesson')
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
+                            : null,
+                      ),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => setState(() =>
+                          filter.contains('meditation')
+                              ? ''
+                              : filter = ['meditation']),
+                      child: Icon(Icons.self_improvement,
+                          color: filter.contains('meditation')
+                              ? Colors.white
+                              : Colors.black.withOpacity(0.5)),
+                      style: ButtonStyle(
+                        backgroundColor: filter.contains('meditation')
+                            ? MaterialStateProperty.all<Color>(
+                                Configuration.maincolor)
+                            : null,
+                      ),
+                    ),
+
+
+                ],
+              ),
+            ),
+            Expanded(child: getLessons(context))
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+class TabletContentView extends StatefulWidget {
+  Content content;
+  Meditation meditation;
+  Lesson lesson;
+  NetworkImage slider;
+
+  TabletContentView({this.content, this.lesson, this.meditation, this.slider});
+  
+  @override
+  _TabletContentViewState createState() => _TabletContentViewState();
+}
+
+class _TabletContentViewState extends State<TabletContentView> {
+  int _index = -1;
+  var _userstate;
+  Map<int, NetworkImage> textimages = new Map();
+  var reachedend = false;
+  List balls = new List.empty(growable: true);
+
+  Widget portada() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      Hero(tag: widget.content.cod, 
+        child: Container(
+          width: Configuration.width*0.4, 
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)), 
+          child: Image(image: widget.slider)
+          )
+      ),
+      Expanded(
+        child: Container(
+          height: Configuration.height,
+          color: Configuration.lightgrey,
+          padding: EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                  Text(widget.content.title,
+                      style: Configuration.tabletText('small', Colors.black)),
+                  SizedBox(height: Configuration.height*0.01),
+                  Text(widget.lesson.description,
+                      style: Configuration.tabletText('tiny', Colors.grey)),
+                  SizedBox(height: Configuration.height*0.05),
+                  TabletStartButton(
+                    onPressed: () async{
+                        setState(() => _index = 0);
+                    } 
+                  )
+            ],
+          ),
+        ),
+      )
+    ]);
+  }
+
+  Widget vistaLeccion() {
+
+    Widget vistaSlide(slide, last) {
+      return Container(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+            mainAxisAlignment: slide['image'] == ''
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              slide['image'] != null ? Image.network(
+                slide["image"],
+                width: Configuration.width*0.4,
+              ) : null,
+              Container(
+                  width: Configuration.width * 0.45,
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(slide["text"], style: Configuration.tabletText('tiny', Colors.black, font: 'Helvetica'))),
+              Row(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                      AnimatedOpacity(
+                        opacity: reachedend && last ? 1.0 : 0.0, 
+                        duration: Duration(seconds: 1),
+                        child: Container(
+                          width: Configuration.width*0.3,
+                          child: AspectRatio(
+                            aspectRatio: 9/2,
+                            child: ElevatedButton(
+                                onPressed: () async {
+                                await _userstate.takeLesson(widget.lesson);
+                                Navigator.pop(context, true);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Configuration.maincolor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
+                              ), 
+                              child: Text(
+                                'Finish',
+                                style: Configuration.tabletText('tiny', Colors.white),
+                              )
+                            ),
+                          ),
+                        ),
+                      ),
+                  ])
+            ],
+          ),
+      );
+
+    }
+    
+    return CarouselSlider.builder(
+        itemCount: widget.lesson.text.length ~/ 2,
+        itemBuilder: (context, index) {
+          return Container(
+            width: Configuration.width,
+            color: Configuration.lightgrey,
+            child: Row(
+              children: [
+                vistaSlide(widget.lesson.text[_index], false),
+                vistaSlide(widget.lesson.text[_index + 1],true)
+              ],
+            ),
+          );
+        },
+        options: CarouselOptions(
+            height: Configuration.height,
+            viewportFraction: 1,
+            initialPage: 0,
+            enableInfiniteScroll: false,
+            reverse: false,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _index = index ;
+                if (_index >= widget.lesson.text.length ~/ 2 - 1) {
+                  Future.delayed(Duration(seconds: 2),() => setState(()=> reachedend = true));
+                }
+              });
+            }));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _index = -1;
+  }
+
+  @override
+  void didChangeDependencies() {
+    var configuration = createLocalImageConfiguration(context);
+
+    widget.lesson.text.forEach((slide) {
+      if (slide['image'] != null) {
+        new NetworkImage(slide['image'])..resolve(configuration);
+      }
+    });
+  
+    var count = 0;
+    var halflist = widget.lesson.text.length ~/ 2;
+
+    for(var lesson in widget.lesson.text.sublist(0,halflist)){
+      balls.add(count++);
+    }
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+              icon: Icon(Icons.close, size: Configuration.tabletsmicon, color: Colors.black),
+              onPressed: () => Navigator.pop(context)),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        extendBodyBehindAppBar: true,
+        body: _index == -1
+            ? portada()
+            : Stack(children: [
+                vistaLeccion(),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.all(Configuration.smmargin),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: balls.map((index) {
+                        return Container(
+                          width: Configuration.safeBlockHorizontal * 2,
+                          height: Configuration.safeBlockHorizontal * 2,
+                          margin: EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 2.0),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _index == index
+                                ? Color.fromRGBO(0, 0, 0, 0.9)
+                                : Color.fromRGBO(0, 0, 0, 0.4),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ])
+    );
   }
 }

@@ -20,6 +20,8 @@ class ChangeDataUseCase extends UseCase<User, UParams> {
   }
 }
 
+
+
 class UParams {
   final User user;
   final User followeduser;

@@ -52,7 +52,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
-
   addfollowers(User loggeduser) async{
     QuerySnapshot following = await database.collection('following').where('coduser', isEqualTo: loggeduser.coduser).get();
     QuerySnapshot followsyou = await database.collection('following').where('following',arrayContains: loggeduser.coduser).get();
@@ -62,13 +61,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         var user = UserModel.fromJson(doc.data());
         //simplemente añado los cods. habría que hacer un read
         loggeduser.addfollow(user);
-        QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: user.coduser).get();
-
-        if (actions.docs.length > 0) {
-          for (DocumentSnapshot doc in actions.docs) {
-            user.addAction(new UserAction.fromJson(doc.data()));
-          }
-        }
       }
     }
 
@@ -105,17 +97,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       if (meditations.docs.length > 0) {
         for (DocumentSnapshot doc in meditations.docs) {
           loggeduser.addMeditation(new MeditationModel.fromJson(doc.data()));
-        }
-      }
-
-      /* 
-        HAY QUE SACAR LAS ACCIONES COMO MÁXIMO DE ESTA SEMANA!!! DE MOMENTO SE SACAN TODAS
-      */
-      QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: loggeduser.coduser).get();
-
-      if (actions.docs.length > 0) {
-        for (DocumentSnapshot doc in actions.docs) {
-          loggeduser.addAction(new UserAction.fromJson(doc.data()));
         }
       }
 
@@ -232,9 +213,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
     }
 
-    for(UserAction a in user.lastactions) {
-        await database.collection('actions').add(a.toJson());
-    }
   }
 
   @override
@@ -243,13 +221,5 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     StageModel s =  await populateStage(stage.docs[0].data());
     u.setStage(s);
     await addfollowers(u);
-
-    QuerySnapshot actions = await database.collection('actions').where('coduser', isEqualTo: u.coduser).get();
-
-    if (actions.docs.length > 0) {
-      for (DocumentSnapshot doc in actions.docs) {
-        u.addAction(new UserAction.fromJson(doc.data()));
-      }
-    }
   }
 }

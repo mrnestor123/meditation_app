@@ -30,8 +30,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([]);
 
-  SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+//  SystemChrome.setPreferredOrientations(
+  //    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
 
   await di.init();
   runApp(MyApp());
@@ -63,28 +64,10 @@ class MyApp extends StatelessWidget {
                   child: RegisterWidget()),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
-              '/leaderboard':(BuildContext context) => LeaderBoard(),
-              //'/main': (BuildContext context) => ContainerAnimated(),
-              '/main': (BuildContext context) => Layout() ,
-              '/main2': (BuildContext context) => MainScreen(),
-              '/countdown': (BuildContext context) => Countdown(),
-             // '/premeditation': (BuildContext context) => Provider(
-               //   create: (context) => sl<MeditationState>(),
-                 // child: SetMeditation()),
-              '/path': (context) => PathScreen(),
-              '/learn': (BuildContext context) => Provider(create: (context) => sl<LessonState>(), child: LearnScreen()),
+              '/main': (BuildContext context) => Layout(),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),
               '/gamestarted': (BuildContext context) => GameStarted()
-              //'/meditating':(BuildContext context) => MeditationinProgress()
-              // '/meditate': (BuildContext context) => MeditationWidget(),
-              // '/feed': (BuildContext context) => FeedWidget(0),
-              // '/meditate': (BuildContext context) => BlocProvider<MeditationBloc>(
-              // creator: (context, _bag) => MeditationBloc(),
-              // child: MeditationWidget(3)),
-              // '/learn': (BuildContext context) => LearnWidget(2),
-              // '/stage': (BuildContext context) => StageWidget(1),
-              // '/profile': (BuildContext context) => ProfileWidget(selectedIndex: 4),
             }));
   }
 }

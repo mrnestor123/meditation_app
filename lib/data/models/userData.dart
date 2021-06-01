@@ -6,9 +6,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/stageData.dart';
+import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:mobx/mobx.dart';
 
 class UserModel extends User {
   UserModel(
@@ -56,15 +58,11 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       );
 
+      u.setActions(json['todayactions'], true);
+      u.setActions(json['thisweekactions'], true);
+      // también se podría hacer algo así para saber quien te sigue?? !!! HACER PARA EL FUTURO!!!
       u.setFollowedUsers(json['following'] != null ? json['following'] : []);
-
-    // u.setFollowedUsers(json['following']);
-    // POrque no puede ser una list dynamic ???
-   // if(json['following'] != null){
-    
-    //    u.setFollowedUsers(json['following'].map((usr) => UserModel.fromJson(usr)).toList());
-    //}
-
+      //HACER INIT USER AQUI ????
     return u;
   }
 
@@ -78,6 +76,8 @@ class UserModel extends User {
         "classic": classic == null ? null : classic,
         'stats': userStats == null ? null : userStats.toJson(),
         'image': image == null ? null : image,
-        "following": following.map((element) => element.coduser).toList()
+        "following": following.map((element) => element.coduser).toList(),
+        "todayactions": todayactions.map((action) => action.toJson()).toList(),
+        "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
       };
 }

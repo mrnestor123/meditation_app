@@ -39,6 +39,21 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$currentpageAtom = Atom(name: '_MeditationState.currentpage');
+
+  @override
+  int get currentpage {
+    _$currentpageAtom.reportRead();
+    return super.currentpage;
+  }
+
+  @override
+  set currentpage(int value) {
+    _$currentpageAtom.reportWrite(value, super.currentpage, () {
+      super.currentpage = value;
+    });
+  }
+
   final _$_meditationFutureAtom =
       Atom(name: '_MeditationState._meditationFuture');
 
@@ -67,6 +82,21 @@ mixin _$MeditationState on _MeditationState, Store {
   set errorMessage(String value) {
     _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
       super.errorMessage = value;
+    });
+  }
+
+  final _$typeAtom = Atom(name: '_MeditationState.type');
+
+  @override
+  String get type {
+    _$typeAtom.reportRead();
+    return super.type;
+  }
+
+  @override
+  set type(String value) {
+    _$typeAtom.reportWrite(value, super.type, () {
+      super.type = value;
     });
   }
 
@@ -128,6 +158,28 @@ mixin _$MeditationState on _MeditationState, Store {
       ActionController(name: '_MeditationState');
 
   @override
+  void switchtype(String newtype) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.switchtype');
+    try {
+      return super.switchtype(newtype);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void switchpage(int index) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.switchpage');
+    try {
+      return super.switchpage(index);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setMeditation(MeditationModel m, User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.setMeditation');
@@ -176,7 +228,9 @@ mixin _$MeditationState on _MeditationState, Store {
     return '''
 user: ${user},
 selmeditation: ${selmeditation},
+currentpage: ${currentpage},
 errorMessage: ${errorMessage},
+type: ${type},
 duration: ${duration},
 startedmeditation: ${startedmeditation},
 state: ${state}

@@ -6,6 +6,7 @@ import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
@@ -25,6 +26,9 @@ class MeditationScreen extends StatefulWidget {
 class _MeditationScreenState extends State<MeditationScreen> {
   UserState _userstate;
   MeditationState _meditationstate;
+  GameState _gamestate;
+
+
   int _index;
 
   //podriamos utilizar meditationstate de arriba
@@ -33,224 +37,232 @@ class _MeditationScreenState extends State<MeditationScreen> {
   var selectedtype = 'Meditation';
   var finished = false;
 
-  Widget initialPage(context) { 
-    Widget freeMeditation() {
-      return Column(
-        children: [
-          TimePicker(),
-          SizedBox(height: Configuration.height * 0.1),
-          StartButton(
-            onPressed: () => {
-              _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data),
-              Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
-              })),
-            },
-          ),
-        ],
-      );
-    }
-
-    Widget guidedMeditation() {
-      List<Widget> meditations() {
-        List<Widget> meditations = new List.empty(growable:true);
-        for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
-          var _blocked = _userstate.user.meditposition < meditation.position && _userstate.user.stagenumber == meditation.stagenumber || _userstate.user.stagenumber < meditation.stagenumber;
-          meditations.add(GestureDetector(
-              onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 
-                  Border.all(color: Configuration.maincolor) : null),
-                child: Stack(
-                  children: [
-                    Column(children: [
-                      Container(
-                        width: Configuration.width* 0.2,
-                        height:Configuration.width* 0.2,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.0),
-                          image: DecorationImage(
-                              image: NetworkImage(meditation.image)))),
-                      Text(
-                        meditation.title,
-                        style: Configuration.text('small', _blocked ? Colors.grey : Colors.black),
-                        textAlign: TextAlign.center,
-                      )
-                    ])
-                  ],
-                ),
-              )
-              )
-            );
-        }
-
-        return meditations;
-      }
-
-      Widget stages() {
-        var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        var types = ['Meditation', 'Game'];
-
-        return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(children: [
-                Text(
-                  'Stage',
-                  style: Configuration.text('small', Colors.black),
-                ),
-                SizedBox(width: Configuration.blockSizeVertical * 1),
-                DropdownButton<int>(
-                    value: selectedstage,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 0,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (int newValue) {
-                      setState(() {
-                        selectedstage = newValue;
-                      });
-                    },
-                    items: stages.map<DropdownMenuItem<int>>((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(value.toString()),
-                      );
-                    }).toList())
-              ]),
-              Row(children: [
-                Text(
-                  'Type',
-                  style: Configuration.text('small', Colors.black),
-                ),
-                SizedBox(width: Configuration.blockSizeVertical * 1),
-                DropdownButton<String>(
-                    value: selectedtype,
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 0,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        selectedtype = newValue;
-                      });
-                    },
-                    items: types.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value.toString()),
-                      );
-                    }).toList())
-              ]),
-            ]);
-      }
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-              height: Configuration.height * 0.45,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16.0)),
-              margin: EdgeInsets.all(Configuration.bigmargin),
-              child: Column(children: [
-                Container(
-                  height: Configuration.height * 0.05,
-                  child: stages(),
-                ),
-                Container(
-                  height: Configuration.height * 0.4,
-                  child: GridView(
-                      padding: EdgeInsets.all(Configuration.medpadding),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2),
-                      children: meditations()),
-                )
-              ])),
-              StartButton(
-                onPressed: () => {
-                  _meditationstate.state ='pre_guided', 
-                  Navigator.pushNamed(context, '/countdown').then(
-                    (value) => setState(()=>{
-                      _userstate.user.progress != null ? 
-                      autocloseDialog(context, _userstate.user.progress) : null
-                    })), 
-                },
-              )
-        ],
-      );
-    }
-
-    return ListView(children: [
-      SizedBox(height: Configuration.height * 0.05),
-      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        Flexible(
-          child: AspectRatio(
-            aspectRatio: 7/4,
-            child: Container(
-              margin: EdgeInsets.all(Configuration.bigmargin),
-              child: ElevatedButton(
-              onPressed: () => {setState(() => meditationtype = 'free')},
-              style: ElevatedButton.styleFrom(
-                primary:  meditationtype == 'free' ? Configuration.maincolor : Colors.white,
-              ),
-              child: Center(
-                  child: Text('Free',
-                      style: Configuration.text(
-                          'smallmedium',
-                          meditationtype == 'guided'
-                              ? Colors.black
-                              : Colors.white)))
-                  ),
-            ),
-          ),
+  Widget freeMeditation() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TimePicker(),
+        SizedBox(height: Configuration.height * 0.1),
+        StartButton(
+          onPressed: () => {
+            _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data),
+            Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
+            })),
+          },
         ),
-        Flexible(
-              child: AspectRatio(
-                aspectRatio: 7/4,
-                child: Container(
-                  margin: EdgeInsets.all(Configuration.bigmargin),
-                  child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary:  meditationtype == 'guided' ? Configuration.maincolor : Colors.white,
-                  ),
-                  onPressed: () => {setState(() => meditationtype = 'guided')},
-                  child: Center(
-                      child: Text('Guided',
-                          style: Configuration.text(
-                              'smallmedium',
-                              meditationtype == 'free'
-                                  ? Colors.black
-                                  : Colors.white)))),
-                ),
-              ),
-        )
-      ]),
-      SizedBox(height: Configuration.height * 0.05),
-      Expanded(
-          child: meditationtype == 'guided'
-              ? guidedMeditation()
-              : freeMeditation())
-    ]);
+      ],
+    );
   }
+
+  Widget guidedMeditation() {
+    List<Widget> meditations() {
+      List<Widget> meditations = new List.empty(growable:true);
+      for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
+        var _blocked = _userstate.user.meditposition < meditation.position && _userstate.user.stagenumber == meditation.stagenumber || _userstate.user.stagenumber < meditation.stagenumber;
+        meditations.add(GestureDetector(
+            onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
+            child: Container(
+              decoration: BoxDecoration(
+                border: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 
+                Border.all(color: Configuration.maincolor) : null),
+              child: Stack(
+                children: [
+                  Column(children: [
+                    Container(
+                      width: Configuration.width* 0.2,
+                      height:Configuration.width* 0.2,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.0),
+                        image: DecorationImage(
+                            image: NetworkImage(meditation.image)))),
+                    Text(
+                      meditation.title,
+                      style: Configuration.text('small', _blocked ? Colors.grey : Colors.black),
+                      textAlign: TextAlign.center,
+                    )
+                  ])
+                ],
+              ),
+            )
+            )
+          );
+      }
+
+      return meditations;
+    }
+
+    Widget stages() {
+      var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      var types = ['Meditation', 'Game'];
+
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(children: [
+              Text(
+                'Stage',
+                style: Configuration.text('small', Colors.black),
+              ),
+              SizedBox(width: Configuration.blockSizeVertical * 1),
+              DropdownButton<int>(
+                  value: selectedstage,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  underline: Container(
+                    height: 0,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (int newValue) {
+                    setState(() {
+                      selectedstage = newValue;
+                    });
+                  },
+                  items: stages.map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList())
+            ]),
+            Row(children: [
+              Text(
+                'Type',
+                style: Configuration.text('small', Colors.black),
+              ),
+              SizedBox(width: Configuration.blockSizeVertical * 1),
+              DropdownButton<String>(
+                  value: selectedtype,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  underline: Container(
+                    height: 0,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String newValue) {
+                    setState(() {
+                      selectedtype = newValue;
+                    });
+                  },
+                  items: types.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList())
+            ]),
+          ]);
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+            height: Configuration.height * 0.45,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.0)),
+            margin: EdgeInsets.all(Configuration.bigmargin),
+            child: Column(children: [
+              Container(
+                height: Configuration.height * 0.05,
+                child: stages(),
+              ),
+              Container(
+                height: Configuration.height * 0.4,
+                child: GridView(
+                    padding: EdgeInsets.all(Configuration.medpadding),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2),
+                    children: meditations()),
+              )
+            ])),
+            StartButton(
+              onPressed: () => {
+                _meditationstate.state ='pre_guided', 
+                Navigator.pushNamed(context, '/countdown').then(
+                  (value) => setState(()=>{
+                    _userstate.user.progress != null ? 
+                    autocloseDialog(context, _userstate.user.progress) : null
+                  })), 
+              },
+            )
+      ],
+    );
+  }
+
+  Widget games() {
+    List<Widget> gamelist(){
+        List<Widget> g = new List.empty(growable: true);
+        for(var element in _userstate.data.stages[0].games){
+          g.add(
+            Column(
+              children: [
+                GestureDetector(
+                    onTap: ()=> setState(()=> _gamestate.selectgame(element)),
+                    child: Container(
+                    decoration: BoxDecoration(border: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == element.cod ? Border.all(color: Configuration.maincolor): Border()),
+                    width: Configuration.width*0.3,
+                    child: AspectRatio(
+                      aspectRatio: 1/1,
+                      child: Container( 
+                        margin: EdgeInsets.all(Configuration.tinpadding),
+                        decoration: BoxDecoration(color: Colors.grey))),
+                  ),
+                ),
+                Text(element.title, style: Configuration.text('small',Colors.black),)
+              ],
+            )
+        );
+
+      return g;
+      }
+    }
+
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          SizedBox(height: Configuration.height * 0.025),
+          Text('Concentration games', style: Configuration.text('medium', Colors.black),),
+          SizedBox(height: Configuration.height*0.05),
+          Container(
+            height: Configuration.height * 0.4,
+            child: Column(
+              children: gamelist(),
+              ), 
+          ),
+          StartButton(
+            onPressed: () { 
+              _gamestate.startgame();
+              Navigator.pushNamed(context,'/gamestarted');
+            },
+          )
+      ]),
+    );
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     _meditationstate = Provider.of<MeditationState>(context);
+    _gamestate = Provider.of<GameState>(context);
     _userstate = Provider.of<UserState>(context);
-    return Container(
-          height: Configuration.height,
-          color: Configuration.lightgrey,
-          width: Configuration.width,
-          child:Stack(children:[ 
-            initialPage(context),
-          ])
+
+    return PageView(
+      controller: _meditationstate.practice,
+      onPageChanged: (newPage) {
+        setState(() {
+          _meditationstate.switchpage(newPage);
+        });
+      },
+      children: [freeMeditation(), guidedMeditation(),games()],
     );
   }
 }
@@ -667,3 +679,32 @@ class _WeekItemState extends State<WeekItem> {
     );
   }
 }
+
+
+
+
+// VISTA DE TABLETS !!!!
+class TabletMeditationScreen extends StatefulWidget {
+  @override
+  _TabletMeditationScreenState createState() => _TabletMeditationScreenState();
+}
+
+class _TabletMeditationScreenState extends State<TabletMeditationScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

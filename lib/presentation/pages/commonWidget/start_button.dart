@@ -33,3 +33,35 @@ class StartButton extends StatelessWidget {
     );
   }
 }
+
+
+class TabletStartButton extends StatelessWidget {
+
+  dynamic onPressed;
+
+  TabletStartButton({this.onPressed});
+  
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: Configuration.width*0.25,
+      child: AspectRatio(
+        aspectRatio: 6/2,
+        child: ElevatedButton(
+        onPressed: () async {
+          onPressed();
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 0.0,
+          primary: Configuration.maincolor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
+        ),
+        child: Text(
+          'Start',
+          style: Configuration.tabletText('small', Colors.white),
+        ),
+          ),
+      ),
+    );
+  }
+}

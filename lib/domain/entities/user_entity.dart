@@ -35,8 +35,8 @@ class User {
 
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
   final List<UserAction> lastactions = new List.empty(growable: true);
-  final List<UserAction> todayactions = new ObservableList();
-  final List<UserAction> thisweekactions = new ObservableList();
+  List<UserAction> todayactions = new ObservableList();
+  List<UserAction> thisweekactions = new ObservableList() ;
   final ObservableList<UserAction> acciones = new ObservableList();
 
   //códigos de los usuarios a los que sigue el usuario
@@ -53,7 +53,10 @@ class User {
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
 
-  User({this.coduser, this.nombre, this.user, this.position, this.image, @required this.stagenumber,this.stage, this.role,this.classic,this.meditposition,this.userStats}) {
+  User({this.coduser, this.nombre, this.user, this.position, 
+        this.image, @required this.stagenumber,this.stage, 
+        this.role,this.classic,this.meditposition,this.userStats
+        }) {
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
       if (time > 1440) {
@@ -84,7 +87,6 @@ class User {
         userStats.streak = 0;
       }
     } 
-
   }
 
   /* 
@@ -119,12 +121,24 @@ class User {
   void addFollower(User u) { u.follows = true; following.add(u); allusers.add(u);}
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
-  void setActions(List<UserAction> a) { 
-    acciones.addAll(a);
-    DateTime today = DateTime.now();
-    DateTime thismonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
-    todayactions.addAll(this.acciones.where((a) => a.time.year == today.year && a.time.day == today.day && a.time.month == today.month).toList());
-    thisweekactions.addAll(this.acciones.where((a) => thismonday.compareTo(a.time) <= 0).toList());
+  void setActions(json, isToday) {
+
+    //habrá que comprobar si las acciones de hoy son buenas
+    if(isToday){
+      todayactions = new ObservableList();
+      if(json != null && json.length > 0 ){ 
+        for(var action in json){
+          todayactions.add(UserAction.fromJson(action));
+        }
+      }
+    } else{
+      thisweekactions = new ObservableList();
+      if(json != null && json.length > 0 ){ 
+        for(var action in json){
+          thisweekactions.add(UserAction.fromJson(action));
+        }
+      }
+    }
   }
 
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
@@ -143,6 +157,7 @@ class User {
 
     acciones.add(a);
   }
+  
   void addfollow(User u) => { following.add(u) };
   void addUnfollower(User u) { followsyou.add(u);}
   void setStage(StageModel s) {
@@ -150,7 +165,7 @@ class User {
     setPercentage();
   }
 
-  //se le podrán dar parámetros... por etapa, por tiempo meditado total, por tiempo meditado en la etapa
+  //se le podrán dar parámetros... por etapa, por tiempo meidtado total, por tiempo meditado en la etapa
   void sortFollowers() {
     this.allusers.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
     this.following.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
