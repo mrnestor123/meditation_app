@@ -140,6 +140,9 @@ class Configuration {
     }
 
     switch (size) {
+       case 'mini':
+        px = safeBlockHorizontal * 1;
+        break;
       case 'verytiny':
         px = safeBlockHorizontal * 1.5;
         break;

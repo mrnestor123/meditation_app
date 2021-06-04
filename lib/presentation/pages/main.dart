@@ -64,6 +64,7 @@ class MyApp extends StatelessWidget {
                   child: RegisterWidget()),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
+               '/tabletimagepath': (BuildContext context) => TabletImagePath(),
               '/main': (BuildContext context) => Layout(),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),

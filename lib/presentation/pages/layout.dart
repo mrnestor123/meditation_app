@@ -1,25 +1,17 @@
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:meditation_app/presentation/mobx/actions/lesson_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/game_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
-import 'package:meditation_app/presentation/pages/more_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/learn/brain_widget.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
-import 'package:path/path.dart';
+import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:provider/provider.dart';
 
-import '../../login_injection_container.dart';
-import 'commonWidget/progress_dialog.dart';
 import 'commonWidget/radial_progress.dart';
 
 class Layout extends StatelessWidget {
@@ -221,7 +213,6 @@ class _TabletLayoutState extends State<TabletLayout> {
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
-    
 
     return Scaffold(
       body: Row(children: [
@@ -255,13 +246,18 @@ class _TabletLayoutState extends State<TabletLayout> {
                   selectedIcon:Icon(Icons.terrain, color: Configuration.maincolor, size: Configuration.smpadding), 
                   label:Text('Path', style: Configuration.tabletText('verytiny', Colors.black))
               ),
+              NavigationRailDestination(
+                  icon: Icon(Icons.person, size: Configuration.smpadding),
+                  selectedIcon:Icon(Icons.person, color: Configuration.maincolor, size: Configuration.smpadding), 
+                  label:Text('Profile', style: Configuration.tabletText('verytiny', Colors.black))
+              ),
             ], 
         selectedIndex: currentindex),  
         Expanded(
           child: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: _c,
-          children: [TabletMainScreen(), TabletLearnScreen(), MeditationScreen(), TabletPathScreen()],
+          children: [TabletMainScreen(), TabletLearnScreen(), TabletMeditationScreen(), TabletPathScreen(), Prueba()],
         ))
       ])
     );

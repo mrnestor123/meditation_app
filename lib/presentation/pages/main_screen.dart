@@ -109,7 +109,7 @@ class _TabletMainScreenState extends State<TabletMainScreen> {
                       borderRadius: BorderRadius.circular(16.0)
                     ),
                     child: TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/imagepath'),
+                      onPressed: () => Navigator.pushNamed(context, '/tabletimagepath'),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

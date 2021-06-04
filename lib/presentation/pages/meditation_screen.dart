@@ -523,6 +523,10 @@ class _CountdownState extends State<Countdown> {
 }
 
 class TimePicker extends StatefulWidget {
+  bool isTablet;
+
+  TimePicker({this.isTablet = false});
+
   @override
   _TimePickerState createState() => _TimePickerState();
 }
@@ -548,13 +552,13 @@ class _TimePickerState extends State<TimePicker> {
           print(seltime);
         });
       },
-      height: Configuration.height * 0.2,
-      width: Configuration.height * 0.2,
+      height: Configuration.height*0.2,
+      width: Configuration.height*0.2,
       selectionColor: Configuration.maincolor,
       child: Center(
           child: Text(
         seltime.toString() + ' min',
-        style: Configuration.text('smallmedium', Colors.black),
+        style: widget.isTablet ? Configuration.tabletText('tiny', Colors.black) : Configuration.text('smallmedium', Colors.black),
       )),
     );
   }
@@ -682,7 +686,6 @@ class _WeekItemState extends State<WeekItem> {
 
 
 
-
 // VISTA DE TABLETS !!!!
 class TabletMeditationScreen extends StatefulWidget {
   @override
@@ -690,10 +693,286 @@ class TabletMeditationScreen extends StatefulWidget {
 }
 
 class _TabletMeditationScreenState extends State<TabletMeditationScreen> {
+    UserState _userstate;
+  MeditationState _meditationstate;
+  GameState _gamestate;
+
+
+  int _index;
+
+  //podriamos utilizar meditationstate de arriba
+  var meditationtype = 'free';
+  var selectedstage = 1;
+  var selectedtype = 'Meditation';
+  var finished = false;
+
+  Widget freeMeditation() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TimePicker(isTablet: true),
+        SizedBox(height: Configuration.height * 0.1),
+        TabletStartButton(
+          onPressed: () => {
+            _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data),
+            Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
+            })),
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget guidedMeditation() {
+    List<Widget> meditations() {
+      List<Widget> meditations = new List.empty(growable:true);
+      for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
+        var _blocked = _userstate.user.meditposition < meditation.position && _userstate.user.stagenumber == meditation.stagenumber || _userstate.user.stagenumber < meditation.stagenumber;
+        meditations.add(GestureDetector(
+            onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
+            child: Container(
+              decoration: BoxDecoration(
+                border: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 
+                Border.all(color: Configuration.maincolor) : null),
+              child: Column(children: [
+                Container(
+                  width: Configuration.width* 0.06,
+                  height:Configuration.width* 0.06,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    image: DecorationImage(
+                        image: NetworkImage(meditation.image)))),
+                Text(
+                  meditation.title,
+                  style: Configuration.tabletText('mini', _blocked ? Colors.grey : Colors.black),
+                  textAlign: TextAlign.center,
+                )
+              ]),
+            )
+            )
+          );
+      }
+
+      return meditations;
+    }
+
+    Widget stages() {
+      var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      var types = ['Meditation', 'Game'];
+
+      return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(children: [
+              Text(
+                'Stage',
+                style: Configuration.tabletText('verytiny', Colors.black),
+              ),
+              SizedBox(width: Configuration.blockSizeVertical * 1),
+              DropdownButton<int>(
+                  value: selectedstage,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  underline: Container(
+                    height: 0,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (int newValue) {
+                    setState(() {
+                      selectedstage = newValue;
+                    });
+                  },
+                  items: stages.map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList())
+            ]),
+            Row(children: [
+              Text(
+                'Type',
+                style: Configuration.tabletText('verytiny', Colors.black),
+              ),
+              SizedBox(width: Configuration.blockSizeVertical * 1),
+              DropdownButton<String>(
+                  value: selectedtype,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.black),
+                  underline: Container(
+                    height: 0,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String newValue) {
+                    setState(() {
+                      selectedtype = newValue;
+                    });
+                  },
+                  items: types.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList())
+            ]),
+          ]);
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+            height: Configuration.height * 0.45,
+            width: Configuration.height*0.45,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16.0)),
+            child: Column(children: [
+              Container(
+                height: Configuration.height * 0.05,
+                child: stages(),
+              ),
+              Expanded(
+                child: GridView(
+                    padding: EdgeInsets.all(12.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3),
+                    children: meditations()),
+              )
+            ])
+        ),
+        SizedBox(height: 20),
+        TabletStartButton(
+          onPressed: () => {
+            _meditationstate.state ='pre_guided', 
+            Navigator.pushNamed(context, '/countdown').then(
+              (value) => setState(()=>{
+                _userstate.user.progress != null ? 
+                autocloseDialog(context, _userstate.user.progress) : null
+              })), 
+          },
+        )
+      ],
+    );
+  }
+
+  Widget games() {
+    List<Widget> gamelist(){
+        List<Widget> g = new List.empty(growable: true);
+        for(var element in _userstate.data.stages[0].games){
+          g.add(
+            Column(
+              children: [
+                GestureDetector(
+                    onTap: ()=> setState(()=> _gamestate.selectgame(element)),
+                    child: Container(
+                    decoration: BoxDecoration(border: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == element.cod ? Border.all(color: Configuration.maincolor): Border()),
+                    width: Configuration.width*0.12,
+                    child: AspectRatio(
+                      aspectRatio: 1/1,
+                      child: Container( 
+                        margin: EdgeInsets.all(Configuration.tinpadding),
+                        decoration: BoxDecoration(color: Colors.grey))),
+                  ),
+                ),
+                Text(element.title, style: Configuration.tabletText('tiny',Colors.black),)
+              ],
+            )
+        );
+
+      return g;
+      }
+    }
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            height: Configuration.height * 0.4,
+            child: Column(
+              children: gamelist(),
+              ), 
+          ),
+          TabletStartButton(
+            onPressed: () { 
+              _gamestate.startgame();
+              Navigator.pushNamed(context,'/gamestarted');
+            },
+          )
+      ]),
+    );
+  }
+
+  Widget chiporText(String text, bool chip){
+      Widget g;
+
+      var types = {'Guided':'guided','Free':'free','Games':'games'};
+
+      if (chip){
+        g = Chip(padding: EdgeInsets.all(12), label: Text(text, style: Configuration.tabletText('tiny', Colors.black)));
+      } else {
+        g = Text(text, style: Configuration.tabletText('tiny', Colors.black));
+      }
+
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _meditationstate.switchtype(types[text]);
+          });
+        },
+        child: Container(padding: EdgeInsets.all(14.0), child: g)
+      );
+    }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
+    _meditationstate = Provider.of<MeditationState>(context);
+    _gamestate = Provider.of<GameState>(context);
+    _userstate = Provider.of<UserState>(context);
+
+    return Column(
+     children: [
+      SizedBox(height: Configuration.height*0.1),
+      Container(
+          child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Observer(builder: (BuildContext context) {  
+              return chiporText('Free', _meditationstate.currentpage == 0);
+            }),
+            
+            Observer(builder: (BuildContext context) {  
+              return chiporText('Guided', _meditationstate.currentpage == 1);
+            }),
+            
+            Observer(builder: (BuildContext context) {  
+              return chiporText('Games', _meditationstate.currentpage == 2);
+            })
+          ]
+        ),
+      ),
+      SizedBox(height: Configuration.height*0.05),
+      Container(
+        height: Configuration.height*0.6,
+        child:PageView(
+          controller: _meditationstate.practice,
+          onPageChanged: (newPage) {
+            setState(() {
+              _meditationstate.switchpage(newPage);
+            });
+          },
+            children: [freeMeditation(), guidedMeditation(),games()],
+          ) 
+        )
+      ]
     );
   }
 }

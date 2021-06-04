@@ -419,3 +419,44 @@ class Ordinal {
 
   Ordinal(this.day, this.min);
 }
+
+
+class TabletProfileScreen extends StatefulWidget {
+  const TabletProfileScreen();
+
+  @override
+  _TabletProfileScreenState createState() => _TabletProfileScreenState();
+}
+
+class _TabletProfileScreenState extends State<TabletProfileScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: Configuration.height*0.3,
+      child: Text('QUE PASAAAA'),
+    );
+  }
+}
+
+
+class Prueba extends StatefulWidget {
+  const Prueba();
+
+  @override
+  _PruebaState createState() => _PruebaState();
+}
+
+class _PruebaState extends State<Prueba> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height:Configuration.height*0.4 ,
+      child: Text('holaaa'),
+    );
+  }
+}
+
+
+
+
+

@@ -46,3 +46,53 @@ class ImagePath extends StatelessWidget {
     );
   }
 }
+
+
+class TabletImagePath extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          SingleChildScrollView(
+            child: SizedBox(
+              width: Configuration.width,
+              height: Configuration.height,
+              child: Image(
+                image: AssetImage('assets/path.png') ,
+                width: Configuration.width,
+                height: Configuration.height,
+              ),
+            ),
+          ),
+          Positioned(
+            //Place it at the top, and not use the entire screen
+            top: 0.0,
+            left: 0.0,
+            right: 0.0,
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back,
+                    size: Configuration.tabletsmicon, color: Colors.black),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+
+
