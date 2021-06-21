@@ -151,46 +151,70 @@ class __TimelineState extends State<_Timeline> {
   String mode = 'Today'; 
   var states = ['Today','This week'];
 
-  //Pasar ESTO FUERA !!! 
+  //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!
   List<Widget> getMessages() { 
       List<User> following = _userstate.user.following;
-      List<UserAction> sortedlist = mode == 'Today' ? _userstate.user.todayactions : _userstate.user.thisweekactions;
+      List<UserAction> sortedlist = new List.empty(growable: true);
+      
+      mode == 'Today' ? sortedlist.addAll(_userstate.user.todayactions) : sortedlist.addAll(_userstate.user.thisweekactions);
 
       //ESTO NO LO DEBERÍA DE HACER MÁS DE UNA VEZ
       for(User u in following) {
-        if(mode == 'Today'){
+        if(mode == 'Today' && u.todayactions.length > 0){
           sortedlist.addAll(u.todayactions);
-        } else {
+        }else if(mode !='Today' && u.thisweekactions.length > 0) {
           sortedlist.addAll(u.thisweekactions);
         }
       }
 
+      sortedlist.sort((a,b) => a.time.compareTo(b.time));
+
       List<Widget> widgets = new List.empty(growable: true);
-      
-      widgets.add(SizedBox(height:Configuration.blockSizeVertical*2));
 
       if (sortedlist.length > 0) {
         for (var action in sortedlist) {
           widgets.add(
             Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              CircleAvatar(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Colors.lightBlue,
-                child: Icon(action.icono),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start, 
+              Stack(
                 children: [
                   Container(
-                    width: Configuration.width*0.3,
-                    child: Text((action.username == _userstate.user.nombre ? 'You ': action.username) + action.message,
+                  height:  Configuration.width*0.15,
+                  width: Configuration.width*0.12,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
+                      color: action.userimage == null ? Configuration.maincolor : null,
+                      shape: BoxShape.circle
+                    ),
+                    width: Configuration.width*0.1,
+                    height: Configuration.height*0.1
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 27,
+                      height: 27,
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
+                      child: Icon(action.icono, color: Colors.white, size: 20.0) ),
+                  ) 
+                ],
+              ),
+              SizedBox(width: 5.0),
+              Expanded(
+                  child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, 
+                  children: [
+                    Text((action.username == _userstate.user.nombre ? 'You': action.username) + ' ' + action.message,
                         style: widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') :  Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                         overflow: TextOverflow.fade,
                         ),
-                  ),
-                  Text((mode == 'today' ? '' : action.day + ' ') +   action.hour,
-                      style:widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') : Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
-              ])
+                    Text((mode == 'today' ? '' : action.day + ' ') +   action.hour,
+                        style:widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') : Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
+                ]),
+              )
             ]),
           );
           widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
@@ -207,8 +231,8 @@ class __TimelineState extends State<_Timeline> {
     _userstate = Provider.of<UserState>(context);
 
     return Container(
-        width: Configuration.width * (widget.isTablet == null ? 0.8 : 0.4),
-        height: Configuration.height *(widget.isTablet == null ? 0.8 : 0.7),
+        width: Configuration.width * (widget.isTablet ? 0.4 : 0.8),
+        height: Configuration.height *(widget.isTablet ? 0.7 : 0.4),
         decoration: BoxDecoration(
           color:Colors.white,  
           borderRadius: BorderRadius.circular(16.0), 
@@ -250,6 +274,8 @@ class __TimelineState extends State<_Timeline> {
                     padding: EdgeInsets.all(4.0),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
                     onPressed: () {
+                      widget.isTablet ? 
+                      Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
                       Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
                     },
                   ),

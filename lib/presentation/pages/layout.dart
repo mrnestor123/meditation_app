@@ -111,13 +111,12 @@ class _MobileLayoutState extends State<MobileLayout> {
                 height: 1.0,
               ),
             preferredSize: currentindex == 2 ? Size.fromHeight(Configuration.blockSizeVertical* 8) : Size.fromHeight(4.0)),
-        leading: IconButton(
-            icon: Icon(Icons.logout,
-                color: Colors.red, size: Configuration.smicon),
-            onPressed: () async {
-              await _userstate.logout();
-              Navigator.pushReplacementNamed(context, '/welcome');
-            }),
+        leading: Container(
+          padding: EdgeInsets.all(4),
+          child: Image.asset('assets/logo-no-text.png')
+        ),
+        
+        
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -125,12 +124,12 @@ class _MobileLayoutState extends State<MobileLayout> {
               color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),
           Container(
-            margin: EdgeInsets.only(
-                left: Configuration.medmargin, right: Configuration.bigmargin),
+            padding: EdgeInsets.symmetric(vertical: 4),
+            margin: EdgeInsets.only(left: Configuration.medmargin, right: Configuration.bigmargin),
             child: GestureDetector(
               onTap: () => Navigator.pushNamed(context, '/profile'),
               child: RadialProgress(
-                  width: Configuration.safeBlockHorizontal * 1,
+                  width: Configuration.safeBlockHorizontal * 0.7,
                   progressColor: Configuration.maincolor,
                   goalCompleted: 1,
                   child: CircleAvatar(
@@ -257,7 +256,7 @@ class _TabletLayoutState extends State<TabletLayout> {
           child: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: _c,
-          children: [TabletMainScreen(), TabletLearnScreen(), TabletMeditationScreen(), TabletPathScreen(), Prueba()],
+          children: [TabletMainScreen(), TabletLearnScreen(), TabletMeditationScreen(), TabletPathScreen(), TabletProfileScreen()],
         ))
       ])
     );

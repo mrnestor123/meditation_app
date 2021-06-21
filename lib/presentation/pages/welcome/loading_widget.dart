@@ -23,55 +23,55 @@ class _LoadingState extends State<Loading> {
   double opacity = 1;
   Duration animationDuration = Duration(milliseconds: 200);
   Timer _timer;
-  Duration _duration = Duration(seconds: 15);
+  Duration _duration = Duration(seconds: 5);
   bool started = false;
   VideoPlayerController _controller;
+  bool isTablet = false;
+  bool finishedloading = false;
 
-  // UN TIMER PARA QUEEE
-  void startTimer() {
-    const oneSec = const Duration(milliseconds: 200);
-    _timer = new Timer.periodic(
-        oneSec,
-        (Timer timer) => setState(() {
-              started = true;
-              if (_duration.inMilliseconds == 0) {
-                if (count < itemsize.length - 1) {
-                  size = itemsize[++count];
-                } else {
-                  count = 0;
-                  size = itemsize[count];
-                }
-                timer.cancel();
-              } else {
-                _duration = _duration - oneSec;
-                if (count < itemsize.length - 1) {
-                  size = itemsize[++count];
-                } else {
-                  count = 0;
-                  size = itemsize[count];
-                }
-              }
-            }));
-  }
 
   @override
   void initState() {
     super.initState();
-     _controller = VideoPlayerController.asset('assets/animacion.webm')
+     _controller = VideoPlayerController.asset('assets/tenstages.mp4')
       ..initialize().then((_) {
         _controller.play();
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() { });
       });
+
+      _timer = new Timer.periodic(Duration(seconds: 1), 
+        (Timer timer) => setState(() {
+             if (_duration.inSeconds == 0) {
+                if(finishedloading) {
+                  _user.user != null ? Navigator.pushNamed(context, '/main') : Navigator.pushNamed(context, '/welcome');
+                }
+                timer.cancel();
+              } else {
+                _duration = _duration - Duration(seconds: 1);
+              }
+            })
+      );
   }
+
+  @override 
+  void dispose(){
+    super.dispose();
+    _timer.cancel();
+  }
+
 
   void userisLogged(context) async {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
     await _user.userisLogged();
-    _user.user != null ? 
-        Navigator.pushNamed(context, '/main')
-        : Navigator.pushNamed(context, '/welcome');
+    setState(() {
+      finishedloading = true;
+    });
+
+    if(_duration.inSeconds <= 0){
+      _user.user != null ? Navigator.pushNamed(context, '/main') : Navigator.pushNamed(context, '/welcome');
+    }
   }
 
   @override
@@ -87,18 +87,13 @@ class _LoadingState extends State<Loading> {
     return Scaffold(
         body: Center(
             child: Container(
-                width: 200, height: 200, child: AspectRatio(
+                width: MediaQuery.of(context).size.width*0.7, 
+                height: MediaQuery.of(context).size.width*0.7, 
+                child: AspectRatio(
                   aspectRatio: _controller.value.aspectRatio,
                   child: VideoPlayer(_controller),
                 )
               )
-            /*AnimatedContainer(
-          duration: animatio nDuration,
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage('assets/logo.jpg')),
-          )),*/
             ));
   }
 }

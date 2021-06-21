@@ -28,7 +28,6 @@ import 'domain/repositories/lesson_repository.dart';
 import 'domain/usecases/user/change_data.dart';
 import 'domain/usecases/user/log_out.dart';
 import 'presentation/mobx/actions/game_state.dart';
-import 'presentation/mobx/actions/lesson_state.dart';
 import 'presentation/mobx/actions/meditation_state.dart';
 import 'presentation/mobx/actions/menu_state.dart';
 import 'presentation/mobx/actions/user_state.dart';
@@ -50,12 +49,9 @@ Future<void> init() async {
     () => MeditationState(meditate: sl()),
   );
 
+  /// A lo mejor userstate hace demasiado ??
   sl.registerFactory(
-    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl(),logout:sl(),lesson: sl(),updateUserUseCase: sl()),
-  );
-
-  sl.registerFactory(
-    () => LessonState(brainlessonsUseCase: sl()),
+    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl(),logout:sl(),lesson: sl(),updateUserUseCase: sl(), updateStageUseCase: sl(),updateImageUseCase: sl(),changeDataUseCase: sl()),
   );
 
   sl.registerFactory(
@@ -71,7 +67,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(()=> CachedUserUseCase(sl()));
-  sl.registerLazySingleton(()=> GetBrainLessonsUseCase(sl()));
   sl.registerLazySingleton(()=> MeditateUseCase(sl(),sl()));
   sl.registerLazySingleton(()=> GetDataUseCase(sl()));
   sl.registerLazySingleton(() => LogOutUseCase(sl()));

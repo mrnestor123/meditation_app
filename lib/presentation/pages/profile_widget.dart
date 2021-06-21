@@ -11,11 +11,17 @@ import 'package:charts_flutter/flutter.dart';
 
 
 class ProfileScreen extends StatefulWidget {
+  User user;
+
+  ProfileScreen({this.user});
+
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
@@ -47,6 +53,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             onPressed: () => Navigator.pop(context),
                           ),
                           actions: [
+                            widget.user != null ?
+                            Container() :
                             IconButton(
                               padding: EdgeInsets.all(0.0),
                               onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -59,6 +67,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         ),
                       ),
+                      widget.user != null ?
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: Configuration.blockSizeVertical*1),
+                            RadialProgress(
+                                width: Configuration.safeBlockHorizontal * 1,
+                                goalCompleted: _userstate.user.stage.stagenumber / 10,
+                                child: CircleAvatar(
+                                    radius:  Configuration.blockSizeHorizontal * 12,
+                                    backgroundColor: Colors.transparent,
+                                    backgroundImage: widget.user.image == null
+                                        ? null
+                                        : NetworkImage(widget.user.image)
+                                )
+                              ),
+                            SizedBox(
+                              height: Configuration.safeBlockVertical * 2,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                    widget.user.nombre != null ? widget.user.nombre : 'Guest',style: Configuration.text('medium', Colors.white),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      )
+                      : 
                       MyInfo(),
                     ],
                   ),
@@ -79,17 +120,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Column(
+                          TextButton(
+                            onPressed: ()=>  
+                            widget.user != null ? null :
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ViewFollowers(
+                                        users: _userstate.user.following,
+                                        title: 'Following',
+                              )),
+                          ), 
+                          child: Column(
                               children: [
                                 Text('Following', style: Configuration.text('tiny', Colors.black)),
-                                Text(_userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                                Text(widget.user != null ? widget.user.followedcods.length.toString() : _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
                               ],
                             ),
-                          Column(
-                            children: [
-                              Text('Followers', style: Configuration.text('tiny', Colors.black)),
-                              Text(_userstate.user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.black))
-                            ],
+                          ),
+                          TextButton(
+                            onPressed: ()=>  
+                            widget.user != null ? null :
+                              Navigator.push(
+                                context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ViewFollowers(
+                                            users: _userstate.user.followsyou,
+                                            title: 'Followers',
+                                  )
+                                ),
+                              ),
+                              child: Column(
+                              children: [
+                                Text('Followers', style: Configuration.text('tiny', Colors.black)),
+                                Text(widget.user != null ? widget.user.followsyoucods.length.toString() :  _userstate.user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.black))
+                              ],
+                            ),
                           ) 
                         ],
                         ),
@@ -97,12 +163,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Table(children: [
                           TableRow(children: [
                             ProfileInfoBigCard(
-                              firstText: _userstate.user.userStats.total.meditations.toString(),
+                              firstText:  widget.user != null ? widget.user.userStats.total.meditations.toString() :_userstate.user.userStats.total.meditations.toString(),
                               secondText: "Meditations\ncompleted",
                               icon: Icon(Icons.self_improvement),
                             ),
                             ProfileInfoBigCard(
-                                firstText: _userstate
+                                firstText: 
+                                 widget.user != null ? widget.user.userStats.total.lessons.toString() :
+                                
+                                _userstate
                                     .user.userStats.total.lessons
                                     .toString(),
                                 secondText: "Lessons\ncompleted",
@@ -128,36 +197,119 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 )),
           ],
         ),
-        /* Positioned(
-          top: Configuration.height * 4 / 9 -
-              ((Configuration.safeBlockVertical * 12) / 2),
-          left: 16,
-          right: 16,
-          child: Container(
-            height: Configuration.safeBlockVertical * 12,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                ProfileInfoCard(
-                    firstText:
-                        '' + _userstate.user.stage.stagenumber.toString(),
-                    secondText: "Stage"),
-                SizedBox(
-                  width: Configuration.safeBlockHorizontal * 5,
-                ),
-                ProfileInfoCard(
-                    firstText: '' + '10 ' + ' %', secondText: "Completed"),
-              ],
-            ),
-          ),
-        ),*/
       ]),
     );
   }
 }
 
+
+
+//ES IGUAL PARA TABLET QUE PARA Móvil ??
+class ViewFollowers extends StatelessWidget {
+  final List<User> users;
+  final String title;
+
+  ViewFollowers({this.users, this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(onPressed: ()=> Navigator.pop(context),  icon: Icon(Icons.arrow_back), color: Colors.black),
+        title: Text(title, style: Configuration.text('small', Colors.black)),
+      ),
+      body: Container(
+        height: Configuration.height,
+        width: Configuration.width,
+        color: Configuration.lightgrey,
+        child: SingleChildScrollView(
+            child: Padding(
+                padding: EdgeInsets.all(Configuration.smpadding),
+                child: users.length > 0 ? Table(  
+                columnWidths: {
+                0: FractionColumnWidth(0.2),
+                1: FractionColumnWidth(0.5),
+                2: FractionColumnWidth(0.3)
+               },
+                children: users.map((u) {
+                  return TableRow(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
+                      backgroundImage: u.image != null ? NetworkImage(u.image) : null,
+                      child: u.image == null ? null : null,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(u.nombre == null ? 'Anónimo' : u.nombre,
+                            style: Configuration.text('small', Colors.black)),
+                        Text('Stage ' + u.stagenumber.toString(),
+                            style: Configuration.text('tiny', Colors.grey))
+                      ],
+                    ),
+                    OutlinedButton(
+                        onPressed: () {
+                           Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ProfileScreen(
+                                        user: u,
+                                  )
+                                ),
+                            );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          elevation: 0.0,
+                          primary: Configuration.maincolor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
+                        ),
+                        child: Text(
+                          'Profile',
+                          style: Configuration.text('small', Colors.black),
+                        ),
+                    )
+                ]);
+              }).toList()
+              ) :  title == 'Following' ? 
+                Text('You are not following any users', style: Configuration.text('tiny',Colors.black)) :
+                Text('You are not being followed by anyone', style:Configuration.text('tiny', Colors.black))    
+            )
+        ),
+      )
+    );
+  }
+}
+
+
+
+
+
+
+class ViewData extends StatefulWidget {
+  const ViewData({ Key key }) : super(key: key);
+
+  @override
+  _ViewDataState createState() => _ViewDataState();
+}
+
+class _ViewDataState extends State<ViewData> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      
+    );
+  }
+}
+
 class MyInfo extends StatefulWidget {
+  bool isTablet;
+
+  MyInfo({this.isTablet = false});
+
   @override
   _MyInfoState createState() => _MyInfoState();
 }
@@ -231,12 +383,12 @@ class _MyInfoState extends State<MyInfo> {
         children: [
           SizedBox(height: Configuration.blockSizeVertical*1),
           RadialProgress(
-              width: Configuration.safeBlockHorizontal * 1,
+              width: widget.isTablet ? Configuration.blockSizeHorizontal* 0.3 :Configuration.safeBlockHorizontal * 1,
               goalCompleted: _userstate.user.stage.stagenumber / 10,
               child: GestureDetector(
                 onTap: () => _showPicker(context),
                 child: CircleAvatar(
-                    radius: Configuration.blockSizeHorizontal * 12,
+                    radius: widget.isTablet ? Configuration.blockSizeHorizontal*7 : Configuration.blockSizeHorizontal * 12,
                     backgroundColor: Colors.transparent,
                     backgroundImage: _userstate.user.image == null
                         ? null
@@ -257,7 +409,7 @@ class _MyInfoState extends State<MyInfo> {
             children: <Widget>[
               Text(
                   _userstate.user.nombre,
-                  style: Configuration.text('medium', Colors.white),
+                  style: widget.isTablet ? Configuration.tabletText('tiny', Colors.white) : Configuration.text('medium', Colors.white),
               ),
             ],
           ),
@@ -282,9 +434,9 @@ class ProfileInfoBigCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
-      border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
+        border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
       ),
       child: Padding(
         padding: EdgeInsets.all(Configuration.smpadding),
@@ -305,43 +457,71 @@ class ProfileInfoBigCard extends StatelessWidget {
   }
 }
 
+class TabletInfoCard extends StatelessWidget {
+  final String firstText, secondText, color;
+  final Widget icon;
+
+  const TabletInfoCard(
+      {Key key,
+      @required this.firstText,
+      @required this.secondText,
+      this.color,
+      @required this.icon})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
+        border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
+      ),
+      child: OutlinedButton(
+          onPressed: ()=> 
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => TabletViewData(
+                      title: secondText,
+                    )),
+          ),
+          style: OutlinedButton.styleFrom(
+            primary: Colors.black
+          ),
+          child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(firstText, style: Configuration.tabletText('tiny', color != null ? Colors.white: Colors.black)),
+                  Align(alignment: Alignment.centerRight, child: icon),
+              ]),
+              Text(secondText, style: Configuration.tabletText('verytiny', color != null ? Colors.white : Colors.black)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 class ProfileInfoCard extends StatelessWidget {
-  final firstText, secondText, hasImage, imagePath;
+  final firstText, secondText, hasImage, imagePath, isTablet;
 
   const ProfileInfoCard(
       {Key key,
       this.firstText,
       this.secondText,
       this.hasImage = false,
+      this.isTablet = false,
       this.imagePath})
       : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Card(
-        elevation: 12,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: hasImage
-            ? Center(child: Icon(Icons.wb_sunny))
-            : TwoLineItem(
-                firstText: firstText,
-                secondText: secondText,
-              ),
-      ),
-    );
-  }
-}
-
-class TwoLineItem extends StatelessWidget {
-  final String firstText, secondText;
-
-  const TwoLineItem(
-      {Key key, @required this.firstText, @required this.secondText})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget twoLineItem(firstText,secondText){
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -353,7 +533,38 @@ class TwoLineItem extends StatelessWidget {
       ],
     );
   }
+
+  Widget tabletTwolineItem(firsText,secondText){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          firstText,
+          style: Configuration.tabletText('tiny', Colors.white),
+        ),
+        Text(secondText, style: Configuration.tabletText('tiny', Colors.white)),
+      ],
+    );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Card(
+        elevation: 12,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: hasImage
+            ? Center(child: Icon(Icons.wb_sunny))
+            : isTablet ? twoLineItem(
+                firstText,
+                secondText,
+              ) : tabletTwolineItem(firstText,secondText,),
+      ),
+    );
+  }
 }
+
 
 class SimpleBarChart extends StatelessWidget {
   final List<Series> seriesList;
@@ -366,19 +577,22 @@ class SimpleBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return BarChart(
-      _createSampleData(_userstate.user),
-      behaviors: [LinePointHighlighter(symbolRenderer: CircleSymbolRenderer())],
-      selectionModels: [
-        SelectionModelConfig(changedListener: (SelectionModel model) {
-          if (model.hasDatumSelection)
-            print(model.selectedSeries[0]
-                .measureFn(model.selectedDatum[0].index));
-        })
-      ],
+    return Container(
+      height: Configuration.height*0.3,
+      child: BarChart(
+        _createSampleData(_userstate.user),
+        behaviors: [LinePointHighlighter(symbolRenderer: CircleSymbolRenderer())],
+        selectionModels: [
+          SelectionModelConfig(changedListener: (SelectionModel model) {
+            if (model.hasDatumSelection)
+              print(model.selectedSeries[0]
+                  .measureFn(model.selectedDatum[0].index));
+          })
+        ],
 
-      // Disable animations for image tests.
-      animate: true,
+        // Disable animations for image tests.
+        animate: true,
+      ),
     );
   }
 
@@ -420,9 +634,9 @@ class Ordinal {
   Ordinal(this.day, this.min);
 }
 
-
+/* VISTAS DE TABLET*/
 class TabletProfileScreen extends StatefulWidget {
-  const TabletProfileScreen();
+  TabletProfileScreen();
 
   @override
   _TabletProfileScreenState createState() => _TabletProfileScreenState();
@@ -431,32 +645,160 @@ class TabletProfileScreen extends StatefulWidget {
 class _TabletProfileScreenState extends State<TabletProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: Configuration.height*0.3,
-      child: Text('QUE PASAAAA'),
+    final _userstate = Provider.of<UserState>(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:[
+            Container(
+            decoration: BoxDecoration(color: Configuration.maincolor, borderRadius: BorderRadius.circular(16.0)),
+            width: Configuration.width*0.25,
+            height: Configuration.width*0.25,
+            child: Column( 
+              children:[
+                MyInfo(isTablet: true),
+                IconButton(
+                  padding: EdgeInsets.all(0.0),
+                  onPressed: () => Navigator.pushNamed(context, '/settings').then((value) => setState(()=> null)),
+                  icon: Icon(
+                    Icons.settings,
+                    color: Colors.white,
+                    size: 15.0,
+                  ),
+                )
+              ])
+            ),
+            Container(
+                width: Configuration.width*0.35,
+                height: Configuration.width*0.35,
+                decoration:BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)) ,
+                child: Column(
+                  children: [
+                    SizedBox(height: 10),
+                    Text('Meditation record',style:Configuration.tabletText('tiny', Colors.black)),
+                    SimpleBarChart(date: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
+                    ),
+                  ],
+                ))
+          ]
+        ),
+        Container(
+          width: Configuration.width*0.3,
+          height: Configuration.width*0.3,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Table(children: [
+                TableRow(
+                  children: [
+                    TabletInfoCard(
+                      firstText: _userstate.user.following.length.toString(),
+                      secondText: "Following",
+                      icon: Icon(Icons.person),
+                    ),
+                    TabletInfoCard(
+                      firstText: _userstate.user.followsyou.length.toString(), 
+                      secondText: "Followers", 
+                      icon: Icon(Icons.person)
+                      )
+                  ]
+                ),
+                TableRow(children: [
+                  TabletInfoCard(
+                    firstText: _userstate.user.userStats.total.meditations.toString(),
+                    secondText: "Meditations\ncompleted",
+                    icon: Icon(Icons.self_improvement),
+                  ),
+                  TabletInfoCard(
+                      firstText: _userstate.user.userStats.total.lessons.toString(),
+                      secondText: "Lessons\ncompleted",
+                      icon: Icon(Icons.book)
+                  ),
+                ]),
+              ]),
+              SizedBox(height: Configuration.blockSizeVertical * 3),
+              
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
+class TabletViewData extends StatefulWidget {
+  String title;
 
-class Prueba extends StatefulWidget {
-  const Prueba();
+  TabletViewData({ Key key , this.title}) : super(key: key);
 
   @override
-  _PruebaState createState() => _PruebaState();
+  _TabletViewDataState createState() => _TabletViewDataState();
 }
 
-class _PruebaState extends State<Prueba> {
+class _TabletViewDataState extends State<TabletViewData> {
+  UserState _userstate;
+  
+  Widget getList(){
+    var items = {
+      'Following': _userstate.user.following.length,
+      'Followers': _userstate.user.followsyou.length,
+    };
+  
+    return items[widget.title] > 0 ?
+     GridView.builder(
+      itemCount: items[widget.title],
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4), 
+      itemBuilder: (context,index){
+        if(widget.title == 'Following'){
+          return Card(
+            child: Text(_userstate.user.following[index].nombre != null ?_userstate.user.following[index].nombre :' Anónimo' ),
+          );
+        } else if(widget.title =='Followers'){
+
+        }
+      }    
+    ) : Center(child: Text('You are not followed', style: Configuration.tabletText('tiny', Colors.black)));
+    
+  }
+  
+  
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height:Configuration.height*0.4 ,
-      child: Text('holaaa'),
+     _userstate = Provider.of<UserState>(context);
+    return Scaffold(
+        body: Container(
+        height: Configuration.height,
+        width: Configuration.width,
+        color: Configuration.lightgrey,
+        child: Column(
+          children: [
+            AppBar(
+              centerTitle: true,
+              title: Text(widget.title, style: Configuration.tabletText('small', Colors.black)),
+              leading: IconButton(
+                icon:Icon(Icons.arrow_back),
+                onPressed: ()=> Navigator.pop(context), 
+                iconSize: Configuration.tabletsmicon, 
+                color: Colors.black
+              ),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+            ),
+            Expanded(
+              child: getList()
+            )
+        ]),
+      ),
     );
   }
 }
-
-
 
 
 

@@ -17,7 +17,7 @@ class UpdateStageUseCase extends UseCase<User, UParams> {
     //updateamos la stage
     params.user.updateStage(params.db);
 
-    return repository.updateUser(user: params.user, toAdd: params.user.lastactions);
+    return repository.updateUser(user: params.user);
   }
 }
 

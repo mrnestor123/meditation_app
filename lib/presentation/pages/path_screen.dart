@@ -277,8 +277,8 @@ class TabletPathScreen extends StatelessWidget {
             Column(
               children: [
                 Row(children: [
-                Text('You are currently on ',style: Configuration.tabletText('tiny', Colors.black)),
-                Text('Stage ' + _userstate.user.stagenumber.toString(),style: Configuration.tabletText('tiny', Configuration.maincolor))
+                  Text('You are currently on ',style: Configuration.tabletText('tiny', Colors.black)),
+                  Text('Stage ' + _userstate.user.stagenumber.toString(),style: Configuration.tabletText('tiny', Configuration.maincolor))
                 ]),
                 Text(_userstate.user.stage.description, style: Configuration.tabletText('tiny',Colors.black), textAlign: TextAlign.center),
                 SizedBox(height: Configuration.height*0.05),

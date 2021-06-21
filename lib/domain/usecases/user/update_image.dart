@@ -19,6 +19,6 @@ class UpdateImageUseCase extends UseCase<User, UParams> {
     Either<Failure,String> image = await repository.updateImage(params.image, params.user);
     image.fold((l) => print('error al subir imagen'), (r) => params.user.image = r);
 
-    return repository.updateUser(user: params.user, toAdd: params.user.lastactions);
+    return repository.updateUser(user: params.user);
   }
 }

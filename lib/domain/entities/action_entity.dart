@@ -5,7 +5,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserAction {
   IconData icono;
-  String username, message, type, hour, coduser, day;
+  String username, userimage, message, type, hour, coduser, day;
   dynamic action;
   DateTime time;
 
@@ -32,7 +32,7 @@ class UserAction {
     this.message += ', ' + action[0];
   }
 
-  UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message}){
+  UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message, this.userimage}){
     if(this.message == null){
    
     var types = {
@@ -83,6 +83,7 @@ class UserAction {
   factory UserAction.fromJson(Map<String, dynamic> json) => UserAction(
       time: json["time"] == null ? null : DateTime.parse(json["time"]),
       message: json['message'] == null ? null : json['message'],
+      userimage: json['userimage'] == null ? null : json['userimage'],
       type: json["type"] == null ? null : json["type"],
       username: json["username"] == null ? null : json["username"],
       coduser: json['coduser'] == null ? null : json['coduser'],

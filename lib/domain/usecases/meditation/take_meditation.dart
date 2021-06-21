@@ -17,7 +17,7 @@ class MeditateUseCase extends UseCase<User, Params> {
   Future<Either<Failure, User>> call(Params params) async {
    int stagenumber = params.user.stagenumber;
    params.user.takeMeditation(params.meditation, params.d);
-   return await userRepository.updateUser(user:params.user, d: params.d, toAdd: [params.meditation, params.user.lastactions], type: 'meditate');
+   return await userRepository.updateUser(user:params.user, d: params.d, toAdd: [params.meditation], type: 'meditate');
   }
 }
 

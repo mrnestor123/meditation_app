@@ -7,7 +7,6 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
@@ -34,12 +33,7 @@ class UserRepositoryImpl implements UserRepository {
       }
     } else {
       //Hay que arreglar este método
-      final localUser = await localDataSource.getUser();
-      if (localUser != null) {
-        return Right(localUser);
-      } else {
-        return Left(ServerFailure());
-      }
+      return Left(ServerFailure());
     }
   }
 
@@ -47,8 +41,8 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, User>> islogged() async {
     if (await networkInfo.isConnected) {
       try {
-        final user = await localDataSource.getUser();
-        remoteDataSource.getUserData(user);
+        final cod = await localDataSource.getUser();
+        final user = await remoteDataSource.getUserData(cod);
         return Right(user);
       } on Exception {
         return Left(ConnectionFailure(error: "User is not connected to the internet"));
@@ -60,19 +54,13 @@ class UserRepositoryImpl implements UserRepository {
     if (await networkInfo.isConnected) {
       try {
         final newUser = await remoteDataSource.updateUser(user:user,data: d, toAdd: toAdd, type: type);
-        localDataSource.updateData(user:user, toAdd: toAdd, type: type);
+      //  localDataSource.updateData(user:user, toAdd: toAdd, type: type);
         return Right(newUser);
       } on ServerException {
         return Left(ServerFailure());
       }
     } else {
-      //Hay que arreglar este método
-      final localUser = await localDataSource.updateData(user:user, toAdd: toAdd, type: type);
-      if (localUser != null) {
-        return Right(localUser);
-      } else {
         return Left(ServerFailure());
-      }
     }
   }
 

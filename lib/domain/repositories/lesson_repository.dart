@@ -7,15 +7,8 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
+/** ESTO NO SE UTILIZA !!! */
 abstract class LessonRepository {
 
   Future<Either<Failure,void>> takeLesson({UserModel user});
-
-  //in order to add a lesson to the database.
-  Future<Either<Failure,void>> addLesson({Lesson lesson});
-
-  Future<Either<Failure,List<Lesson>>> getBrainLessons({int stage});
-
-  Future<Either<Failure,List<Lesson>>> getMeditationLessons({int stage});
-
 }

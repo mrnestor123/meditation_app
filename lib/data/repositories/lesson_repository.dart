@@ -27,7 +27,6 @@ class LessonRepositoryImpl implements LessonRepository {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.updateUser(user:user);
-        await localDataSource.updateData(user:user);
         return Right(true);
       } on Exception {
         return Left(ServerFailure());
@@ -36,28 +35,4 @@ class LessonRepositoryImpl implements LessonRepository {
     return null;
   }
 
-  @override
-  Future<Either<Failure, void>> addLesson({Lesson lesson}) {
-    // TODO: implement addLesson
-    return null;
-  }
-
-  @override
-  Future<Either<Failure, List<LessonModel>>> getBrainLessons(
-      {int stage}) async {
-    if (await networkInfo.isConnected) {
-      try {
-        return Right(null);
-      } on Exception {
-        return Left(ServerFailure());
-      }
-    } else {
-      return Left(ServerFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<LessonModel>>> getMeditationLessons({int stage}) {
-    return null;
-  }
 }

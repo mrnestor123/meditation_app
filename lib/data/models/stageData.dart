@@ -17,7 +17,8 @@ class StageModel extends Stage {
       String obstacles,
       String skills,
       String mastery,
-      objectives})
+      String longimage,
+      stobjectives})
       : super(
             stagenumber: stagenumber,
             userscount: userscount,
@@ -27,7 +28,9 @@ class StageModel extends Stage {
             obstacles: obstacles,
             skills: skills,
             mastery: mastery,
-            objectives: objectives);
+            longimage: longimage,
+            stobjectives: stobjectives
+            );
 
   factory StageModel.fromRawJson(String str) =>
       StageModel.fromJson(json.decode(str));
@@ -39,12 +42,13 @@ class StageModel extends Stage {
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         description: json["description"] == null ? null : json["description"],
         userscount: json['userscount'] == null ? null : json['userscount'],
+        longimage: json['longimage']== null ? null : json['longimage'],
         image: json["image"] == null ? null : json["image"],
         goals: json["goals"] == null ? null : json["goals"],
         obstacles: json["obstacles"] == null ? null : json["obstacles"],
+        stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
         skills: json["skills"] == null ? null : json["skills"],
-        mastery: json["mastery"] == null ? null : json["mastery"],
-        objectives: json['objectives'] == null ? null : json['objectives']);
+        mastery: json["mastery"] == null ? null : json["mastery"]);
         
     return s;
   }
@@ -53,12 +57,13 @@ class StageModel extends Stage {
         "stagenumber": stagenumber == null ? null : stagenumber,
         "description": description == null ? null : description,
         "userscount": userscount == null ? null : userscount,
+        "longimage": longimage == null ? null: longimage,
         "image": image == null ? null : image,
         "goals": goals == null ? null : goals,
         "obstacles": obstacles == null ? null : obstacles,
         "skills": skills == null ? null : skills,
+        'objectives': stobjectives == null? null : stobjectives.toJson(),
         "mastery": mastery == null ? null : mastery,
-        "path": path == null ? null : path,
-        'objectives': objectives == null ? null : objectives
+        "path": path == null ? null : path
       };
 }

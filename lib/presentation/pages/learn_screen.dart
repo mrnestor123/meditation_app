@@ -37,8 +37,8 @@ class _LearnScreenState extends State<LearnScreen> {
               itemCount: _userstate.data.stages.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
               itemBuilder: (context, index) {
-                var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.objectives['lecciones'])*6).round();
-
+                var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
+                
                 return Container(
                   margin: EdgeInsets.all(Configuration.medmargin),
                   decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
@@ -129,7 +129,10 @@ class _StageViewState extends State<StageView> {
   var filter = ['all'];
 
   FutureOr onGoBack(dynamic value) {
-    setState(() {if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user.progress);});
+    setState(() {
+      if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user);
+      
+      });
   }
 
   @override
@@ -186,14 +189,30 @@ class _StageViewState extends State<StageView> {
                   Positioned(
                       top: 15,
                       left: 15,
-                      child: Container(
-                        width: Configuration.safeBlockHorizontal * 5,
-                        height: Configuration.safeBlockHorizontal * 5,
-                        child: Icon(
-                            content.type == 'meditation'
-                                ? Icons.self_improvement
-                                : Icons.book,
-                            color: Colors.grey),
+                      child: Row(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(right: Configuration.blockSizeHorizontal *2),
+                            width: Configuration.safeBlockHorizontal * 5,
+                            height: Configuration.safeBlockHorizontal * 5,
+                            child: Icon(
+                                content.type == 'meditation'
+                                    ? Icons.self_improvement
+                                    : Icons.book,
+                                color: Colors.grey),
+                          ),
+                          content.position < _userstate.user.position || 
+                            content.stagenumber < _userstate.user.stagenumber || 
+                            _userstate.user.userStats.lastread.where((c) => c['cod'] == content.cod).length > 0
+                            ?  
+                            Container(
+                              width: Configuration.safeBlockHorizontal * 5,
+                              height: Configuration.safeBlockHorizontal * 5,
+                              child: Icon(Icons.visibility,
+                                color: Colors.lightBlue
+                              ),
+                            ): Container(),
+                        ],
                       )),
                   Positioned(
                       left: 15,
@@ -641,8 +660,6 @@ class _ContentViewState extends State<ContentView> {
 
 
 
-
-
 //VISTAS DE TABLET
 class TabletLearnScreen extends StatefulWidget {
   @override
@@ -667,7 +684,7 @@ class _TabletLearnScreenState extends State<TabletLearnScreen> {
                   itemCount: _userstate.data.stages.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
                   itemBuilder: (context, index) {
-                    var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.objectives['lecciones'])*6).round();
+                    var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
 
                     return Container(
                       margin: EdgeInsets.all(16.0),
@@ -759,7 +776,8 @@ class _TabletStageViewState extends State<TabletStageView> {
   var filter = ['all'];
 
   FutureOr onGoBack(dynamic value) {
-    setState(() {if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user.progress);});
+    setState(() {
+      if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user, isTablet: true);});
   }
 
   @override
@@ -770,7 +788,6 @@ class _TabletStageViewState extends State<TabletStageView> {
 
   Widget getLessons(context) {
     List<Widget> lessons = new List.empty(growable: true);
-
 
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3), 
@@ -792,8 +809,7 @@ class _TabletStageViewState extends State<TabletStageView> {
         ),
         child: ElevatedButton(
           onPressed: () {
-            if (_userstate.user.position >= content.position ||
-                _userstate.user.stagenumber > content.stagenumber) {
+            if (_userstate.user.position >= content.position || _userstate.user.stagenumber > content.stagenumber) {
               Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -826,7 +842,22 @@ class _TabletStageViewState extends State<TabletStageView> {
                         color: Colors.grey,
                         size: Configuration.tabletsmicon,
                         ),
-                  )),
+                  )
+              ),
+              content.position < _userstate.user.position || 
+              content.stagenumber < _userstate.user.stagenumber || 
+              _userstate.user.userStats.lastread.where((c) => c['cod'] == content.cod).length > 0
+              ? 
+              Positioned(
+                  top: 15,
+                  right: 15,
+                  child: Container(
+                    child: Icon(Icons.visibility,
+                        color: Colors.lightBlue,
+                        size: Configuration.tabletsmicon,
+                        ),
+                )
+              ) : Container(),
               Positioned(
                   left: 15,
                   bottom: 15,
@@ -840,6 +871,20 @@ class _TabletStageViewState extends State<TabletStageView> {
                                ),
                     ),
                   )),
+              /*Positioned(
+                  bottom: 0.0,
+                  left: 0.0,
+                  width: Configuration.safeBlockHorizontal * 40,
+                  height: Configuration.safeBlockHorizontal * 5,
+                  child:  Container(
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [Colors.grey.withOpacity(0.9), Colors.grey.withOpacity(0.1)],
+                          )),
+                        )
+              ),*/
               Positioned(
                 left: 0,
                 bottom: 0,
@@ -969,8 +1014,6 @@ class _TabletStageViewState extends State<TabletStageView> {
   }
 }
 
-
-
 class TabletContentView extends StatefulWidget {
   Content content;
   Meditation meditation;
@@ -1031,67 +1074,60 @@ class _TabletContentViewState extends State<TabletContentView> {
 
   Widget vistaLeccion() {
 
-    Widget vistaSlide(slide, last) {
-      return Container(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-            mainAxisAlignment: slide['image'] == ''
-                ? MainAxisAlignment.center
-                : MainAxisAlignment.start,
-            children: [
-              slide['image'] != null ? Image.network(
-                slide["image"],
-                width: Configuration.width*0.4,
-              ) : null,
-              Container(
-                  width: Configuration.width * 0.45,
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(slide["text"], style: Configuration.tabletText('tiny', Colors.black, font: 'Helvetica'))),
-              Row(mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                      AnimatedOpacity(
-                        opacity: reachedend && last ? 1.0 : 0.0, 
-                        duration: Duration(seconds: 1),
-                        child: Container(
-                          width: Configuration.width*0.3,
-                          child: AspectRatio(
-                            aspectRatio: 9/2,
-                            child: ElevatedButton(
-                                onPressed: () async {
-                                await _userstate.takeLesson(widget.lesson);
-                                Navigator.pop(context, true);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Configuration.maincolor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
-                              ), 
-                              child: Text(
-                                'Finish',
-                                style: Configuration.tabletText('tiny', Colors.white),
-                              )
-                            ),
-                          ),
-                        ),
-                      ),
-                  ])
-            ],
-          ),
-      );
+    Widget vistaSlide(slide) {
+      return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                slide['image'] != null && slide['image'] != '' ? Image.network(slide["image"], width: Configuration.width*0.4) : Container(),
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(slide["text"], style: Configuration.tabletText('tiny', Colors.black, font: 'Helvetica')),
+                    ),
+                )
+            ]),
+            SizedBox(height: 30),
+            AnimatedOpacity(
+              opacity: reachedend ? 1.0 : 0.0, 
+              duration: Duration(seconds: 4),
+              child: Container(
+                width: Configuration.width*0.3,
+                child: AspectRatio(
+                  aspectRatio: 9/2,
+                  child: ElevatedButton(
+                      onPressed: () async {
+                      await _userstate.takeLesson(widget.lesson);
+                      Navigator.pop(context, true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Configuration.maincolor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
+                    ), 
+                    child: Text(
+                      'Finish',
+                      style: Configuration.tabletText('tiny', Colors.white),
+                    )
+                  ),
+                ),
+              ),
+            )
+          ],
+        );
 
     }
     
     return CarouselSlider.builder(
-        itemCount: widget.lesson.text.length ~/ 2,
+        itemCount: widget.lesson.text.length,
         itemBuilder: (context, index) {
           return Container(
             width: Configuration.width,
+            height: Configuration.height,
             color: Configuration.lightgrey,
-            child: Row(
-              children: [
-                vistaSlide(widget.lesson.text[_index], false),
-                vistaSlide(widget.lesson.text[_index + 1],true)
-              ],
-            ),
+            padding: EdgeInsets.all(32),
+            child: vistaSlide(widget.lesson.text[index]),
           );
         },
         options: CarouselOptions(
@@ -1103,8 +1139,8 @@ class _TabletContentViewState extends State<TabletContentView> {
             onPageChanged: (index, reason) {
               setState(() {
                 _index = index ;
-                if (_index >= widget.lesson.text.length ~/ 2 - 1) {
-                  Future.delayed(Duration(seconds: 2),() => setState(()=> reachedend = true));
+                if (_index == widget.lesson.text.length - 1) {
+                  setState(()=> reachedend = true);
                 }
               });
             }));
@@ -1127,9 +1163,8 @@ class _TabletContentViewState extends State<TabletContentView> {
     });
   
     var count = 0;
-    var halflist = widget.lesson.text.length ~/ 2;
 
-    for(var lesson in widget.lesson.text.sublist(0,halflist)){
+    for(var lesson in widget.lesson.text){
       balls.add(count++);
     }
 
@@ -1145,7 +1180,8 @@ class _TabletContentViewState extends State<TabletContentView> {
         appBar: AppBar(
           leading: IconButton(
               icon: Icon(Icons.close, size: Configuration.tabletsmicon, color: Colors.black),
-              onPressed: () => Navigator.pop(context)),
+              onPressed: () => Navigator.pop(context)
+              ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),

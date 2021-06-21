@@ -9,12 +9,12 @@ import 'config/configuration.dart';
 class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text('Settings', 
-          style: Configuration.text('medium', Colors.black)
-        ),
+        title: Text('Settings',style: Configuration.text('medium', Colors.black)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -29,7 +29,7 @@ class Settings extends StatelessWidget {
               primary: Configuration.grey,
               padding: EdgeInsets.all(Configuration.smpadding)
             ),
-            onPressed: () =>showGeneralDialog(
+            onPressed: () => showGeneralDialog(
               barrierColor: Colors.black.withOpacity(0.5),
               transitionBuilder: (context, a1, a2, widget) {
                 return Transform.scale(
@@ -47,7 +47,13 @@ class Settings extends StatelessWidget {
               pageBuilder: (context, animation1, animation2) {}) ,             
             child: Text('Increase Stage',
                 style: Configuration.text('big', Colors.white) )
-          )
+          ),
+          ElevatedButton(onPressed: () { 
+            _userstate.logout();
+            Navigator.pushReplacementNamed(context, '/welcome');
+ 
+          }, child: Text('log out'))
+
         ],
       ),    
     );
@@ -64,21 +70,24 @@ class IncreaseScreenDialog extends StatelessWidget {
       content: Container(
           height: Configuration.height * 0.3,
           width: Configuration.width,
-          decoration: BoxDecoration(
-              color: Colors.white, borderRadius: BorderRadius.circular(16)),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
           padding: EdgeInsets.all(Configuration.smpadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                   'You are going to change to the next stage while not finishing the stage before',
-                  style: Configuration.text('small', Colors.black)),
+                  style: Configuration.tabletText('tiny', Colors.black)),
               SizedBox(height: Configuration.height * 0.05),
               Text('Are you sure?',
-                  style: Configuration.text('small', Colors.black)),
+                  style: Configuration.tabletText('tiny', Colors.black)),
               SizedBox(height: Configuration.height * 0.01),
               ElevatedButton(
-                  onPressed: (){_userstate.updateStage(); Navigator.pop(context);},
+                  onPressed: (){
+                    print('pressed button');
+                    _userstate.updateStage(); 
+                    Navigator.pop(context);
+                  },
                   child: Padding(
                     padding: EdgeInsets.all(Configuration.smpadding),
                     child: Text('Yes'),

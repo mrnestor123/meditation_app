@@ -9,7 +9,6 @@ import 'package:mobx/mobx.dart';
 
 
 void main() {
-
   Stage one = new Stage(stagenumber: 1, image: 'stage1', 
     objectives: {
         'totaltime': 240,
@@ -87,6 +86,15 @@ void main() {
 
 
   test('lessons', () {
+    
+
+
+
+
+
+
+
+
 
   });
 }

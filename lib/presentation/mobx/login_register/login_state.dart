@@ -27,6 +27,13 @@ abstract class _LoginState with Store {
   @observable
   Future<Either<Failure, dynamic>> _userFuture;
 
+  @observable 
+  //valida el login y el register tanto en tablet como en móvil
+  final formKey = GlobalKey<FormState>();
+
+  final TextEditingController userController = new TextEditingController();
+  final TextEditingController passwordController = new TextEditingController();
+
   @observable
   String errorMessage = "";
 
@@ -40,6 +47,28 @@ abstract class _LoginState with Store {
     _loginusecase = login;
   }
 
+  String switchExceptions(exception){
+
+    //añadir mas excepciones !!
+    switch(exception) {
+      case 'user-not-found': return 'User not Found';
+      case 'wrong-password': return 'Password is invalid';
+    }
+
+
+  }
+
+  bool validateMail(String input){
+    const emailRegex = r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
+    
+    if (RegExp(emailRegex).hasMatch(input)) {
+      return true;
+    }
+    return false;
+  }
+
+
+  
   @action
   Future login(var user) async {
     startedlogin = true;
@@ -48,8 +77,7 @@ abstract class _LoginState with Store {
       errorMessage = "";
       _userFuture = _loginusecase(UserParams(usuario: user));
       log = await _userFuture;
-      log.fold(
-          (Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
+      log.fold((Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
     } on Failure {
       errorMessage = 'Could not log user';
     }
@@ -57,6 +85,7 @@ abstract class _LoginState with Store {
 
   // instead of returning true or false
 // returning user to directly access UserID
+  @action
   Future signin(String email, String password) async {
     try {
       UserCredential result = await auth.signInWithEmailAndPassword(email: email, password: email);
@@ -64,36 +93,12 @@ abstract class _LoginState with Store {
       
       await login(user);
 
-      // return Future.value(true);
       return Future.value(user);
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
       // simply passing error code as a message
       print(e.code);
-      switch (e.code) {
-        case 'ERROR_INVALID_EMAIL':
-          //showErrDialog(context, e.code);
-          break;
-        case 'ERROR_WRONG_PASSWORD':
-          //   showErrDialog(context, e.code);
-          break;
-        case 'ERROR_USER_NOT_FOUND':
-          // showErrDialog(context, e.code);
-          break;
-        case 'ERROR_USER_DISABLED':
-          // showErrDialog(context, e.code);
-          break;
-        case 'ERROR_TOO_MANY_REQUESTS':
-          //  showErrDialog(context, e.code);
-          break;
-        case 'ERROR_OPERATION_NOT_ALLOWED':
-          //showErrDialog(context, e.code);
-          break;
-      }
-      // since we are not actually continuing after displaying errors
-      // the false value will not be returned
-      // hence we don't have to check the valur returned in from the signin function
-      // whenever we call it anywhere
-      return Future.value(null);
+      //aqui habra que devolver el mensaje !!
+      return switchExceptions(e.code);
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:mobx/mobx.dart';
 class DataBase {
   ObservableList<Stage> stages = new ObservableList();
   ObservableList<User> users = new ObservableList();
+  //La VERSION ESTA BIEN. LOS USUARIOS LOS GUARDAMOS EN LA DATABASE
   String version;
   String versionnotes;
 

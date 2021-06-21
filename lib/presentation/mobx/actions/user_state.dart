@@ -96,13 +96,15 @@ abstract class _UserState with Store {
     });
   }
 
-  //Esto tiene que ser LESSONNNNNNNN
   @action
   Future<bool> takeLesson(LessonModel l) async {
-    int currentposition = user.position;
+    user.progress = null;
+
+    int currentposition = user.stagenumber;
     await lesson.call(LessonParams(lesson: l, user: user, d: data));
 
-    if (currentposition < user.position) {
+    // SI HA SUBIDO DE ETAPA !!!! 
+    if (currentposition < user.stagenumber) {
       return true;
     } else {
       return false;

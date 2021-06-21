@@ -73,6 +73,15 @@ class UserStats {
     }
   }
 
+  void reset() {
+      this.stage.timemeditated = 0;
+      this.stage.lessons = 0;
+      this.stage.maxstreak = 0;
+      this.stage.guidedmeditations = 0;
+      this.stage.timemeditations = 0;
+      this.lastread.clear();
+    }
+
 }
 
 //timemeditations son meditaciones por encima de x tiempo establecido
@@ -116,13 +125,7 @@ class StageStats {
       "tiempo": timemeditated == null ? 0 : timemeditated
     };    
 
-    void reset() {
-      timemeditated = 0;
-      lessons = 0;
-      maxstreak = 0;
-      guidedmeditations = 0;
-      timemeditations = 0;
-    }
+    
 }
 
 class TotalStats{

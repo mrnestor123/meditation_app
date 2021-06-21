@@ -58,11 +58,11 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       );
 
+      u.setActions(json['thisweekactions'], false);
       u.setActions(json['todayactions'], true);
-      u.setActions(json['thisweekactions'], true);
-      // también se podría hacer algo así para saber quien te sigue?? !!! HACER PARA EL FUTURO!!!
       u.setFollowedUsers(json['following'] != null ? json['following'] : []);
-      //HACER INIT USER AQUI ????
+      u.setFollowsYou(json['followsyou'] != null ? json['followsyou'] : []);
+
     return u;
   }
 
@@ -78,6 +78,7 @@ class UserModel extends User {
         'image': image == null ? null : image,
         "following": following.map((element) => element.coduser).toList(),
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
+        "followsyou": followsyou.map((user) => user.coduser).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
       };
 }

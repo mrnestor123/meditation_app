@@ -21,6 +21,7 @@ class _GameScreenState extends State<GameScreen> {
   List<Widget> games() {   
     List<Widget> g = new List.empty(growable: true);
     for(var element in _userstate.data.stages[0].games){
+      VideoPlayerController v = new VideoPlayerController.network(element.video)..initialize();
       g.add(
         Column(
           children: [
@@ -33,7 +34,8 @@ class _GameScreenState extends State<GameScreen> {
                   aspectRatio: 1/1,
                   child: Container( 
                     margin: EdgeInsets.all(Configuration.tinpadding),
-                    decoration: BoxDecoration(color: Colors.grey))),
+                    child: VideoPlayer(v),                    
+                    )),
               ),
             ),
             Text(element.title, style: Configuration.text('small',Colors.black),)

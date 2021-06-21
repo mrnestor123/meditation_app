@@ -32,6 +32,9 @@ abstract class _GameState with Store {
   @observable
   VideoPlayerController controller;
 
+  @observable
+  VideoPlayerController beforecontroller;
+
   @action
   void selectgame(Game g){
     started = false;

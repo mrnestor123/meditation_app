@@ -26,7 +26,7 @@ class TakeLessonUseCase extends UseCase<void, LessonParams> {
     bool aux;
     // se podría meter en el updateuser todo
     params.user.takeLesson(params.lesson, params.d);
-    return userRepository.updateUser(user: params.user, d: params.d, toAdd: params.user.lastactions, type: 'lesson');
+    return userRepository.updateUser(user: params.user, d: params.d,  type: 'lesson');
   }
 }
 

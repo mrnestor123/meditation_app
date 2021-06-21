@@ -41,7 +41,10 @@ abstract class _MeditationState with Store {
 
   @observable
   String type = 'free';
-  
+
+  bool finished = false;
+
+
   var selectedstage = 1;
   var selectedtype = 'Meditation';
 
@@ -49,6 +52,8 @@ abstract class _MeditationState with Store {
   Duration duration;
 
   Duration totalduration;
+
+
 
   @observable
   bool startedmeditation = false;
@@ -101,7 +106,8 @@ abstract class _MeditationState with Store {
 
   @action
   void startMeditation() {
-    startTimer();
+    finishMeditation();
+    //startTimer();
   }
 
   @action
@@ -113,7 +119,7 @@ abstract class _MeditationState with Store {
     this.state = 'started';
 
     timer = new Timer.periodic(oneSec, (timer) {
-      if (this.duration.inSeconds < 2) {
+      if (this.duration.inSeconds < 2 ) {
         finishMeditation();
         state = 'finished';
         timer.cancel();
@@ -122,6 +128,7 @@ abstract class _MeditationState with Store {
       }
     });
   }
+
 
   @action
   void pause() {

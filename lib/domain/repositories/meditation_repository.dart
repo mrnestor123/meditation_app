@@ -6,7 +6,7 @@ import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
-
+/** ESTO NO SE UTILIZA !!! */
 abstract class MeditationRepository {
   Future<Either<Failure, bool>> meditate({MeditationModel meditation, UserModel user});
 }

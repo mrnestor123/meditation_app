@@ -16,7 +16,7 @@ class ChangeDataUseCase extends UseCase<User, UParams> {
   @override
   Future<Either<Failure, User>> call(UParams params) async {
     params.user.nombre = params.nombre;
-    return repository.updateUser(user: params.user, d: params.db, toAdd: params.user.lastactions, type:params.type);
+    return repository.updateUser(user: params.user, d: params.db, type:params.type);
   }
 }
 

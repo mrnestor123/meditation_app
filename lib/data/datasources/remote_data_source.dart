@@ -35,9 +35,8 @@ abstract class UserRemoteDataSource {
   //We get all the users data
   Future<DataBase> getData();
 
-
   //sacamos los datos del usuario que no guardamos en la bd
-  Future getUserData(User u);
+  Future <UserModel> getUserData(String coduser);
 
   Future updateImage(PickedFile image, User u);
 }
@@ -53,22 +52,41 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
   addfollowers(User loggeduser) async{
-    QuerySnapshot following = await database.collection('following').where('coduser', isEqualTo: loggeduser.coduser).get();
-    QuerySnapshot followsyou = await database.collection('following').where('following',arrayContains: loggeduser.coduser).get();
 
-    if(following.docs.length > 0){
-      for(DocumentSnapshot doc in following.docs){
-        var user = UserModel.fromJson(doc.data());
-        //simplemente añado los cods. habría que hacer un read
+    //si sigue a alguien sacamos los que sigue y los que no sigue
+    if(loggeduser.followedcods.length > 0 ){
+      QuerySnapshot notfollowed = await database.collection('users').where('coduser', whereNotIn: loggeduser.followedcods).get();
+
+      loggeduser.followedcods.forEach((element) async { 
+        QuerySnapshot userquery = await database.collection('users').where('coduser', isEqualTo: element).get();
+        UserModel user = UserModel.fromJson(userquery.docs[0].data());  
         loggeduser.addfollow(user);
-      }
+      });
+
+      if(notfollowed.docs.length > 0){
+        for(DocumentSnapshot doc in notfollowed.docs){
+          loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
+        }
+      }    
+    }else{
+      QuerySnapshot allusers = await database.collection('users').where('coduser', isNotEqualTo: loggeduser.coduser).get();
+
+       if(allusers.docs.length > 0){
+        for(DocumentSnapshot doc in allusers.docs){
+          if(doc.data()['cod'])
+          loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
+        }
+      }  
     }
 
+    QuerySnapshot followsyou = await database.collection('users').where('following',arrayContains: loggeduser.coduser).get();
+
     if(followsyou.docs.length > 0){
-       for(DocumentSnapshot doc in followsyou.docs){
-        loggeduser.addFollower(UserModel.fromJson(doc.data()));
+      for(DocumentSnapshot doc in followsyou.docs){
+        UserModel user = UserModel.fromJson(doc.data());
+        loggeduser.addFollower(user);
       }
-    }    
+    }
 
     loggeduser.sortFollowers();
   }
@@ -153,6 +171,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 
   @override
+  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ??
   Future<DataBase> getData() async  {
     DataBase d = new DataBase();
     QuerySnapshot stages = await database.collection('stages').get();
@@ -192,6 +211,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await database.collection("users").doc(documentId).update(user.toJson());
 
     //actualizamos la base de datos. habrá que mirarlo esto !!!!!!!!!. ESTO NO LO HARÍA ASÍ . HABRÁ QUE CAMBIAR ESTOO!!!
+    //aCTUALIZAR DATA CADA 5 MIN ?
+    /*
     if (data != null) {
       QuerySnapshot users = await database.collection('users').get();
       data.users.clear();
@@ -199,27 +220,40 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         data.users.add(new UserModel.fromJson(user.data()));
       }
       data.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
-    }
+    }*/
 
     //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
     if (type == 'meditate') {
       await database.collection('meditations').add(toAdd[0].toJson());
-    } else if(type =='follow' || type =='unfollow'){
-      QuerySnapshot userfollow = await database.collection('following').where('coduser', isEqualTo: user.coduser).get();
-      if(userfollow.docs.length > 0){
-        await database.collection('following').doc(userfollow.docs[0].id).update({'following': user.following.map((u) => u.toJson()).toList()});
-      } else {
-        await database.collection('following').add({'coduser':user.coduser,'following': user.following.map((u)=> u.toJson()).toList()});
-      }
-    }
-
+    } 
   }
 
+
+
+  /*
+
+    TODO: SACAR LAS LECCIONES QUE HA LEIDO !!
+  */
+
   @override
-  Future getUserData(User u) async{
-    QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:u.stagenumber).get();
-    StageModel s =  await populateStage(stage.docs[0].data());
-    u.setStage(s);
-    await addfollowers(u);
+  Future <UserModel> getUserData(String coduser) async{
+    QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: coduser).get();
+    if(user.docs.length > 0){
+      UserModel u = UserModel.fromJson(user.docs[0].data());
+  
+      QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:u.stagenumber).get();
+      StageModel s =  await populateStage(stage.docs[0].data());
+      u.setStage(s);
+      await addfollowers(u);
+      
+      QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: u.coduser).get();
+
+      if (meditations.docs.length > 0) {
+        for (DocumentSnapshot doc in meditations.docs) {
+          u.addMeditation(new MeditationModel.fromJson(doc.data()));
+        }
+      }
+      return u;
+    } throw Exception();
   }
 }

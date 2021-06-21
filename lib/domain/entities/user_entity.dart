@@ -20,6 +20,7 @@ class User {
   var user;
   int stagenumber, position, meditposition;
   Stage stage;
+  //follows es cuando un usuario TE SIGUE!!
   bool classic, follows;
 
   //para el modal de progreso
@@ -34,17 +35,20 @@ class User {
   int percentage;
 
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
-  final List<UserAction> lastactions = new List.empty(growable: true);
   List<UserAction> todayactions = new ObservableList();
   List<UserAction> thisweekactions = new ObservableList() ;
-  final ObservableList<UserAction> acciones = new ObservableList();
 
   //códigos de los usuarios a los que sigue el usuario
   final List<dynamic> followedcods = new List.empty(growable: true);
+  final List<dynamic> followsyoucods = new List.empty(growable: true);
+
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
   final ObservableList<UserModel> following = new ObservableList();
+  final ObservableList<UserModel> notfollowing = new ObservableList();
   final ObservableList<UserModel> followsyou = new ObservableList();
+  //LIST OF USERS SORTED 
   final ObservableList<UserModel> allusers = new ObservableList();
+
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
@@ -93,73 +97,71 @@ class User {
     @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
   */
 
+  //HAY QUE QUITAR COSAS DE AQUÍII!!!!!
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
   int getStageNumber() => this.stagenumber;
 
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
-    this.acciones.add(a);
-    if(this.todayactions.length > 0 ){
+    if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson'){
       for(UserAction a in this.todayactions) {
-        if(type !='meditation' && a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
+        if(a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
           a.setAction(attribute);
+          a.userimage = this.image;
           a.time = DateTime.now().toLocal();
           return;
         }
       }
-      
       this.todayactions.add(a);
     }else{
       this.todayactions.add(a);
     }
 
-    this.thisweekactions.add(a);
-    this.lastactions.add(a);
+    //this.thisweekactions.add(a);
   }
 
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
-  void addFollower(User u) { u.follows = true; following.add(u); allusers.add(u);}
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setActions(json, isToday) {
-
-    //habrá que comprobar si las acciones de hoy son buenas
-    if(isToday){
+    if(isToday) {
       todayactions = new ObservableList();
-      if(json != null && json.length > 0 ){ 
-        for(var action in json){
-          todayactions.add(UserAction.fromJson(action));
+      if(json != null && json.length > 0 ) { 
+        for(var action in json){ 
+          var day = DateTime.parse(action["time"]);
+          if(day.day == DateTime.now().day && day.month == DateTime.now().month){
+            action['userimage'] = this.image;
+            todayactions.add(UserAction.fromJson(action));
+          }else {
+            action['userimage'] = this.image;
+            thisweekactions.add(UserAction.fromJson(action));
+          }
         }
       }
-    } else{
+    } else {
+      DateTime today = DateTime.now();
+      var dayOfWeek = 1;
+      DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
       thisweekactions = new ObservableList();
-      if(json != null && json.length > 0 ){ 
+      if(json != null && json.length > 0){ 
         for(var action in json){
-          thisweekactions.add(UserAction.fromJson(action));
+           var day = DateTime.parse(action["time"]);
+            if(day.compareTo(monday) >= 0 && day.compareTo(monday.add(Duration(days: 7))) < 0){
+              action['userimage'] = this.image;
+              thisweekactions.add(UserAction.fromJson(action));
+          }
         }
       }
     }
   }
 
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
+  void setFollowsYou(List<dynamic> u )=>  followsyoucods.addAll(u);
 
-  void addAction(UserAction a) { 
-    DateTime today = DateTime.now();
-    DateTime thismonday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1, hours: today.hour));
-
-    if(today.day == a.time.day && today.month == a.time.month) {
-      todayactions.add(a);
-    }
-
-    if(thismonday.compareTo(a.time) <= 0){
-      thisweekactions.add(a);
-    }
-
-    acciones.add(a);
-  }
+  void addfollow(User u) { u.follows = true;  following.add(u); allusers.add(u);}  
+  void addFollower(User u) { followsyou.add(u); }
+  void addUnfollower(User u ) { u.follows = false; notfollowing.add(u); allusers.add(u);}
   
-  void addfollow(User u) => { following.add(u) };
-  void addUnfollower(User u) { followsyou.add(u);}
   void setStage(StageModel s) {
     this.stage = s ;
     setPercentage();
@@ -169,11 +171,10 @@ class User {
   void sortFollowers() {
     this.allusers.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
     this.following.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
+    this.notfollowing.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
   }
   
   void follow(User u) {
-    this.lastactions.clear();
-   
     for(User user in allusers){
       if(user.coduser == u.coduser){
         user.follows = true;
@@ -186,9 +187,7 @@ class User {
     }
   }
 
-  void unfollow(User u) {
-    this.lastactions.clear();
-     
+  void unfollow(User u) {     
     for(User user in allusers){
       if(user.coduser == u.coduser){
         user.follows = false;
@@ -199,18 +198,23 @@ class User {
       setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
       following.remove(u);
     }
+
   }
 
   void updateStage(DataBase data) {
+    this.stagenumber +=1;
+
     data.stages.forEach((element) {
-      if (element.stagenumber == (this.stagenumber + 1)) {
+      if (element.stagenumber == this.stagenumber) {
         this.stage = element;
       }
     });
 
+    this.progress = null;
     this.stagenumber = this.stage.stagenumber;
+    this.percentage = 0;
     this.position = 0;
-    userStats.stage.reset();
+    userStats.reset();
 
     setAction("updatestage", attribute: this.stagenumber.toString());
   }
@@ -224,41 +228,33 @@ class User {
     return false;
   }
 
-  //este método se repite en la etapa también ... Moverlo todo aquí.
-  //!!!! REFACTORIZAR !!!!
   void setPercentage() {
     Stage s = this.stage;
 
-    //en el momento que se cambie la nomenclatura estos métodos van a fallar !!!!! :(
-    var labels = {
-      'meditation': s.objectives['meditation']['time'].toString() + ' min meditations' ,
-      'totaltime': 'Total time',
-      'streak': 'Streak',
-      'lecciones': 'Lessons',
-      'meditguiadas':'Guided meditations'
-    };
-
     var objectiveCheck = {
-      'totaltime': () => userStats.stage.timemeditated >= s.objectives['totaltime'] ? true : userStats.stage.timemeditated.toString() + '/' + s.objectives['totaltime'].toString() ,
-      'meditation': () => userStats.stage.timemeditations >= s.objectives['meditation']['count'] ? true : userStats.stage.timemeditations.toString() + '/' +  s.objectives['meditation']['count'].toString(),
-      'streak': () => userStats.stage.maxstreak >= s.objectives['streak'] ? true : userStats.stage.maxstreak.toString() + '/' + s.objectives['streak'].toString() ,
-      'lecciones': () => userStats.stage.lessons >= s.objectives['lecciones'] ? true : userStats.stage.lessons.toString() + '/' + s.objectives['lecciones'].toString(),
-      'meditguiadas': () => userStats.stage.guidedmeditations >= s.objectives['meditguiadas'] ? true : userStats.stage.guidedmeditations.toString() + '/' + s.objectives['meditguiadas'].toString() 
+      'totaltime': userStats.stage.timemeditated ,
+      'meditation': userStats.stage.timemeditations ,
+      'streak': userStats.stage.maxstreak,
+      'lecciones': userStats.stage.lessons,
+      'meditguiadas': userStats.stage.guidedmeditations 
     };
 
     var percentageCheck = {
-      'Total time': () => userStats.stage.timemeditated / s.objectives['totaltime'] ,
-       s.objectives['meditation']['time'].toString() + ' min meditations': () => userStats.stage.timemeditations / s.objectives['meditation']['count']  ,
-      'Streak': () => userStats.stage.maxstreak / s.objectives['streak'],
-      'Lessons': () => userStats.stage.lessons / s.objectives['lecciones'],
-      'Guided meditations': () => userStats.stage.guidedmeditations / s.objectives['meditguiadas']   
+      'Total time': () => userStats.stage.timemeditated / s.stobjectives.totaltime ,
+      s.stobjectives.freemeditationlabel : () => userStats.stage.timemeditations / s.stobjectives.meditationcount,
+      'Streak': () => userStats.stage.maxstreak / s.stobjectives.streak,
+      'Lessons': () => userStats.stage.lessons / s.stobjectives.lecciones,
+      'Guided meditations': () => userStats.stage.guidedmeditations / s.stobjectives.meditguiadas
     };
 
-    double passedcount = 0;
+    var objectives =  s.stobjectives.getObjectives();
 
-    s.objectives.forEach((key, value) { 
-      passedObjectives[labels[key]] = objectiveCheck[key](); 
-    }); 
+    // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
+    objectives.forEach((key,value) { 
+         passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
+    });
+
+    double passedcount = 0;
 
     passedObjectives.forEach((key, value) { 
       if(value == true) {
@@ -269,24 +265,28 @@ class User {
       }
     });
 
-    this.percentage = ((passedcount / s.objectives.length) * 100).floor();
+    this.percentage = ((passedcount / objectives.length) * 100).floor();
   }
 
   bool takeLesson(Lesson l, DataBase d) {
+    this.userStats.lastread.clear();
 
-    this.lastactions.clear();
-    List<Lesson> lessons = List.empty(growable:true);
-
-    if (l.stagenumber == this.stagenumber && this.position <= l.position) {
+    if (l.stagenumber == this.stagenumber 
+        && this.position <= l.position 
+        && (
+          this.userStats.lastread.length == 0 
+        || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0
+        )
+      ) {
       this.userStats.takeLesson();
-      this.progress = Progress(
+       this.progress = Progress(
         done: this.userStats.stage.lessons,
-        total: this.stage.objectives['lecciones'], 
+        total: this.stage.stobjectives.lecciones, 
         what: ' Lessons'
       );
       setPercentage();
 
-      if (this.stage.path.where((c) => c.position == this.position).length == this.userStats.lastread.length + 1) {
+      if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
         this.position += 1;
         this.userStats.lastread.clear();
         return true;
@@ -297,7 +297,7 @@ class User {
     }
     
 
-    if (this.percentage == 100) {
+    if (this.percentage >= 100) {
       this.updateStage(d);
     }
 
@@ -310,7 +310,6 @@ class User {
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
     
-    this.lastactions.clear();
     this.totalMeditations.add(m);
 
     //comprobamos la racha
@@ -328,15 +327,14 @@ class User {
     
     this.userStats.meditate(m);
 
-
     // si la meditación es free
     if (m.title == null) {
-      if (this.stage.objectives['meditation'] != null && this.stage.objectives['meditation']['time'] != null && this.stage.objectives['meditation']['time'] <= m.duration.inMinutes) {
+      if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
         this.userStats.stage.timemeditations++;
         progress = Progress(
           done: this.userStats.stage.timemeditations,
-          total: this.stage.objectives['meditation']['count'], 
-          what: this.stage.objectives['meditation']['time'].toString() + ' min meditations'
+          total: this.stage.stobjectives.meditationcount, 
+          what: this.stage.stobjectives.freemeditationlabel
         );
       }
       setAction('meditation', attribute: [m.duration.inMinutes]);
@@ -348,7 +346,7 @@ class User {
         guidedMeditations.add(m);
         progress = Progress(
           done: this.userStats.stage.guidedmeditations,
-          total: this.stage.objectives['meditguiadas'], 
+          total: this.stage.stobjectives.meditguiadas, 
           what: ' guided meditations');
       }
 
