@@ -11,8 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
@@ -23,8 +24,7 @@ class RegisterWidget extends StatelessWidget {
   final TextEditingController _confirmController = new TextEditingController();
   final TextEditingController _mailController = new TextEditingController();
   String your_client_id = "445064026505232";
-  String your_redirect_url =
-      "https://www.facebook.com/connect/login_success.html";
+  String your_redirect_url = "https://www.facebook.com/connect/login_success.html";
   var _userstate;
 
   void pushNextPage(user, context) {
@@ -36,7 +36,7 @@ class RegisterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _registerstate = Provider.of<RegisterState>(context);
+    final _registerstate = Provider.of<LoginState>(context);
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
         extendBodyBehindAppBar: true,
@@ -75,48 +75,23 @@ class RegisterWidget extends StatelessWidget {
                     icon: Icon(FontAwesomeIcons.key),
                     controller: _confirmController),
                 SizedBox(height: 12.0),
-                Observer(
-                    builder: (context) => _registerstate.errorMessage == ""
-                        ? Container()
-                        : Text(_registerstate.errorMessage)),
-                GestureDetector(
-                    child: Container(
-                      child: Center(
-                          child: Text(
-                        'REGISTER',
-                        style: Configuration.text('big', Colors.white),
-                      )),
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      height: MediaQuery.of(context).size.height * 0.08,
-                      decoration: BoxDecoration(
-                          color: Configuration.maincolor,
-                          borderRadius: new BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.grey,
-                                offset: Offset(2, 3),
-                                spreadRadius: 1,
-                                blurRadius: 3)
-                          ]),
-                    ),
-                    onTap: () async {
-                       await _registerstate.register(
-                          _userController.text,
-                          _passwordController.text,
-                          _confirmController.text,
-                          _mailController.text);
-                      if (_registerstate.user != null) {
-                        pushNextPage(_registerstate.user, context);
-                      }
-                    }),
+                LoginRegisterButton(
+                  onPressed: () async{
+                    await _registerstate.startRegister(
+                          context,
+                          username:_userController.text,
+                          password: _passwordController.text,
+                          mail:_mailController.text, 
+                          type: 'mail');
+                  },
+                  text: 'REGISTER',
+                ),
                 SizedBox(height: 30),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   RawMaterialButton(
                     onPressed: () async{
-                      await _registerstate.googleLogin();
-                      if (_registerstate.user != null) {
-                        pushNextPage(_registerstate.user, context);
-                      }
+                      await _registerstate.startRegister(context, type: 'google');
+                     
                     },
                     elevation: 2.0,
                     fillColor: Configuration.maincolor,
@@ -144,10 +119,11 @@ class RegisterWidget extends StatelessWidget {
                               maintainState: true),
                         );
                         if (result != null) {
-                              await _registerstate.registerWithFacebook(result);
-                          if (_registerstate.user != null) {
+                          await _registerstate.startRegister(context, type: 'facebook');
+
+                          /*if (_registerstate.user != null) {
                             pushNextPage(_registerstate.user, context);
-                          }
+                          }*/
                         }
                       })
                 ])

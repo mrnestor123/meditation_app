@@ -84,7 +84,9 @@ abstract class _UserState with Store {
 
   @action
   void setUser(var u) {
-    user = u;
+    if(u != null){
+      user = u;
+    }
   }
 
   @action

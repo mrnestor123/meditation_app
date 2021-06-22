@@ -3,7 +3,6 @@ import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/mobx/login_register/register_state.dart';
 import 'package:meditation_app/presentation/pages/leaderboard.dart';
 import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:flutter/services.dart';
@@ -43,22 +42,19 @@ class MyApp extends StatelessWidget {
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
-          Provider<GameState>(create: (context) => sl<GameState>())
+          Provider<GameState>(create: (context) => sl<GameState>()),
+          Provider<LoginState>(create: (context) => sl<LoginState>())
         ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
             routes: <String, WidgetBuilder> {
               '/welcome': (BuildContext context) => WelcomeWidget(),
-              //      '/brain': (BuildContext context) => Provider(
-              //        create: (context) => sl<LessonState>(), child: BrainScreen()),
               '/loading': (BuildContext context) => Loading(),
-              '/login': (BuildContext context) => Provider(create: (context) => sl<LoginState>(), child: LoginWidget()),
-              '/tabletlogin': (BuildContext context) => Provider(create: (context) => sl<LoginState>(), child: TabletLoginWidget()),
-              '/tabletregister': (BuildContext context) => Provider(create: (context) => sl<RegisterState>(), child: LoginWidget()),
-              '/register': (BuildContext context) => Provider(
-                  create: (context) => sl<RegisterState>(),
-                  child: RegisterWidget()),
+              '/login': (BuildContext context) => LoginWidget(),
+              '/tabletlogin': (BuildContext context) => TabletLoginWidget(),
+              '/tabletregister': (BuildContext context) => LoginWidget(),
+              '/register': (BuildContext context) => RegisterWidget(),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
               '/tabletimagepath': (BuildContext context) => TabletImagePath(),

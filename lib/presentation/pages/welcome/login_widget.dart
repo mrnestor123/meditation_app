@@ -10,6 +10,7 @@ import 'package:meditation_app/domain/entities/auth/email_address.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/TextField.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
@@ -91,52 +92,14 @@ class _LoginWidgetState extends State<LoginWidget> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      Container(
-                        width: Configuration.width*0.85,
-                        child: AspectRatio(
-                          aspectRatio: 10/2,
-                          child: ElevatedButton(
-                          onPressed: () async {
-                            FocusScopeNode currentFocus = FocusScope.of(context);
-                            if (!currentFocus.hasPrimaryFocus) {
-                              currentFocus.unfocus();
-                            }
-
-
-                            if(_loginstate.formKey.currentState.validate()){
-                                var errormsg = await _loginstate.signin(_loginstate.userController.text, _loginstate.passwordController.text);
-                                if (_loginstate.loggeduser != null) {
-                                  _userstate.setUser(_loginstate.loggeduser);
-                                  Navigator.pushReplacementNamed(context, '/main');
-                                }else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Container(
-                                        padding: EdgeInsets.all(12.0),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Icon(Icons.error_outline_rounded, color: Colors.red, size: Configuration.medicon),
-                                            Text(errormsg, style: Configuration.text('small', Colors.white)),
-                                          ],
-                                        )
-                                      ),
-                                    ),
-                                  );
-                                }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0.0,
-                            primary: Configuration.maincolor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
-                          ),
-                          child: Text(
-                            'LOGIN',
-                            style: Configuration.text('small', Colors.white),
-                            ),
-                          ),
-                        ),
+                      LoginRegisterButton(
+                        onPressed: () async {
+                          _loginstate.startlogin(context, 
+                          username: _loginstate.userController.text, 
+                          password: _loginstate.passwordController.text,
+                          type:'mail');
+                        },
+                        text: 'LOGIN'
                       )
                     ],
                   )
@@ -144,12 +107,8 @@ class _LoginWidgetState extends State<LoginWidget> {
                 SizedBox(height: 50),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   RawMaterialButton(
-                    onPressed: () async{
-                      await _loginstate.googleLogin();
-                      if (_loginstate.loggeduser != null) {
-                        _userstate.setUser(_loginstate.loggeduser);
-                        Navigator.pushReplacementNamed(context, '/main');
-                      }
+                    onPressed: () async {
+                      _loginstate.startlogin(context,type:'google');
                     },
                     elevation: 2.0,
                     fillColor: Configuration.maincolor,
@@ -177,11 +136,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                               maintainState: true),
                         );
                         if (result != null) {
-                          await _loginstate.loginWithFacebook(result);
-                          if (_loginstate.loggeduser != null) {
-                            _userstate.setUser(_loginstate.loggeduser);
-                            Navigator.pushReplacementNamed(context, '/main');
-                          }
+                          _loginstate.startlogin(context, type:'facebook', token: result);
                         }
                       })
                 ])
@@ -269,12 +224,10 @@ class TabletLoginWidget extends StatelessWidget {
                         ]),
                   ),
                   onTap: () async {
-                    await _loginstate.signin(
-                        _userController.text, _passwordController.text);
-                    if (_loginstate.loggeduser != null) {
-                      _userstate.setUser(_loginstate.loggeduser);
-                      Navigator.pushReplacementNamed(context, '/main');
-                    }
+                   _loginstate.startlogin(context, 
+                          username: _loginstate.userController.text, 
+                          password: _loginstate.passwordController.text,
+                          type:'mail');
                   }),                
               ), 
               SizedBox(height: 25),            
@@ -284,11 +237,8 @@ class TabletLoginWidget extends StatelessWidget {
                 children: [
                   RawMaterialButton(
                     onPressed: () async{
-                      await _loginstate.googleLogin();
-                      if (_loginstate.loggeduser != null) {
-                        _userstate.setUser(_loginstate.loggeduser);
-                        Navigator.pushReplacementNamed(context, '/main');
-                      }
+                      _loginstate.startlogin(context,type:'google');
+                      _userstate.setUser(_loginstate.loggeduser);
                     },
                     elevation: 2.0,
                     fillColor: Configuration.maincolor,
@@ -316,11 +266,8 @@ class TabletLoginWidget extends StatelessWidget {
                               maintainState: true),
                         );
                         if (result != null) {
-                          await _loginstate.loginWithFacebook(result);
-                          if (_loginstate.loggeduser != null) {
+                            await _loginstate.startlogin(context, type:'facebook', token: result);
                             _userstate.setUser(_loginstate.loggeduser);
-                            Navigator.pushReplacementNamed(context, '/main');
-                          }
                         }
                       })
                 ]),

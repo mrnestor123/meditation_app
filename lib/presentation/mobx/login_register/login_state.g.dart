@@ -54,6 +54,21 @@ mixin _$LoginState on _LoginState, Store {
     });
   }
 
+  final _$formKeyAtom = Atom(name: '_LoginState.formKey');
+
+  @override
+  GlobalKey<FormState> get formKey {
+    _$formKeyAtom.reportRead();
+    return super.formKey;
+  }
+
+  @override
+  set formKey(GlobalKey<FormState> value) {
+    _$formKeyAtom.reportWrite(value, super.formKey, () {
+      super.formKey = value;
+    });
+  }
+
   final _$errorMessageAtom = Atom(name: '_LoginState.errorMessage');
 
   @override
@@ -91,18 +106,12 @@ mixin _$LoginState on _LoginState, Store {
     return _$loginAsyncAction.run(() => super.login(user));
   }
 
-  final _$googleLoginAsyncAction = AsyncAction('_LoginState.googleLogin');
-
-  @override
-  Future<dynamic> googleLogin() {
-    return _$googleLoginAsyncAction.run(() => super.googleLogin());
-  }
-
   @override
   String toString() {
     return '''
 log: ${log},
 loggeduser: ${loggeduser},
+formKey: ${formKey},
 errorMessage: ${errorMessage},
 startedlogin: ${startedlogin}
     ''';

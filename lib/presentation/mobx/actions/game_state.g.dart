@@ -84,6 +84,21 @@ mixin _$GameState on _GameState, Store {
     });
   }
 
+  final _$beforecontrollerAtom = Atom(name: '_GameState.beforecontroller');
+
+  @override
+  VideoPlayerController get beforecontroller {
+    _$beforecontrollerAtom.reportRead();
+    return super.beforecontroller;
+  }
+
+  @override
+  set beforecontroller(VideoPlayerController value) {
+    _$beforecontrollerAtom.reportWrite(value, super.beforecontroller, () {
+      super.beforecontroller = value;
+    });
+  }
+
   final _$_GameStateActionController = ActionController(name: '_GameState');
 
   @override
@@ -126,7 +141,8 @@ selectedgame: ${selectedgame},
 success: ${success},
 state: ${state},
 started: ${started},
-controller: ${controller}
+controller: ${controller},
+beforecontroller: ${beforecontroller}
     ''';
   }
 }
