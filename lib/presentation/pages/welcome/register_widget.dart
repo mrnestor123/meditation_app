@@ -22,7 +22,7 @@ class RegisterWidget extends StatelessWidget {
   final TextEditingController _userController = new TextEditingController();
   final TextEditingController _passwordController = new TextEditingController();
   final TextEditingController _confirmController = new TextEditingController();
-  final TextEditingController _mailController = new TextEditingController();
+
   String your_client_id = "445064026505232";
   String your_redirect_url = "https://www.facebook.com/connect/login_success.html";
   var _userstate;
@@ -59,39 +59,92 @@ class RegisterWidget extends StatelessWidget {
                 Image.asset('assets/logo.png', width: Configuration.width*0.4,),
                 // spacer
                 SizedBox(height: 12.0),
-                WidgetTextField(
-                    text: 'mail',
-                    icon: Icon(Icons.mail),
-                    controller: _mailController),
-                SizedBox(height: 12.0),
-                // [Password]
-                WidgetTextField(
-                    text: 'password',
-                    icon: Icon(FontAwesomeIcons.key),
-                    controller: _passwordController),
-                SizedBox(height: 12.0),
-                WidgetTextField(
-                    text: 'confirm password',
-                    icon: Icon(FontAwesomeIcons.key),
-                    controller: _confirmController),
-                SizedBox(height: 12.0),
-                LoginRegisterButton(
-                  onPressed: () async{
-                    await _registerstate.startRegister(
-                          context,
-                          username:_userController.text,
-                          password: _passwordController.text,
-                          mail:_mailController.text, 
-                          type: 'mail');
-                  },
-                  text: 'REGISTER',
+                
+                Form(
+                  key: _registerstate.formKey,
+                  child: Column(
+                    children: [
+                       Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          controller: _userController,
+                          decoration: InputDecoration(
+                              filled: true,
+                              labelText: 'Mail',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.email),
+                          ),
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a mail';
+                            }else if(!_registerstate.validateMail(value)){
+                              return 'Please input a valid mail';
+                            } 
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 12.0),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          obscureText: true,
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                              filled: true,
+                              labelText: 'password',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.lock),
+                          ),
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a password';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 12.0),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          obscureText: true,
+                          controller: _confirmController,
+                          decoration: InputDecoration(
+                              filled: true,
+                              labelText: 'password',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.lock),
+                          ),
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a password';
+                            }else if(_confirmController.text != _passwordController.text) {
+                              return 'Passwords must be equal';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 12.0),
+                      LoginRegisterButton(
+                        onPressed: () async{
+                          await _registerstate.startRegister(
+                                context,
+                                mail:_userController.text,
+                                password: _passwordController.text,
+                                type: 'mail');
+                        },
+                        text: 'REGISTER',
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 30),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   RawMaterialButton(
                     onPressed: () async{
                       await _registerstate.startRegister(context, type: 'google');
-                     
                     },
                     elevation: 2.0,
                     fillColor: Configuration.maincolor,

@@ -60,6 +60,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       loggeduser.followedcods.forEach((element) async { 
         QuerySnapshot userquery = await database.collection('users').where('coduser', isEqualTo: element).get();
         UserModel user = UserModel.fromJson(userquery.docs[0].data());  
+        //Sacamos las meditaciones del usuario al que sigue
+        /// NO ESTOY SEGURO DE HACER ESTO !!!! 
+        QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: user.coduser).get();    
+        if (meditations.docs.length > 0) {
+          for (DocumentSnapshot doc in meditations.docs) {
+            user.addMeditation(new MeditationModel.fromJson(doc.data()));
+          }
+        }
         loggeduser.addfollow(user);
       });
 
@@ -68,13 +76,19 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
         }
       }    
-    }else{
+    } else {
       QuerySnapshot allusers = await database.collection('users').where('coduser', isNotEqualTo: loggeduser.coduser).get();
 
        if(allusers.docs.length > 0){
         for(DocumentSnapshot doc in allusers.docs){
-          if(doc.data()['cod'])
-          loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
+          UserModel user = UserModel.fromJson(doc.data());  
+          QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: user.coduser).get();    
+          if (meditations.docs.length > 0) {
+            for (DocumentSnapshot doc in meditations.docs) {
+              user.addMeditation(new MeditationModel.fromJson(doc.data()));
+            }
+          }
+          loggeduser.addUnfollower(user);
         }
       }  
     }
@@ -209,22 +223,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
-
-    //actualizamos la base de datos. habrá que mirarlo esto !!!!!!!!!. ESTO NO LO HARÍA ASÍ . HABRÁ QUE CAMBIAR ESTOO!!!
-    //aCTUALIZAR DATA CADA 5 MIN ?
-    /*
-    if (data != null) {
-      QuerySnapshot users = await database.collection('users').get();
-      data.users.clear();
-      for (var user in users.docs) {
-        data.users.add(new UserModel.fromJson(user.data()));
-      }
-      data.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
-    }*/
-
+ 
     //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
     if (type == 'meditate') {
       await database.collection('meditations').add(toAdd[0].toJson());
+    }
+
+    if(type =='lesson'){
+      //Añadirlo a las lessonss del usuario !!
     } 
   }
 

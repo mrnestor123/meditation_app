@@ -92,7 +92,6 @@ abstract class _MeditationState with Store {
     currentpage = index;
   }
 
-
   @action
   void setMeditation(MeditationModel m, User u, DataBase d) {
     this.user = u;
@@ -100,13 +99,13 @@ abstract class _MeditationState with Store {
     this.totalduration = m.duration;
     this.duration = m.duration;
     this.selmeditation = m;
-    //finishMeditation();
-    startMeditation();
+    finishMeditation();
+    //startMeditation();
   }
 
   @action
   void startMeditation() {
-    finishMeditation();
+    //finishMeditation();
     //startTimer();
   }
 

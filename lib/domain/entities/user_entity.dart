@@ -17,6 +17,7 @@ import 'action_entity.dart';
 //MIRAR DE REFACTORIZAR ESTA CLASE !!!!!
 class User {
   String coduser, nombre, role, image, timemeditated;
+  //USUARIO DE FIREBASE
   var user;
   int stagenumber, position, meditposition;
   Stage stage;
@@ -103,6 +104,8 @@ class User {
 
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
+    a.userimage = this.image;
+
     if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson'){
       for(UserAction a in this.todayactions) {
         if(a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){

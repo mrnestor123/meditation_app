@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
@@ -43,6 +44,7 @@ class _MobileLayoutState extends State<MobileLayout> {
   Widget child;
   int currentindex = 0;
   PageController _c;
+  UserState _userstate;
 
   @override
   void initState() {
@@ -51,11 +53,22 @@ class _MobileLayoutState extends State<MobileLayout> {
     );
     super.initState();
   }
+  
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+    final _loginstate = Provider.of<LoginState>(context);
+    if(_userstate.user==null){
+      print(_loginstate.loggeduser);
+      _userstate.setUser(_loginstate.loggeduser);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
-    UserState _userstate = Provider.of<UserState>(context);
+     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     
     Widget chiporText(String text, bool chip){
@@ -79,6 +92,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       );
     }
 
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Configuration.white,
@@ -101,7 +115,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                       Observer(builder: (BuildContext context) {  
                         return chiporText('Games', _meditationstate.currentpage == 2);
                       }),
-                      
+
                     ],
                   ),
                 ],

@@ -49,6 +49,7 @@ dependencies:
   video_player: ^2.0.2
   firebase_storage: ^8.0.0
   plugin_platform_interface: ^2.0.0
+  table_calendar: ^3.0.0
   assets_audio_player: ^3.0.1
 
 

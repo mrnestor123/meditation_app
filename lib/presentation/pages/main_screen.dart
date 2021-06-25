@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -19,6 +20,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   UserState _userstate;
+  LoginState _loginstate;
 
   Color darken(Color c, [int percent = 0]) {
     assert(0 <= percent && percent <= 100);
@@ -29,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
+    UserState _userstate = Provider.of<UserState>(context);
     return Container(
       height: Configuration.height,
       width: Configuration.width,
@@ -211,7 +213,7 @@ class __TimelineState extends State<_Timeline> {
                         style: widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') :  Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                         overflow: TextOverflow.fade,
                         ),
-                    Text((mode == 'today' ? '' : action.day + ' ') +   action.hour,
+                    Text((mode == 'Today' ? '' : action.day + ' ') +   action.hour,
                         style:widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') : Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
                 ]),
               )

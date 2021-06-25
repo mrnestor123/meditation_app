@@ -61,9 +61,7 @@ abstract class _LoginState with Store {
       var user;
       if(type == 'mail'){
           if(formKey.currentState.validate()){
-          UserCredential result = await auth.signInWithEmailAndPassword(email: username, password: password);
-          user = result.user;
-          await login(user);
+          user = await auth.signInWithEmailAndPassword(email: username, password: password);
           }
       } else if(type =='google'){
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
@@ -73,15 +71,17 @@ abstract class _LoginState with Store {
           AuthCredential credential = GoogleAuthProvider.credential(
               idToken: googleSignInAuthentication.idToken,
               accessToken: googleSignInAuthentication.accessToken);
-          UserCredential result = await auth.signInWithCredential(credential);
-          user = auth.currentUser;
-
-          await login(user);
+          user = await auth.signInWithCredential(credential);
         }
       } else {
           final facebookAuthCred = FacebookAuthProvider.credential(token);
           user = await auth.signInWithCredential(facebookAuthCred);
-          await login(user.user);
+      }
+
+      if(user != null) {
+        _userFuture = _loginusecase(UserParams(usuario: user.user));
+        log = await _userFuture;
+        log.fold((Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
       }
     }on FirebaseAuthException catch (e) {
       // simply passing error code as a message
@@ -166,14 +166,17 @@ abstract class _LoginState with Store {
         final facebookAuthCred = FacebookAuthProvider.credential(token);
         user = await auth.signInWithCredential(facebookAuthCred);
       }
-      errormsg = await userRegistered(user.user);
+
+      if(user != null){
+        errormsg = await userRegistered(user.user);
+      }
     } on FirebaseAuthException catch (e) {
-      errorMessage = switchExceptions(e.code);
+      errormsg = switchExceptions(e.code);
     }
 
     if (loggeduser != null) {
       Navigator.pushReplacementNamed(context, '/main');
-    } else {
+    } else if(errormsg != null) {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -215,8 +218,7 @@ abstract class _LoginState with Store {
     // Reset the possible previous error message.
     try {
       errorMessage = "";
-      _userFuture = _loginusecase(UserParams(usuario: user));
-      log = await _userFuture;
+     
       log.fold((Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
     } on Failure {
       errorMessage = 'Could not log user';

@@ -148,6 +148,8 @@ class _LoginWidgetState extends State<LoginWidget> {
 }
 
 
+
+//HAY QUE PASAR LA TABLET A LO NUEVO !!!!!!!!
 class TabletLoginWidget extends StatelessWidget {
   //PASAR EL TEXTEDITINGCONTROLLER AL MOBX!!!
   final TextEditingController _userController = new TextEditingController();
