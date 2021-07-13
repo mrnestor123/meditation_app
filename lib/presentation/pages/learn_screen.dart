@@ -445,52 +445,10 @@ class _ContentViewState extends State<ContentView> {
                         ? MainAxisAlignment.spaceEvenly
                         : MainAxisAlignment.center,
                     children: [
-                      widget.lesson.type == 'meditation'
-                          ? GestureDetector(
-                              onTap: () async {
-                                await _userstate.takeLesson(widget.lesson);
-                                Navigator.pop(context, true);
-                              },
-                              child: AnimatedContainer(
-                                width: reachedend ? Configuration.width * 0.5 : 0,
-                                padding: EdgeInsets.all(Configuration.smpadding),
-                                decoration: BoxDecoration(
-                                    color: Configuration.maincolor,
-                                    shape: BoxShape.circle),
-                                duration: Duration(seconds: 1),
-                                curve: Curves.easeIn,
-                                child: reachedend
-                                    ? Center(
-                                        child: Text(
-                                          'Practice',
-                                          style: Configuration.text(
-                                              'medium', Colors.white),
-                                        ),
-                                      )
-                                    : Container(),
-                              ),
-                            )
-                          : Container(),
+                      
                        Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                  /*MaterialButton(
-                                    onPressed: () async {
-                                      await _userstate
-                                          .takeLesson(widget.lesson);
-                                      Navigator.pop(context, true);
-                                    },
-                                    color: Configuration.maincolor,
-                                    textColor: Colors.white,
-                                    child: Text(
-                                      'Next lesson',
-                                      style: Configuration.text(
-                                          'medium', Colors.white),
-                                    ),
-                                    padding: EdgeInsets.all(
-                                        Configuration.medpadding),
-                                    shape: CircleBorder(),
-                                  ),*/
                                   AnimatedOpacity(
                                     opacity: reachedend ? 1.0 : 0.0, 
                                     duration: Duration(seconds: 1),
@@ -516,25 +474,6 @@ class _ContentViewState extends State<ContentView> {
                                     ),
                                   ),
 
-                                  /*ClipOval(
-                                    child: Material(
-                                      color: Configuration
-                                          .maincolor, // button color
-                                      child: InkWell(
-                                        splashColor:
-                                            Colors.red, // inkwell color
-                                        child: SizedBox(
-                                            width: Configuration.width*0.2,
-                                            height: Configuration.width*0.2,
-                                            child: Center(child: Text('Finish', style: Configuration.text('medium',Colors.white),))),
-                                        onTap: () async {
-                                          await _userstate
-                                              .takeLesson(widget.lesson);
-                                          Navigator.pop(context, true);
-                                        },
-                                      ),
-                                    ),
-                                  ),*/
                                 ])
                           ,
 

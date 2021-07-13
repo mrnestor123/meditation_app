@@ -104,7 +104,7 @@ class User {
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
   int getStageNumber() => this.stagenumber;
 
-  //checks if user 
+  //checks if user answered the question
   bool answeredGame(String cod){
     return this.answeredquestions.length > 0 && this.answeredquestions[cod] != null;
   }
@@ -295,9 +295,7 @@ class User {
     this.percentage = ((passedcount / objectives.length) * 100).floor();
   }
 
-  bool takeLesson(Lesson l, DataBase d) {
-    this.userStats.lastread.clear();
-
+  void takeLesson(Lesson l, DataBase d) {
     if (l.stagenumber == this.stagenumber 
         && this.position <= l.position 
         && (
@@ -316,10 +314,8 @@ class User {
       if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
         this.position += 1;
         this.userStats.lastread.clear();
-        return true;
       } else {
         this.userStats.lastread.add({'cod': l.cod});
-        return false;
       }
     }
     
@@ -330,7 +326,6 @@ class User {
 
     setAction('lesson', attribute: l.title);
 
-    return false;
   }
 
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
