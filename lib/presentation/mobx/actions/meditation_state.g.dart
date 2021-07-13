@@ -54,34 +54,18 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
-  final _$_meditationFutureAtom =
-      Atom(name: '_MeditationState._meditationFuture');
+  final _$currentsentenceAtom = Atom(name: '_MeditationState.currentsentence');
 
   @override
-  Future<Either<Failure, Meditation>> get _meditationFuture {
-    _$_meditationFutureAtom.reportRead();
-    return super._meditationFuture;
+  String get currentsentence {
+    _$currentsentenceAtom.reportRead();
+    return super.currentsentence;
   }
 
   @override
-  set _meditationFuture(Future<Either<Failure, Meditation>> value) {
-    _$_meditationFutureAtom.reportWrite(value, super._meditationFuture, () {
-      super._meditationFuture = value;
-    });
-  }
-
-  final _$errorMessageAtom = Atom(name: '_MeditationState.errorMessage');
-
-  @override
-  String get errorMessage {
-    _$errorMessageAtom.reportRead();
-    return super.errorMessage;
-  }
-
-  @override
-  set errorMessage(String value) {
-    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
-      super.errorMessage = value;
+  set currentsentence(String value) {
+    _$currentsentenceAtom.reportWrite(value, super.currentsentence, () {
+      super.currentsentence = value;
     });
   }
 
@@ -191,17 +175,6 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
-  void startMeditation() {
-    final _$actionInfo = _$_MeditationStateActionController.startAction(
-        name: '_MeditationState.startMeditation');
-    try {
-      return super.startMeditation();
-    } finally {
-      _$_MeditationStateActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   void startTimer() {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startTimer');
@@ -229,7 +202,7 @@ mixin _$MeditationState on _MeditationState, Store {
 user: ${user},
 selmeditation: ${selmeditation},
 currentpage: ${currentpage},
-errorMessage: ${errorMessage},
+currentsentence: ${currentsentence},
 type: ${type},
 duration: ${duration},
 startedmeditation: ${startedmeditation},

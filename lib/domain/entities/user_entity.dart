@@ -30,7 +30,7 @@ class User {
   //estadísticas
   UserStats userStats;
 
-  //passed objectives también estará en stats
+  //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
   int percentage;
@@ -57,10 +57,12 @@ class User {
 
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
+  Map<dynamic,dynamic> answeredquestions = new Map();
 
   User({this.coduser, this.nombre, this.user, this.position, 
         this.image, @required this.stagenumber,this.stage, 
-        this.role,this.classic,this.meditposition,this.userStats
+        this.role,this.classic,this.meditposition,this.userStats, 
+        this.answeredquestions
         }) {
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
@@ -102,6 +104,26 @@ class User {
   ObservableList<Lesson> getLessonsLearned() => lessonslearned;
   int getStageNumber() => this.stagenumber;
 
+  //checks if user 
+  bool answeredGame(String cod){
+    return this.answeredquestions.length > 0 && this.answeredquestions[cod] != null;
+  }
+
+  //returns if user has read a lesson
+  bool readLesson(String codlesson){
+    return false;
+  }
+
+  //how much up to 6 the user has passed the lessons
+  int lessonsPercentage(){
+    if(this.userStats == 0){
+      return 0;
+    }else{
+      return ((this.userStats.stage.lessons / this.stage.stobjectives.lecciones)*6).round();
+    }
+  }
+
+
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
@@ -127,6 +149,10 @@ class User {
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setActions(json, isToday) {
+    DateTime today = DateTime.now();
+    var dayOfWeek = 1;
+    DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
+
     if(isToday) {
       todayactions = new ObservableList();
       if(json != null && json.length > 0 ) { 
@@ -135,16 +161,13 @@ class User {
           if(day.day == DateTime.now().day && day.month == DateTime.now().month){
             action['userimage'] = this.image;
             todayactions.add(UserAction.fromJson(action));
-          }else {
+          } else if(day.compareTo(monday) >= 0 && day.compareTo(monday.add(Duration(days: 7))) < 0) {
             action['userimage'] = this.image;
             thisweekactions.add(UserAction.fromJson(action));
           }
         }
       }
     } else {
-      DateTime today = DateTime.now();
-      var dayOfWeek = 1;
-      DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
       thisweekactions = new ObservableList();
       if(json != null && json.length > 0){ 
         for(var action in json){
@@ -219,6 +242,7 @@ class User {
     this.position = 0;
     userStats.reset();
 
+    setPercentage();
     setAction("updatestage", attribute: this.stagenumber.toString());
   }
 

@@ -25,6 +25,7 @@ class UserModel extends User {
       bool classic,
       int meditposition,
       UserStats userStats,
+      answeredquestions,
       stats})
       : super(
             coduser: coduser,
@@ -37,6 +38,7 @@ class UserModel extends User {
             meditposition: meditposition,
             stage: stage,
             classic: classic,
+            answeredquestions: answeredquestions,
             userStats: userStats);
 
   factory UserModel.fromRawJson(String str) =>
@@ -55,6 +57,7 @@ class UserModel extends User {
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
         classic: json["classic"] == null ? true : json["classic"],
+        answeredquestions: json['answeredquestions'] == null ? new Map() : json['answeredquestions'],
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       );
 
@@ -69,16 +72,17 @@ class UserModel extends User {
   Map<String, dynamic> toJson() => {
         "coduser": coduser == null ? null : coduser,
         "role": role == null ? null : role,
-        "stagenumber": stagenumber == null ? null : stagenumber,
-        "position": position == null ? null : position,
-        "meditposition": meditposition == null ? null : meditposition,
+        "stagenumber": stagenumber == null ? 1 : stagenumber,
+        "position": position == null ? 0 : position,
+        "meditposition": meditposition == null ? 0 : meditposition,
         "nombre": nombre == null ? null : nombre,
-        "classic": classic == null ? null : classic,
+        "classic": classic == null ? false : classic,
         'stats': userStats == null ? null : userStats.toJson(),
         'image': image == null ? null : image,
         "following": following.map((element) => element.coduser).toList(),
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "followsyou": followsyou.map((user) => user.coduser).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
+        "answeredquestions": answeredquestions
       };
 }

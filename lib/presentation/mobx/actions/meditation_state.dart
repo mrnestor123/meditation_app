@@ -34,10 +34,7 @@ abstract class _MeditationState with Store {
   PageController practice = new PageController(initialPage: 0);
 
   @observable
-  Future<Either<Failure, Meditation>> _meditationFuture;
-
-  @observable
-  String errorMessage = "";
+  String currentsentence;
 
   @observable
   String type = 'free';
@@ -53,13 +50,13 @@ abstract class _MeditationState with Store {
 
   Duration totalduration;
 
-
-
   @observable
   bool startedmeditation = false;
+  
 
   @observable
   String state = 'initial';
+
   Timer timer;
   AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
 
@@ -72,12 +69,12 @@ abstract class _MeditationState with Store {
 
     if(type =='guided') {
       practice.jumpToPage(1);
-      currentpage=1;
+      currentpage = 1;
     }
 
     if(type == 'free'){
       practice.jumpToPage(0);
-      currentpage=0;
+      currentpage = 0;
     }
 
     
@@ -99,19 +96,15 @@ abstract class _MeditationState with Store {
     this.totalduration = m.duration;
     this.duration = m.duration;
     this.selmeditation = m;
-    finishMeditation();
-    //startMeditation();
+   // finishMeditation();
+    startTimer();
   }
-
-  @action
-  void startMeditation() {
-    //finishMeditation();
-    //startTimer();
-  }
+  
 
   @action
   void startTimer() {
     var oneSec = new Duration(seconds: 1);
+    int count = 0;
     if(timer != null){
       timer.cancel();
     }
@@ -123,6 +116,19 @@ abstract class _MeditationState with Store {
         state = 'finished';
         timer.cancel();
       } else {
+        print(type);
+        if(selmeditation.type !='free' && selmeditation.followalong != null){
+          var nextsentence = selmeditation.followalong[count.toString()];
+          if(nextsentence != null) {
+            var time = nextsentence['time'].split(':');
+            Duration _timestampduration = Duration(minutes:int.parse(time[0]), seconds: int.parse(time[1]));
+            if(_timestampduration.inSeconds < (selmeditation.duration.inSeconds - this.duration.inSeconds)){
+              currentsentence = nextsentence['text'];
+              print(nextsentence);
+              count++;
+            }
+          } 
+        }
         duration = duration - oneSec;
       }
     });
@@ -139,6 +145,7 @@ abstract class _MeditationState with Store {
   Future finishMeditation() async {
     int currentposition = user.position;
     Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation, user: user, d: data));
+
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
     this.state = 'finished';
   }

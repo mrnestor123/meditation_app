@@ -6,26 +6,28 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 class StartButton extends StatelessWidget {
 
   dynamic onPressed;
+  String text;
 
-  StartButton({this.onPressed});
+  StartButton({this.onPressed, this.text});
   
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: Configuration.width*0.6,
+      width: 250,
+      margin: EdgeInsets.only(bottom: 12.0),
       child: AspectRatio(
         aspectRatio: 9/2,
         child: ElevatedButton(
-        onPressed: () async {
+        onPressed: onPressed != null ? () async {
           onPressed();
-        },
+        } : null,
         style: ElevatedButton.styleFrom(
           elevation: 0.0,
           primary: Configuration.maincolor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0))
         ),
         child: Text(
-          'Start',
+          text != null ? text : 'Start',
           style: Configuration.text('small', Colors.white),
         ),
           ),
@@ -38,12 +40,14 @@ class StartButton extends StatelessWidget {
 class TabletStartButton extends StatelessWidget {
 
   dynamic onPressed;
+  String text;
 
-  TabletStartButton({this.onPressed});
+  TabletStartButton({this.onPressed, this.text});
   
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: 12.0),
       width: Configuration.width*0.25,
       child: AspectRatio(
         aspectRatio: 6/2,
@@ -57,7 +61,7 @@ class TabletStartButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
         ),
         child: Text(
-          'Start',
+          text != null ? text :'Start',
           style: Configuration.tabletText('small', Colors.white),
         ),
           ),

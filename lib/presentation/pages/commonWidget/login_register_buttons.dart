@@ -2,18 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
+//UTILIZAR ESTE EN  TODOS LOS SITIOS !!!
 class LoginRegisterButton extends StatelessWidget {
   dynamic onPressed;
+  bool isTablet;
+  String text;  
 
-  String text;
-
-
-  LoginRegisterButton({this.onPressed, this.text}) : super();
+  LoginRegisterButton({this.onPressed, this.text, this.isTablet= false}) : super();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: Configuration.width*0.85,
+        width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.85,
         child: AspectRatio(
           aspectRatio: 10/2,
           child: ElevatedButton(
@@ -27,7 +27,7 @@ class LoginRegisterButton extends StatelessWidget {
           ),
           child: Text(
             text,
-            style: Configuration.text('small', Colors.white),
+            style: Configuration.width > 500 ? Configuration.tabletText('small', Colors.white) : Configuration.text('small', Colors.white),
             ),
           ),
         ),

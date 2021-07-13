@@ -22,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
@@ -58,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Configuration.maincolor),
         Column(
           children: <Widget>[
+            //REFACTORIZAR ESTO
             Expanded(
                 flex: 2,
                 child: widget.user != null ?
@@ -180,8 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 }
 
 
-
-//ES IGUAL PARA TABLET QUE PARA Móvil ??
+//ES IGUAL PARA TABLET QUE PARA Móvil ?? //DEBERÍA
 class ViewFollowers extends StatelessWidget {
   final List<User> users;
   final String title;
@@ -261,7 +260,6 @@ class ViewFollowers extends StatelessWidget {
   }
 }
 
-
 class ViewData extends StatefulWidget {
   const ViewData({ Key key }) : super(key: key);
 
@@ -297,10 +295,8 @@ class _MyInfoState extends State<MyInfo> {
     PickedFile image = await _picker.getImage(source: ImageSource.camera);
     
     if(image != null){
-    _userstate.updateUser(image, 'image');
-    
+    await _userstate.changeImage(image);
     setState(() {
-      _image = image;
     });
     }
   }
@@ -309,9 +305,8 @@ class _MyInfoState extends State<MyInfo> {
     PickedFile image = await _picker.getImage(source: ImageSource.gallery);
 
      if(image != null){
-    _userstate.updateUser(image, 'image');
+      await _userstate.changeImage(image);
       setState(() {
-        _image = image;
       });
      }
   }
@@ -355,6 +350,7 @@ class _MyInfoState extends State<MyInfo> {
       children: [
         SizedBox(height: Configuration.blockSizeVertical*1),
         RadialProgress(
+            //Mirar de hacer esto de una forma bien en el config!!!
             width: widget.isTablet ? Configuration.blockSizeHorizontal* 0.3 :Configuration.safeBlockHorizontal * 1,
             goalCompleted: _userstate.user.stage.stagenumber / 10,
             child: GestureDetector(
@@ -381,7 +377,7 @@ class _MyInfoState extends State<MyInfo> {
           children: <Widget>[
             Text(
                 _userstate.user.nombre,
-                style: widget.isTablet ? Configuration.tabletText('tiny', Colors.white) : Configuration.text('medium', Colors.white),
+                style: Configuration.text('medium', Colors.white),
             ),
           ],
         ),
@@ -607,7 +603,9 @@ class Ordinal {
 
 /* VISTAS DE TABLET*/
 class TabletProfileScreen extends StatefulWidget {
-  TabletProfileScreen();
+  User user;
+
+  TabletProfileScreen({this.user});
 
   @override
   _TabletProfileScreenState createState() => _TabletProfileScreenState();
@@ -643,20 +641,6 @@ class _TabletProfileScreenState extends State<TabletProfileScreen> {
               ])
             ),
             Container(
-                width: Configuration.width*0.35,
-                height: Configuration.width*0.35,
-                decoration:BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)) ,
-                child: Column(
-                  children: [
-                    SizedBox(height: 10),
-                    Text('Meditation record',style:Configuration.tabletText('tiny', Colors.black)),
-                    SimpleBarChart(date: DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
-                    ),
-                  ],
-                ))
-          ]
-        ),
-        Container(
           width: Configuration.width*0.3,
           height: Configuration.width*0.3,
           decoration: BoxDecoration(
@@ -669,16 +653,43 @@ class _TabletProfileScreenState extends State<TabletProfileScreen> {
               Table(children: [
                 TableRow(
                   children: [
-                    TabletInfoCard(
-                      firstText: _userstate.user.following.length.toString(),
-                      secondText: "Following",
-                      icon: Icon(Icons.person),
+                    TextButton(
+                        onPressed: ()=>  
+                        widget.user != null ? null :
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ViewFollowers(
+                                    users: _userstate.user.following,
+                                    title: 'Following',
+                          )),
+                      ), 
+                      child: Column(
+                          children: [
+                            Text('Following', style: Configuration.tabletText('tiny', Colors.black)),
+                            Text(widget.user != null ? widget.user.followedcods.length.toString() : _userstate.user.following.length.toString(), style: Configuration.tabletText('verytiny',Colors.black))
+                          ],
+                        ),
+                      ),
+                    TextButton(
+                      onPressed: ()=>  
+                      widget.user != null ? null :
+                        Navigator.push(
+                          context,
+                            MaterialPageRoute(
+                                builder: (context) => ViewFollowers(
+                                      users: _userstate.user.followsyou,
+                                      title: 'Followers',
+                            )
+                          ),
+                        ),
+                        child: Column(
+                        children: [
+                          Text('Followers', style: Configuration.tabletText('tiny', Colors.black)),
+                          Text(widget.user != null ? widget.user.followsyoucods.length.toString() :  _userstate.user.followsyou.length.toString(), style: Configuration.tabletText('verytiny',Colors.black))
+                        ],
+                      ),
                     ),
-                    TabletInfoCard(
-                      firstText: _userstate.user.followsyou.length.toString(), 
-                      secondText: "Followers", 
-                      icon: Icon(Icons.person)
-                      )
                   ]
                 ),
                 TableRow(children: [
@@ -699,6 +710,21 @@ class _TabletProfileScreenState extends State<TabletProfileScreen> {
             ],
           ),
         ),
+        ]
+        ),
+        Container(
+            width: Configuration.width*0.35,
+            height: Configuration.width*0.35,
+            decoration:BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.0)) ,
+            child: Column(
+              children: [
+                SizedBox(height: 10),
+                Text('Meditation record',style:Configuration.tabletText('tiny', Colors.black)),
+                CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations)                    
+              ],
+          )
+        ),
+        
       ],
     );
   }

@@ -1,8 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
+import 'package:meditation_app/core/usecases/usecase.dart';
+import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -11,13 +14,16 @@ import 'package:mobx/mobx.dart';
 part 'login_state.g.dart';
 
 class LoginState extends _LoginState with _$LoginState {
-  LoginState({LoginUseCase loginUseCase, RegisterUseCase registerUseCase}) : super(login: loginUseCase, register: registerUseCase);
+  LoginState({LoginUseCase loginUseCase, RegisterUseCase registerUseCase, LogOutUseCase logout}) : 
+  super(login: loginUseCase, register: registerUseCase,logoutusecase: logout);
 }
 
 enum StoreState { initial, loading, loaded }
 
 abstract class _LoginState with Store {
   LoginUseCase _loginusecase;
+  LogOutUseCase logoutusecase;
+
 
   @observable
   Either<Failure, dynamic> log;
@@ -29,6 +35,7 @@ abstract class _LoginState with Store {
 
   @observable
   Future<Either<Failure, dynamic>> _userFuture;
+  
 
   @observable 
   //valida el login y el register tanto en tablet como en móvil
@@ -46,11 +53,12 @@ abstract class _LoginState with Store {
   FirebaseAuth auth = FirebaseAuth.instance;
   final googleSignin = GoogleSignIn();
 
-  _LoginState({@required LoginUseCase login, RegisterUseCase register}) {
+  _LoginState({@required LoginUseCase login, RegisterUseCase register,this.logoutusecase}) {
     _loginusecase = login;
+    _registerusecase = register;
   }
 
-  Future startlogin(context,{username, password, type, token}) async {
+  Future startlogin(context,{username, password, type, token, isTablet = false}) async {
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
     if (!currentFocus.hasPrimaryFocus) {
@@ -59,6 +67,7 @@ abstract class _LoginState with Store {
 
     try {
       var user;
+
       if(type == 'mail'){
           if(formKey.currentState.validate()){
           user = await auth.signInWithEmailAndPassword(email: username, password: password);
@@ -81,8 +90,13 @@ abstract class _LoginState with Store {
       if(user != null) {
         _userFuture = _loginusecase(UserParams(usuario: user.user));
         log = await _userFuture;
-        log.fold((Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
+        log.fold(
+          (Failure f) => errormsg = f.error, 
+          (dynamic u) => loggeduser = u
+        );
       }
+    }on PlatformException catch (e) {
+      print(e);
     }on FirebaseAuthException catch (e) {
       // simply passing error code as a message
       print(e.code);
@@ -91,10 +105,13 @@ abstract class _LoginState with Store {
 
     if (loggeduser != null) {
       Navigator.pushReplacementNamed(context, '/main');
-    } else {
+    } else if(errormsg != null && errormsg != ''){
+      print(errormsg);
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.fixed,
+          margin: isTablet ? EdgeInsets.all(20.0) : EdgeInsets.all(0.0),
           content: Container(
             padding: EdgeInsets.all(12.0),
             child: Row(
@@ -103,7 +120,7 @@ abstract class _LoginState with Store {
                 Icon(Icons.error_outline_rounded, color: Colors.red, size: Configuration.medicon),
                 SizedBox(width: 10),
                 Expanded(
-                  child:Text(errormsg, style: Configuration.text('small', Colors.white))
+                  child:Text(errormsg, style: isTablet ? Configuration.tabletText('small', Colors.white) : Configuration.text('small', Colors.white))
                 ),
               ],
             )
@@ -133,6 +150,14 @@ abstract class _LoginState with Store {
       return true;
     }
     return false;
+  }
+
+
+  @action
+  Future logout() async {
+    googleSignin.disconnect();
+    auth.signOut();
+    await logoutusecase.call(NoParams());
   }
 
 
@@ -170,11 +195,14 @@ abstract class _LoginState with Store {
       if(user != null){
         errormsg = await userRegistered(user.user);
       }
-    } on FirebaseAuthException catch (e) {
+    }on PlatformException catch (e) {
+      print(e);
+    }on FirebaseAuthException catch (e) {
       errormsg = switchExceptions(e.code);
     }
 
     if (loggeduser != null) {
+      Navigator.pushReplacementNamed(context, '/setdata');
       Navigator.pushReplacementNamed(context, '/main');
     } else if(errormsg != null) {
       //habra que hacer la versión tablet de esto !!
@@ -211,19 +239,6 @@ abstract class _LoginState with Store {
     });
   }
 
-  
-  @action
-  Future login(var user) async {
-    startedlogin = true;
-    // Reset the possible previous error message.
-    try {
-      errorMessage = "";
-     
-      log.fold((Failure f) => errorMessage = f.error, (dynamic u) => loggeduser = u);
-    } on Failure {
-      errorMessage = 'Could not log user';
-    }
-  }
 
   String _mapFailureToMessage(Failure failure) {
     // Instead of a regular 'if (failure is ServerFailure)...'

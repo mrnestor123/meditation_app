@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -10,6 +11,7 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
+    final _loginstate = Provider.of<LoginState>(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -49,7 +51,7 @@ class Settings extends StatelessWidget {
                 style: Configuration.text('big', Colors.white) )
           ),
           ElevatedButton(onPressed: () { 
-            _userstate.logout();
+            _loginstate.logout();
             Navigator.pushReplacementNamed(context, '/welcome');
  
           }, child: Text('log out'))

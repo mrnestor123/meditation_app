@@ -18,10 +18,9 @@ environment:
 
 dependencies:
   rxdart: ^0.26.0
-  bloc_provider: ^0.7.0
   mobx: ^1.1.1
   flutter_mobx: ^1.1.0
-  provider: ^4.0.5
+  provider: ^5.0.0
   uuid: ^3.0.1
   path: ^1.6.4
   path_provider: ^2.0.1 
@@ -37,11 +36,10 @@ dependencies:
   shared_preferences: ^0.5.6+2
   flutter_spinkit: "^4.1.2"
   http: ^0.13.0
-  data_connection_checker: any
   font_awesome_flutter: ^8.8.1
   carousel_slider: ^2.3.1
-  wakelock: ^0.2.1+1
-  google_sign_in: ^4.5.6
+  wakelock: ^0.5.2
+  google_sign_in: ^5.0.4
   flutter_webview_plugin: ^0.3.10+1
   flutter_circular_slider: ^2.5.0
   image_picker: ^0.7.3
@@ -51,6 +49,10 @@ dependencies:
   plugin_platform_interface: ^2.0.0
   table_calendar: ^3.0.0
   assets_audio_player: ^3.0.1
+  numberpicker: ^2.1.1
+  flutter_html: ^2.1.0
+  connectivity_plus: ^1.0.5
+
 
 
 

@@ -54,6 +54,21 @@ mixin _$GameState on _GameState, Store {
     });
   }
 
+  final _$userAtom = Atom(name: '_GameState.user');
+
+  @override
+  User get user {
+    _$userAtom.reportRead();
+    return super.user;
+  }
+
+  @override
+  set user(User value) {
+    _$userAtom.reportWrite(value, super.user, () {
+      super.user = value;
+    });
+  }
+
   final _$startedAtom = Atom(name: '_GameState.started');
 
   @override
@@ -66,6 +81,21 @@ mixin _$GameState on _GameState, Store {
   set started(bool value) {
     _$startedAtom.reportWrite(value, super.started, () {
       super.started = value;
+    });
+  }
+
+  final _$selectedanswerAtom = Atom(name: '_GameState.selectedanswer');
+
+  @override
+  int get selectedanswer {
+    _$selectedanswerAtom.reportRead();
+    return super.selectedanswer;
+  }
+
+  @override
+  set selectedanswer(int value) {
+    _$selectedanswerAtom.reportWrite(value, super.selectedanswer, () {
+      super.selectedanswer = value;
     });
   }
 
@@ -124,11 +154,22 @@ mixin _$GameState on _GameState, Store {
   }
 
   @override
-  void userAnswer(String answer) {
+  void getRandomquestion() {
+    final _$actionInfo = _$_GameStateActionController.startAction(
+        name: '_GameState.getRandomquestion');
+    try {
+      return super.getRandomquestion();
+    } finally {
+      _$_GameStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void userAnswer(int answer, User u) {
     final _$actionInfo =
         _$_GameStateActionController.startAction(name: '_GameState.userAnswer');
     try {
-      return super.userAnswer(answer);
+      return super.userAnswer(answer, u);
     } finally {
       _$_GameStateActionController.endAction(_$actionInfo);
     }
@@ -140,7 +181,9 @@ mixin _$GameState on _GameState, Store {
 selectedgame: ${selectedgame},
 success: ${success},
 state: ${state},
+user: ${user},
 started: ${started},
+selectedanswer: ${selectedanswer},
 controller: ${controller},
 beforecontroller: ${beforecontroller}
     ''';

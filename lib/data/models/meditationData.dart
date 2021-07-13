@@ -15,7 +15,8 @@ class MeditationModel extends Meditation {
       int stagenumber,
       String coduser,
       content,
-      int position
+      int position,
+      followalong
       })
       : super(
             cod: cod,
@@ -28,6 +29,7 @@ class MeditationModel extends Meditation {
             type: type,
             image: image,
             stagenumber: stagenumber,
+            followalong: followalong,
             position: position);
 
   factory MeditationModel.fromRawJson(String str) =>
@@ -47,6 +49,7 @@ class MeditationModel extends Meditation {
           stagenumber: json['stagenumber'] == null ? null : json['stagenumber'],
           position: json['position'] == null ? null : json['position'],
           coduser: json['coduser'] == null ? null : json['coduser'],
+          followalong: json['followalong'] == null ? null : json['followalong'],
           content: json['content'] == null ? null: json['content']
           //userId: json["userId"] == null ? null : json["userId"],
           );
@@ -57,12 +60,7 @@ class MeditationModel extends Meditation {
         //"title": this.title == null ? null : this.title,
         "duration": this.duration == null ? null : duration.inMinutes,
         //"recording": this.recording == null ? null : this.recording,
-        "day": this.day == null ? null : day.toIso8601String(),
-       // "type": this.type == null ? null : type,
-       // "image": this.image == null ? null : image,
-       // "stagenumber": this.stagenumber == null ? null : stagenumber
-        
-        // "userId": userId == null ? null : userId,
+        "day": this.day == null ? null : day.toIso8601String()
       };
 }
 

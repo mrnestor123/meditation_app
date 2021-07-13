@@ -58,11 +58,10 @@ class Configuration {
 
   //textstyles
   /*
-
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
+    HACER EL TEXTO RESIZABLE PARA TODOS
   */
-  static TextStyle text(String size, Color color,
-      {String style, double spacing, String font}) {
+  static TextStyle text(String size, Color color,{String style, double spacing, String font}) {
     var px;
     var weight = FontWeight.normal;
     double letterspacing = 0;
@@ -80,29 +79,61 @@ class Configuration {
     if(font != null){
       fontfamily = font;
     }
-
-    switch (size) {
-      case 'verytiny':
-        px = safeBlockHorizontal * 3;
-        break;
-      case "tiny":
-        px = safeBlockHorizontal * 3.5;
-        break;
-      case "small":
-        px = safeBlockHorizontal * 4;
-        break;
-      case "smallmedium":
-        px = safeBlockHorizontal * 5;
-        break;
-      case "medium":
-        px = safeBlockHorizontal * 6;
-        break;
-      case "big":
-        px = safeBlockHorizontal * 8;
-        break;
-      case "huge":
-        px = safeBlockHorizontal * 10;
-        break;
+    
+    if(width < 480){
+      switch (size) {
+        case 'mini':
+          px = 8.0;
+          break;
+        case 'verytiny':
+          px = 10.0;
+          break;
+        case "tiny":
+          px = 12.0;
+          break;
+        case "small":
+          px = 16.0;
+          break;
+        case "smallmedium":
+          px = 18.0;
+          break;
+        case "medium":
+          px = 20.0;
+          break;
+        case "big":
+          px = 24.0;
+          break;
+        case "huge":
+          px = 30.0;
+          break;
+      }
+    }else{
+      switch (size) {
+        case 'mini':
+          px = 12.0;
+          break;
+        case 'verytiny':
+          px = 14.0;
+          break;
+        case "tiny":
+          px = 16.0;
+          break;
+        case "small":
+          px = 18.0;
+          break;
+        case "smallmedium":
+          px = 20.0;
+          break;
+        case "medium":
+          px = 22.0;
+          break;
+        case "big":
+          px = 24.0;
+          break;
+        case "huge":
+          px = 30.0;
+          break;
+      }
     }
 
     return TextStyle(
@@ -114,7 +145,7 @@ class Configuration {
   }
 
 
-  //textstyles
+  //textstyles HAY QUE QUITAR ESTO DE AQUI !!!
   /*
 
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
@@ -141,28 +172,28 @@ class Configuration {
 
     switch (size) {
        case 'mini':
-        px = safeBlockHorizontal * 1;
+        px = 12.0;
         break;
       case 'verytiny':
-        px = safeBlockHorizontal * 1.5;
+        px =14.0;
         break;
       case "tiny":
-        px = safeBlockHorizontal * 2;
+        px = 16.0;
         break;
       case "small":
-        px = safeBlockHorizontal * 2.5;
+        px = 18.0;
         break;
       case "smallmedium":
-        px = safeBlockHorizontal * 3;
+        px = 20.0;
         break;
       case "medium":
-        px = safeBlockHorizontal * 1.5;
+        px = 22.0;
         break;
       case "big":
-        px = safeBlockHorizontal * 1.6;
+        px = 24.0;
         break;
       case "huge":
-        px = safeBlockHorizontal * 1.7;
+        px = 30.0;
         break;
     }
 
@@ -173,7 +204,6 @@ class Configuration {
         fontWeight: weight,
         letterSpacing: letterspacing);
   }
-
   
 
 
@@ -197,22 +227,36 @@ class Configuration {
     safeBlockVertical = (height - _safeAreaVertical) / 100;
 
     //Paddings
-    tinpadding = blockSizeHorizontal * 2;
-    smpadding = blockSizeHorizontal * 4;
-    medpadding = blockSizeHorizontal * 8;
-    bigpadding = blockSizeHorizontal * 10;
+    if(width > 500){
+      tinpadding = 10;
+      smpadding = 14;
+      medpadding = 18;
+      bigpadding = 24;
+      smicon = safeBlockHorizontal * 3.5;
+      medicon = safeBlockHorizontal * 5;
+      bigicon = safeBlockHorizontal * 6;
+      smmargin = blockSizeHorizontal * 1;
+      medmargin = blockSizeHorizontal * 1.5;
+      bigmargin = blockSizeHorizontal * 2;
+    }else {
+      tinpadding = 10;
+      smpadding = 14;
+      medpadding = 18;
+      bigpadding = 22;
+      smicon = safeBlockHorizontal * 6;
+      medicon = safeBlockHorizontal * 11;
+      bigicon = safeBlockHorizontal * 15;
+      smmargin = blockSizeHorizontal * 1;
+      medmargin = blockSizeHorizontal * 2;
+      bigmargin = blockSizeHorizontal * 4;
+    }
 
+    
     //icons
     tablettinicon = safeBlockHorizontal *2;
     tabletsmicon= safeBlockHorizontal *2.5;
-    smicon = safeBlockHorizontal * 6;
-    medicon = safeBlockHorizontal * 11;
-    bigicon = safeBlockHorizontal * 15;
-
-    //Paddings
-    smmargin = blockSizeHorizontal * 1;
-    medmargin = blockSizeHorizontal * 2;
-    bigmargin = blockSizeHorizontal * 4;
+    
+  
   }
 
   void leftRollDialog(context, dialog) {

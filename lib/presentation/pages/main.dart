@@ -25,9 +25,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
-  //SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight,
-  //]);
+    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
+ // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
 
   await di.init();
   runApp(MyApp());
@@ -52,16 +51,11 @@ class MyApp extends StatelessWidget {
               '/welcome': (BuildContext context) => WelcomeWidget(),
               '/loading': (BuildContext context) => Loading(),
               '/login': (BuildContext context) => LoginWidget(),
-              '/tabletlogin': (BuildContext context) => TabletLoginWidget(),
-              '/tabletregister': (BuildContext context) => LoginWidget(),
               '/register': (BuildContext context) => RegisterWidget(),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
-              '/tabletimagepath': (BuildContext context) => TabletImagePath(),
               '/countdown' : (BuildContext context) => Countdown(),
-              '/tabletcountdown' : (BuildContext context) => TabletCountdown(),
               '/leaderboard': (BuildContext context) => LeaderBoard(),
-              '/tabletleaderboard': (BuildContext context) => TabletLeaderBoard(),
               '/main': (BuildContext context) => Layout(),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),

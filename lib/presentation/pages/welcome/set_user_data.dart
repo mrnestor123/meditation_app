@@ -24,12 +24,11 @@ class _SetUserDataState extends State<SetUserData> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Select your username',
-                style: Configuration.text('medium', Colors.white)),
+            Text('Select your username', style: Configuration.text('small', Colors.white)),
             SizedBox(height: Configuration.height * 0.03),
             TextField(controller: _nameController),
             SizedBox(height: Configuration.height * 0.03),
-            RaisedButton(
+            ElevatedButton(
                 onPressed: () {
                   _userstate.changeName(_nameController.text);
                   Navigator.pushReplacementNamed(context, '/main');

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
@@ -10,10 +11,7 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/layout.dart';
-import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
-
 import 'commonWidget/progress_dialog.dart';
 
 class LearnScreen extends StatefulWidget {
@@ -27,90 +25,88 @@ class _LearnScreenState extends State<LearnScreen> {
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.all(Configuration.medmargin),
-      child: Expanded(
-          child: GridView.builder(
-              itemCount: _userstate.data.stages.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-              itemBuilder: (context, index) {
-                var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
-                
-                return Container(
-                  margin: EdgeInsets.all(Configuration.medmargin),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-                  child: ElevatedButton(
-                    onPressed: _userstate.user.stagenumber > index
-                        ?  () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => StageView(
-                                      stage:_userstate.data.stages[index],
-                                    )),
-                          ).then((value) => setState(() { 
-                            
-                        }))
-                        : null,
-                    child: 
-                    Stack(
-                      children: [
-                        Center(
-                          child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
-                            style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
-                          ),
-                        ),
-                        _userstate.user.stagenumber > index ? 
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: AspectRatio(
-                           aspectRatio: 9/1,
-                           child: Container(  
-                             decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
-                                borderRadius: BorderRadius.circular(16.0),
-                                border: Border.all(color:Colors.grey), 
-                                color: Colors.white
-                              ) : BoxDecoration(color: Colors.transparent), 
-                             child: Row(
-                               mainAxisAlignment: MainAxisAlignment.center,
-                               children: [
-                                 flex < 6 && _userstate.user.stagenumber == (index +1) ? 
-                                 Flexible(
-                                   flex: flex,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.green, 
-                                        borderRadius: BorderRadius.circular(16.0)
-                                      ),
-                                    ) ,
-                                 ) : Padding(
-                                   padding: const EdgeInsets.only(bottom:16.0),
-                                   child: Icon(Icons.check_circle,color: Colors.green),
-                                 ),
-                                flex < 6 && _userstate.user.stagenumber == (index +1) ?
-                                 Flexible(
-                                   child: Container(),
-                                   flex:6-flex
-                                  ) : Container()
-                             ])
-                             ),
-                           )
-                          ) : Container()
-                      ]
-                    ) ,
-                    style: ElevatedButton.styleFrom(
-                        primary: Configuration.maincolor,
-                        onPrimary: Colors.white,
-                        padding: EdgeInsets.all(Configuration.smpadding),
-                        minimumSize:Size(double.infinity, double.infinity),
-                        animationDuration: Duration(milliseconds: 50)        
-                        ),
+    return GridView.builder(
+        shrinkWrap: true,
+        itemCount: _userstate.data.stages.length,
+        gridDelegate: 
+          SliverGridDelegateWithMaxCrossAxisExtent(
+            childAspectRatio: 1.0, 
+            maxCrossAxisExtent: Configuration.width > 1000 ? 400.0 : 200.0,
+            crossAxisSpacing: 10,
+        ),
+        itemBuilder: (context, index) {
+          var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
+          return Container(
+            margin: EdgeInsets.only(top: 10),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
+            child: ElevatedButton(
+              onPressed: _userstate.user.stagenumber > index
+                  ?  () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StageView(
+                                stage:_userstate.data.stages[index],
+                              )),
+                    ).then((value) => setState(() { 
+                      
+                  }))
+                  : null,
+              child: 
+              Stack(
+                children: [
+                  Center(
+                    child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
+                      style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
+                    ),
                   ),
-                );
-              })),
-    );
+                  _userstate.user.stagenumber > index ? 
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AspectRatio(
+                     aspectRatio: 9/1,
+                     child: Container(  
+                       decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
+                          borderRadius: BorderRadius.circular(16.0),
+                          border: Border.all(color:Colors.grey), 
+                          color: Colors.white
+                        ) : BoxDecoration(color: Colors.transparent), 
+                       child: Row(
+                         mainAxisAlignment: MainAxisAlignment.center,
+                         children: [
+                           flex < 6 && _userstate.user.stagenumber == (index +1) ? 
+                           Flexible(
+                             flex: flex,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green, 
+                                  borderRadius: BorderRadius.circular(16.0)
+                                ),
+                              ) ,
+                           ) : Padding(
+                             padding: const EdgeInsets.only(bottom:16.0),
+                             child: Icon(Icons.check_circle,color: Colors.green),
+                           ),
+                          flex < 6 && _userstate.user.stagenumber == (index +1) ?
+                           Flexible(
+                             child: Container(),
+                             flex:6-flex
+                            ) : Container()
+                       ])
+                       ),
+                     )
+                    ) : Container()
+                ]
+              ) ,
+              style: ElevatedButton.styleFrom(
+                  primary: Configuration.maincolor,
+                  onPrimary: Colors.white,
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  minimumSize:Size(double.infinity, double.infinity),
+                  animationDuration: Duration(milliseconds: 50)        
+                  ),
+            ),
+          );
+        });
   }
 }
 
@@ -433,15 +429,17 @@ class _ContentViewState extends State<ContentView> {
                   ? MainAxisAlignment.center
                   : MainAxisAlignment.start,
               children: [
-                Image.network(
+                 widget.lesson.text[index]["image"] != '' && widget.lesson.text[index]["image"] != null ? Image.network(
                   widget.lesson.text[index]["image"],
                   width: Configuration.width,
-                ),
+                ) : Container(),
                 Container(
                     width: Configuration.width,
                     padding: EdgeInsets.all(Configuration.smpadding),
-                    child: Text(widget.lesson.text[index]["text"],
-                        style: Configuration.text('small', Colors.black, font: 'Helvetica'))),
+                    child: Html(
+                      data:widget.lesson.text[index]["text"],
+                    )
+                   ),
                 Row(
                     mainAxisAlignment: widget.lesson.type == 'meditation'
                         ? MainAxisAlignment.spaceEvenly
@@ -660,106 +658,8 @@ class _ContentViewState extends State<ContentView> {
 
 
 
-//VISTAS DE TABLET
-class TabletLearnScreen extends StatefulWidget {
-  @override
-  _TabletLearnScreenState createState() => _TabletLearnScreenState();
-}
-
-class _TabletLearnScreenState extends State<TabletLearnScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final _userstate = Provider.of<UserState>(context);
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.all(Configuration.medmargin),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-              child: GridView.builder(
-                  itemCount: _userstate.data.stages.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
-                  itemBuilder: (context, index) {
-                    var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
-
-                    return Container(
-                      margin: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-                      child: ElevatedButton(
-                        onPressed: _userstate.user.stagenumber > index
-                            ?  () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => TabletStageView(
-                                          stage:_userstate.data.stages[index],
-                                        )),
-                              ).then((value) => setState(() {}))
-                            : null,
-                        child: Stack(
-                          children: [
-                            Center(
-                              child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
-                                style: Configuration.tabletText("tiny", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
-                              ),
-                            ),
-                            _userstate.user.stagenumber > index ? 
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: AspectRatio(
-                               aspectRatio: 9/1,
-                               child: Container(  
-                                 decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16.0),
-                                    border: Border.all(color:Colors.grey), 
-                                    color: Colors.white
-                                  ) : BoxDecoration(color: Colors.transparent), 
-                                 child: Row(
-                                   mainAxisAlignment: MainAxisAlignment.center,
-                                   children: [
-                                     flex < 6 && _userstate.user.stagenumber == (index +1) ? 
-                                     Flexible(
-                                       flex: flex,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.green, 
-                                            borderRadius: BorderRadius.circular(16.0)
-                                          ),
-                                        ) ,
-                                     ) : Padding(
-                                       padding: const EdgeInsets.only(bottom:16.0),
-                                       child: Icon(Icons.check_circle,color: Colors.green),
-                                     ),
-                                    flex < 6 && _userstate.user.stagenumber == (index +1) ?
-                                     Flexible(
-                                       child: Container(),
-                                       flex:6-flex
-                                      ) : Container()
-                                 ])
-                                 ),
-                               )
-                              ) : Container()
-                          ]
-                        ) ,
-                        style: ElevatedButton.styleFrom(
-                            primary: Configuration.maincolor,
-                            onPrimary: Colors.white,
-                            padding: EdgeInsets.all(16.0),
-                            minimumSize:Size(double.infinity, double.infinity),
-                            animationDuration: Duration(milliseconds: 50)        
-                            ),
-                      ),
-                    );
-                  })),
-        ],
-      ),
-    );
-  }
-}
-
+// HAY QUE PENSAR OTRA FORMA MAS EFICIENTE DE HACER LAS COSAS !!!
+/*
 class TabletStageView extends StatefulWidget {
    Stage stage;
 
@@ -1218,3 +1118,4 @@ class _TabletContentViewState extends State<TabletContentView> {
     );
   }
 }
+*/

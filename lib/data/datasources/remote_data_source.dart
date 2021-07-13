@@ -170,13 +170,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     StageModel s = new StageModel.fromJson(json);
     QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
 
+    //HAGO DOS VECES EL IF SE PODRÍA HACER METODO ADDMEDITATION, ADDLESSON, ADDGAME !!!
     for (var content in lessons.docs) {
-      if (content.data()['position'] != null || content.data()['type'] == 'meditation-game') {
+      if (content.data()['position'] != null || content.data()['type'] == 'meditation-game' ) {
         content.data()['type'] == 'meditation-practice' ?
-          s.addContent(MeditationModel.fromJson(content.data())):
+          s.addMeditation(MeditationModel.fromJson(content.data())):
         content.data()['type'] == 'meditation-game' ?
-          s.addContent(GameModel.fromJson(content.data())):
-          s.addContent(LessonModel.fromJson(content.data()));
+          s.addGame(GameModel.fromJson(content.data())):
+          s.addLesson(LessonModel.fromJson(content.data()));
       }
     }
 
@@ -185,7 +186,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 
   @override
-  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ??
+  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ?? // SE UTILIZA ???
   Future<DataBase> getData() async  {
     DataBase d = new DataBase();
     QuerySnapshot stages = await database.collection('stages').get();
@@ -233,8 +234,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       //Añadirlo a las lessonss del usuario !!
     } 
   }
-
-
 
   /*
 

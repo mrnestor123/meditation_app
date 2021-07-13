@@ -33,8 +33,7 @@ class _LoadingState extends State<Loading> {
   @override
   void initState() {
     super.initState();
-     _controller = VideoPlayerController.asset('assets/tenstages.mp4')
-      ..initialize().then((_) {
+     _controller = VideoPlayerController.asset('assets/tenstages.mp4')..initialize().then((_) {
         _controller.play();
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() { });
@@ -70,7 +69,10 @@ class _LoadingState extends State<Loading> {
     });
 
     if(_duration.inSeconds <= 0){
-      _user.user != null ? Navigator.pushNamed(context, '/main') : Navigator.pushNamed(context, '/welcome');
+      _user.user != null ? 
+      Navigator.pushReplacementNamed(context, '/main') 
+      : 
+      Navigator.pushReplacementNamed(context, '/welcome');
     }
   }
 
@@ -86,14 +88,30 @@ class _LoadingState extends State<Loading> {
 
     return Scaffold(
         body: Center(
-            child: Container(
-                width: MediaQuery.of(context).size.width*0.7, 
-                height: MediaQuery.of(context).size.width*0.7, 
-                child: AspectRatio(
-                  aspectRatio: _controller.value.aspectRatio,
-                  child: VideoPlayer(_controller),
-                )
-              )
+            child: Stack(
+              children: [
+                _duration.inSeconds == 0 ?
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    width: 25,
+                    margin: EdgeInsets.all(12.0),
+                    height: 25,
+                    child: CircularProgressIndicator(
+                      color: Configuration.maincolor,
+                      strokeWidth: 3.0,
+                    ),
+                  ),
+                ) : Container(),
+                Align(
+                  alignment: Alignment.center,
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  ),
+                ),
+              ],
+            )
             ));
   }
 }

@@ -11,6 +11,7 @@ import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/radial_progress.dart';
@@ -20,14 +21,14 @@ class Layout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (builder, constraints) {
-        print(constraints.maxWidth);
-        if (constraints.maxWidth < 700) {
+    //cambiar por orientation builder
+    return OrientationBuilder(
+      builder: (builder, orientation) {
+       // if (orientation == Orientation.portrait) {
           return MobileLayout();
-        } else {
-          return TabletLayout();
-        }
+       // } else {
+         // return TabletLayout();
+        //}
       },
     );
   }
@@ -54,7 +55,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     super.initState();
   }
   
-   @override
+  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
@@ -79,7 +80,13 @@ class _MobileLayoutState extends State<MobileLayout> {
       if (chip){
         g = Chip(label: Text(text, style: Configuration.text('tiny', Colors.black)));
       } else {
-        g = Text(text, style: Configuration.text('tiny', Colors.black));
+        g =Chip(
+          label: Text(text, style: Configuration.text('tiny', Colors.black)), 
+          backgroundColor: Colors.white, 
+          elevation: 0.0,
+          side: BorderSide.none
+        );
+        
       }
 
       return GestureDetector(
@@ -129,8 +136,6 @@ class _MobileLayoutState extends State<MobileLayout> {
           padding: EdgeInsets.all(4),
           child: Image.asset('assets/logo-no-text.png')
         ),
-        
-        
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -191,20 +196,25 @@ class _MobileLayoutState extends State<MobileLayout> {
           }
         },
       ),
-      body: PageView(
-        physics: NeverScrollableScrollPhysics(),
-        controller: _c,
-        onPageChanged: (newPage) {
-          setState(() {
-            currentindex = newPage;
-          });
-        },
-        children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+      body: Container(
+        padding: EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
+        color: Configuration.lightgrey,
+        child: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _c,
+          onPageChanged: (newPage) {
+            setState(() {
+              currentindex = newPage;
+            });
+          },
+          children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+        ),
       ),
     );
   }
 }
 
+/*
 class TabletLayout extends StatefulWidget {
   @override
   _TabletLayoutState createState() => _TabletLayoutState();
@@ -214,6 +224,7 @@ class _TabletLayoutState extends State<TabletLayout> {
   Widget child;
   int currentindex = 0;
   PageController _c;
+  UserState _userstate;
 
   @override
   void initState() {
@@ -224,8 +235,19 @@ class _TabletLayoutState extends State<TabletLayout> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+    final _loginstate = Provider.of<LoginState>(context);
+
+    if(_userstate.user==null && _loginstate.loggeduser != null){
+      _userstate.setUser(_loginstate.loggeduser);
+    }
     Configuration().init(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       body: Row(children: [
@@ -270,10 +292,11 @@ class _TabletLayoutState extends State<TabletLayout> {
           child: PageView(
           physics: NeverScrollableScrollPhysics(),
           controller: _c,
-          children: [TabletMainScreen(), TabletLearnScreen(), TabletMeditationScreen(), TabletPathScreen(), TabletProfileScreen()],
+          children: [TabletMainScreen(), LearnScreen(), TabletMeditationScreen(), TabletPathScreen(), TabletProfileScreen()],
         ))
       ])
     );
   }
   
 }
+*/

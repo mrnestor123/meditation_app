@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
@@ -15,13 +16,13 @@ class PathScreen extends StatelessWidget {
       progressColor: Colors.transparent,
       progressBackgroundColor: Colors.grey,
       child: Container(
-        padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 2),
+        padding: EdgeInsets.symmetric(vertical:20, horizontal: 10),
         child: RadialProgress(
           goalCompleted: _userstate.user.percentage/100,
           progressColor: Configuration.maincolor,
           progressBackgroundColor: Colors.transparent,
           child: Container(
-            padding: EdgeInsets.all(Configuration.medpadding),
+            padding: EdgeInsets.symmetric(vertical:15,horizontal: 35),
             child: Text(
               _userstate.user.percentage.toString() + '%',
               style: Configuration.text('medium', Colors.black),
@@ -32,45 +33,65 @@ class PathScreen extends StatelessWidget {
     );
   }
 
-  Widget goals() {
-    return Container(
-      width: Configuration.width,
-      padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
-      decoration: BoxDecoration(
-          color: Configuration.maincolor,
-          borderRadius: BorderRadius.circular(16)),
-      child: Table(
-        columnWidths: {0: FractionColumnWidth(0.3)},
-        children: [
-          TableRow(children:
-          [
-            Text('Goals ',
-              style: Configuration.text('tiny', Colors.black),
+  Widget goals(context) {
+    
+    Widget iconButton(String text, IconData icon, modaltext){
+      return GestureDetector(
+        onTap: ()=> {
+          showGeneralDialog(
+              barrierColor: Colors.black.withOpacity(0.5),
+              transitionBuilder: (context, a1, a2, widget) {
+                return AbstractDialog(
+                  content: Container(
+                    height: Configuration.height*0.2,
+                    width: Configuration.width*0.9,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.0)
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(text, style: Configuration.text('smallmedium', Colors.black)),
+                        SizedBox(height: 10),
+                        Text(modaltext, style:Configuration.text('small', Colors.black, font: 'Helvetica'), textAlign: TextAlign.center,),
+                      ],
+                    )) ,
+                );
+              },
+              transitionDuration: Duration(milliseconds: 200),
+              barrierDismissible: true,
+              barrierLabel: '',
+              context: context,
+              pageBuilder: (context, animation1, animation2) {})
+        },
+        child: Container(
+          padding: EdgeInsets.all(6.0),
+          decoration: BoxDecoration(border: Border.all(color: Configuration.maincolor), borderRadius: BorderRadius.circular(12.0)),
+          child: Column(children: [
+            IconButton(icon: Icon(icon), onPressed: null),
+            Text(text,
+                style: Configuration.text('tiny', Colors.black),
             ),
-            Text(_userstate.user.stage.goals,
-                style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
           ]),
-          TableRow(children: [
-            Text('Obstacles ',
-                style: Configuration.text('tiny', Colors.black)),
-            Text(_userstate.user.stage.obstacles,
-                  style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
-          ]),
-          TableRow(children: [
-            Text('Skills ',
-                style: Configuration.text('tiny', Colors.black)),
-            Text(_userstate.user.stage.skills,
-            style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
-          ]),
-          TableRow(children: [
-            Text('Mastery ',
-                style: Configuration.text('tiny', Colors.black)),
-            Text(_userstate.user.stage.mastery,
-            style: Configuration.text('tiny', Colors.white, font: 'Helvetica'),
-            overflow: TextOverflow.visible)
-          ]),
-        ],
-      ),
+        ),
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GridView(
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10),
+          children: [
+          iconButton('Goals', Icons.tab, _userstate.user.stage.goals),
+          iconButton('Obstacles', Icons.tab, _userstate.user.stage.obstacles),
+          iconButton('Skills', Icons.tab, _userstate.user.stage.skills),
+          iconButton('Mastery', Icons.tab, _userstate.user.stage.mastery)
+        ]),
+      ],
     );
   }
 
@@ -116,38 +137,32 @@ class PathScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding,),
-      child: SingleChildScrollView(
-              child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: Configuration.height * 0.025),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('You are currently on ',
-                    style: Configuration.text('small', Colors.black)),
-                Text('Stage ' + _userstate.user.stagenumber.toString(),
-                    style: Configuration.text('smallmedium', Configuration.maincolor))
-              ],
-            ),
-            SizedBox(height: Configuration.height * 0.01),
-            Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.black), textAlign: TextAlign.center,),
-            SizedBox(height: Configuration.height * 0.05),
-            porcentaje(),
-            SizedBox(height: Configuration.height * 0.05),
-            Container(height: _userstate.user.passedObjectives.length > 3 ? Configuration.height * 0.3 : Configuration.height * 0.2,
-              child:labels()
-            ),
-            SizedBox(height: Configuration.height * 0.05),
-            goals()
-          ],
-        ),
+    return Column(
+    children: [
+      Flexible(
+      flex: 2,
+      child:Column(
+        children: [
+            Text('You are currently on ', style: Configuration.text('tiny', Colors.grey)),
+            Text('Stage ' + _userstate.user.stagenumber.toString(),
+             style: Configuration.text('big', Configuration.maincolor)),
+            Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
+            SizedBox(height: 30),
+            porcentaje()
+          ]
+        )
       ),
+
+      Flexible(
+        flex: 2,
+        child:labels() 
+      ),
+
+      Flexible( 
+        flex:2,
+        child: goals(context)
+      )
+    ],
     );
   }
 }

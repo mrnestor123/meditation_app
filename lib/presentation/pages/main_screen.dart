@@ -32,54 +32,48 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     UserState _userstate = Provider.of<UserState>(context);
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-      child: SingleChildScrollView(
+    return Column(
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      SizedBox(height: 20),
+      Flexible(
+        flex: 2,
+        child:AspectRatio(
+        aspectRatio: 16/9,
+          child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16.0)
+          ),
+          child: TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/imagepath'),
             child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: Configuration.height * 0.025),
-              AspectRatio(
-                aspectRatio: 16/9,
-                  child: Container(
-                  margin: EdgeInsets.all(Configuration.medmargin),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16.0)
-                  ),
-                  child: TextButton(
-                    onPressed: () => Navigator.pushNamed(context, '/imagepath'),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Stage ' + _userstate.user.stagenumber.toString(),
-                          style: Configuration.text('small', Colors.white),
-                        ),
-                        Expanded(child: Image(image: AssetImage('assets/stage 1/stage 1.png'))),
-                      ],
-                    ),
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                        primary: Configuration.maincolor,
-                        elevation: 0.0,
-                        onPrimary: Colors.white,
-                        padding: EdgeInsets.all(Configuration.smpadding),
-                        minimumSize: Size(double.infinity, double.infinity)),
-                  ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Stage ' + _userstate.user.stagenumber.toString(),
+                  style: Configuration.text('small', Colors.white),
                 ),
-              ),
-              SizedBox(height: Configuration.height * 0.05),
-              _Timeline(),
-              SizedBox(height: Configuration.height*0.05)
-            ]),
+                Expanded(child: Image(image: AssetImage('assets/stage 1/stage 1.png'))),
+              ],
+            ),
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                primary: Configuration.maincolor,
+                elevation: 0.0,
+                onPrimary: Colors.white,
+                padding: EdgeInsets.all(Configuration.smpadding),
+                minimumSize: Size(double.infinity, double.infinity)),
+          ),
+        ),
       ),
-    );
+      ),
+      Expanded(
+        flex: 4,
+        child:_Timeline()
+      ),
+    ]);
   }
 }
-
 
 class TabletMainScreen extends StatefulWidget {
   @override
@@ -137,7 +131,6 @@ class _TabletMainScreenState extends State<TabletMainScreen> {
       ));
   }
 }
-
 
 class _Timeline extends StatefulWidget {
   bool isTablet;
@@ -210,11 +203,11 @@ class __TimelineState extends State<_Timeline> {
                   crossAxisAlignment: CrossAxisAlignment.start, 
                   children: [
                     Text((action.username == _userstate.user.nombre ? 'You': action.username) + ' ' + action.message,
-                        style: widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') :  Configuration.text('tiny', Colors.black, font: 'Helvetica'),
+                        style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                         overflow: TextOverflow.fade,
                         ),
                     Text((mode == 'Today' ? '' : action.day + ' ') +   action.hour,
-                        style:widget.isTablet ? Configuration.tabletText('verytiny', Colors.black, font: 'Helvetica') : Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
+                        style: Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
                 ]),
               )
             ]),
@@ -222,7 +215,7 @@ class __TimelineState extends State<_Timeline> {
           widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
         }
       } else {
-        widgets.add(Center(child: Text('No actions realized ' + (mode == 'Today' ? 'today' : 'this week'), style: widget.isTablet ? Configuration.tabletText('tiny', Colors.grey, font: 'Helvetica') : Configuration.text('small', Colors.grey, font: 'Helvetica'))));
+        widgets.add(Center(child: Text('No actions realized ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
 
       return widgets;
@@ -233,14 +226,12 @@ class __TimelineState extends State<_Timeline> {
     _userstate = Provider.of<UserState>(context);
 
     return Container(
-        width: Configuration.width * (widget.isTablet ? 0.4 : 0.8),
-        height: Configuration.height *(widget.isTablet ? 0.7 : 0.4),
         decoration: BoxDecoration(
           color:Colors.white,  
           borderRadius: BorderRadius.circular(16.0), 
           border: Border.all(color: Colors.grey, width: 0.15)),
-        padding: EdgeInsets.all(widget.isTablet ? 16.0 : Configuration.tinpadding),
-        margin: EdgeInsets.all(widget.isTablet ? 16.0 : 0.0) ,
+        padding: EdgeInsets.all(Configuration.tinpadding),
+        margin: EdgeInsets.only(top: 20),
         child: Column(children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -248,7 +239,7 @@ class __TimelineState extends State<_Timeline> {
               DropdownButton<String>(
                     value: mode,
                     elevation: 16,
-                    style: widget.isTablet ? Configuration.tabletText('tiny', Colors.black) : Configuration.text('small', Colors.black),
+                    style: Configuration.text('small', Colors.black),
                     underline: Container(
                       height: 0,
                       color: Colors.deepPurpleAccent,
@@ -266,6 +257,7 @@ class __TimelineState extends State<_Timeline> {
                     }).toList()
                 ),
               RawMaterialButton(
+                    elevation: 0.0,
                     fillColor: Configuration.maincolor,
                     child: Row(
                       children: [

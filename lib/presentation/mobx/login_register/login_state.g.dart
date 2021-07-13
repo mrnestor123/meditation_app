@@ -99,11 +99,11 @@ mixin _$LoginState on _LoginState, Store {
     });
   }
 
-  final _$loginAsyncAction = AsyncAction('_LoginState.login');
+  final _$logoutAsyncAction = AsyncAction('_LoginState.logout');
 
   @override
-  Future<dynamic> login(dynamic user) {
-    return _$loginAsyncAction.run(() => super.login(user));
+  Future<dynamic> logout() {
+    return _$logoutAsyncAction.run(() => super.logout());
   }
 
   @override

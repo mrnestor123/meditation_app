@@ -190,9 +190,14 @@ class _CalendarState extends State<CalendarWidget> {
             children: <Widget>[
               // prev month button
               _toggleBtn(false),
-              Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), style: Configuration.text('small', Colors.black),),
+              Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), 
+                style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('small', Colors.black)
+                ),
 
-              Chip(label: Text(filteredmeditations.length.toString() + ' meditations', style: Configuration.text('verytiny', Colors.black))),
+              Chip(
+                label: Text(filteredmeditations.length.toString() + ' meditations', 
+                style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('verytiny', Colors.black))
+              ),
               // next month button
               _toggleBtn(true),
             ],

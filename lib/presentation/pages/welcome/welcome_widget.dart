@@ -63,7 +63,7 @@ class WelcomeWidget extends StatelessWidget {
                               aspectRatio: 6/2,
                               child: ElevatedButton(
                               onPressed: () async {
-                                Navigator.pushNamed(context, '/tabletlogin');
+                                Navigator.pushNamed(context, '/login');
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 0.0,
@@ -83,7 +83,7 @@ class WelcomeWidget extends StatelessWidget {
                               aspectRatio: 6/2,
                               child: ElevatedButton(
                               onPressed: () async {
-                                Navigator.pushNamed(context, '/tabletlogin');
+                                Navigator.pushNamed(context, '/register');
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 0.0,

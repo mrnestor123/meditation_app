@@ -26,8 +26,7 @@ class UserRepositoryImpl implements UserRepository {
         localDataSource.cacheUser(newUser);
         return Right(newUser);
       } on LoginException {
-        return Left(
-            LoginFailure(error: 'No existe un usuario en la base de datos'));
+        return Left(LoginFailure(error: 'User does not exist in the database'));
       } on ServerException {
         return Left(ServerFailure());
       }

@@ -39,23 +39,29 @@ class Game extends Content {
 
 
 class Question {
-  String question;
-  String answer;
+  String question, key;
+  
+  List<dynamic> options;
+  int answer;
 
-  Question({this.question,this.answer});
+  Question({this.question,this.options,this.answer, this.key});
 
-  bool isValid(String ans){
+  bool isValid(int ans){
     return ans == this.answer;
   }  
 
   factory Question.fromJson(Map<String, dynamic> json) => Question(
-      answer: json["answer"] == null ? json['answer'] : json["answer"],
-      question: json['question'] == null ? null : json['question']
+      answer: json["answer"] == null ? 0 : json['answer'] is String ? int.parse(json["answer"]) : json['answer'],
+      options: json['options'] == null ? [] : json['options'],
+      question: json['question'] == null ? null : json['question'],
+      key: json['key'] == null ?null : json['key']
     );
 
   Map<String, dynamic> toJson() => {
       "answer": answer == null ? null : answer,
-      "question": question == null ? null : question
+      "options":options == null ? null : options,
+      "question": question == null ? null : question,
+      'key': key == null ? null : key
   };
 
 }

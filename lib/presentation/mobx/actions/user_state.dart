@@ -22,7 +22,6 @@ class UserState extends _UserState with _$UserState {
   UserState(
       {CachedUserUseCase cachedUseCase,
       MeditateUseCase meditate,
-      LogOutUseCase logout,
       GetDataUseCase data,
       TakeLessonUseCase lesson,
       FollowUseCase updateUserUseCase,
@@ -34,7 +33,6 @@ class UserState extends _UserState with _$UserState {
             cachedUser: cachedUseCase,
             meditate: meditate,
             getdata: data,
-            logoutusecase: logout,
             lesson: lesson,
             followUseCase: updateUserUseCase,
             updateStageUseCase: updateStageUseCase,
@@ -48,7 +46,6 @@ abstract class _UserState with Store {
   MeditateUseCase meditate;
   GetDataUseCase getdata;
   TakeLessonUseCase lesson;
-  LogOutUseCase logoutusecase;
   FollowUseCase followUseCase;
   UpdateImageUseCase imageUseCase;
   UpdateStageUseCase updateStageUseCase;
@@ -59,7 +56,6 @@ abstract class _UserState with Store {
       {this.cachedUser,
       this.meditate,
       this.getdata,
-      this.logoutusecase,
       this.lesson,
       this.followUseCase,
       this.imageUseCase,
@@ -129,23 +125,23 @@ abstract class _UserState with Store {
     final following = followUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));
   }
 
-  @action
-  Future logout() async {
-    user = null;
-    loggedin = false;
-    await logoutusecase.call(NoParams());
-  }
-
+  
   @action
   Future changeName(String username) async {
     Either<Failure, User> _addedname = await changeDataUseCase.call(UParams(user: user, nombre: username, type: "name"));
     return true;
   }
 
+  @action 
+  Future changeImage(dynamic image) async {
+    Either<Failure, User> _changedimage = await imageUseCase.call(UParams(user: user, image: image));
+    return true;
+  }
+
   //DE AQUI HAY QUE QUITAR EL CHANGE IMAGE
   @action
   Future updateUser(dynamic variable, String type) async {
-    Either<Failure, User> _addedname = await followUseCase.call(UParams(user: user, type: type, image: variable));
+    Either<Failure, User> _addedname = await followUseCase.call(UParams(user: user, type: type));
   }
 
   @action

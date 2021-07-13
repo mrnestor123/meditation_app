@@ -112,13 +112,6 @@ mixin _$UserState on _UserState, Store {
     return _$followAsyncAction.run(() => super.follow(u, follow));
   }
 
-  final _$logoutAsyncAction = AsyncAction('_UserState.logout');
-
-  @override
-  Future<dynamic> logout() {
-    return _$logoutAsyncAction.run(() => super.logout());
-  }
-
   final _$changeNameAsyncAction = AsyncAction('_UserState.changeName');
 
   @override

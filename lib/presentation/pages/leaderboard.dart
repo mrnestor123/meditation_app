@@ -25,6 +25,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
   var time = '';
   TabController _tabController;
+
+  dynamic condition = true;
   bool searching = false;
 
   dynamic showUserProfile(User user,context) {
@@ -36,7 +38,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
           return StatefulBuilder(
               builder:(BuildContext context, StateSetter setState ) {
               return  Container(
-              height: Configuration.height*0.4,
+              height: Configuration.height * 0.4,
               color: Configuration.maincolor,
               child: Column(
                 children: [
@@ -114,7 +116,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         onPressed: () => setState((){
                           following= !following;  
                           _userstate.follow(user, following);}), 
-                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.text('tiny', Colors.lightBlue)),
+                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.text('tiny', following ? Colors.red : Colors.lightBlue)),
                         style: OutlinedButton.styleFrom(
                         ),
                       )
@@ -130,7 +132,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
   }
 
 
-  Widget createTable(List<User> list, following, context) {
+  Widget createTable(List<User> list, context) {
     var count = 0;
 
     Widget texticon(IconData icon, String text) {
@@ -183,7 +185,10 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    IconButton(icon: Icon(u.follows != null && u.follows ? Icons.person : Icons.person_add), onPressed: () async { await showUserProfile(u,context); setState((){});}),
+                    IconButton(
+                      icon: Icon(u.follows != null && u.follows ? Icons.person : Icons.person_add), 
+                      onPressed: () async { await showUserProfile(u,context); setState((){});}
+                      ),
                   ],
                 )
             ]
@@ -201,6 +206,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
   void didChangeDependencies(){
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    users = _userstate.user.allusers;
   }
 
 
@@ -249,7 +255,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
               flex: 4,
               child: Column(children: [
                 Container(
-                  decoration: BoxDecoration(color: Configuration.grey),
+                  decoration: BoxDecoration(color: Configuration.lightgrey),
                   child: Row(
                     children: [
                       Container(
@@ -262,11 +268,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                               child: TextField(
                               onChanged: (string) {
                                 setState(() {
-                                  if(string != null || string != ''){
-                                    users =  _userstate.data.users.where((u) => u.nombre != null && u.nombre.contains(string)).toList();
-                                  }else{
-                                    users = _userstate.data.users;
-                                  }
+                                  condition = string;
                                 });
                               },
                               controller: _searchController,
@@ -284,12 +286,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           indicatorColor: Configuration.maincolor,
                           tabs: [
                             Tab(
-                                child: Text('All users',
-                                    style: Configuration.text(
-                                        'small', Colors.black))),
+                                child: Text('All users',style: Configuration.text('small', Colors.black))),
                             Tab(
-                              child: Text('Following',
-                                  style:Configuration.text('small', Colors.black)),
+                              child: Text('Following', style:Configuration.text('small', Colors.black)),
                             ),
                           ]),
                       ),
@@ -297,20 +296,21 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         width: Configuration.width *0.1,
                         child: IconButton(
                           icon: Icon(searching ? Icons.close : Icons.search), 
-                          onPressed: ()=> setState(()=> searching = !searching)
+                          onPressed: () => setState(() { searching = !searching; _searchController.clear(); condition = true; })
                           )
                         )
                     ],
                   ),
                 ),
                 Expanded(child: 
-                TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
-                  controller: _tabController,
-                  children: [
-                  createTable(_userstate.user.allusers, false, context),
-                  createTable(_userstate.user.following, true, context),
-                ]))
+                  TabBarView(
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: _tabController,
+                    children: [
+                    createTable(_userstate.user.allusers.where((u) => (condition is String &&  u.nombre != null && u.nombre.contains(condition)) || condition is bool ).toList(), context),
+                    createTable(_userstate.user.following, context),
+                  ])
+                )
               ]),
             )
           ]),
@@ -362,7 +362,6 @@ class UserProfile extends StatelessWidget {
     );
   }
 }
-
 
 
 
@@ -517,7 +516,7 @@ class _TabletLeaderBoardState extends State<TabletLeaderBoard> {
                         onPressed: () => setState((){
                           following= !following;  
                           _userstate.follow(user, following);}), 
-                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.tabletText('tiny', Colors.lightBlue)),
+                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.tabletText('tiny', !following ? Colors.red : Colors.lightBlue)),
                         style: OutlinedButton.styleFrom(
                         ),
                       )

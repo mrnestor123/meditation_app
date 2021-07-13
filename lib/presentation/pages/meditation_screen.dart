@@ -10,6 +10,7 @@ import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/progress_dialog.dart';
@@ -27,8 +28,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
   UserState _userstate;
   MeditationState _meditationstate;
   GameState _gamestate;
-
-
   int _index;
 
   //podriamos utilizar meditationstate de arriba
@@ -37,53 +36,53 @@ class _MeditationScreenState extends State<MeditationScreen> {
   var selectedtype = 'Meditation';
   var finished = false;
 
+  bool canStart = false;
+
+
   Widget freeMeditation() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TimePicker(),
-        SizedBox(height: Configuration.height * 0.1),
-        StartButton(
-          onPressed: () => {
-            _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data),
-            Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
-            })),
-          },
-        ),
-      ],
-    );
+    return layout( 
+      TimePicker(), 
+    () {
+        _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data);
+        Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
+          _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null }));
+    }, true);
   }
 
   Widget guidedMeditation() {
+    List<int> stages = [1,2,3,4,5,6,7,8,9,10];
+
     List<Widget> meditations() {
       List<Widget> meditations = new List.empty(growable:true);
       for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
+        //estascondiciones podria ponerlas en el dominio _userstate.user.canMeditate(x)
         var _blocked = _userstate.user.meditposition < meditation.position && _userstate.user.stagenumber == meditation.stagenumber || _userstate.user.stagenumber < meditation.stagenumber;
         meditations.add(GestureDetector(
             onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
             child: Container(
               decoration: BoxDecoration(
-                border: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 
-                Border.all(color: Configuration.maincolor) : null),
-              child: Stack(
-                children: [
-                  Column(children: [
-                    Container(
-                      width: Configuration.width* 0.2,
-                      height:Configuration.width* 0.2,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.0),
-                        image: DecorationImage(
-                            image: NetworkImage(meditation.image)))),
-                    Text(
-                      meditation.title,
-                      style: Configuration.text('small', _blocked ? Colors.grey : Colors.black),
-                      textAlign: TextAlign.center,
-                    )
-                  ])
-                ],
+                borderRadius: BorderRadius.circular(16.0),
+                color: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Colors.grey.withOpacity(0.1) : Colors.transparent,
               ),
-            )
+              child: Column(
+                children: [
+                  SizedBox(height: 10),
+                  Container(
+                    height:_meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Configuration.width*0.2: Configuration.width * 0.15,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.0),
+                      image: DecorationImage(
+                          image: NetworkImage(meditation.image)))),
+                  Flexible(
+                      child: Text(
+                      meditation.title,
+                      style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 10)
+                ]),
+              )
             )
           );
       }
@@ -91,157 +90,138 @@ class _MeditationScreenState extends State<MeditationScreen> {
       return meditations;
     }
 
-    Widget stages() {
-      var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var types = ['Meditation', 'Game'];
-
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(children: [
-              Text(
-                'Stage',
-                style: Configuration.text('small', Colors.black),
-              ),
-              SizedBox(width: Configuration.blockSizeVertical * 1),
-              DropdownButton<int>(
-                  value: selectedstage,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.black),
-                  underline: Container(
-                    height: 0,
-                    color: Colors.deepPurpleAccent,
-                  ),
-                  onChanged: (int newValue) {
-                    setState(() {
-                      selectedstage = newValue;
-                    });
-                  },
-                  items: stages.map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList())
-            ]),
-            Row(children: [
-              Text(
-                'Type',
-                style: Configuration.text('small', Colors.black),
-              ),
-              SizedBox(width: Configuration.blockSizeVertical * 1),
-              DropdownButton<String>(
-                  value: selectedtype,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.black),
-                  underline: Container(
-                    height: 0,
-                    color: Colors.deepPurpleAccent,
-                  ),
-                  onChanged: (String newValue) {
-                    setState(() {
-                      selectedtype = newValue;
-                    });
-                  },
-                  items: types.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList())
-            ]),
-          ]);
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return layout(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        Text('Stage',
+          style: Configuration.text('small', Colors.black),
+        ),
+        SizedBox(width: Configuration.blockSizeVertical * 1),
         Container(
-            height: Configuration.height * 0.45,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.0)),
-            margin: EdgeInsets.all(Configuration.bigmargin),
-            child: Column(children: [
-              Container(
-                height: Configuration.height * 0.05,
-                child: stages(),
-              ),
-              Container(
-                height: Configuration.height * 0.4,
-                child: GridView(
-                    padding: EdgeInsets.all(Configuration.medpadding),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2),
-                    children: meditations()),
-              )
-            ])),
-            StartButton(
-              onPressed: () => {
+          width: Configuration.width,
+          child: GridView.builder(
+            itemCount: 10,
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, crossAxisSpacing: 5.0, mainAxisSpacing: 30.0),
+            itemBuilder: (context,index) {
+              return Text(stages[index].toString(), style: Configuration.text('tiny',Colors.black));
+            }          
+          ),
+        ),
+        GridView(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, mainAxisSpacing: 30.0),
+            children: meditations())
+        ]
+      ), 
+      () => {
                 _meditationstate.state ='pre_guided', 
                 Navigator.pushNamed(context, '/countdown').then(
                   (value) => setState(()=>{
                     _userstate.user.progress != null ? 
                     autocloseDialog(context, _userstate.user) : null
                   })), 
-              },
-            )
-      ],
-    );
+      }, _meditationstate.selmeditation != null);
   }
 
   Widget games() {
-    List<Widget> gamelist(){
-        List<Widget> g = new List.empty(growable: true);
-        for(var element in _userstate.data.stages[0].games){
-          g.add(
-            Column(
-              children: [
-                GestureDetector(
-                    onTap: ()=> setState(()=> _gamestate.selectgame(element)),
-                    child: Container(
-                    decoration: BoxDecoration(border: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == element.cod ? Border.all(color: Configuration.maincolor): Border()),
-                    width: Configuration.width*0.3,
-                    child: AspectRatio(
-                      aspectRatio: 1/1,
-                      child: Container( 
-                        margin: EdgeInsets.all(Configuration.tinpadding),
-                        decoration: BoxDecoration(color: Colors.grey))),
+    Widget gamelist(){
+      return GridView.builder(
+        shrinkWrap: true,
+        itemCount: _userstate.data.stages[0].games.length,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200), 
+        itemBuilder: (context,index) {
+          var game = _userstate.data.stages[0].games[index];
+          return GestureDetector(
+            onTap: ()=> setState(()=> _gamestate.selectgame(game)),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.0),
+                color:  _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod  ? Colors.grey.withOpacity(0.1) : Colors.transparent,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 5),
+                  Container(
+                    height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ? Configuration.height*0.17 :Configuration.height*0.15,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(image: NetworkImage(game.image)),
+                    ),
+                   child: Stack(
+                     children: [
+                       _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?
+                       Positioned(
+                         top: -5,
+                         right: 25,
+                         child:
+                         Chip(
+                           side: BorderSide.none,
+                           label: Text( 
+                             (_userstate.user.answeredGame(game.cod) ? _userstate.user.answeredquestions.length.toString(): '0' )
+                             + '/' + game.questions.length.toString(), 
+                              style: Configuration.text('mini', Colors.white)
+                            )
+                          )
+                       ) : Container(),
+                     ],
+                   ),
                   ),
-                ),
-                Text(element.title, style: Configuration.text('small',Colors.black),)
-              ],
-            )
-        );
-
-      return g;
-      }
+                  SizedBox(height: 10),
+                  Text(game.title, style: Configuration.text('small',Colors.black),)
+                ]
+              ),
+            ),
+          );
+        });
     }
 
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          SizedBox(height: Configuration.height * 0.025),
-          Text('Concentration games', style: Configuration.text('medium', Colors.black),),
-          SizedBox(height: Configuration.height*0.05),
-          Container(
-            height: Configuration.height * 0.4,
-            child: Column(
-              children: gamelist(),
-              ), 
-          ),
-          StartButton(
-            onPressed: () { 
-              _gamestate.startgame();
-              Navigator.pushNamed(context,'/gamestarted');
-            },
-          )
-      ]),
+    return layout(
+      Container(
+        width: Configuration.width > 500 ? Configuration.width*0.45 : Configuration.width,
+        height: Configuration.height,
+        child: gamelist(),
+      ), 
+      () {
+         _gamestate.startgame();
+        Navigator.pushNamed(context,'/gamestarted');
+      },
+      _gamestate.selectedgame != null 
     );
   }
 
+  Widget layout(child, onPressed, condition){
+    return Stack(
+      children: [
+        Align(
+          alignment: Configuration.width > 500 ? Alignment.centerRight : Alignment.bottomCenter,
+          child: StartButton(
+            onPressed:condition ? ()=> onPressed() : null,
+          ),
+        ),
+        Align(
+          alignment: Configuration.width > 500 ? Alignment.topLeft : Alignment.topCenter,
+          child: child,
+        )
+      ],
+    );
+
+  }
+
+  @override 
+  void initState(){
+    super.initState();
+  }
+
+  @override 
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+    _meditationstate = Provider.of<MeditationState>(context);
+    _meditationstate.practice = PageController(initialPage: _meditationstate.currentpage);
+    selectedstage = _userstate.user.stagenumber;
+  }
 
   @override
   void dispose() {
@@ -250,9 +230,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _meditationstate = Provider.of<MeditationState>(context);
     _gamestate = Provider.of<GameState>(context);
-    _userstate = Provider.of<UserState>(context);
 
     return PageView(
       controller: _meditationstate.practice,
@@ -261,11 +239,12 @@ class _MeditationScreenState extends State<MeditationScreen> {
           _meditationstate.switchpage(newPage);
         });
       },
-      children: [freeMeditation(), guidedMeditation(),games()],
+      children: [freeMeditation(), guidedMeditation(), games()],
     );
   }
 }
 
+//VISTA DE MEDITACIÓN
 class Countdown extends StatefulWidget {
   const Countdown({
     Key key
@@ -345,23 +324,16 @@ class _CountdownState extends State<Countdown> {
 
       if (_meditationstate.selmeditation.content[index.toString()]['text'] != null) {
         l.add(Text(_meditationstate.selmeditation.content[index.toString()]['text'],
-            style: Configuration.text('tiny', Colors.white,font:'Helvetica')));
+            style: Configuration.text('small', Colors.white,font:'Helvetica')));
       }
 
       if (finished) {
         l.add(SizedBox(height: Configuration.height * 0.02));
-        l.add(ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Configuration.maincolor,
-            padding: EdgeInsets.all(Configuration.medpadding),
-            shape: CircleBorder(),
-            animationDuration: Duration(milliseconds: 500)
-          ),
-          onPressed: ()=> {_meditationstate.setMeditation(_meditationstate.selmeditation, _userstate.user, _userstate.data)} ,
-          child: Text(
-            'Start',
-            style: Configuration.text('medium', Colors.white),
-          ),
+        l.add(StartButton(
+          onPressed: () {
+            // esto hace falta hacerlo ???
+            _meditationstate.setMeditation(_meditationstate.selmeditation, _userstate.user, _userstate.data);
+          },
         ));
       }
 
@@ -413,17 +385,22 @@ class _CountdownState extends State<Countdown> {
           child: _meditationstate.selmeditation.type != 'free' ? 
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: Configuration.height*0.35,
-                width: Configuration.height*0.35,
-                child: Image(image: NetworkImage(_meditationstate.selmeditation.image),fit: BoxFit.cover),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
-              ),
-              SizedBox(height: Configuration.blockSizeVertical*3),
-              Text(_meditationstate.selmeditation.title,style: Configuration.text('small',Colors.white))
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: 
+               _meditationstate.currentsentence != null ? [
+                  Text(_meditationstate.currentsentence, style: Configuration.text('small', Colors.white), textAlign: TextAlign.center)
+               ]: [
+                  Container(
+                    height: Configuration.height*0.35,
+                    width: Configuration.height*0.35,
+                    child: Image(image: NetworkImage(_meditationstate.selmeditation.image),fit: BoxFit.cover),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
+                  ),
+                SizedBox(height: Configuration.blockSizeVertical*3),
+                Text(_meditationstate.selmeditation.title,style: Configuration.text('small',Colors.white))
             ],
-          ):  Container(
+          ) :  
+          Container(
             height: Configuration.blockSizeHorizontal * 60,
             width: Configuration.blockSizeHorizontal * 60,
             decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
@@ -512,9 +489,8 @@ class _CountdownState extends State<Countdown> {
 }
 
 class TimePicker extends StatefulWidget {
-  bool isTablet;
 
-  TimePicker({this.isTablet = false});
+  TimePicker();
 
   @override
   _TimePickerState createState() => _TimePickerState();
@@ -534,20 +510,19 @@ class _TimePickerState extends State<TimePicker> {
       1,
       baseColor: Colors.grey.withOpacity(0.6),
       handlerColor: Configuration.maincolor,
-      
       onSelectionChange: (a, b, c) {
         setState(() {
           seltime = b;
           print(seltime);
         });
       },
-      height: Configuration.height*0.2,
-      width: Configuration.height*0.2,
+      height: Configuration.width > 600 ? 200 : Configuration.height*0.2,
+      width: Configuration.width > 600 ? 200 : 200,
       selectionColor: Configuration.maincolor,
       child: Center(
           child: Text(
         seltime.toString() + ' min',
-        style: widget.isTablet ? Configuration.tabletText('tiny', Colors.black) : Configuration.text('smallmedium', Colors.black),
+        style: Configuration.text('smallmedium', Colors.black),
       )),
     );
   }
@@ -674,6 +649,7 @@ class _WeekItemState extends State<WeekItem> {
 }
 
 // VISTA DE TABLETS !!!!
+/*
 class TabletMeditationScreen extends StatefulWidget {
   @override
   _TabletMeditationScreenState createState() => _TabletMeditationScreenState();
@@ -696,7 +672,7 @@ class _TabletMeditationScreenState extends State<TabletMeditationScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TimePicker(isTablet: true),
+        TimePicker(),
         SizedBox(height: Configuration.height * 0.1),
         TabletStartButton(
           onPressed: () => {
@@ -1193,5 +1169,5 @@ class _TabletCountdownState extends State<TabletCountdown> {
 
 
 
-
+*/
 

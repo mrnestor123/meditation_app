@@ -10,6 +10,8 @@ class Meditation extends Content {
 
   Map<dynamic, dynamic> content;
 
+  Map<dynamic,dynamic> followalong;
+
   //for referencing the user.
   //final String userId;
 
@@ -19,6 +21,7 @@ class Meditation extends Content {
       this.day,
       this.coduser,
       this.content,
+      this.followalong,
       recording,
       cod,
       type,

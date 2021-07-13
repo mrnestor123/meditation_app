@@ -36,6 +36,7 @@ class RegisterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //Registerstate ya es login
     final _registerstate = Provider.of<LoginState>(context);
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
@@ -52,19 +53,20 @@ class RegisterWidget extends StatelessWidget {
         body: Container(
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
           padding: EdgeInsets.all(8),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Image.asset('assets/logo.png', width: Configuration.width*0.4,),
-                // spacer
-                SizedBox(height: 12.0),
-                
-                Form(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Flexible(
+                flex: 2,
+                child:Image.asset('assets/logo.png')
+                ),
+              Flexible(
+                flex: 3,
+                child: Form(
                   key: _registerstate.formKey,
                   child: Column(
                     children: [
-                       Container(
+                      Container(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextFormField(
                           controller: _userController,
@@ -135,13 +137,15 @@ class RegisterWidget extends StatelessWidget {
                                 password: _passwordController.text,
                                 type: 'mail');
                         },
-                        text: 'REGISTER',
+                        text: 'REGISTER'
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 30),
-                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              ),
+              Flexible(
+                flex: 1,
+                child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   RawMaterialButton(
                     onPressed: () async{
                       await _registerstate.startRegister(context, type: 'google');
@@ -173,15 +177,11 @@ class RegisterWidget extends StatelessWidget {
                         );
                         if (result != null) {
                           await _registerstate.startRegister(context, type: 'facebook');
-
-                          /*if (_registerstate.user != null) {
-                            pushNextPage(_registerstate.user, context);
-                          }*/
                         }
                       })
-                ])
-              ],
-            ),
+                ]),
+              )
+            ],
           ),
         ));
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:mobx/mobx.dart';
 
 import 'game_entity.dart';
@@ -26,19 +27,23 @@ class Stage {
       this.userscount,
       this.stobjectives});
 
-  void addContent(Content c){
-    if(c.type== 'meditation' || c.type =='lesson'){
-      stobjectives.lecciones++;
-      path.add(c);
-      path.sort((a, b) => a.position - b.position);
-    } else if(c.type =='meditation-practice') {
-      stobjectives.meditguiadas++;
-      meditpath.add(c);
-      meditpath.sort((a, b) => a.position - b.position);
-    }else {
-      games.add(c);
-    }
+  void addLesson(Lesson l){
+    stobjectives.lecciones++;
+    path.add(l);
+    path.sort((a, b) => a.position - b.position);
   }
+
+  void addMeditation(Meditation m){
+    stobjectives.meditguiadas++;
+    meditpath.add(m);
+    meditpath.sort((a, b) => a.position - b.position);
+  }
+
+  void addGame(Game g){
+     games.add(g);
+  }
+
+
 }
 
 
@@ -55,7 +60,7 @@ class StageObjectives {
       totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
       streak: json['racha'] == null ? 0 : json['racha'],
       meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'],
-      freemeditationlabel: json['meditation'] == null ? 0 : json['meditation']['count'].toString() + ' min meditations ',
+      freemeditationlabel: json['meditation'] == null ? 0 : json['meditation']['time'].toString() + ' min meditations ',
       meditationfreetime: json['meditation'] == null ? 0 : json['meditation']['time'],
       meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
       lecciones: json['lessons'] == null ? 0 : json['lessons']
