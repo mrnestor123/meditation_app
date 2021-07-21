@@ -28,6 +28,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
   dynamic condition = true;
   bool searching = false;
+  var loading = false;
 
   dynamic showUserProfile(User user,context) {
    return showModalBottomSheet<void>(
@@ -79,13 +80,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                               Column(
                                 children: [
                                   Text('Following', style: Configuration.text('tiny', Colors.white)),
-                                  Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.white))   
+                                  Text(user.followedcods.length.toString(), style: Configuration.text('tiny',Colors.white))   
                                 ],
                               ),
                               Column(
                                 children: [
                                   Text('Followers', style: Configuration.text('tiny', Colors.white)),
-                                  Text(user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.white))
+                                  Text(user.followsyoucods.length.toString(), style: Configuration.text('tiny',Colors.white))
                                 ],
                               )
                           ])
@@ -182,7 +183,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 children: [
                   texticon(Icons.timer, u.timemeditated)
                 ]),
-                Row(
+              Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     IconButton(
@@ -203,12 +204,18 @@ class _LeaderBoardState extends State<LeaderBoard> {
   }
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    setState(() {
+      loading= true;
+    });
+    await _userstate.getData();
+    setState(() {
+      loading = false;
+    });
     users = _userstate.user.allusers;
   }
-
 
   @override
   void dispose() {
@@ -241,14 +248,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 child: Container(
                 width: Configuration.width,
                 color: Configuration.maincolor,
-                child: Stack(
+                child: !loading ? Stack(
                   fit: StackFit.expand,
                   children: [
                     Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.data.users[1], large: false, position: 2,)),
                     Align(child: UserProfile(user: _userstate.data.users[0], large: true, position: 1,)),
                     Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.data.users[2], large:false, position: 3))
                   ],
-                ),
+                ) : Container(),
               ),
             ),
             Flexible(
@@ -302,12 +309,20 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     ],
                   ),
                 ),
+                loading ? 
+                Container(
+                  margin: EdgeInsets.only(top: 16.0),
+                  child: CircularProgressIndicator(
+                    color: Configuration.maincolor,
+                    strokeWidth: 3.0,
+                  ),
+                ) :
                 Expanded(child: 
                   TabBarView(
                     physics: NeverScrollableScrollPhysics(),
                     controller: _tabController,
                     children: [
-                    createTable(_userstate.user.allusers.where((u) => (condition is String &&  u.nombre != null && u.nombre.contains(condition)) || condition is bool ).toList(), context),
+                    createTable(_userstate.data.users, context),
                     createTable(_userstate.user.following, context),
                   ])
                 )
@@ -412,7 +427,7 @@ class TabletUserProfile extends StatelessWidget {
   }
 }
 
-
+/*
 class TabletLeaderBoard extends StatefulWidget {
   @override
   _TabletLeaderBoardState createState() => _TabletLeaderBoardState();
@@ -716,4 +731,4 @@ class _TabletLeaderBoardState extends State<TabletLeaderBoard> {
   }
 }
 
-
+*/

@@ -73,6 +73,7 @@ abstract class _LoginState with Store {
           user = await auth.signInWithEmailAndPassword(email: username, password: password);
           }
       } else if(type =='google'){
+          googleSignin.disconnect();
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
 
         if (googleSignInAccount != null) {
@@ -110,7 +111,7 @@ abstract class _LoginState with Store {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.fixed,
+          behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.floating,
           margin: isTablet ? EdgeInsets.all(20.0) : EdgeInsets.all(0.0),
           content: Container(
             padding: EdgeInsets.all(12.0),

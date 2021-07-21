@@ -288,6 +288,7 @@ class MyInfo extends StatefulWidget {
 class _MyInfoState extends State<MyInfo> {
   final ImagePicker _picker = ImagePicker();
   UserState _userstate;
+  bool uploading = false;
 
   PickedFile _image;
 
@@ -295,8 +296,13 @@ class _MyInfoState extends State<MyInfo> {
     PickedFile image = await _picker.getImage(source: ImageSource.camera);
     
     if(image != null){
-    await _userstate.changeImage(image);
     setState(() {
+      uploading =true;
+    });
+    await _userstate.changeImage(image);
+    
+    setState(() {
+      uploading = false;
     });
     }
   }
@@ -305,8 +311,12 @@ class _MyInfoState extends State<MyInfo> {
     PickedFile image = await _picker.getImage(source: ImageSource.gallery);
 
      if(image != null){
+      setState(() {
+        uploading =true;
+      });
       await _userstate.changeImage(image);
       setState(() {
+        uploading = false;
       });
      }
   }
@@ -423,58 +433,6 @@ class ProfileInfoBigCard extends StatelessWidget {
     );
   }
 }
-
-class TabletInfoCard extends StatelessWidget {
-  final String firstText, secondText, color;
-  final Widget icon;
-
-  const TabletInfoCard(
-      {Key key,
-      @required this.firstText,
-      @required this.secondText,
-      this.color,
-      @required this.icon})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
-        border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
-      ),
-      child: OutlinedButton(
-          onPressed: ()=> 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => TabletViewData(
-                      title: secondText,
-                    )),
-          ),
-          style: OutlinedButton.styleFrom(
-            primary: Colors.black
-          ),
-          child: Padding(
-          padding: EdgeInsets.all(8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(firstText, style: Configuration.tabletText('tiny', color != null ? Colors.white: Colors.black)),
-                  Align(alignment: Alignment.centerRight, child: icon),
-              ]),
-              Text(secondText, style: Configuration.tabletText('verytiny', color != null ? Colors.white : Colors.black)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 
 class ProfileInfoCard extends StatelessWidget {
   final firstText, secondText, hasImage, imagePath, isTablet;
@@ -601,7 +559,7 @@ class Ordinal {
   Ordinal(this.day, this.min);
 }
 
-/* VISTAS DE TABLET*/
+/* VISTAS DE TABLET
 class TabletProfileScreen extends StatefulWidget {
   User user;
 
@@ -799,3 +757,4 @@ class _TabletViewDataState extends State<TabletViewData> {
 
 
 
+*/

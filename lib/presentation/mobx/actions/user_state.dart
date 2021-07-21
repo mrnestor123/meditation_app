@@ -102,6 +102,7 @@ abstract class _UserState with Store {
     await lesson.call(LessonParams(lesson: l, user: user, d: data));
 
     // SI HA SUBIDO DE ETAPA !!!! 
+    //CHECKEAR EL UPLOADSTAGE !!!
     if (currentposition < user.stagenumber) {
       return true;
     } else {
@@ -114,7 +115,9 @@ abstract class _UserState with Store {
   Future getData() async {
     final result = await getdata.call(NoParams());
 
-    result.fold((Failure f) => print(f.error), (DataBase d) {
+    result.fold(
+    (Failure f) => print(f.error), 
+    (DataBase d) {
       data = d;
     });
   }

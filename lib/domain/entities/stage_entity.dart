@@ -40,7 +40,33 @@ class Stage {
   }
 
   void addGame(Game g){
-     games.add(g);
+    games.add(g);
+  }
+
+  void setGames(List<dynamic> games){
+    if(games.length > 0){
+      for(var game in games){
+        addGame(game);
+      }
+    }
+
+  }
+
+  void setMeditations(List<dynamic> meditations){
+    if(meditations.length > 0){
+      for(var meditation in meditations){
+        addMeditation(meditation);
+      }
+    }
+
+  }
+
+  void setLessons(List<dynamic> lessons){
+     if(lessons.length > 0){
+      for(var lesson in lessons){
+        addLesson(lesson);
+      }
+    }
   }
 
 

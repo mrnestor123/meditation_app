@@ -137,7 +137,8 @@ class PathScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return Column(
+    return Flex(
+    direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
     children: [
       Flexible(
       flex: 2,
@@ -166,7 +167,6 @@ class PathScreen extends StatelessWidget {
     );
   }
 }
-
 
 class TabletPathScreen extends StatelessWidget {
   TabletPathScreen();

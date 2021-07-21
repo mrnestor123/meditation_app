@@ -1,5 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
@@ -11,6 +14,7 @@ import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:http/http.dart' as http;
 
 
 import '../models/lesson_model.dart';
@@ -38,21 +42,46 @@ abstract class UserRemoteDataSource {
   //sacamos los datos del usuario que no guardamos en la bd
   Future <UserModel> getUserData(String coduser);
 
+  Future getActions(UserModel u);
+
   Future updateImage(PickedFile image, User u);
+}
+
+// QUITAR ESTO PARA EL FUTURO
+class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
+  }
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   var database;
+  var nodejs ;
 
   UserRemoteDataSourceImpl() {
+    HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
+    nodejs = 'https://192.168.4.67:8802';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
-  addfollowers(User loggeduser) async{
 
+  Future<UserModel> connect(String cod) async {
+    var url = Uri.parse('$nodejs/connect/$cod');
+    http.Response response = await http.get(url);
+
+    //comprobar que funciona bien
+    UserModel u = UserModel.fromRawJson(response.body);
+
+    return u;
+  }
+
+  //se ejecuta cuando nos conectamos siempre!
+  addfollowers(User loggeduser) async {    
     //si sigue a alguien sacamos los que sigue y los que no sigue
     if(loggeduser.followedcods.length > 0 ){
       QuerySnapshot notfollowed = await database.collection('users').where('coduser', whereNotIn: loggeduser.followedcods).get();
@@ -109,31 +138,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({var usuario}) async {
-    QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: usuario.uid).get();
 
-    UserModel loggeduser;
+    // Vamos a hacer esto en el server !!
+    UserModel loggeduser = await connect(usuario.uid);
 
-    if (user.docs.length > 0) {
-      loggeduser = new UserModel.fromJson(user.docs[0].data());
+    getActions(loggeduser);
 
-      await addfollowers(loggeduser);
-
-      QuerySnapshot stage = await database.collection('stages').where('stagenumber', isEqualTo: loggeduser.stagenumber).get();
-
-      StageModel s = await populateStage(stage.docs[0].data());
-
-      loggeduser.setStage(s);
-
-      QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: loggeduser.coduser).get();
-
-      if (meditations.docs.length > 0) {
-        for (DocumentSnapshot doc in meditations.docs) {
-          loggeduser.addMeditation(new MeditationModel.fromJson(doc.data()));
-        }
-      }
-
+    Timer.periodic(new Duration(seconds: 30), (timer) {
+      getActions(loggeduser);
+    });    
+    if(loggeduser !=null){
       return loggeduser;
-    } else {
+    }else {
       throw LoginException();
     }
   }
@@ -141,6 +157,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<UserModel> registerUser({var usuario}) async {
     //Sacamos la primera etapa
+    //Esto se debería de sacar del getStage
     QuerySnapshot firststage = await database.collection('stages').where('stagenumber', isEqualTo: 1).get();
     StageModel one;
 
@@ -165,43 +182,45 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return user;
   }
 
+  // se carga cada x tiempo las últimas acciones del usuario!
+  Future getActions(UserModel u) async {
+    var url = Uri.parse('$nodejs/live/${u.coduser}');
+    var response = await http.get(url);
 
-  Future<StageModel> populateStage(json) async {
-    StageModel s = new StageModel.fromJson(json);
-    QuerySnapshot lessons = await database.collection('content').where('stagenumber', isEqualTo: s.stagenumber).get();
+    var actions = json.decode(response.body);
 
-    //HAGO DOS VECES EL IF SE PODRÍA HACER METODO ADDMEDITATION, ADDLESSON, ADDGAME !!!
-    for (var content in lessons.docs) {
-      if (content.data()['position'] != null || content.data()['type'] == 'meditation-game' ) {
-        content.data()['type'] == 'meditation-practice' ?
-          s.addMeditation(MeditationModel.fromJson(content.data())):
-        content.data()['type'] == 'meditation-game' ?
-          s.addGame(GameModel.fromJson(content.data())):
-          s.addLesson(LessonModel.fromJson(content.data()));
-      }
+    if(actions['today'] != null && actions['today'].length > u.todayactions.length){
+      u.setActions(actions['today'], true);
     }
 
-    return s;
+    if(actions['thisweek'] != null && actions['thisweek'].length > u.thisweekactions.length){
+      u.setActions(actions['thisweek'], false);
+    }
+    
   }
 
-
   @override
-  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ?? // SE UTILIZA ???
+  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ?? // SE UTILIZA ??? // DEBERÍA QUITARSE !!
   Future<DataBase> getData() async  {
     DataBase d = new DataBase();
-    QuerySnapshot stages = await database.collection('stages').get();
-    QuerySnapshot users = await database.collection('users').get();
+    var url = Uri.parse('$nodejs/stages');
+    http.Response response = await http.get(url);
+    List<StageModel>  stages = new List.empty(growable: true);
 
-    for (var stage in stages.docs) {
-      StageModel s = await populateStage(stage.data());
-      d.stages.add(s);
+    var stagesquery = json.decode(response.body);
+
+    for(var stage in stagesquery){
+      d.stages.add(StageModel.fromJson(stage));      
     }
+
+    //Pasar esto al server de node !!
+    QuerySnapshot users = await database.collection('users').get();
 
     for (var user in users.docs) {
       d.users.add(new UserModel.fromJson(user.data()));
     }
 
-    d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
+//    d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
     d.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
 
     return d;
@@ -219,8 +238,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       return profilepath;
   }
 
+
   @override
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
+    
     QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
@@ -228,20 +249,40 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
     if (type == 'meditate') {
       await database.collection('meditations').add(toAdd[0].toJson());
+    }else if(type =='lesson'){
+      //Añadirlo a las lessonss del usuario !!
     }
 
-    if(type =='lesson'){
-      //Añadirlo a las lessonss del usuario !!
-    } 
+    var url = Uri.parse('$nodejs/action/${user.coduser}');
+    
+    //esto se ejecutará antes que el clear ??
+    user.lastactions.forEach((element) async{
+      var body = json.encode(element.toJson());
+
+      var response = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: body
+      );
+    });
+
+    user.lastactions.clear();
+
   }
 
   /*
-
     TODO: SACAR LAS LECCIONES QUE HA LEIDO !!
   */
-
   @override
   Future <UserModel> getUserData(String coduser) async{
+    UserModel u = await connect(coduser);
+
+    getActions(u);
+
+    Timer.periodic(new Duration(seconds: 30), (timer) {
+      getActions(u);
+    });    
+    
+    /*
     QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: coduser).get();
     if(user.docs.length > 0){
       UserModel u = UserModel.fromJson(user.docs[0].data());
@@ -260,5 +301,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
       return u;
     } throw Exception();
+    */
+    if(u == null){
+      throw Exception();
+    }else{
+      return u;
+    }
+
   }
 }

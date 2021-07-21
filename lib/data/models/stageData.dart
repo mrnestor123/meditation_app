@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/mission_model.dart';
@@ -49,7 +50,19 @@ class StageModel extends Stage {
         stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
         skills: json["skills"] == null ? null : json["skills"],
         mastery: json["mastery"] == null ? null : json["mastery"]);
+
+        if(json['lessons'] != null){
+          s.setLessons(json['lessons'].map((l) => new LessonModel.fromJson(l)).toList());
+        }
         
+        if(json['meditations'] != null && json['meditations'] is List){
+          s.setMeditations(json['meditations'].map((m) => new MeditationModel.fromJson(m)).toList());
+        }
+        
+        if(json['games'] != null){
+          s.setGames(json['games'].map((g) => new GameModel.fromJson(g)).toList());
+        }
+
     return s;
   }
 

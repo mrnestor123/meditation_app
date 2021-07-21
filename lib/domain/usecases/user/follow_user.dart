@@ -16,10 +16,12 @@ class FollowUseCase extends UseCase<User, UParams> {
   Future<Either<Failure, User>> call(UParams params) async {
     if (params.type == 'follow') {
       params.user.follow(params.followeduser);
-     // repository.follow(user:params.user, following:params.followeduser);
     } else if (params.type == 'unfollow') {
       params.user.unfollow(params.followeduser);
-    }
+    } 
+
+    // Updateamos también los datos del usuario  al que se sigue
+    repository.updateUser(user: params.followeduser);
 
     return repository.updateUser(user: params.user,  type:params.type);
   }

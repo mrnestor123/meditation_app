@@ -30,6 +30,8 @@ class User {
   //estadísticas
   UserStats userStats;
 
+
+
   //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
@@ -38,10 +40,12 @@ class User {
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
   List<UserAction> todayactions = new ObservableList();
   List<UserAction> thisweekactions = new ObservableList() ;
+  List<UserAction> lastactions = new ObservableList();
+
 
   //códigos de los usuarios a los que sigue el usuario
-  final List<dynamic> followedcods = new List.empty(growable: true);
-  final List<dynamic> followsyoucods = new List.empty(growable: true);
+  List<dynamic> followedcods = new List.empty(growable: true);
+  List<dynamic> followsyoucods = new List.empty(growable: true);
 
   //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
   final ObservableList<UserModel> following = new ObservableList();
@@ -62,8 +66,8 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position, 
         this.image, @required this.stagenumber,this.stage, 
         this.role,this.classic,this.meditposition,this.userStats, 
-        this.answeredquestions
-        }) {
+        this.answeredquestions  }) {
+   
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
       if (time > 1440) {
@@ -94,6 +98,10 @@ class User {
         userStats.streak = 0;
       }
     } 
+
+    if(this.stage != null){
+      setPercentage();
+    }
   }
 
   /* 
@@ -142,6 +150,8 @@ class User {
       this.todayactions.add(a);
     }
 
+    this.lastactions.add(a);
+
     //this.thisweekactions.add(a);
   }
 
@@ -149,6 +159,16 @@ class User {
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
   void setActions(json, isToday) {
+    for(var action in json){ 
+      action['userimage'] = this.image;
+      if(isToday) {
+        todayactions.add(UserAction.fromJson(action));
+      }else{
+        thisweekactions.add(UserAction.fromJson(action));   
+      }
+    }
+    /*
+    // ya no hace falta esto !!
     DateTime today = DateTime.now();
     var dayOfWeek = 1;
     DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
@@ -178,7 +198,7 @@ class User {
           }
         }
       }
-    }
+    }*/
   }
 
   void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
@@ -188,11 +208,6 @@ class User {
   void addFollower(User u) { followsyou.add(u); }
   void addUnfollower(User u ) { u.follows = false; notfollowing.add(u); allusers.add(u);}
   
-  void setStage(StageModel s) {
-    this.stage = s ;
-    setPercentage();
-  }
-
   //se le podrán dar parámetros... por etapa, por tiempo meidtado total, por tiempo meditado en la etapa
   void sortFollowers() {
     this.allusers.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
@@ -206,11 +221,13 @@ class User {
         user.follows = true;
       }
     }
-    
+
     if(!following.contains(u)){
       setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
       following.add(u);
     }
+
+    u.followsyoucods.add(this.coduser);
   }
 
   void unfollow(User u) {     
@@ -225,6 +242,9 @@ class User {
       following.remove(u);
     }
 
+    if(u.followsyoucods.contains(this.coduser)){
+      u.followsyoucods.remove(this.coduser);
+    }
   }
 
   void updateStage(DataBase data) {
@@ -357,7 +377,7 @@ class User {
           done: this.userStats.stage.timemeditations,
           total: this.stage.stobjectives.meditationcount, 
           what: this.stage.stobjectives.freemeditationlabel
-        );
+        ); 
       }
       setAction('meditation', attribute: [m.duration.inMinutes]);
     } else {

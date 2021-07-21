@@ -32,7 +32,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     UserState _userstate = Provider.of<UserState>(context);
-    return Column(
+    return Flex(
+    direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -67,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       ),
+      SizedBox(height: 20,width: 20),
       Expanded(
         flex: 4,
         child:_Timeline()
@@ -74,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
     ]);
   }
 }
-
+/*
 class TabletMainScreen extends StatefulWidget {
   @override
   _TabletMainScreenState createState() => _TabletMainScreenState();
@@ -131,7 +133,7 @@ class _TabletMainScreenState extends State<TabletMainScreen> {
       ));
   }
 }
-
+*/
 class _Timeline extends StatefulWidget {
   bool isTablet;
 
@@ -231,7 +233,6 @@ class __TimelineState extends State<_Timeline> {
           borderRadius: BorderRadius.circular(16.0), 
           border: Border.all(color: Colors.grey, width: 0.15)),
         padding: EdgeInsets.all(Configuration.tinpadding),
-        margin: EdgeInsets.only(top: 20),
         child: Column(children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
