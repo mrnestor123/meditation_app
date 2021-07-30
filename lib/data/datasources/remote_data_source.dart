@@ -141,12 +141,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     // Vamos a hacer esto en el server !!
     UserModel loggeduser = await connect(usuario.uid);
-
     getActions(loggeduser);
-
     Timer.periodic(new Duration(seconds: 30), (timer) {
       getActions(loggeduser);
-    });    
+    });
+    
+        
     if(loggeduser !=null){
       return loggeduser;
     }else {
@@ -241,7 +241,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
-    
     QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
     String documentId = userreference.docs[0].id;
     await database.collection("users").doc(documentId).update(user.toJson());
@@ -255,6 +254,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     var url = Uri.parse('$nodejs/action/${user.coduser}');
     
+    print(url);
+
+
     //esto se ejecutará antes que el clear ??
     user.lastactions.forEach((element) async{
       var body = json.encode(element.toJson());
