@@ -12,6 +12,7 @@ import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:http/http.dart' as http;
@@ -45,6 +46,11 @@ abstract class UserRemoteDataSource {
   Future getActions(UserModel u);
 
   Future updateImage(PickedFile image, User u);
+
+  Future <List<Request>> getRequests();
+
+  Future  updateRequest(Request r);
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -64,7 +70,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'https://192.168.4.67:8802';
+    nodejs = 'http://192.168.4.67:8802';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -138,19 +144,21 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({var usuario}) async {
-
-    // Vamos a hacer esto en el server !!
-    UserModel loggeduser = await connect(usuario.uid);
-    getActions(loggeduser);
-    Timer.periodic(new Duration(seconds: 30), (timer) {
+    try{
+      // Vamos a hacer esto en el server !!
+      UserModel loggeduser = await connect(usuario.uid);
       getActions(loggeduser);
-    });
-    
-        
-    if(loggeduser !=null){
-      return loggeduser;
-    }else {
-      throw LoginException();
+      Timer.periodic(new Duration(seconds: 30), (timer) {
+        getActions(loggeduser);
+      });
+      
+      if(loggeduser !=null){
+        return loggeduser;
+      }else {
+        throw LoginException();
+      }
+    } catch(e) {
+      throw ServerException();
     }
   }
 
@@ -186,7 +194,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future getActions(UserModel u) async {
     var url = Uri.parse('$nodejs/live/${u.coduser}');
     var response = await http.get(url);
-
     var actions = json.decode(response.body);
 
     if(actions['today'] != null && actions['today'].length > u.todayactions.length){
@@ -196,7 +203,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     if(actions['thisweek'] != null && actions['thisweek'].length > u.thisweekactions.length){
       u.setActions(actions['thisweek'], false);
     }
-    
   }
 
   @override
@@ -238,6 +244,21 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       return profilepath;
   }
 
+  @override
+  Future<List<Request>> getRequests() async {
+    var url = Uri.parse('$nodejs/requests');
+    http.Response response = await http.get(url);
+    List<Request> requests = new List.empty(growable: true);
+
+    //Comprobar que no haya error al llamar
+    for(var j in json.decode(response.body)){
+      requests.add(Request.fromJson(j));
+    }
+
+    return requests;
+  }
+
+
 
   @override
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
@@ -276,39 +297,34 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   */
   @override
   Future <UserModel> getUserData(String coduser) async{
-    UserModel u = await connect(coduser);
+    try {
+      UserModel u = await connect(coduser);
 
-    getActions(u);
-
-    Timer.periodic(new Duration(seconds: 30), (timer) {
       getActions(u);
-    });    
-    
-    /*
-    QuerySnapshot user = await database.collection('users').where('coduser', isEqualTo: coduser).get();
-    if(user.docs.length > 0){
-      UserModel u = UserModel.fromJson(user.docs[0].data());
-  
-      QuerySnapshot stage = await database.collection('stages').where('stagenumber',isEqualTo:u.stagenumber).get();
-      StageModel s =  await populateStage(stage.docs[0].data());
-      u.setStage(s);
-      await addfollowers(u);
-      
-      QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: u.coduser).get();
 
-      if (meditations.docs.length > 0) {
-        for (DocumentSnapshot doc in meditations.docs) {
-          u.addMeditation(new MeditationModel.fromJson(doc.data()));
-        }
+      Timer.periodic(new Duration(seconds: 30), (timer) {
+        getActions(u);
+      });    
+    
+      if(u == null){
+        throw Exception();
+      }else{
+        return u;
       }
-      return u;
-    } throw Exception();
-    */
-    if(u == null){
-      throw Exception();
-    }else{
-      return u;
+    }catch(e){
+      throw ServerException();
     }
 
   }
+
+  Future updateRequest(Request r) async{
+    QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
+    String docID = query.docs[0].id; 
+    try{
+      await database.collection("requests").doc(docID).update(r.toJson());
+    }catch(e) {
+      throw ServerException();
+    }
+  }
+
 }

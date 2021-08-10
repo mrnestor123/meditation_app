@@ -9,6 +9,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
@@ -267,9 +268,9 @@ class _StageViewState extends State<StageView> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text('Stage ' + widget.stage.stagenumber.toString(),
             style: Configuration.text('medium', Colors.black)),
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
               size: Configuration.smicon, color: Colors.black),
@@ -286,19 +287,12 @@ class _StageViewState extends State<StageView> {
         color: Configuration.white,
         child: Column(
           children: [
-            AspectRatio(
-              aspectRatio: 9/4,
-                child: Container(
-                width: Configuration.width,
-                margin: EdgeInsets.only(
-                    left: Configuration.smmargin,
-                    right: Configuration.smmargin,
-                    top: Configuration.medmargin),
-                decoration: BoxDecoration(
-                    color: Configuration.maincolor,
-                    borderRadius: BorderRadius.circular(12.0)),
-              ),
-            ),
+            Container( 
+              margin: EdgeInsets.only(
+                    left: Configuration.medmargin,
+                    right: Configuration.medmargin,
+                  ),
+              child: StageCard(stage:widget.stage)),
             Container(
                 padding: EdgeInsets.symmetric(
                     vertical: Configuration.tinpadding),

@@ -69,6 +69,21 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
+  final _$requestsAtom = Atom(name: '_UserState.requests');
+
+  @override
+  List<Request> get requests {
+    _$requestsAtom.reportRead();
+    return super.requests;
+  }
+
+  @override
+  set requests(List<Request> value) {
+    _$requestsAtom.reportWrite(value, super.requests, () {
+      super.requests = value;
+    });
+  }
+
   final _$lessondataAtom = Atom(name: '_UserState.lessondata');
 
   @override
@@ -119,6 +134,13 @@ mixin _$UserState on _UserState, Store {
     return _$changeNameAsyncAction.run(() => super.changeName(username));
   }
 
+  final _$changeImageAsyncAction = AsyncAction('_UserState.changeImage');
+
+  @override
+  Future<dynamic> changeImage(dynamic image) {
+    return _$changeImageAsyncAction.run(() => super.changeImage(image));
+  }
+
   final _$updateUserAsyncAction = AsyncAction('_UserState.updateUser');
 
   @override
@@ -131,6 +153,13 @@ mixin _$UserState on _UserState, Store {
   @override
   Future<dynamic> updateStage() {
     return _$updateStageAsyncAction.run(() => super.updateStage());
+  }
+
+  final _$getRequestsAsyncAction = AsyncAction('_UserState.getRequests');
+
+  @override
+  Future<dynamic> getRequests() {
+    return _$getRequestsAsyncAction.run(() => super.getRequests());
   }
 
   final _$_UserStateActionController = ActionController(name: '_UserState');
@@ -153,6 +182,7 @@ user: ${user},
 data: ${data},
 nightmode: ${nightmode},
 loggedin: ${loggedin},
+requests: ${requests},
 lessondata: ${lessondata}
     ''';
   }

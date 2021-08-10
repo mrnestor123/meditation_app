@@ -7,6 +7,7 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
@@ -124,15 +125,45 @@ class UserRepositoryImpl implements UserRepository {
  
   @override
   Future<Either<Failure, String>> updateImage(PickedFile image, User u) async{
-    var string = await remoteDataSource.updateImage(image, u);
+    try{
+      var string = await remoteDataSource.updateImage(image, u);
 
-    if(string != null) {
-      return Right(string);
-    }else{
+      if(string != null) {
+        return Right(string);
+      }else{
+        return Left(ConnectionFailure(error: 'No se ha podido subir'));
+      }
+    }catch(e){
       return Left(ConnectionFailure(error: 'No se ha podido subir'));
     }
 
 
     // TODO: implement updateImage
   }
+
+
+
+  @override
+  Future<Either<Failure,List<Request>>> getRequests() async{
+    List<Request> requests = await remoteDataSource.getRequests();
+
+    if(requests != null) {
+      return Right(requests);
+    }else{
+      return Left(ConnectionFailure(error: 'We could not get the  requests'));
+    }
+  }
+
+
+  @override
+  Future<Either<Failure,void>> updateRequest(Request r) async{
+    try{
+      remoteDataSource.updateRequest(r);
+    }catch(e){
+      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+    }
+  
+  }
+
+
 }

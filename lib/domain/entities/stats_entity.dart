@@ -55,13 +55,14 @@ class UserStats {
       this.stage.maxstreak = this.streak;
     }
 
-    if (this.total.maxstreak < this.total.maxstreak) {
+    if (this.total.maxstreak < this.streak) {
       this.total.maxstreak = this.streak;
     }
   }
 
   void meditate(Meditation m){
-    this.lastmeditated = DateTime.now().toIso8601String();    
+    //debería de ser una string ????
+    this.lastmeditated = m.day != null ? m.day.toIso8601String() : DateTime.now().toIso8601String();    
     this.stage.timemeditated += m.duration.inMinutes;
     this.total.timemeditated += m.duration.inMinutes;
     this.total.meditations++;
@@ -74,13 +75,13 @@ class UserStats {
   }
 
   void reset() {
-      this.stage.timemeditated = 0;
-      this.stage.lessons = 0;
-      this.stage.maxstreak = 0;
-      this.stage.guidedmeditations = 0;
-      this.stage.timemeditations = 0;
-      this.lastread.clear();
-    }
+    this.stage.timemeditated = 0;
+    this.stage.lessons = 0;
+    this.stage.maxstreak = 0;
+    this.stage.guidedmeditations = 0;
+    this.stage.timemeditations = 0;
+    this.lastread.clear();
+  }
 
 }
 

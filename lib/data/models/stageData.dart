@@ -19,6 +19,7 @@ class StageModel extends Stage {
       String skills,
       String mastery,
       String longimage,
+      String shortimage,
       stobjectives})
       : super(
             stagenumber: stagenumber,
@@ -30,7 +31,8 @@ class StageModel extends Stage {
             skills: skills,
             mastery: mastery,
             longimage: longimage,
-            stobjectives: stobjectives
+            stobjectives: stobjectives,
+            shortimage: shortimage
             );
 
   factory StageModel.fromRawJson(String str) =>
@@ -46,6 +48,7 @@ class StageModel extends Stage {
         longimage: json['longimage']== null ? null : json['longimage'],
         image: json["image"] == null ? null : json["image"],
         goals: json["goals"] == null ? null : json["goals"],
+        shortimage: json["shortimage"] == null ? null : json["shortimage"],
         obstacles: json["obstacles"] == null ? null : json["obstacles"],
         stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
         skills: json["skills"] == null ? null : json["skills"],

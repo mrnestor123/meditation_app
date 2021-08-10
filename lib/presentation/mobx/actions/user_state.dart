@@ -4,14 +4,17 @@ import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/mission.dart';
+import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/change_data.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
+import 'package:meditation_app/domain/usecases/user/get_requests.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:meditation_app/domain/usecases/user/update_image.dart';
+import 'package:meditation_app/domain/usecases/user/update_request.dart';
 import 'package:meditation_app/domain/usecases/user/update_stage.dart';
 import 'package:meditation_app/domain/usecases/user/follow_user.dart';
 import 'package:mobx/mobx.dart';
@@ -27,6 +30,8 @@ class UserState extends _UserState with _$UserState {
       FollowUseCase updateUserUseCase,
       UpdateImageUseCase updateImageUseCase,
       UpdateStageUseCase updateStageUseCase,
+      GetRequestsUseCase getRequestsUseCase,
+      UpdateRequestUseCase updateRequestUseCase,
       ChangeDataUseCase changeDataUseCase
       })
       : super(
@@ -36,12 +41,15 @@ class UserState extends _UserState with _$UserState {
             lesson: lesson,
             followUseCase: updateUserUseCase,
             updateStageUseCase: updateStageUseCase,
+            updateRequestUseCase:updateRequestUseCase,
             imageUseCase: updateImageUseCase,
-            changeDataUseCase: changeDataUseCase
+            changeDataUseCase: changeDataUseCase,
+            getRequestsUseCase: getRequestsUseCase
             );
 }
 
 abstract class _UserState with Store {
+  UpdateRequestUseCase updateRequestUseCase;
   CachedUserUseCase cachedUser;
   MeditateUseCase meditate;
   GetDataUseCase getdata;
@@ -50,7 +58,7 @@ abstract class _UserState with Store {
   UpdateImageUseCase imageUseCase;
   UpdateStageUseCase updateStageUseCase;
   ChangeDataUseCase changeDataUseCase;
-
+  GetRequestsUseCase getRequestsUseCase;
 
   _UserState(
       {this.cachedUser,
@@ -60,7 +68,9 @@ abstract class _UserState with Store {
       this.followUseCase,
       this.imageUseCase,
       this.updateStageUseCase, 
-      this.changeDataUseCase
+      this.changeDataUseCase,
+      this.getRequestsUseCase,
+      this.updateRequestUseCase
       });
 
   @observable
@@ -74,6 +84,9 @@ abstract class _UserState with Store {
 
   @observable
   bool loggedin;
+
+  @observable 
+  List<Request> requests;
 
   @observable
   Map lessondata;
@@ -150,5 +163,22 @@ abstract class _UserState with Store {
   @action
   Future updateStage() async {
     Either<Failure, User> _addedname = await updateStageUseCase.call(UParams(user: user,db: data));
+  }
+
+  @action 
+  Future getRequests() async{
+    Either<Failure, List<Request>> res = await getRequestsUseCase.call(NoParams());
+    requests = new List.empty(growable: true);
+
+    res.fold(
+    (Failure f) => print(f.error), 
+    (List<Request> d) {
+      requests = d;
+    });
+  }
+
+  Future updateRequest(int i, bool like) async{
+    Either<Failure, void> res = await updateRequestUseCase.call(ReqParams(r: requests[i], like:like, cod:user.coduser));
+   // res.fold((l) => print(l.error), (r) => print('bien'));
   }
 }

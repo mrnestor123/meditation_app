@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 abstract class UserRepository {
@@ -21,4 +22,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,String>> updateImage(PickedFile image, User u);
 
+  Future<Either<Failure,List<Request>>> getRequests();
+
+  Future<Either<Failure,void>> updateRequest(Request r);
 }

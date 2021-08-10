@@ -30,8 +30,6 @@ class User {
   //estadísticas
   UserStats userStats;
 
-
-
   //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
   //cuanto le queda por pasar de etapa
@@ -315,7 +313,7 @@ class User {
     this.percentage = ((passedcount / objectives.length) * 100).floor();
   }
 
-  void takeLesson(Lesson l, DataBase d) {
+  void takeLesson(Lesson l, [DataBase d]) {
     if (l.stagenumber == this.stagenumber 
         && this.position <= l.position 
         && (
@@ -324,7 +322,7 @@ class User {
         )
       ) {
       this.userStats.takeLesson();
-       this.progress = Progress(
+      this.progress = Progress(
         done: this.userStats.stage.lessons,
         total: this.stage.stobjectives.lecciones, 
         what: ' Lessons'
@@ -351,7 +349,6 @@ class User {
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
-    
     this.totalMeditations.add(m);
 
     //comprobamos la racha
@@ -369,7 +366,7 @@ class User {
     
     this.userStats.meditate(m);
 
-    // si la meditación es free
+    // si la meditación es free no tiene título !!
     if (m.title == null) {
       if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
         this.userStats.stage.timemeditations++;

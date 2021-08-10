@@ -73,7 +73,8 @@ abstract class _LoginState with Store {
           user = await auth.signInWithEmailAndPassword(email: username, password: password);
           }
       } else if(type =='google'){
-          googleSignin.disconnect();
+          //hay que desconectar !!
+          //googleSignin.disconnect();
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
 
         if (googleSignInAccount != null) {
@@ -92,7 +93,7 @@ abstract class _LoginState with Store {
         _userFuture = _loginusecase(UserParams(usuario: user.user));
         log = await _userFuture;
         log.fold(
-          (Failure f) => errormsg = f.error, 
+          (Failure f) => errormsg = _mapFailureToMessage(f), 
           (dynamic u) => loggeduser = u
         );
       }
@@ -227,7 +228,7 @@ abstract class _LoginState with Store {
     }
   }
 
-
+  //SE UTILIZA ??
   Future userRegistered(dynamic firebaseuser) async {
     firebaseuser.sendEmailVerification();
     var register = await _registerusecase.call(RegisterParams(user: firebaseuser));

@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
@@ -57,6 +58,7 @@ class MyApp extends StatelessWidget {
               '/countdown' : (BuildContext context) => Countdown(),
               '/leaderboard': (BuildContext context) => LeaderBoard(),
               '/main': (BuildContext context) => Layout(),
+              '/requests': (BuildContext context) => Requests(),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),
               '/gamestarted': (BuildContext context) => GameStarted()

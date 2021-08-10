@@ -12,10 +12,12 @@ import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/answer_question.dart';
 import 'package:meditation_app/domain/usecases/user/get_data.dart';
+import 'package:meditation_app/domain/usecases/user/get_requests.dart';
 import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/domain/usecases/user/update_image.dart';
+import 'package:meditation_app/domain/usecases/user/update_request.dart';
 import 'package:meditation_app/domain/usecases/user/update_stage.dart';
 import 'package:meditation_app/domain/usecases/user/follow_user.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
@@ -45,7 +47,7 @@ Future<void> init() async {
 
   /// A lo mejor userstate hace demasiado ??
   sl.registerFactory(
-    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl(),lesson: sl(),updateUserUseCase: sl(), updateStageUseCase: sl(),updateImageUseCase: sl(),changeDataUseCase: sl()),
+    () => UserState(cachedUseCase: sl(),meditate: sl(),data: sl(),lesson: sl(),updateUserUseCase: sl(), updateStageUseCase: sl(),updateImageUseCase: sl(),changeDataUseCase: sl(),getRequestsUseCase: sl(), updateRequestUseCase: sl()),
   );
 
   sl.registerFactory(
@@ -70,6 +72,8 @@ Future<void> init() async {
   sl.registerLazySingleton(()=> ChangeDataUseCase(sl()));
   sl.registerLazySingleton(()=> UpdateStageUseCase(sl()));
   sl.registerLazySingleton(()=> UpdateImageUseCase(sl()));
+  sl.registerLazySingleton(()=> GetRequestsUseCase(sl()));
+  sl.registerLazySingleton(()=> UpdateRequestUseCase(sl()));
 
   //Repositories
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(

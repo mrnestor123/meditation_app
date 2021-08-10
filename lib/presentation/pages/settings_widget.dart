@@ -13,6 +13,11 @@ class Settings extends StatelessWidget {
     final _userstate = Provider.of<UserState>(context);
     final _loginstate = Provider.of<LoginState>(context);
 
+    Widget MenuButton(){
+      
+
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -50,12 +55,21 @@ class Settings extends StatelessWidget {
             child: Text('Increase Stage',
                 style: Configuration.text('big', Colors.white) )
           ),
-          ElevatedButton(onPressed: () { 
+          ElevatedButton(
+            onPressed: ()=> {
+              Navigator.pushNamed(context, '/requests')
+            }, 
+            child: Text('Requests')
+          ),
+          
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.red
+            ),
+            onPressed: () { 
             _loginstate.logout();
             Navigator.pushReplacementNamed(context, '/welcome');
- 
-          }, child: Text('log out'))
-
+          }, child: Text('log out')),
         ],
       ),    
     );
@@ -99,3 +113,5 @@ class IncreaseScreenDialog extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,5 +1,6 @@
 //Objeto para almacenar información de la base de datos
 
+import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
@@ -8,6 +9,8 @@ import 'package:mobx/mobx.dart';
 class DataBase {
   ObservableList<Stage> stages = new ObservableList();
   ObservableList<User> users = new ObservableList();
+  ObservableList<Request> requests = new ObservableList();
+
   //La VERSION ESTA BIEN. LOS USUARIOS LOS GUARDAMOS EN LA DATABASE
   String version;
   String versionnotes;

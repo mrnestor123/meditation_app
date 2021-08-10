@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
+import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
@@ -10,6 +11,8 @@ import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
+
+import 'commonWidget/stage_card.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen();
@@ -40,33 +43,7 @@ class _MainScreenState extends State<MainScreen> {
       SizedBox(height: 20),
       Flexible(
         flex: 2,
-        child:AspectRatio(
-        aspectRatio: 16/9,
-          child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.0)
-          ),
-          child: TextButton(
-            onPressed: () => Navigator.pushNamed(context, '/imagepath'),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Stage ' + _userstate.user.stagenumber.toString(),
-                  style: Configuration.text('small', Colors.white),
-                ),
-                Expanded(child: Image(image: AssetImage('assets/stage 1/stage 1.png'))),
-              ],
-            ),
-            style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                primary: Configuration.maincolor,
-                elevation: 0.0,
-                onPrimary: Colors.white,
-                padding: EdgeInsets.all(Configuration.smpadding),
-                minimumSize: Size(double.infinity, double.infinity)),
-          ),
-        ),
-      ),
+        child:StageCard(stage: _userstate.user.stage),
       ),
       SizedBox(height: 20,width: 20),
       Expanded(
@@ -76,6 +53,8 @@ class _MainScreenState extends State<MainScreen> {
     ]);
   }
 }
+
+
 /*
 class TabletMainScreen extends StatefulWidget {
   @override
