@@ -361,7 +361,7 @@ class _MyInfoState extends State<MyInfo> {
         SizedBox(height: Configuration.blockSizeVertical*1),
         RadialProgress(
             //Mirar de hacer esto de una forma bien en el config!!!
-            width: widget.isTablet ? Configuration.blockSizeHorizontal* 0.3 :Configuration.safeBlockHorizontal * 1,
+            width: widget.isTablet ? Configuration.blockSizeHorizontal* 0.3 : Configuration.safeBlockHorizontal * 1,
             goalCompleted: _userstate.user.stage.stagenumber / 10,
             child: GestureDetector(
               onTap: () => _showPicker(context),

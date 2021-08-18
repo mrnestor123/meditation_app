@@ -32,13 +32,11 @@ abstract class _LeaderBoardController with Store {
   }
 
   @action 
-  void switchtab(){
-    
+  void switchtab(){    
   }
 
   @action 
   void startsearch(String user) {
-
 
 
   }

@@ -158,12 +158,20 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<Either<Failure,void>> updateRequest(Request r) async{
     try{
-      remoteDataSource.updateRequest(r);
+      await remoteDataSource.updateRequest(r);
     }catch(e){
       return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
     }
   
   }
 
+  @override
+  Future<Either<Failure, void>> uploadRequest(Request r) async{
+    try{
+      await remoteDataSource.uploadRequest(r);
+    }catch(e){
+      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+    }
+  }
 
 }

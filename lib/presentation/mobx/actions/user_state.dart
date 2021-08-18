@@ -1,76 +1,29 @@
 import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/mission.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:meditation_app/domain/usecases/lesson/take_lesson.dart';
-import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
-import 'package:meditation_app/domain/usecases/user/change_data.dart';
-import 'package:meditation_app/domain/usecases/user/get_data.dart';
-import 'package:meditation_app/domain/usecases/user/get_requests.dart';
-import 'package:meditation_app/domain/usecases/user/isloggedin.dart';
-import 'package:meditation_app/domain/usecases/user/log_out.dart';
-import 'package:meditation_app/domain/usecases/user/update_image.dart';
-import 'package:meditation_app/domain/usecases/user/update_request.dart';
-import 'package:meditation_app/domain/usecases/user/update_stage.dart';
-import 'package:meditation_app/domain/usecases/user/follow_user.dart';
+import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
 
 class UserState extends _UserState with _$UserState {
   UserState(
-      {CachedUserUseCase cachedUseCase,
-      MeditateUseCase meditate,
-      GetDataUseCase data,
-      TakeLessonUseCase lesson,
-      FollowUseCase updateUserUseCase,
-      UpdateImageUseCase updateImageUseCase,
-      UpdateStageUseCase updateStageUseCase,
-      GetRequestsUseCase getRequestsUseCase,
-      UpdateRequestUseCase updateRequestUseCase,
-      ChangeDataUseCase changeDataUseCase
+      {
+      UserRepository userRepository
       })
       : super(
-            cachedUser: cachedUseCase,
-            meditate: meditate,
-            getdata: data,
-            lesson: lesson,
-            followUseCase: updateUserUseCase,
-            updateStageUseCase: updateStageUseCase,
-            updateRequestUseCase:updateRequestUseCase,
-            imageUseCase: updateImageUseCase,
-            changeDataUseCase: changeDataUseCase,
-            getRequestsUseCase: getRequestsUseCase
-            );
+        repository: userRepository
+      );
 }
 
 abstract class _UserState with Store {
-  UpdateRequestUseCase updateRequestUseCase;
-  CachedUserUseCase cachedUser;
-  MeditateUseCase meditate;
-  GetDataUseCase getdata;
-  TakeLessonUseCase lesson;
-  FollowUseCase followUseCase;
-  UpdateImageUseCase imageUseCase;
-  UpdateStageUseCase updateStageUseCase;
-  ChangeDataUseCase changeDataUseCase;
-  GetRequestsUseCase getRequestsUseCase;
+  UserRepository repository;
 
   _UserState(
-      {this.cachedUser,
-      this.meditate,
-      this.getdata,
-      this.lesson,
-      this.followUseCase,
-      this.imageUseCase,
-      this.updateStageUseCase, 
-      this.changeDataUseCase,
-      this.getRequestsUseCase,
-      this.updateRequestUseCase
+      {this.repository,
       });
 
   @observable
@@ -84,6 +37,9 @@ abstract class _UserState with Store {
 
   @observable
   bool loggedin;
+
+  @observable
+  String errorMessage;
 
   @observable 
   List<Request> requests;
@@ -100,8 +56,10 @@ abstract class _UserState with Store {
 
   @action
   Future userisLogged() async {
-    Either<Failure, User> _isUserCached = await cachedUser.call(NoParams());
-    _isUserCached.fold((Failure f) => loggedin = false, (User u) {
+    Either<Failure, User> _isUserCached = await repository.islogged();
+
+    _isUserCached.fold((Failure f) => loggedin = false, 
+    (User u) {
       user = u;
       loggedin = true;
     });
@@ -110,9 +68,9 @@ abstract class _UserState with Store {
   @action
   Future<bool> takeLesson(LessonModel l) async {
     user.progress = null;
-
     int currentposition = user.stagenumber;
-    await lesson.call(LessonParams(lesson: l, user: user, d: data));
+    user.takeLesson(l, data);
+    repository.updateUser(user: user,  type: 'lesson');
 
     // SI HA SUBIDO DE ETAPA !!!! 
     //CHECKEAR EL UPLOADSTAGE !!!
@@ -126,7 +84,7 @@ abstract class _UserState with Store {
   //We get all the necessary data for displaying the app from the database and the
   @action
   Future getData() async {
-    final result = await getdata.call(NoParams());
+    final result = await repository.getData();
 
     result.fold(
     (Failure f) => print(f.error), 
@@ -135,39 +93,48 @@ abstract class _UserState with Store {
     });
   }
 
-  //todos los del updateuserusecase se podrían juntar !!!!!!!!!
+  //!!COMPROBAR ERRORES
   @action
   Future follow(User u, bool follow) async {
-    final following = followUseCase.call(UParams(user: user, followeduser: u, type: follow ? 'follow' : 'unfollow'));
+     if (follow) {
+      user.follow(u);
+    } else {
+      user.unfollow(u);
+    } 
+
+    // Updateamos también los datos del usuario  al que se sigue
+    repository.updateUser(user: u);
+    repository.updateUser(user:user);
+
   }
 
   
   @action
   Future changeName(String username) async {
-    Either<Failure, User> _addedname = await changeDataUseCase.call(UParams(user: user, nombre: username, type: "name"));
-    return true;
+    user.nombre = username;
+    return repository.updateUser(user: user);
   }
 
   @action 
   Future changeImage(dynamic image) async {
-    Either<Failure, User> _changedimage = await imageUseCase.call(UParams(user: user, image: image));
-    return true;
-  }
+    Either<Failure,String> imageupload = await repository.updateImage(image, user);
+    //PASAR TODOS LOS  FOLD AL FINAL !!!
+    imageupload.fold((l) => errorMessage = 'error al subir imagen', (r) => user.image = r);
 
-  //DE AQUI HAY QUE QUITAR EL CHANGE IMAGE
-  @action
-  Future updateUser(dynamic variable, String type) async {
-    Either<Failure, User> _addedname = await followUseCase.call(UParams(user: user, type: type));
+    return repository.updateUser(user: user);
   }
 
   @action
   Future updateStage() async {
-    Either<Failure, User> _addedname = await updateStageUseCase.call(UParams(user: user,db: data));
+      //updateamos la stage
+    user.updateStage(data);
+
+    return repository.updateUser(user: user);
   }
 
   @action 
   Future getRequests() async{
-    Either<Failure, List<Request>> res = await getRequestsUseCase.call(NoParams());
+    Either<Failure, List<Request>> res = await repository.getRequests();
     requests = new List.empty(growable: true);
 
     res.fold(
@@ -177,8 +144,26 @@ abstract class _UserState with Store {
     });
   }
 
-  Future updateRequest(int i, bool like) async{
-    Either<Failure, void> res = await updateRequestUseCase.call(ReqParams(r: requests[i], like:like, cod:user.coduser));
+  Future updateRequest(Request r, bool like, [String comment]) async{
+    if(like != null){
+      if(like){
+        r.like(user.coduser);
+      }else{
+        r.dislike(user.coduser);
+      }
+    }else{
+      Comment c = new Comment(comment: comment,username: user.nombre, coduser: user.coduser);
+      r.comment(c);
+    }
+
+    Either<Failure, void> res = await repository.updateRequest(r);
    // res.fold((l) => print(l.error), (r) => print('bien'));
   }
+
+  Future uploadRequest(Request r) async{
+    r.coduser = user.coduser;
+    r.username = user.nombre;
+    Either<Failure,void> res = await repository.uploadRequest(r);
+  }
+
 }

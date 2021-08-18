@@ -25,4 +25,7 @@ abstract class UserRepository {
   Future<Either<Failure,List<Request>>> getRequests();
 
   Future<Either<Failure,void>> updateRequest(Request r);
+
+  Future<Either<Failure,void>> uploadRequest(Request r);
+
 }

@@ -1,34 +1,41 @@
 import 'package:http/http.dart';
+import 'package:uuid/uuid.dart';
 
+//type issue and suggestion
+//state open, closed
 class Request {
-  String cod;
-  String username;
-  String type;
-  String description;
-  String coduser;
-  String state;
+  dynamic cod;
+  String username,type,content,coduser,state,title;
   List<Comment> comments;
   int points;
   Map<String,dynamic> votes;
-  String title;
+  Uuid _uiddd = Uuid();
 
   Request(
       {this.cod,
       this.username,
       this.type,
-      this.description,
+      this.content,
       this.coduser,
       this.state,
       this.comments,
-      this.points,
+      this.points = 0,
       this.votes,
-      this.title});
+      this.title}){
+
+    if (cod == null) {
+      var uuid = Uuid();
+      this.cod = uuid.v1();
+    } else {
+      this.cod = coduser;
+    }     
+  }
 
   Request.fromJson(Map<String, dynamic> json) {
     this.cod = json['cod'];
     this.username = json['username'];
     this.type = json['type'];
-    this.description = json['description'];
+    this.content = json['content'] == null ? json['description'] : json ['content'];
     this.coduser = json['coduser'];
     this.state = json['state'];
     //ESTO SE PUEDE HACER EN OTROS SITIOS
@@ -48,15 +55,19 @@ class Request {
     data['cod'] = this.cod;
     data['username'] = this.username;
     data['type'] = this.type;
-    data['description'] = this.description;
+    data['content'] = this.content;
     data['coduser'] = this.coduser;
     data['state'] = this.state;
     if (this.comments != null) {
       data['comments'] = this.comments.map((v) => v.toJson()).toList();
+    }else{
+      data['comments'] = [];
     }
     data['points'] = this.points;
     if (this.votes != null) {
       data['votes'] = this.votes;
+    }else{
+      data['votes'] = {};
     }
     data['title'] = this.title;
     return data;
@@ -78,13 +89,13 @@ class Request {
   
 
   void dislike(String cod){
-    if(points > 0){
-      if(votes[cod] == null){
-      this.points--;
-      this.votes[cod] = -1;
-      }else if(votes[cod] == -1){
+    if(votes[cod] == -1){
       this.points++;
       this.votes.removeWhere((key, value) => key == cod);
+    }else if(points > 0 ){
+      if(votes[cod] == null){
+        this.points--;
+        this.votes[cod] = -1;
       }else if(votes[cod] == 1){
         this.points--;
         if(this.points > 0){
@@ -97,33 +108,33 @@ class Request {
 
 
   void comment(Comment c){
+    if(this.comments == null){
+      this.comments = new List.empty(growable: true);
+    }
 
+    this.comments.add(c);
   }
 }
 
 class Comment{
-  String _comment;
-  String _username;
-  String _coduser;
+  String comment;
+  String username;
+  String coduser;
 
-  Comment({String comment, String username, String coduser}) {
-    this._comment = comment;
-    this._username = username;
-    this._coduser = coduser;
-  }
+  Comment({this.comment, this.username, this.coduser});
 
 
   Comment.fromJson(Map<String, dynamic> json) {
-    _comment = json['comment'];
-    _username = json['username'];
-    _coduser = json['coduser'];
+    this.comment = json['comment'];
+    this.username = json['username'];
+    this.coduser = json['coduser'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['comment'] = this._comment;
-    data['username'] = this._username;
-    data['coduser'] = this._coduser;
+    data['comment'] = this.comment;
+    data['username'] = this.username;
+    data['coduser'] = this.coduser;
     return data;
   }
 }

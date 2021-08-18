@@ -49,7 +49,9 @@ abstract class UserRemoteDataSource {
 
   Future <List<Request>> getRequests();
 
-  Future  updateRequest(Request r);
+  Future updateRequest(Request r);
+
+  Future uploadRequest(Request r);
 
 }
 
@@ -325,6 +327,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }catch(e) {
       throw ServerException();
     }
+  }
+
+  Future uploadRequest(Request r) async{
+    await database.collection('requests').add(r.toJson());
   }
 
 }

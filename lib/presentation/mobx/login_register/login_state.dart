@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/usecases/usecase.dart';
+import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
@@ -14,16 +15,16 @@ import 'package:mobx/mobx.dart';
 part 'login_state.g.dart';
 
 class LoginState extends _LoginState with _$LoginState {
-  LoginState({LoginUseCase loginUseCase, RegisterUseCase registerUseCase, LogOutUseCase logout}) : 
-  super(login: loginUseCase, register: registerUseCase,logoutusecase: logout);
+  LoginState({ UserRepository repository}) : 
+  super(repository: repository);
 }
 
+//ESTO QUE ES ??
 enum StoreState { initial, loading, loaded }
 
 abstract class _LoginState with Store {
-  LoginUseCase _loginusecase;
-  LogOutUseCase logoutusecase;
 
+  UserRepository repository;
 
   @observable
   Either<Failure, dynamic> log;
@@ -36,7 +37,6 @@ abstract class _LoginState with Store {
   @observable
   Future<Either<Failure, dynamic>> _userFuture;
   
-
   @observable 
   //valida el login y el register tanto en tablet como en móvil
   var formKey = GlobalKey<FormState>();
@@ -53,11 +53,12 @@ abstract class _LoginState with Store {
   FirebaseAuth auth = FirebaseAuth.instance;
   final googleSignin = GoogleSignIn();
 
-  _LoginState({@required LoginUseCase login, RegisterUseCase register,this.logoutusecase}) {
-    _loginusecase = login;
-    _registerusecase = register;
-  }
+  _LoginState({this.repository});
 
+
+  /*
+  JUNTAR STARTLOGIN Y STARTREGISTER EN LA MISMA !!!!!
+  */
   Future startlogin(context,{username, password, type, token, isTablet = false}) async {
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
@@ -90,8 +91,7 @@ abstract class _LoginState with Store {
       }
 
       if(user != null) {
-        _userFuture = _loginusecase(UserParams(usuario: user.user));
-        log = await _userFuture;
+        log = await repository.loginUser(usuario: user.user);
         log.fold(
           (Failure f) => errormsg = _mapFailureToMessage(f), 
           (dynamic u) => loggeduser = u
@@ -159,7 +159,7 @@ abstract class _LoginState with Store {
   Future logout() async {
     googleSignin.disconnect();
     auth.signOut();
-    await logoutusecase.call(NoParams());
+    await repository.logout();
   }
 
 
@@ -231,7 +231,7 @@ abstract class _LoginState with Store {
   //SE UTILIZA ??
   Future userRegistered(dynamic firebaseuser) async {
     firebaseuser.sendEmailVerification();
-    var register = await _registerusecase.call(RegisterParams(user: firebaseuser));
+    var register = await repository.registerUser(usuario: firebaseuser);
 
     register.fold((Failure failure) {
       return _mapFailureToMessage(failure);

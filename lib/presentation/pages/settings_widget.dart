@@ -13,7 +13,7 @@ class Settings extends StatelessWidget {
     final _userstate = Provider.of<UserState>(context);
     final _loginstate = Provider.of<LoginState>(context);
 
-    Widget MenuButton(){
+    Widget menuButton(){
       
 
     }
@@ -27,50 +27,54 @@ class Settings extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context), color: Colors.black),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(Configuration.smpadding),
-        children: [
-          SizedBox(height: Configuration.height*0.1,),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary: Configuration.grey,
-              padding: EdgeInsets.all(Configuration.smpadding)
+      body: Container(
+        
+        color: Colors.white,
+        child: ListView(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          children: [
+            SizedBox(height: Configuration.height*0.1,),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Configuration.grey,
+                padding: EdgeInsets.all(Configuration.smpadding)
+              ),
+              onPressed: () => showGeneralDialog(
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionBuilder: (context, a1, a2, widget) {
+                  return Transform.scale(
+                    scale: a1.value,
+                    child: Opacity(
+                      opacity: a1.value,
+                      child: IncreaseScreenDialog(),
+                    ),
+                  );
+                },
+                transitionDuration: Duration(milliseconds: 200),
+                barrierDismissible: true,
+                barrierLabel: '',
+                context: context,
+                pageBuilder: (context, animation1, animation2) {}) ,             
+              child: Text('Increase Stage',
+                  style: Configuration.text('big', Colors.white) )
             ),
-            onPressed: () => showGeneralDialog(
-              barrierColor: Colors.black.withOpacity(0.5),
-              transitionBuilder: (context, a1, a2, widget) {
-                return Transform.scale(
-                  scale: a1.value,
-                  child: Opacity(
-                    opacity: a1.value,
-                    child: IncreaseScreenDialog(),
-                  ),
-                );
-              },
-              transitionDuration: Duration(milliseconds: 200),
-              barrierDismissible: true,
-              barrierLabel: '',
-              context: context,
-              pageBuilder: (context, animation1, animation2) {}) ,             
-            child: Text('Increase Stage',
-                style: Configuration.text('big', Colors.white) )
-          ),
-          ElevatedButton(
-            onPressed: ()=> {
-              Navigator.pushNamed(context, '/requests')
-            }, 
-            child: Text('Requests')
-          ),
-          
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary: Colors.red
+            ElevatedButton(
+              onPressed: ()=> {
+                Navigator.pushNamed(context, '/requests')
+              }, 
+              child: Text('Requests')
             ),
-            onPressed: () { 
-            _loginstate.logout();
-            Navigator.pushReplacementNamed(context, '/welcome');
-          }, child: Text('log out')),
-        ],
+            
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red
+              ),
+              onPressed: () { 
+              _loginstate.logout();
+              Navigator.pushReplacementNamed(context, '/welcome');
+            }, child: Text('log out')),
+          ],
+        ),
       ),    
     );
   }

@@ -69,6 +69,21 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
+  final _$errorMessageAtom = Atom(name: '_UserState.errorMessage');
+
+  @override
+  String get errorMessage {
+    _$errorMessageAtom.reportRead();
+    return super.errorMessage;
+  }
+
+  @override
+  set errorMessage(String value) {
+    _$errorMessageAtom.reportWrite(value, super.errorMessage, () {
+      super.errorMessage = value;
+    });
+  }
+
   final _$requestsAtom = Atom(name: '_UserState.requests');
 
   @override
@@ -141,13 +156,6 @@ mixin _$UserState on _UserState, Store {
     return _$changeImageAsyncAction.run(() => super.changeImage(image));
   }
 
-  final _$updateUserAsyncAction = AsyncAction('_UserState.updateUser');
-
-  @override
-  Future<dynamic> updateUser(dynamic variable, String type) {
-    return _$updateUserAsyncAction.run(() => super.updateUser(variable, type));
-  }
-
   final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');
 
   @override
@@ -182,6 +190,7 @@ user: ${user},
 data: ${data},
 nightmode: ${nightmode},
 loggedin: ${loggedin},
+errorMessage: ${errorMessage},
 requests: ${requests},
 lessondata: ${lessondata}
     ''';

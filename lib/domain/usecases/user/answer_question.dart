@@ -16,13 +16,7 @@ class AnswerQuestionUseCase extends UseCase<User, GameParams> {
 
   @override
   Future<Either<Failure, User>> call(GameParams params) async {
-    if(params.user.answeredquestions[params.game.cod] == null) {
-      params.user.answeredquestions[params.game.cod] = new List.empty(growable: true);
-    }
-
-    params.user.answeredquestions[params.game.cod].add(params.question.key);
-
-    return repository.updateUser(user: params.user);
+   
   }
 }
 

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/game_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/user/answer_question.dart';
 import 'package:mobx/mobx.dart';
 import 'package:video_player/video_player.dart';
@@ -10,11 +11,13 @@ import 'package:video_player/video_player.dart';
 part 'game_state.g.dart';
 
 class GameState extends _GameState with _$GameState {
-  GameState({AnswerQuestionUseCase answerusecase}) : super(answerusecase: answerusecase);
+  GameState({UserRepository repository}) : super(repository: repository);
 }
 
 abstract class _GameState with Store {
-  _GameState({this.answerusecase});
+  UserRepository repository;
+  
+  _GameState({this.repository});
 
   AnswerQuestionUseCase answerusecase;
 
@@ -73,7 +76,13 @@ abstract class _GameState with Store {
     state = 'answer';
     success = selectedquestion.isValid(answer);
     if(success){
-      answerusecase.call(GameParams(game: selectedgame,question: selectedquestion, user: u));
+       if(user.answeredquestions[selectedgame.cod] == null) {
+        user.answeredquestions[selectedgame.cod] = new List.empty(growable: true);
+      }
+
+      user.answeredquestions[selectedgame.cod].add(selectedquestion.key);
+
+      repository.updateUser(user: user);
     }
   }
   //todo. ask question ??
