@@ -59,7 +59,6 @@ class _LoadingState extends State<Loading> {
     _timer.cancel();
   }
 
-
   void userisLogged(context) async {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
@@ -70,7 +69,9 @@ class _LoadingState extends State<Loading> {
 
     if(_duration.inSeconds <= 0){
       _user.user != null ? 
-      Navigator.pushReplacementNamed(context, '/main') 
+        _user.user.nombre == null || _user.user.nombre == '' ?
+        Navigator.pushReplacementNamed(context, '/selectusername'):
+        Navigator.pushReplacementNamed(context, '/main') 
       : 
       Navigator.pushReplacementNamed(context, '/welcome');
     }
@@ -87,6 +88,7 @@ class _LoadingState extends State<Loading> {
     }
 
     return Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
             child: Stack(
               children: [

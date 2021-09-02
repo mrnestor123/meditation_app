@@ -1,15 +1,24 @@
-import 'package:http/http.dart';
+import 'package:flutter/material.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:uuid/uuid.dart';
 
+//intento de hacer enum. Muy complicado serializar
+enum RequestState {
+  Closed,
+  InProgress,
+  Open 
+}
+
 //type issue and suggestion
-//state open, closed
+//state == open, closed
+// states go from open, to in progress, to closed.
 class Request {
   dynamic cod;
-  String username,type,content,coduser,state,title;
+  String username,type,content,coduser,state,title,image;
+  
   List<Comment> comments;
   int points;
   Map<String,dynamic> votes;
-  Uuid _uiddd = Uuid();
 
   Request(
       {this.cod,
@@ -21,6 +30,7 @@ class Request {
       this.comments,
       this.points = 0,
       this.votes,
+      this.image,
       this.title}){
 
     if (cod == null) {
@@ -34,6 +44,7 @@ class Request {
   Request.fromJson(Map<String, dynamic> json) {
     this.cod = json['cod'];
     this.username = json['username'];
+    this.image = json['image'];
     this.type = json['type'];
     this.content = json['content'] == null ? json['description'] : json ['content'];
     this.coduser = json['coduser'];
@@ -53,7 +64,6 @@ class Request {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['cod'] = this.cod;
-    data['username'] = this.username;
     data['type'] = this.type;
     data['content'] = this.content;
     data['coduser'] = this.coduser;
@@ -73,6 +83,59 @@ class Request {
     return data;
   }
 
+  String getState(){
+    if(this.state =='open'){
+      return 'Open';
+    }else if(this.state == 'inprogress'){
+      return 'In Progress';
+    }else{
+      return 'Closed';
+    }
+  }
+
+  Color getColor(){
+    if(this.state =='open'){
+      return Colors.green;
+    }else if(this.state == 'inprogress'){
+      return Colors.yellow;
+    }else{
+      return Colors.red;
+    }
+  }
+
+  Color nextStateColor(){
+    if(this.state =='open'){
+      return Colors.yellow;
+    }else if(this.state == 'inprogress'){
+      return Colors.red;
+    }else{
+      return Colors.green;
+    }
+  }
+
+
+  String nextState(){
+    if(this.state =='open'){
+      return 'in progress';
+    }else if(this.state == 'inprogress'){
+      return 'closed';
+    }else{
+      return 'open';
+    }
+  }
+
+
+  void changeState(User u){
+     if(this.state =='open'){
+      this.state = 'inprogress';
+    }else if(this.state == 'inprogress'){
+      this.state = 'closed';
+    }else {
+      this.state ='open';
+    }
+
+    this.comments.add(Comment(comment: 'Has changed state of the request to ' + this.getState(), username: u.nombre,coduser: u.coduser));
+  }
 
   void like(String cod){
     if(votes[cod] == null){
@@ -138,4 +201,5 @@ class Comment{
     return data;
   }
 }
+
 

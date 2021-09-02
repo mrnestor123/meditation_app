@@ -59,7 +59,9 @@ abstract class _LoginState with Store {
   /*
   JUNTAR STARTLOGIN Y STARTREGISTER EN LA MISMA !!!!!
   */
+  @action
   Future startlogin(context,{username, password, type, token, isTablet = false}) async {
+    startedlogin = true;
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
     if (!currentFocus.hasPrimaryFocus) {
@@ -104,6 +106,8 @@ abstract class _LoginState with Store {
       print(e.code);
       errormsg = switchExceptions(e.code);
     }
+
+    startedlogin = false;
 
     if (loggeduser != null) {
       Navigator.pushReplacementNamed(context, '/main');
@@ -162,7 +166,7 @@ abstract class _LoginState with Store {
     await repository.logout();
   }
 
-
+  @action
   Future startRegister(context, {username, password, mail, type, token}) async {
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
@@ -178,6 +182,7 @@ abstract class _LoginState with Store {
               email: mail,
               password: password,
             );        
+            startedlogin = true;
         }
       }else if(type =='google'){
         GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
@@ -189,9 +194,11 @@ abstract class _LoginState with Store {
               accessToken: googleSignInAuthentication.accessToken);
           user = await auth.signInWithCredential(credential);
         }
+        startedlogin = true;
       } else {
         final facebookAuthCred = FacebookAuthProvider.credential(token);
         user = await auth.signInWithCredential(facebookAuthCred);
+        startedlogin = true;
       }
 
       if(user != null){
@@ -203,9 +210,10 @@ abstract class _LoginState with Store {
       errormsg = switchExceptions(e.code);
     }
 
+    
+    startedlogin = false;
     if (loggeduser != null) {
       Navigator.pushReplacementNamed(context, '/setdata');
-      Navigator.pushReplacementNamed(context, '/main');
     } else if(errormsg != null) {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(

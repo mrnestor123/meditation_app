@@ -124,7 +124,7 @@ abstract class _MeditationState with Store {
             Duration _timestampduration = Duration(minutes:int.parse(time[0]), seconds: int.parse(time[1]));
             if(_timestampduration.inSeconds < (selmeditation.duration.inSeconds - this.duration.inSeconds)){
               currentsentence = nextsentence['text'];
-              print(nextsentence);
+              assetsAudioPlayer.open(Audio("assets/audios/bowl-sound.mp3"));
               count++;
             }
           } 
@@ -137,7 +137,7 @@ abstract class _MeditationState with Store {
 
   @action
   void pause() {
-    this.state = 'paused';
+    //this.state = 'paused';
     timer.cancel();
   }
 

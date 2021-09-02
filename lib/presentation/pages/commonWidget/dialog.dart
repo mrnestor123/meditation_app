@@ -11,7 +11,7 @@ class AbstractDialog extends StatelessWidget {
       this.width = Configuration.width * 0.9;
     }
     if (this.height == null) {
-      this.height = Configuration.height * 0.3;
+      this.height = Configuration.height * 0.9;
     }
   }
 

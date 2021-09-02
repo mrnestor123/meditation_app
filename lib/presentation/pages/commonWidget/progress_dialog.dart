@@ -17,7 +17,7 @@ void autocloseDialog(context, User user, {isTablet = false}) async {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
-    barrierColor: Colors.transparent,
+    barrierColor: user.progress.what.contains('stage') ? Colors.black : Colors.transparent,
     transitionDuration: Duration(milliseconds: 400),
     transitionBuilder: (context, anim1, anim2, child) {
       return FadeTransition(
@@ -26,15 +26,16 @@ void autocloseDialog(context, User user, {isTablet = false}) async {
       );
     },
     pageBuilder:(context, anim1, anim2) {
-      _timer = Timer(Duration(seconds: 4), () {
+      _timer = Timer(Duration(seconds: 3), () {
         user.progress = null;
         Navigator.of(context).pop();
       });
 
-      return  AbstractDialog(
-          width: isTablet ? Configuration.width*0.4: Configuration.width*0.2,
-          height: isTablet ?  Configuration.width*0.2 : Configuration.width*0.1,
-          content: isTablet ? TabletAnimatedProgress(progress:user.progress): AnimatedProgress(progress: user.progress),
+      return AbstractDialog(
+          content: isTablet ? 
+          TabletAnimatedProgress(progress:user.progress)
+          : 
+          AnimatedProgress(progress: user.progress),
       );
       }).then((val){
         if (_timer.isActive) {
@@ -93,8 +94,6 @@ class _TabletAnimatedProgressState extends State<TabletAnimatedProgress> {
 }
 
 
-
-
 class AnimatedProgress extends StatefulWidget {
   final Progress progress;
 
@@ -108,37 +107,55 @@ class AnimatedProgress extends StatefulWidget {
 }
 
 class _AnimatedProgressState extends State<AnimatedProgress> {
+
+  List<Widget> progressDialog(){
+    return [
+      Container(
+          width: Configuration.width*0.1,
+          child: Text(widget.progress.done.toString() + '/' + widget.progress.total.toString(), style: Configuration.text('smallmedium', Colors.black)),
+      ),
+      Text(widget.progress.what, 
+        style:Configuration.text('small', Colors.grey), 
+        textAlign: TextAlign.center
+      )
+    ];
+  }
+
+  List<Widget> stageDialog(){
+    return [
+      Text('Congratulations, you have updated to the next stage', style: Configuration.text('small', Colors.black) ),
+      SizedBox(height: 10),
+      Text('Stage '+ widget.progress.done.toString(), style: Configuration.text('small', Colors.black))
+    ];
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return AnimatedAlign(
       duration: Duration(seconds: 2),
-      alignment: Alignment.topCenter,
+      alignment: widget.progress.what.contains('stage') ? Alignment.center : Alignment.topCenter,
       child:  Container(
-      margin: EdgeInsets.all(Configuration.medmargin),
-      width: Configuration.width *0.4,
-      height: Configuration.width*0.2,
+      padding: EdgeInsets.all(6.0),
+      width: Configuration.width *0.5,
+      height: widget.progress.what.contains('stage') ? Configuration.width *0.5: Configuration.width*0.2,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0), 
         color: Colors.white,
-        boxShadow: [
+        /*boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.4),
             spreadRadius: 2,
             blurRadius: 2,
             offset: Offset(2, 2), // changes position of shadow
           ),
-        ]
+        ]*/
         ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: Configuration.width*0.1,
-            child: Text(widget.progress.done.toString() + '/' + widget.progress.total.toString(), style: Configuration.text('smallmedium', Colors.black)),
-          ),
-          Text(widget.progress.what, style:Configuration.text('small', Colors.grey), textAlign: TextAlign.center,)
-        ],
+        children: widget.progress.what.contains('stage') ?
+          stageDialog() : progressDialog(),
       ),
     ));
   }

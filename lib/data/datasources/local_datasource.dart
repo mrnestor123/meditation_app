@@ -33,31 +33,12 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});
 
-  @override
-  Future updateData({UserModel user, dynamic toAdd, String type}) async {
-    final jsonUser = sharedPreferences.setString(CACHED_USER, json.encode(user.toJson()));
-
-   // StageModel stage = user.stage;
-   // sharedPreferences.setString(CACHED_STAGE, json.encode(stage.toJson()));
-
-    //if(type == 'meditate'){
-      // usermeditations.add(toAdd[0].toRawJson());
-       //sharedPreferences.setStringList(CACHED_MEDITATIONS, usermeditations.map((e) => e).toList());
-    //}
-    //sharedPreferences.setStringList(CACHED_ACTIONS, useractions.map((e) => e).toList());
-   
-    if (jsonUser == null) {
-      throw CacheException();
-    }
-  }
-
   //Añadimos el usuario a la cache con su nombre de usuario.
   @override
   Future<void> cacheUser(UserModel userToCache) async {
     sharedPreferences.setString(CACHED_USER, json.encode(userToCache.coduser));
   }
 
-  // HAY QUE GUARDAR LAS ACCIONES TMB EN LA CACHE !!!!
   @override
   Future<String> getUser([String usuario]) async {
     final jsonUser = sharedPreferences.getString(CACHED_USER);

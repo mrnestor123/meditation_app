@@ -72,11 +72,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'http://192.168.4.67:8802';
+    nodejs = 'https://public.digitalvalue.es:8002';
+    //nodejs = 'http://192.168.4.67:8802';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
-
 
   Future<UserModel> connect(String cod) async {
     var url = Uri.parse('$nodejs/connect/$cod');
@@ -168,19 +168,23 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<UserModel> registerUser({var usuario}) async {
     //Sacamos la primera etapa
     //Esto se debería de sacar del getStage
-    QuerySnapshot firststage = await database.collection('stages').where('stagenumber', isEqualTo: 1).get();
-    StageModel one;
+    var url = Uri.parse('$nodejs/stage/1');
+    http.Response response = await http.get(url);
 
-    for (DocumentSnapshot doc in firststage.docs) {
-      one = new StageModel.fromJson(doc.data());
-    }
+    //comprobar que funciona bien
+    UserModel u = UserModel.fromRawJson(response.body);
+    StageModel one = StageModel.fromRawJson(response.body);
+
 
     //hay que pasar esto al nuevo setting con UserStats
     UserModel user = new UserModel(
         coduser: usuario.uid,
         user: usuario,
         stagenumber: 1,
+        meditposition: 0,
+        gameposition: 0,
         role: "meditator",
+        classic: true,
         position: 0,
         stage: one,
         userStats: UserStats.empty()
@@ -196,14 +200,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future getActions(UserModel u) async {
     var url = Uri.parse('$nodejs/live/${u.coduser}');
     var response = await http.get(url);
-    var actions = json.decode(response.body);
+    try{
+      var actions = json.decode(response.body);
 
-    if(actions['today'] != null && actions['today'].length > u.todayactions.length){
-      u.setActions(actions['today'], true);
-    }
+      if(actions['today'] != null && actions['today'].length > u.todayactions.length){
+        u.setActions(actions['today'], true);
+      }
 
-    if(actions['thisweek'] != null && actions['thisweek'].length > u.thisweekactions.length){
-      u.setActions(actions['thisweek'], false);
+      if(actions['thisweek'] != null && actions['thisweek'].length > u.thisweekactions.length){
+        u.setActions(actions['thisweek'], false);
+      }
+    }catch(e){
+      print(e);
     }
   }
 
@@ -234,7 +242,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return d;
   }
 
-
   Future<String> updateImage(PickedFile image, User u) async {
       Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}');
 
@@ -264,34 +271,39 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
-    QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
-    String documentId = userreference.docs[0].id;
-    await database.collection("users").doc(documentId).update(user.toJson());
- 
-    //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
-    if (type == 'meditate') {
-      await database.collection('meditations').add(toAdd[0].toJson());
-    }else if(type =='lesson'){
-      //Añadirlo a las lessonss del usuario !!
+    try{
+      QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
+      String documentId = userreference.docs[0].id;
+      
+      await database.collection("users").doc(documentId).update(user.toJson());
+  
+      //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
+      if (type == 'meditate') {
+        await database.collection('meditations').add(toAdd[0].toJson());
+      }else if(type =='lesson'){
+        //Añadirlo a las lessonss del usuario !!
+      }
+
+      var url = Uri.parse('$nodejs/action/${user.coduser}');
+      
+      print(url);
+
+
+      //esto se ejecutará antes que el clear ??
+      //esto desde cuando se ejecuta ??
+      user.lastactions.forEach((element) async{
+        var body = json.encode(element.toJson());
+
+        var response = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: body
+        );
+      });
+
+      user.lastactions.clear();
+    }catch(e){  
+      print(e);
     }
-
-    var url = Uri.parse('$nodejs/action/${user.coduser}');
-    
-    print(url);
-
-
-    //esto se ejecutará antes que el clear ??
-    user.lastactions.forEach((element) async{
-      var body = json.encode(element.toJson());
-
-      var response = await http.post(url,
-        headers: {"Content-Type": "application/json"},
-        body: body
-      );
-    });
-
-    user.lastactions.clear();
-
   }
 
   /*
@@ -302,16 +314,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try {
       UserModel u = await connect(coduser);
 
-      getActions(u);
-
-      Timer.periodic(new Duration(seconds: 30), (timer) {
+      if(u !=null){
         getActions(u);
-      });    
-    
-      if(u == null){
-        throw Exception();
-      }else{
-        return u;
+
+        Timer.periodic(new Duration(seconds: 30), (timer) {
+          getActions(u);
+        });    
+      
+        if(u == null){
+          throw Exception();
+        }else{
+          return u;
+        }
       }
     }catch(e){
       throw ServerException();

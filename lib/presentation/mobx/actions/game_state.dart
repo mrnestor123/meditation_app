@@ -19,8 +19,6 @@ abstract class _GameState with Store {
   
   _GameState({this.repository});
 
-  AnswerQuestionUseCase answerusecase;
-
   @observable 
   Game selectedgame;
 
@@ -33,19 +31,25 @@ abstract class _GameState with Store {
   @observable
   User user;
 
+  @observable
   Question selectedquestion;
 
   @observable
   bool started = false;
 
   @observable 
+  bool max = false;
+
+  @observable 
+  bool unlockednext = false;
+
   int selectedanswer;
 
   @observable
-  VideoPlayerController controller;
+  ObservableList<bool> answeredquestions = new ObservableList();
 
   @observable
-  VideoPlayerController beforecontroller;
+  VideoPlayerController controller;
 
   @action
   void selectgame(Game g){
@@ -56,33 +60,50 @@ abstract class _GameState with Store {
   
   @action 
   void startgame(){
+    answeredquestions.clear();
+    max = false;
     state = 'video';
   }
 
   //TODO: based on users answers we get a question
   @action
-  void getRandomquestion(){
-    print('random question');
+  void finishvideo(){
     state = 'question';
     started = false;
-    print('video Ended');
-    var rnd = new Random();
-    selectedquestion = selectedgame.questions[rnd.nextInt(selectedgame.questions.length -1)];
+    selectedquestion = selectedgame.questions[0];
+  }
+
+  void getMaxAnswered(User user){
+    if(user.answeredquestions[selectedgame.cod] == null || user.answeredquestions[selectedgame.cod] < answeredquestions.length ){
+      user.answeredquestions[selectedgame.cod] = answeredquestions.length;
+      max = true;
+      
+      if(user.gameposition == selectedgame.position){
+        user.gameposition++;
+      }
+
+      repository.updateUser(user:user);
+    }
   }
 
   @action
   void userAnswer(int answer, User u) {
     selectedanswer = answer;
-    state = 'answer';
     success = selectedquestion.isValid(answer);
+  
     if(success){
-       if(user.answeredquestions[selectedgame.cod] == null) {
-        user.answeredquestions[selectedgame.cod] = new List.empty(growable: true);
+      answeredquestions.add(true);
+      if(answeredquestions.length  == selectedgame.questions.length){
+        getMaxAnswered(u);
+
+        state = 'answer';
+      }else{
+        var index = selectedgame.questions.indexOf(selectedquestion);
+        selectedquestion = selectedgame.questions[++index];
       }
-
-      user.answeredquestions[selectedgame.cod].add(selectedquestion.key);
-
-      repository.updateUser(user: user);
+    }else{
+      getMaxAnswered(u);
+      state = 'answer';
     }
   }
   //todo. ask question ??

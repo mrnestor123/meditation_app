@@ -14,6 +14,7 @@ import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:provider/provider.dart';
 
+import 'commonWidget/profile_widget.dart';
 import 'commonWidget/radial_progress.dart';
 
 class Layout extends StatelessWidget {
@@ -61,15 +62,17 @@ class _MobileLayoutState extends State<MobileLayout> {
     _userstate = Provider.of<UserState>(context);
     final _loginstate = Provider.of<LoginState>(context);
     if(_userstate.user==null){
-      print(_loginstate.loggeduser);
       _userstate.setUser(_loginstate.loggeduser);
+    }
+    if(_userstate.data == null){
+      _userstate.getData();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     Configuration().init(context);
-     _userstate = Provider.of<UserState>(context);
+    _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     
     Widget chiporText(String text, bool chip){
@@ -99,7 +102,6 @@ class _MobileLayoutState extends State<MobileLayout> {
       );
     }
 
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Configuration.white,
@@ -113,7 +115,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                     children: [
                       Observer(builder: (BuildContext context) {  
                         return chiporText('Free', _meditationstate.currentpage == 0);
-                      },),
+                      }),
                       
                       Observer(builder: (BuildContext context) {  
                         return chiporText('Guided', _meditationstate.currentpage == 1);
@@ -122,7 +124,6 @@ class _MobileLayoutState extends State<MobileLayout> {
                       Observer(builder: (BuildContext context) {  
                         return chiporText('Games', _meditationstate.currentpage == 2);
                       }),
-
                     ],
                   ),
                 ],
@@ -132,36 +133,27 @@ class _MobileLayoutState extends State<MobileLayout> {
                 height: 1.0,
               ),
             preferredSize: currentindex == 2 ? Size.fromHeight(Configuration.blockSizeVertical* 8) : Size.fromHeight(4.0)),
-        leading: Container(
-          padding: EdgeInsets.all(4),
-          child: Image.asset('assets/logo-no-text.png')
+        leading: GestureDetector(
+          onTap: (){
+            this._c.jumpToPage(0);
+          },
+          child: Container(
+            padding: EdgeInsets.all(4),
+            child: Image.asset('assets/logo-no-text.png')
+          ),
         ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
+            color: Colors.black,
+            icon: Icon(Icons.bug_report),
+            onPressed: ()=> Navigator.pushNamed(context, '/requests'),
+          ),
+          IconButton(
               icon: Icon(Icons.ac_unit),
               color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),
-          Container(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            margin: EdgeInsets.only(left: Configuration.medmargin, right: Configuration.bigmargin),
-            child: GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/profile'),
-              child: RadialProgress(
-                  width: Configuration.safeBlockHorizontal * 0.7,
-                  progressColor: Configuration.maincolor,
-                  goalCompleted: 1,
-                  child: CircleAvatar(
-                    backgroundColor: _userstate.user.image == null
-                        ? Configuration.lightgrey
-                        : Colors.transparent,
-                    backgroundImage: _userstate.user.image == null
-                        ? null
-                        : NetworkImage(_userstate.user.image) ,
-                        //: FileImage(File(_userstate.user.image)),
-                  )),
-            ),
-          ),
+          ProfileCircle(userImage: _userstate.user.image, onTap: ()=> Navigator.pushNamed(context, '/profile')),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -213,6 +205,8 @@ class _MobileLayoutState extends State<MobileLayout> {
     );
   }
 }
+
+
 
 /*
 class TabletLayout extends StatefulWidget {

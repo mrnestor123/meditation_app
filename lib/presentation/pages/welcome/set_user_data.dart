@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,8 @@ class _SetUserDataState extends State<SetUserData> {
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
+    final _loginstate = Provider.of<LoginState>(context);
+
     return Scaffold(
       body: Container(
         height: Configuration.height,
@@ -28,18 +31,26 @@ class _SetUserDataState extends State<SetUserData> {
             SizedBox(height: Configuration.height * 0.03),
             TextField(controller: _nameController),
             SizedBox(height: Configuration.height * 0.03),
-            ElevatedButton(
-                onPressed: () {
-                  _userstate.changeName(_nameController.text);
-                  Navigator.pushReplacementNamed(context, '/main');
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(Configuration.tinpadding),
+            AspectRatio(
+              aspectRatio: 8/1,
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white,
+                    padding: EdgeInsets.all(12.0)
+                  ),
+                  onPressed: () async{
+                    await _userstate.getData();
+                    if(_userstate.user == null || _loginstate.loggeduser.coduser != _userstate.user.coduser){
+                      _userstate.setUser(_loginstate.loggeduser);
+                    }
+                    _userstate.changeName(_nameController.text);
+                    Navigator.pushReplacementNamed(context, '/main');
+                  },
                   child: Text(
                     'Set',
-                    style: Configuration.text('big', Colors.black),
-                  ),
-                )),
+                    style: Configuration.text('medium', Colors.black),
+                  )),
+            ),
           ],
         ),
       ),

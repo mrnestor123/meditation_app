@@ -69,6 +69,21 @@ mixin _$GameState on _GameState, Store {
     });
   }
 
+  final _$selectedquestionAtom = Atom(name: '_GameState.selectedquestion');
+
+  @override
+  Question get selectedquestion {
+    _$selectedquestionAtom.reportRead();
+    return super.selectedquestion;
+  }
+
+  @override
+  set selectedquestion(Question value) {
+    _$selectedquestionAtom.reportWrite(value, super.selectedquestion, () {
+      super.selectedquestion = value;
+    });
+  }
+
   final _$startedAtom = Atom(name: '_GameState.started');
 
   @override
@@ -84,18 +99,18 @@ mixin _$GameState on _GameState, Store {
     });
   }
 
-  final _$selectedanswerAtom = Atom(name: '_GameState.selectedanswer');
+  final _$answeredquestionsAtom = Atom(name: '_GameState.answeredquestions');
 
   @override
-  int get selectedanswer {
-    _$selectedanswerAtom.reportRead();
-    return super.selectedanswer;
+  ObservableList<bool> get answeredquestions {
+    _$answeredquestionsAtom.reportRead();
+    return super.answeredquestions;
   }
 
   @override
-  set selectedanswer(int value) {
-    _$selectedanswerAtom.reportWrite(value, super.selectedanswer, () {
-      super.selectedanswer = value;
+  set answeredquestions(ObservableList<bool> value) {
+    _$answeredquestionsAtom.reportWrite(value, super.answeredquestions, () {
+      super.answeredquestions = value;
     });
   }
 
@@ -111,21 +126,6 @@ mixin _$GameState on _GameState, Store {
   set controller(VideoPlayerController value) {
     _$controllerAtom.reportWrite(value, super.controller, () {
       super.controller = value;
-    });
-  }
-
-  final _$beforecontrollerAtom = Atom(name: '_GameState.beforecontroller');
-
-  @override
-  VideoPlayerController get beforecontroller {
-    _$beforecontrollerAtom.reportRead();
-    return super.beforecontroller;
-  }
-
-  @override
-  set beforecontroller(VideoPlayerController value) {
-    _$beforecontrollerAtom.reportWrite(value, super.beforecontroller, () {
-      super.beforecontroller = value;
     });
   }
 
@@ -154,11 +154,11 @@ mixin _$GameState on _GameState, Store {
   }
 
   @override
-  void getRandomquestion() {
+  void finishvideo() {
     final _$actionInfo = _$_GameStateActionController.startAction(
-        name: '_GameState.getRandomquestion');
+        name: '_GameState.finishvideo');
     try {
-      return super.getRandomquestion();
+      return super.finishvideo();
     } finally {
       _$_GameStateActionController.endAction(_$actionInfo);
     }
@@ -182,10 +182,10 @@ selectedgame: ${selectedgame},
 success: ${success},
 state: ${state},
 user: ${user},
+selectedquestion: ${selectedquestion},
 started: ${started},
-selectedanswer: ${selectedanswer},
-controller: ${controller},
-beforecontroller: ${beforecontroller}
+answeredquestions: ${answeredquestions},
+controller: ${controller}
     ''';
   }
 }

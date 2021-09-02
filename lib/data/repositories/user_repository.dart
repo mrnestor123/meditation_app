@@ -93,7 +93,6 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, DataBase>> getData() async {
-    // TODO: implement getData
     if (await networkInfo.isConnected) {
       try {
         final data = await remoteDataSource.getData();
@@ -140,7 +139,6 @@ class UserRepositoryImpl implements UserRepository {
 
     // TODO: implement updateImage
   }
-
 
 
   @override

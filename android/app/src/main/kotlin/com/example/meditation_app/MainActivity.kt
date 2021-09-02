@@ -1,4 +1,4 @@
-package com.example.meditationApp
+package tenStages.meditationApp
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

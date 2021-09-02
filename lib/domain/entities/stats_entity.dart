@@ -11,7 +11,7 @@ import 'lesson_entity.dart';
 class UserStats {
   StageStats stage;
   TotalStats total;
-  List<dynamic> lastread;
+  List<dynamic> lastread = new List.empty(growable: true);
   int streak;
   String lastmeditated;
   Map<String,dynamic> meditationtime;
@@ -32,7 +32,7 @@ class UserStats {
       streak: json['racha'] == null ? 0 : json['racha'],
       meditationtime: json['meditationtime'] == null ? new Map() : json['meditationtime'],
       lastmeditated: json['lastmeditated'] == null ? null : json['lastmeditated'],
-      lastread: json['lastread'] == null ? null : json['lastread']
+      lastread: json['lastread'] == null ? [] : json['lastread']
     );  
 
   Map<String, dynamic> toJson() => {

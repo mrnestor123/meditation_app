@@ -2,13 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'config/configuration.dart';
 
+// VISTA DE LISTA DE REQUESTS
 class Requests extends StatefulWidget {
   const Requests() : super();
 
@@ -34,7 +35,9 @@ class _RequestsState extends State<Requests> {
   }
 
   Widget addRequestModal(context){
-    _imgFromCamera() async {
+    
+    void _showPicker(context) {
+      _imgFromCamera() async {
       PickedFile image = await _picker.getImage(source: ImageSource.camera);
       
       if(image != null){
@@ -61,8 +64,7 @@ class _RequestsState extends State<Requests> {
       }
     }
 
-    void _showPicker(context) {
-      showModalBottomSheet(
+    showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
           return SafeArea(
@@ -95,121 +97,139 @@ class _RequestsState extends State<Requests> {
 
     return StatefulBuilder(
       builder:(BuildContext context, StateSetter setState ) {
-      return  Container(
-          height: Configuration.height * 0.8,
-          padding: EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 10),
-              Text('Title', style:Configuration.text('small', Colors.black)),
-              TextField(
-                controller: title,
-                maxLines: 2,
-                onChanged: (str){addedReq.title = str;},
-                decoration: InputDecoration.collapsed(hintText: "Enter title",
-                  border: new OutlineInputBorder(
-                      borderSide: new BorderSide(color: Colors.black)
-                  ),),
-              ),
-              Text('Content', style:Configuration.text('small', Colors.black)),
-              SizedBox(height: 6),
-              Expanded(
-                child: TextField(
-                  controller: content,
-                  onChanged: (str) {
-                    addedReq.content = str;
-                  },
-                  expands: true,
-                  maxLines: null,
-                  decoration: InputDecoration.collapsed(hintText: "Enter your text here",
+      return  Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+            height: Configuration.height * 0.5,
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10),
+                Text('Title', style:Configuration.text('small', Colors.black)),
+                TextField(
+                  controller: title,
+                  maxLines: 1,
+                  onChanged: (str){addedReq.title = str;},
+                  decoration: InputDecoration(
+                    hintText: "Enter title",
+                    hintMaxLines: 2,
                     border: new OutlineInputBorder(
                         borderSide: new BorderSide(color: Colors.black)
                     ),),
                 ),
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Type of request', style: Configuration.text('small', Colors.black)), 
-                  DropdownButton<String>(
-                    value: selectedtype,
-                    icon: Icon(Icons.arrow_downward_sharp, color: Colors.black,size: Configuration.smicon),
-                    elevation: 16,
-                    style: TextStyle(color: Colors.black),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.black,
-                    ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        if(newValue =='Suggestion'){
-                          addedReq.type = 'suggestion';
-                        }else{
-                          addedReq.type = 'issue';  
-                        }
-                        selectedtype = newValue;
-                      });
+                Text('Content', style:Configuration.text('small', Colors.black)),
+                SizedBox(height: 6),
+                Expanded(
+                  child: TextField(
+                    controller: content,
+                    onChanged: (str) {
+                      addedReq.content = str;
                     },
-                    items: <String>['Suggestion', 'Issue'].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                    expands: true,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: "Enter your text here",
+                      border: new OutlineInputBorder(
+                          borderSide: new BorderSide(color: Colors.black)
+                      ),),
                   ),
-                ],
-              ),
-              SizedBox(height: 10),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Add Image', style: Configuration.text('small', Colors.black)),
-                  ElevatedButton(
-                    onPressed: ()=> _showPicker(context), 
-                    child: Text('Image')
-                  )
-                ],
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: (){ 
-                  _userState.uploadRequest(addedReq);
-                  setState(() async{
-                    addedReq.title ='';
-                    addedReq.content = '';
-                    addedReq.type = 'suggestion';
-                    await _userState.getRequests();
-                    Navigator.pop(context);
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: Configuration.maincolor,
-                  padding: EdgeInsets.symmetric(vertical:2.0,horizontal: 4.0)
-                ), 
-                child: Text('Send Request', style: Configuration.text('small', Colors.white))
-              )
-            ],
-          )
-        );
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Type of request', style: Configuration.text('small', Colors.black)), 
+                    DropdownButton<String>(
+                      value: selectedtype,
+                      icon: Icon(Icons.arrow_downward_sharp, color: Colors.black,size: Configuration.smicon),
+                      elevation: 16,
+                      style: TextStyle(color: Colors.black),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.black,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          if(newValue =='Suggestion'){
+                            addedReq.type = 'suggestion';
+                          }else{
+                            addedReq.type = 'issue';  
+                          }
+                          selectedtype = newValue;
+                        });
+                      },
+                      items: <String>['Suggestion', 'Issue'].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Add Image', style: Configuration.text('small', Colors.black)),
+                    ElevatedButton(
+                      onPressed: ()=> _showPicker(context), 
+                      child: Text('Image')
+                    )
+                  ],
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: (){ 
+                    _userState.uploadRequest(addedReq);
+                    setState(() async{
+                      addedReq.title ='';
+                      addedReq.content = '';
+                      addedReq.type = 'suggestion';
+                      await _userState.getRequests();
+                      Navigator.pop(context);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size.fromWidth(Configuration.width),
+                    primary: Configuration.maincolor,
+                    padding: EdgeInsets.symmetric(vertical:10.0,horizontal: 4.0)
+                  ), 
+                  child: Text('Send Request', style: Configuration.text('small', Colors.white))
+                )
+              ],
+            )
+          ),
+      );
     });
   }
 
-  Widget requests(String tipo){
-    List<Request> request = _userState.requests;
+  Widget requests([String tipo]){
+    List<Request> request = tipo == null ? 
+      _userState.requests.where((element) => element.coduser == _userState.user.coduser).toList() : 
+      _userState.requests.where((element) => element.type == tipo && element.state != 'closed').toList();
 
-    return ListView.builder(
+    String tipostring = tipo != null ? tipo =='suggestion' ? 'suggestions' :'issues': 'Issues/Request';
+
+    return request.length == 0 ? 
+     Center(
+       child: Text('There are no open $tipostring at the moment. You can add one pressing at the plus button', 
+          style: Configuration.text('small', Colors.black),
+          textAlign: TextAlign.center,
+        )
+      ) :
+     ListView.builder(
       itemCount:request.length,
       itemBuilder: (context,index) => 
         GestureDetector(
           onTap: ()=> 
-          Navigator.push( context,
+          Navigator.push(context,
             MaterialPageRoute(
               builder: (context) => RequestView(request: request[index],)
             )
-          ),
+          ).then((value) => setState((){})),
           child: Card(
             child: Container(
               padding: EdgeInsets.all(6.0),
@@ -217,10 +237,25 @@ class _RequestsState extends State<Requests> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.person, size: Configuration.smicon),
-                      Text(request[index].username, style: Configuration.text('verytiny', Colors.black)),
-                  ]),
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            child:ProfileCircle(
+                              userImage:request[index].image, 
+                              width: 2, 
+                              marginLeft: 2, 
+                              marginRight: 2
+                            ),
+                          ),
+                          SizedBox(width: 4),
+                          Text(request[index].username, style: Configuration.text('tiny', Colors.black)),
+                      ]),
+                      StateChip(request: request[index])
+                    ],
+                  ),
                   SizedBox(height: 5.0),
                   Text(request[index].title, style: Configuration.text('small', Colors.black)),
                   SizedBox(height: 5.0),
@@ -230,6 +265,14 @@ class _RequestsState extends State<Requests> {
                     children: [
                       Row(
                         children:[
+                           IconButton(
+                            onPressed: ()=> 
+                              setState(() {
+                                _userState.updateRequest(request[index], true); 
+                              }), 
+                            icon: Icon(Icons.arrow_upward, color: request[index].votes[_userState.user.coduser] == 1 ? Colors.green : Colors.black)
+                          ),
+                          Text(request[index].points.toString(), style: Configuration.text('small', Colors.black),),
                           IconButton(
                             onPressed: ()=> 
                               setState(() {
@@ -237,14 +280,7 @@ class _RequestsState extends State<Requests> {
                               }),
                             icon:  Icon(Icons.arrow_downward , color:  request[index].votes[_userState.user.coduser] == -1 ? Colors.red : Colors.black)
                           ),
-                          Text(request[index].points.toString()),
-                          IconButton(
-                            onPressed: ()=> 
-                              setState(() {
-                                _userState.updateRequest(request[index], true); 
-                              }), 
-                            icon: Icon(Icons.arrow_upward, color: request[index].votes[_userState.user.coduser] == 1 ? Colors.green : Colors.black)
-                          ),
+                         
                         ]
                       ),
                       Row(
@@ -265,6 +301,7 @@ class _RequestsState extends State<Requests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if(addedReq.title != null){
@@ -274,6 +311,7 @@ class _RequestsState extends State<Requests> {
             content.text = addedReq.content;
           }
           return showModalBottomSheet<void>(
+            isScrollControlled: true,
             context: context,
             builder: (BuildContext context) {
               return addRequestModal(context);
@@ -289,7 +327,7 @@ class _RequestsState extends State<Requests> {
       ),
       extendBody: false,
       body: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Column(
           children: [
             Padding(
@@ -306,25 +344,39 @@ class _RequestsState extends State<Requests> {
                   child: Text('Issues', style:Configuration.text('small', Colors.black)),
                 ),
                 Tab(
-                    child: Text('Suggestions',style: Configuration.text('small', Colors.black))),
+                  child: Text('Suggestions',style: Configuration.text('small', Colors.black))
+                ),
+                Tab(
+                  child: Text('My Requests', style:Configuration.text('small', Colors.black)),
+                )
             ]),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
                 color: Configuration.lightgrey,
+                width: Configuration.width,
                 child: Observer(builder: (context)  {
                   return _userState.requests == null ? 
-                  Container(
-                    height: 15,
-                    width: 15,
-                    child: CircularProgressIndicator(),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Center(
+                        child: Container(
+                          height: 40,
+                          width: 40,
+                          child: CircularProgressIndicator(color:Configuration.maincolor),
+                        ),
+                      ),
+                    ],
                   )
                   :
                   TabBarView(
                     physics: NeverScrollableScrollPhysics(),
                     children: [
-                      requests('issues') ,
-                      requests('suggestions')
+                      requests('issue') ,
+                      requests('suggestion'),
+                      requests()
                   ]);
                 })
               ),
@@ -347,7 +399,6 @@ class RequestView extends StatefulWidget {
 
 class _RequestViewState extends State<RequestView> {
   var _controller = TextEditingController();
-
   
   Widget comment(Comment comment){
     return Container(
@@ -355,9 +406,9 @@ class _RequestViewState extends State<RequestView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(comment.username,style: Configuration.text('small', Colors.black),),
+          Text(comment.username != null ? comment.username : 'x', style: Configuration.text('small', Colors.black),),
           SizedBox(height: 10),
-          Text(comment.comment)
+          Text(comment.comment != null ? comment.comment :'xx')
         ],
       ),
     );
@@ -382,7 +433,6 @@ class _RequestViewState extends State<RequestView> {
                 });
               },   
               icon: Icon(Icons.send)
-
             )
           ),
         ),
@@ -392,35 +442,77 @@ class _RequestViewState extends State<RequestView> {
         elevation: 0.0,
         backgroundColor: Configuration.lightgrey,
         leading: BackButton(),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        actions: [
+           //Pasar esto a admin
           Container(
-            color: Colors.white,
-            width: Configuration.width,
-            padding: EdgeInsets.all(8.0),
-            child:Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Text(widget.request.title, style: Configuration.text('smallmedium', Colors.black)),
-              SizedBox(height: 10),
-              Text(widget.request.content, style:Configuration.text('small', Colors.black, font:'Helvetica'))
-            ])
+            padding: EdgeInsets.all(12.0),
+            child: OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(width: 2.0, color: widget.request.nextStateColor())
+              ),
+              onPressed: () {
+                setState(() {
+                  widget.request.changeState(_userState.user);
+                  _userState.updateRequest(widget.request, null);
+                });
+              }, 
+              child: Text('Change Request to ' + widget.request.nextState(), style: Configuration.text('small', Colors.black),)
+            ),
           ),
-          SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text('Comments', style: Configuration.text('medium', Colors.black)),
-          ),
-          SizedBox(height: 5),
-          Expanded(
-            child: Container(
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              color: Colors.white,
+              width: Configuration.width,
+              padding: EdgeInsets.all(8.0),
+              child:Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                Row(
+                  mainAxisAlignment:MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: Configuration.width*0.12,
+                          child:ProfileCircle(
+                            userImage:widget.request.image, 
+                            width: 2,
+                            marginLeft: 3,
+                            marginRight: 3,
+                          )
+                        ),
+                        Text(widget.request.username,style:Configuration.text('small',Colors.black))
+                      ],
+                    ),
+                    
+                    StateChip(request: widget.request)
+                  ],
+                ),
+                SizedBox(height: 10),
+                Text(widget.request.title, style: Configuration.text('medium', Colors.black)),
+                SizedBox(height: 10),
+                Text(widget.request.content, style:Configuration.text('small', Colors.black, font:'Helvetica'))
+              ])
+            ),
+            SizedBox(height: 5),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Comments', style: Configuration.text('medium', Colors.black)),
+            ),
+            SizedBox(height: 5),
+            Container(
               width: Configuration.width,
               decoration: BoxDecoration(color: Colors.white),
               child: 
               widget.request.comments.length > 0 ?
               ListView.separated(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
                 itemCount: widget.request.comments.length,
                 itemBuilder: (context,index){
                   return comment(widget.request.comments[index]);
@@ -434,16 +526,30 @@ class _RequestViewState extends State<RequestView> {
                 })
                 :
                 Text('There are no comments at the moment. You can add one at the bottom') 
-
             )
-            )
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
+class StateChip extends StatelessWidget {
+  const StateChip({
+    Key key,
+    @required this.request,
+  }) : super(key: key);
 
+  final Request request;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      label: Text(request.getState(), style:Configuration.text('small', Colors.white)),
+      backgroundColor: request.getColor(),
+    );
+  }
+}
 
 
 class BackButton extends StatelessWidget {

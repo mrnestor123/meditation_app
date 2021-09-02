@@ -58,7 +58,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                                     Container(
                                       padding: EdgeInsets.all(2.0),
                                       decoration: BoxDecoration(
-                                        image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+                                        image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.contain) : null,
                                         border: Border.all(color: Colors.white, width: 2.5),
                                         shape: BoxShape.circle
                                         ),

@@ -9,7 +9,7 @@ import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
 
-class UserState extends _UserState with _$UserState {
+class   UserState extends _UserState with _$UserState {
   UserState(
       {
       UserRepository userRepository
@@ -151,7 +151,7 @@ abstract class _UserState with Store {
       }else{
         r.dislike(user.coduser);
       }
-    }else{
+    }else if(comment != null){
       Comment c = new Comment(comment: comment,username: user.nombre, coduser: user.coduser);
       r.comment(c);
     }

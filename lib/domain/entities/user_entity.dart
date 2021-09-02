@@ -10,6 +10,7 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
+import 'game_entity.dart';
 import 'lesson_entity.dart';
 import 'meditation_entity.dart';
 import 'action_entity.dart';
@@ -19,10 +20,10 @@ class User {
   String coduser, nombre, role, image, timemeditated;
   //USUARIO DE FIREBASE
   var user;
-  int stagenumber, position, meditposition;
+  int stagenumber, position, meditposition, gameposition, percentage;
   Stage stage;
   //follows es cuando un usuario TE SIGUE!!
-  bool classic, follows;
+  bool classic, follows,stageupdated;
 
   //para el modal de progreso
   Progress progress;
@@ -32,8 +33,6 @@ class User {
 
   //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
-  //cuanto le queda por pasar de etapa
-  int percentage;
 
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
   List<UserAction> todayactions = new ObservableList();
@@ -61,10 +60,10 @@ class User {
   final ObservableList<Lesson> lessonslearned = new ObservableList();
   Map<dynamic,dynamic> answeredquestions = new Map();
 
-  User({this.coduser, this.nombre, this.user, this.position, 
-        this.image, @required this.stagenumber,this.stage, 
-        this.role,this.classic,this.meditposition,this.userStats, 
-        this.answeredquestions  }) {
+  User({this.coduser, this.nombre, this.user, this.position = 0, 
+        this.image, this.stagenumber = 1,this.stage, 
+        this.role,this.classic = false,this.meditposition= 0,this.userStats, 
+        this.answeredquestions,this.gameposition = 0 }) {
    
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
@@ -120,6 +119,14 @@ class User {
     return false;
   }
 
+  bool isBlocked(Meditation meditation){
+    return this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber;
+  }
+  
+  bool isGameBlocked(Game g){
+    return this.gameposition < g.position;
+  }
+
   //how much up to 6 the user has passed the lessons
   int lessonsPercentage(){
     if(this.userStats == 0){
@@ -129,12 +136,11 @@ class User {
     }
   }
 
-
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
 
-    if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson'){
+    if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson' && type != 'updatestage'){
       for(UserAction a in this.todayactions) {
         if(a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
           a.setAction(attribute);
@@ -152,7 +158,6 @@ class User {
 
     //this.thisweekactions.add(a);
   }
-
   void addMeditation(MeditationModel m) => totalMeditations.add(m);
   void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
   void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
@@ -246,7 +251,7 @@ class User {
   }
 
   void updateStage(DataBase data) {
-    this.stagenumber +=1;
+    this.stagenumber +=1;    
 
     data.stages.forEach((element) {
       if (element.stagenumber == this.stagenumber) {
@@ -254,11 +259,17 @@ class User {
       }
     });
 
-    this.progress = null;
-    this.stagenumber = this.stage.stagenumber;
     this.percentage = 0;
     this.position = 0;
+    this.meditposition = 0;
     userStats.reset();
+    this.stageupdated = true;
+
+     this.progress = Progress(
+        done: this.stagenumber,
+        what: 'stage',
+        stage: this.stage
+    );
 
     setPercentage();
     setAction("updatestage", attribute: this.stagenumber.toString());
@@ -284,6 +295,7 @@ class User {
       'meditguiadas': userStats.stage.guidedmeditations 
     };
 
+    // 0 / x == 0? 
     var percentageCheck = {
       'Total time': () => userStats.stage.timemeditated / s.stobjectives.totaltime ,
       s.stobjectives.freemeditationlabel : () => userStats.stage.timemeditations / s.stobjectives.meditationcount,
@@ -293,10 +305,11 @@ class User {
     };
 
     var objectives =  s.stobjectives.getObjectives();
+    passedObjectives = new Map();
 
     // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
     objectives.forEach((key,value) { 
-         passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
+        passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
     });
 
     double passedcount = 0;
@@ -327,6 +340,7 @@ class User {
         total: this.stage.stobjectives.lecciones, 
         what: ' Lessons'
       );
+
       setPercentage();
 
       if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
@@ -337,7 +351,6 @@ class User {
       }
     }
     
-
     if (this.percentage >= 100) {
       this.updateStage(d);
     }
@@ -370,7 +383,7 @@ class User {
     if (m.title == null) {
       if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
         this.userStats.stage.timemeditations++;
-        progress = Progress(
+        this.progress = Progress(
           done: this.userStats.stage.timemeditations,
           total: this.stage.stobjectives.meditationcount, 
           what: this.stage.stobjectives.freemeditationlabel
@@ -395,6 +408,7 @@ class User {
     this.setPercentage();
 
     if (this.percentage >= 100) {
+     
       this.updateStage(d);
     }
 

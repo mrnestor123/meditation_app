@@ -11,19 +11,28 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
 
 void main() {
-  Stage one = new Stage(stagenumber: 1, image: 'stage1', 
-    stobjectives: StageObjectives(totaltime: 240,meditationfreetime: 20,meditationcount: 2,lecciones: 8, streak: 6),
+  Stage one = new Stage(
+    stagenumber: 1, image: 'stage1', 
+    stobjectives: StageObjectives(
+      totaltime: 240,
+      meditationfreetime: 20,
+      meditguiadas: 0,
+      meditationcount: 2,
+      lecciones: 8, 
+      streak: 6
+    ),
   );
 
   for (int i = 0; i < 7; i++) {
-    one.addLesson(new Lesson(title: 'Lesson ' + i.toString(), description: 'test', text: []));
-    one.addMeditation(new Meditation(duration: Duration(hours: 15), title: 'Guided meditation '+ i.toString()));
+    one.addLesson(new Lesson(title: 'Lesson ' + i.toString(), description: 'test', text: [], position: i,stagenumber: 1));
+    one.addMeditation(new Meditation(duration: Duration(hours: 15), title: 'Guided meditation '+ i.toString(),position: i,stagenumber: 1));
   }
 
   User user = new User(
       nombre: "ernest", 
       stagenumber: 1, 
       meditposition: 0,
+      position: 1,
       stage: one, 
       userStats: UserStats.empty()
   );
@@ -31,14 +40,11 @@ void main() {
   DataBase d = new DataBase();
   
   d.stages.add(one);
-  d.stages.add(one);  
 
   Meditation m = Meditation(duration: Duration(minutes: 240));
 
   //a lo mejor hay que checkear mas casos
   test('meditations ', () {
-    
-
     Meditation m0 = new Meditation(duration: Duration(minutes: 15), day: DateTime.now());
     user.takeMeditation(m0);
 
@@ -90,11 +96,14 @@ void main() {
       //HAY QUE ELIMINAR D DE TAKE LESSON
       user.takeLesson(l, d); 
     } 
-    
 
+    print(user.passedObjectives);
+    
     for(Meditation m in one.meditpath){
       user.takeMeditation(m,d);
     }
+
+    print(user.passedObjectives);
 
 
   });
@@ -112,15 +121,6 @@ void main() {
 
 
   test('lessons', () {
-    
-
-
-
-
-
-
-
-
 
   });
 }

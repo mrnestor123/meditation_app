@@ -36,7 +36,7 @@ class _LearnScreenState extends State<LearnScreen> {
             crossAxisSpacing: 10,
         ),
         itemBuilder: (context, index) {
-          var flex = ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
+          var flex = _userstate.user.stage.stobjectives.lecciones  == 0 ? 0: ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
           return Container(
             margin: EdgeInsets.only(top: 10),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
@@ -127,8 +127,8 @@ class _StageViewState extends State<StageView> {
 
   FutureOr onGoBack(dynamic value) {
     setState(() {
-      if(_userstate.user.progress != null) autocloseDialog(context, _userstate.user);
-      
+      if(_userstate.user.progress != null) 
+        autocloseDialog(context, _userstate.user);
       });
   }
 
@@ -145,6 +145,7 @@ class _StageViewState extends State<StageView> {
     widget.stage.path.forEach((content) {
       count++;
       var image;
+
       if (content.image != null) {
         var configuration = createLocalImageConfiguration(context);
         image = new NetworkImage(content.image)..resolve(configuration);
@@ -233,6 +234,18 @@ class _StageViewState extends State<StageView> {
                       padding: EdgeInsets.all(0),
                       key: Key(content.cod),
                       duration: Duration(seconds: 2),
+                      child:  _userstate.user.position < content.position &&
+                              _userstate.user.stagenumber <= content.stagenumber ?
+                              Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.lock, size: Configuration.smicon),
+                                    SizedBox(height: 10),
+                                    Text('Unlocked after reading ' + widget.stage.path[content.position-1].title , style: Configuration.text('verytiny', Colors.white), ),
+                                  ],
+                                )
+                              ) :Container(),
                       decoration: BoxDecoration(
                           color: _userstate.user.position < content.position &&
                                   _userstate.user.stagenumber <= content.stagenumber
@@ -514,11 +527,6 @@ class _ContentViewState extends State<ContentView> {
                 }
               });
             }));
-  }
-
-  //esto se mezclará
-  Widget vistaMeditacion() {
-    return Container();
   }
 
   @override

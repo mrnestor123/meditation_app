@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -22,8 +23,32 @@ import 'package:provider/provider.dart';
 import '../../login_injection_container.dart';
 import 'game_screen.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  var initializationSettingsAndroid = AndroidInitializationSettings('ic_launcher');
+
+  var initializationSettingsIOS = IOSInitializationSettings(
+    requestAlertPermission: true,
+    requestBadgePermission: true,
+    requestSoundPermission: true,
+    onDidReceiveLocalNotification: (int id,String title, String body,String payload) async{}
+  );
+
+  var initializationSettings = InitializationSettings(
+   android: initializationSettingsAndroid,iOS:initializationSettingsIOS);
+
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+    onSelectNotification: (String payload) async{
+      if(payload != null){
+        debugPrint(payload);
+      }
+    }
+  
+  );
+  
   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
@@ -56,6 +81,7 @@ class MyApp extends StatelessWidget {
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
               '/countdown' : (BuildContext context) => Countdown(),
+              '/setdata':(BuildContext context) => SetUserData(),
               '/leaderboard': (BuildContext context) => LeaderBoard(),
               '/main': (BuildContext context) => Layout(),
               '/requests': (BuildContext context) => Requests(),

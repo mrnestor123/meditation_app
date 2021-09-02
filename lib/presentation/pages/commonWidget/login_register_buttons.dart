@@ -15,7 +15,7 @@ class LoginRegisterButton extends StatelessWidget {
     return Container(
         width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.85,
         child: AspectRatio(
-          aspectRatio: 10/2,
+          aspectRatio: 6/1,
           child: ElevatedButton(
           onPressed: () async {
             this.onPressed();
@@ -23,7 +23,7 @@ class LoginRegisterButton extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             elevation: 0.0,
             primary: Configuration.maincolor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))
           ),
           child: Text(
             text,

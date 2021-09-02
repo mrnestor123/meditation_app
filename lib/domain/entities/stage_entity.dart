@@ -29,12 +29,19 @@ class Stage {
       this.stobjectives});
 
   void addLesson(Lesson l){
+    if(stobjectives.lecciones == null){
+      stobjectives.lecciones = 0;
+    }
     stobjectives.lecciones++;
     path.add(l);
     path.sort((a, b) => a.position - b.position);
   }
 
   void addMeditation(Meditation m){
+    if(stobjectives.meditguiadas == null){
+      stobjectives.meditguiadas = 0;
+    }
+    
     stobjectives.meditguiadas++;
     meditpath.add(m);
     meditpath.sort((a, b) => a.position - b.position);
@@ -42,6 +49,7 @@ class Stage {
 
   void addGame(Game g){
     games.add(g);
+    games.sort((a, b) => a.position - b.position);
   }
 
   void setGames(List<dynamic> games){
@@ -85,14 +93,13 @@ class StageObjectives {
   factory StageObjectives.fromJson(Map<String, dynamic> json) =>
     StageObjectives(
       totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
-      streak: json['racha'] == null ? 0 : json['racha'],
+      streak: json['streak'] == null ? 0 : json['streak'],
       meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'],
       freemeditationlabel: json['meditation'] == null ? 0 : json['meditation']['time'].toString() + ' min meditations ',
       meditationfreetime: json['meditation'] == null ? 0 : json['meditation']['time'],
       meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
       lecciones: json['lessons'] == null ? 0 : json['lessons']
     );  
-
   
   factory StageObjectives.empty() => 
   StageObjectives(
@@ -129,7 +136,6 @@ class StageObjectives {
     if(streak != null){
       objectives['streak'] = 'Streak';
     }
-
 
     if(lecciones != null){
       objectives['lecciones'] = 'Lessons';

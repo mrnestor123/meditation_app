@@ -92,7 +92,7 @@ class Configuration {
           px = 12.0;
           break;
         case "small":
-          px = 16.0;
+          px = 14.0;
           break;
         case "smallmedium":
           px = 18.0;

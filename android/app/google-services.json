@@ -42,6 +42,59 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120106070238:android:7164b2e97611729a8c524f",
+        "android_client_info": {
+          "package_name": "tenStages.meditationApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120106070238-3k3kdud9jo3ircli7ta8d22shn1g1bgu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tenStages.meditationApp",
+            "certificate_hash": "f7f8d5c78123bf13a1e4b8c7da597aacb3774fde"
+          }
+        },
+        {
+          "client_id": "120106070238-r8d99agb20jqj924ehfh6l06b0fgcl6g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tenStages.meditationApp",
+            "certificate_hash": "6a5b908262e40bfa8d1cac00afa1bed0c753eec7"
+          }
+        },
+        {
+          "client_id": "120106070238-uf9g1ghvfi1fbudubqapalo35galf8em.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tenStages.meditationApp",
+            "certificate_hash": "73fffed39161a894df7a5ad957ebb19ca6eb4242"
+          }
+        },
+        {
+          "client_id": "120106070238-2rl449luqi76dlms48v215oejt9u7uo2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWKZbNDFZiDjc03nG0Af_CHkFiCt1xFyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120106070238-2rl449luqi76dlms48v215oejt9u7uo2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

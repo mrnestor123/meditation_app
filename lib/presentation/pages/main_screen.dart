@@ -1,18 +1,19 @@
-import 'dart:developer';
-import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
-import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:timezone/timezone.dart' as tz;
+
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/stage_card.dart';
+import 'main.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen();
@@ -41,6 +42,9 @@ class _MainScreenState extends State<MainScreen> {
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       SizedBox(height: 20),
+      ElevatedButton(onPressed: (){
+        scheduleNotification();
+      }, child: Text("NOtification")),
       Flexible(
         flex: 2,
         child:StageCard(stage: _userstate.user.stage),
@@ -54,65 +58,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-
-/*
-class TabletMainScreen extends StatefulWidget {
-  @override
-  _TabletMainScreenState createState() => _TabletMainScreenState();
-}
-
-class _TabletMainScreenState extends State<TabletMainScreen> {
-  @override
-  Widget build(BuildContext context) {
-    UserState _userstate = Provider.of<UserState>(context);
-
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.all(16.0),
-      child: SingleChildScrollView(
-            child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: Configuration.width*0.4,
-                child: AspectRatio(
-                  aspectRatio: 16/9,
-                    child: Container(
-                    margin: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16.0)
-                    ),
-                    child: TextButton(
-                      onPressed: () => Navigator.pushNamed(context, '/tabletimagepath'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Stage ' + _userstate.user.stagenumber.toString(),
-                            style: Configuration.tabletText('tiny', Colors.white),
-                          ),
-                          Expanded(child: Image(image: AssetImage('assets/stage 1/stage 1.png'))),
-                        ],
-                      ),
-                      style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                          primary: Configuration.maincolor,
-                          elevation: 0.0,
-                          onPrimary: Colors.white,
-                          padding: EdgeInsets.all(12.0),
-                          minimumSize: Size(double.infinity, double.infinity)),
-                    ),
-                  ),
-                ),
-              ),
-              _Timeline(isTablet: true),
-            ])
-      ));
-  }
-}
-*/
 class _Timeline extends StatefulWidget {
   bool isTablet;
 
@@ -126,6 +71,8 @@ class __TimelineState extends State<_Timeline> {
   UserState _userstate;
   String mode = 'Today'; 
   var states = ['Today','This week'];
+  
+  ScrollController _scrollController = new ScrollController();
 
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!
   List<Widget> getMessages() { 
@@ -193,11 +140,14 @@ class __TimelineState extends State<_Timeline> {
               )
             ]),
           );
-          widgets.add(SizedBox(height: Configuration.safeBlockVertical * 2));
+          widgets.add(SizedBox(height: 10));
         }
       } else {
+        widgets.add(SizedBox(height: 20));
         widgets.add(Center(child: Text('No actions realized ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
+
+      Timer(Duration(milliseconds: 1), () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
 
       return widgets;
     }
@@ -211,7 +161,6 @@ class __TimelineState extends State<_Timeline> {
           color:Colors.white,  
           borderRadius: BorderRadius.circular(16.0), 
           border: Border.all(color: Colors.grey, width: 0.15)),
-        padding: EdgeInsets.all(Configuration.tinpadding),
         child: Column(children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -255,8 +204,59 @@ class __TimelineState extends State<_Timeline> {
                   ),
             ]
           ),
-          Divider(),
-          Expanded(child: ListView(children: getMessages()))
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 0.15,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          Expanded(child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 5),
+            child: ListView(
+              controller: _scrollController,
+              children: getMessages()))
+            )
         ]));
   }
 }
+
+
+
+void scheduleNotification()async{
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+        'tenstages', 'tenstages', 'Channel for displaying shitt',
+        importance: Importance.max,
+        priority: Priority.high,
+        showWhen: false);
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    
+    await flutterLocalNotificationsPlugin.show(
+    0, 'plain title', 'plain body', platformChannelSpecifics,
+    payload: 'item x');
+}
+
+
+  void _requestPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+  }
