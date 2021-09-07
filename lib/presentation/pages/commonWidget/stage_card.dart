@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/stage/path.dart';
 
 class StageCard extends StatelessWidget {
   
@@ -20,11 +21,17 @@ class StageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.0)
       ),
       child: TextButton(
-        onPressed: () => Navigator.pushNamed(context, '/imagepath'),
+        onPressed: () => 
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ImagePath(stage: stage)
+            )
+          ),
         child: Stack(
           children: [
             Text('Stage ' + stage.stagenumber.toString(),
-              style: Configuration.text('small', Colors.white),
+              style: Configuration.text('medium', Colors.white),
             ),
             Align(
               alignment: Alignment.bottomCenter,
@@ -33,7 +40,10 @@ class StageCard extends StatelessWidget {
                 child: Image(
                   image: stage.shortimage  != null ? 
                   NetworkImage(stage.shortimage) : 
-                  AssetImage('assets/stage 1/stage 1.png')
+                  AssetImage('assets/stage 1/stage 1.png'),
+                  height: 130,
+                  width: Configuration.width,
+                  fit: BoxFit.cover
                   ),
               ),
             ),

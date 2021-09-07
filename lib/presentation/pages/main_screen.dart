@@ -42,9 +42,10 @@ class _MainScreenState extends State<MainScreen> {
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       SizedBox(height: 20),
-      ElevatedButton(onPressed: (){
+      /*ElevatedButton(onPressed: (){
         scheduleNotification();
       }, child: Text("NOtification")),
+      */
       Flexible(
         flex: 2,
         child:StageCard(stage: _userstate.user.stage),
@@ -223,7 +224,6 @@ class __TimelineState extends State<_Timeline> {
         ]));
   }
 }
-
 
 
 void scheduleNotification()async{

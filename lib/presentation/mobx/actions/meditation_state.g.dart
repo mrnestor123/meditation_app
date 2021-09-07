@@ -57,13 +57,13 @@ mixin _$MeditationState on _MeditationState, Store {
   final _$currentsentenceAtom = Atom(name: '_MeditationState.currentsentence');
 
   @override
-  String get currentsentence {
+  Map<String, dynamic> get currentsentence {
     _$currentsentenceAtom.reportRead();
     return super.currentsentence;
   }
 
   @override
-  set currentsentence(String value) {
+  set currentsentence(Map<String, dynamic> value) {
     _$currentsentenceAtom.reportWrite(value, super.currentsentence, () {
       super.currentsentence = value;
     });
@@ -164,11 +164,11 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
-  void setMeditation(MeditationModel m, User u, DataBase d) {
+  void setMeditation(MeditationModel m, User u, DataBase d, int time) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.setMeditation');
     try {
-      return super.setMeditation(m, u, d);
+      return super.setMeditation(m, u, d, time);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }

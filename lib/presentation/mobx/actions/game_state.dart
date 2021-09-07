@@ -53,8 +53,12 @@ abstract class _GameState with Store {
 
   @action
   void selectgame(Game g){
-    started = false;
-    selectedgame = g;
+    if(selectedgame ==  g){
+      selectedgame = null;
+    }else{
+      started = false;
+      selectedgame = g;
+    }
   }
 
   

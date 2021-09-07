@@ -47,8 +47,15 @@ abstract class _LoginState with Store {
   @observable
   String errorMessage = "";
 
-  @observable
   bool startedlogin = false;
+
+  @observable
+  bool startedgooglelogin= false;
+  @observable 
+  bool  startedfacelogin = false;
+  @observable 
+  bool startedmaillogin = false;
+
 
   FirebaseAuth auth = FirebaseAuth.instance;
   final googleSignin = GoogleSignIn();
@@ -60,7 +67,7 @@ abstract class _LoginState with Store {
   JUNTAR STARTLOGIN Y STARTREGISTER EN LA MISMA !!!!!
   */
   @action
-  Future startlogin(context,{username, password, type, token, isTablet = false}) async {
+  Future startlogin(context,{username, password, type, token, mail, isTablet = false, register = false}) async {
     startedlogin = true;
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
@@ -72,10 +79,19 @@ abstract class _LoginState with Store {
       var user;
 
       if(type == 'mail'){
+          startedmaillogin = true;
           if(formKey.currentState.validate()){
-          user = await auth.signInWithEmailAndPassword(email: username, password: password);
+            if(register){
+              user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: mail,
+              password: password,
+            );    
+            }else{
+            user = await auth.signInWithEmailAndPassword(email: username, password: password);
+            }
           }
       } else if(type =='google'){
+          startedgooglelogin = true;
           //hay que desconectar !!
           //googleSignin.disconnect();
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
@@ -88,16 +104,21 @@ abstract class _LoginState with Store {
           user = await auth.signInWithCredential(credential);
         }
       } else {
+          startedfacelogin = true;
           final facebookAuthCred = FacebookAuthProvider.credential(token);
           user = await auth.signInWithCredential(facebookAuthCred);
       }
 
       if(user != null) {
-        log = await repository.loginUser(usuario: user.user);
-        log.fold(
-          (Failure f) => errormsg = _mapFailureToMessage(f), 
-          (dynamic u) => loggeduser = u
-        );
+        if(register){
+          errormsg = await userRegistered(user.user);
+        }else{
+          log = await repository.loginUser(usuario: user.user);
+          log.fold(
+            (Failure f) => errormsg = _mapFailureToMessage(f), 
+            (dynamic u) => loggeduser = u
+          );
+        }
       }
     }on PlatformException catch (e) {
       print(e);
@@ -108,6 +129,9 @@ abstract class _LoginState with Store {
     }
 
     startedlogin = false;
+    startedfacelogin = false;
+    startedgooglelogin = false;
+    startedmaillogin = false;
 
     if (loggeduser != null) {
       Navigator.pushReplacementNamed(context, '/main');
@@ -166,6 +190,7 @@ abstract class _LoginState with Store {
     await repository.logout();
   }
 
+  /*
   @action
   Future startRegister(context, {username, password, mail, type, token}) async {
     FocusScopeNode currentFocus = FocusScope.of(context);
@@ -234,7 +259,7 @@ abstract class _LoginState with Store {
         ),
       );
     }
-  }
+  }*/
 
   //SE UTILIZA ??
   Future userRegistered(dynamic firebaseuser) async {

@@ -36,9 +36,9 @@ class _GameStartedState extends State<GameStarted> {
         setState(() {});
       }
 
-      if(started && controller.value.position == controller.value.duration) {
+      if(controller.value.duration.inSeconds > 0 && started && controller.value.position == controller.value.duration) {
         setState(() {
-          _gamestate.finishvideo();          
+            _gamestate.finishvideo();          
         });
       }
     });
@@ -164,14 +164,14 @@ class _GameStartedState extends State<GameStarted> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-            Text('Questions answered', style: Configuration.text('small', Colors.grey)),
+            Text('Questions answered', style: Configuration.text('medium', Colors.grey)),
             SizedBox(width: 10),
             Text(_gamestate.answeredquestions.length.toString()  + '/'+  _gamestate.selectedgame.questions.length.toString(),style: Configuration.text('medium', Colors.black))
           ]),
           SizedBox(height: 15),
           !_gamestate.success ? 
-          Text('''You failed!.\n But don't worry you can try it again''', textAlign: TextAlign.center, style: Configuration.text('small', Colors.black)):
-          Text('Good job you answered right !', style: Configuration.text('small', Colors.black))
+          Text('''You failed!.\n But don't worry you can try it again''', textAlign: TextAlign.center, style: Configuration.text('smallmedium', Colors.black)):
+          Text('Good job you answered right !', style: Configuration.text('smallmedium', Colors.black))
       ],
     );
   }

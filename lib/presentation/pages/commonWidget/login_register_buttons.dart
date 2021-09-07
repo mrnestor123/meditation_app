@@ -6,14 +6,15 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 class LoginRegisterButton extends StatelessWidget {
   dynamic onPressed;
   bool isTablet;
+  Widget content;
   String text;  
 
-  LoginRegisterButton({this.onPressed, this.text, this.isTablet= false}) : super();
+  LoginRegisterButton({this.onPressed, this.text, this.isTablet= false, this.content}) : super();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.85,
+        width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.9,
         child: AspectRatio(
           aspectRatio: 6/1,
           child: ElevatedButton(
@@ -21,14 +22,13 @@ class LoginRegisterButton extends StatelessWidget {
             this.onPressed();
           },
           style: ElevatedButton.styleFrom(
-            elevation: 0.0,
             primary: Configuration.maincolor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))
           ),
-          child: Text(
+          child: text != null ? Text(
             text,
-            style: Configuration.width > 500 ? Configuration.tabletText('small', Colors.white) : Configuration.text('small', Colors.white),
-            ),
+            style: Configuration.text('small', Colors.white),
+            ) : content,
           ),
         ),
       );

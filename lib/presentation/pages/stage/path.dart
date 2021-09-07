@@ -1,29 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:photo_view/photo_view.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 
 class ImagePath extends StatelessWidget {
   ScrollController scrollController = new ScrollController(
     initialScrollOffset: Configuration.height,
   );
+  
+  Stage stage;
+
+  ImagePath({this.stage});
 
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Color.fromARGB(255,220,208,186),
       body: Stack(
         children: <Widget>[
           SingleChildScrollView(
-            controller: scrollController,
             child: Image(
-              image: NetworkImage(_userstate.user.stage.longimage) ,
+              image: NetworkImage(stage != null? stage.longimage : _userstate.user.stage.longimage) ,
               width: Configuration.width,
               height: Configuration.height,
             ),
           ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: [
+                SizedBox(height: 15),
+               
+              ],
+            ),
+          ),
+          
           //Place it at the top, and not use the entire screen
           Positioned(
             top: 0.0,
@@ -31,14 +49,40 @@ class ImagePath extends StatelessWidget {
             right: 0.0,
             child: AppBar(
               backgroundColor: Colors.transparent,
-              elevation: 0,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back,
-                    size: Configuration.smicon, color: Colors.black),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+              centerTitle: true,
+              title: Column(
+                children: [
+                  Text('Stage ' + stage.stagenumber.toString(), style: Configuration.text('medium', Colors.black)),
+                  SizedBox(height: 5),
+                  Text(stage.description, style: Configuration.text('small', Colors.black))
+                ],
               ),
+              actions: [
+                IconButton(onPressed: ()=> 
+                 showGeneralDialog(
+                    context: context,
+                    barrierLabel: 'dismiss',
+                    barrierDismissible: true,
+                    pageBuilder:(context, anim1, anim2) {
+                      return AbstractDialog(
+                        content: Container(
+                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0), color: Colors.white),
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image(image: NetworkImage(stage.shortimage)),
+                              Html(data: stage.shorttext)
+                            ],
+                          ),
+                        ),
+                        );
+                    })
+                , icon: Icon(Icons.info),color: Colors.black,)
+              ],
+              elevation: 0,
+              leading: ButtonBack()
             ),
           ),
         ],

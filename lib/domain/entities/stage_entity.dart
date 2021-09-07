@@ -8,7 +8,7 @@ import 'meditation_entity.dart';
 
 class Stage {
   int stagenumber, userscount;
-  String description, image, goals, obstacles, skills, mastery, longimage,  shortimage;
+  String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext;
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
@@ -18,6 +18,7 @@ class Stage {
   Stage(
       {@required this.stagenumber,
       this.description,
+      this.shorttext,
       @required this.image,
       this.longimage,
       this.goals,
@@ -94,9 +95,9 @@ class StageObjectives {
     StageObjectives(
       totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
       streak: json['streak'] == null ? 0 : json['streak'],
-      meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'],
-      freemeditationlabel: json['meditation'] == null ? 0 : json['meditation']['time'].toString() + ' min meditations ',
-      meditationfreetime: json['meditation'] == null ? 0 : json['meditation']['time'],
+      meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'] == null ? 0 : json['meditation']['count'],
+      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null ? null : json['meditation']['time'].toString() + ' min meditations ',
+      meditationfreetime: json['meditation'] == null   ? 0 :  json['meditation']['time']  == null ? 0 :json['meditation']['time'],
       meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
       lecciones: json['lessons'] == null ? 0 : json['lessons']
     );  
@@ -125,23 +126,23 @@ class StageObjectives {
 
     print(this);
     
-    if(freemeditationlabel != null) {
+    if(freemeditationlabel != null ) {
       objectives ['meditation'] = freemeditationlabel;
     }
 
-    if(totaltime != null) {
+    if(totaltime != null  && totaltime != 0) {
       objectives['totaltime'] = 'Total time';
     }
 
-    if(streak != null){
+    if(streak != null && streak != 0){
       objectives['streak'] = 'Streak';
     }
 
-    if(lecciones != null){
+    if(lecciones != null && lecciones != 0){
       objectives['lecciones'] = 'Lessons';
     }
 
-    if(meditguiadas != null){
+    if(meditguiadas != null && meditguiadas != 0){
       objectives['meditguiadas'] = 'Guided meditations';
     }
 

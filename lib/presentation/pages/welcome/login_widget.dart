@@ -11,6 +11,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/login_register_bu
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -40,110 +41,94 @@ class _LoginWidgetState extends State<LoginWidget> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Stack(
-          children: [
-            
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Flexible(
-                  flex:2,
-                  child: Image.asset('assets/logo.png', width: Configuration.width*0.4)
-                ),
-                Flexible(
-                  flex:3,
-                  child:Form(
-                  key: _loginstate.formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: TextFormField(
-                          controller: _loginstate.userController,
-                          decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(4.0),
-                              filled: true,
-                              labelText: 'Mail',
-                              border: new OutlineInputBorder(
-                                  borderSide: new BorderSide(color: Colors.purpleAccent)),
-                              prefixIcon: Icon(Icons.email, size: Configuration.smicon),
-                          ),
-                          validator: (value) { 
-                            if(value == null  || value.isEmpty){
-                              return 'Please enter the username';
-                            }else if(!_loginstate.validateMail(value)){
-                              return 'Please input a valid mail';
-                            } 
-                            return null;
-                          },
-                        ),
+        body: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 30),
+              Image.asset('assets/logo.png', width: Configuration.height*0.2),
+              Form(
+              key: _loginstate.formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: TextFormField(
+                      controller: _loginstate.userController,
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.all(12.0),
+                          filled: true,
+                          labelText: 'Mail',
+                          border: new OutlineInputBorder(
+                              borderSide: new BorderSide(color: Colors.purpleAccent)),
+                          prefixIcon: Icon(Icons.email, size: Configuration.smicon),
                       ),
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: TextFormField(  
-                          controller: _loginstate.passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                              contentPadding: EdgeInsets.all(4.0),
-                              filled:true,
-                              labelText: 'Password',
-                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-                              prefixIcon: Icon(Icons.lock, size: Configuration.smicon),
-                          ),
-                          validator: (value) { 
-                            if(value == null || value.isEmpty){
-                              return 'Please enter a password';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                      LoginRegisterButton(
-                        onPressed: () async {
-                          _loginstate.startlogin(context, 
-                          username: _loginstate.userController.text, 
-                          password: _loginstate.passwordController.text,
-                          type:'mail');
-                        },
-                        text: 'LOGIN'
-                      )
-                    ],
-                  )
-                ),
-                ),
-                Flexible(
-                  flex:1,
-                  child:Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    GoogleButton(registerstate: _loginstate,register: false),
-                    FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false)
-                ])
-                )
-              ],
-            ),
-            Observer(builder: (context) {
-              if(_loginstate.startedlogin){
-                return Positioned.fill(
-                child:Container(
-                    color: Colors.black.withOpacity(0.8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          color: Configuration.maincolor,
-                          semanticsLabel: 'Getting your user', 
-                        ),
-                        SizedBox(height: 15),
-                        Text('Loggin in', style: Configuration.text('small',Colors.white),)
-                      ],
+                      validator: (value) { 
+                        if(value == null  || value.isEmpty){
+                          return 'Please enter the username';
+                        }else if(!_loginstate.validateMail(value)){
+                          return 'Please input a valid mail';
+                        } 
+                        return null;
+                      },
                     ),
-                  )              
-                );
-              }else{
-                return Container();
-              }
-            }),
-          ]
+                  ),
+                  SizedBox(height: 15),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: TextFormField(  
+                      controller: _loginstate.passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.all(4.0),
+                          filled:true,
+                          labelText: 'Password',
+                          border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                          prefixIcon: Icon(Icons.lock, size: Configuration.smicon),
+                      ),
+                      validator: (value) { 
+                        if(value == null || value.isEmpty){
+                          return 'Please enter a password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  LoginRegisterButton(
+                    onPressed: () async {
+                      if(!_loginstate.startedlogin){ 
+                        _loginstate.startlogin(context, 
+                        username: _loginstate.userController.text, 
+                        password: _loginstate.passwordController.text,
+                        type:'mail');
+                      }
+                    },
+                    content: Observer(builder: (context)  {
+                      if(_loginstate.startedmaillogin){
+                       return CircularProgressIndicator(color: Colors.white);
+                      }else{
+                        return  Text(
+                          'LOGIN',
+                          style: Configuration.text('small', Colors.white),
+                          );
+                      }
+                    }),
+                  )
+                ],
+              )
+              ),
+              Spacer(),
+              SizedBox(height: 30),
+              GoogleButton(registerstate: _loginstate,register: false),
+              SizedBox(height: 15),
+              FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
+              SizedBox(height: 40
+              ,)
+            ],
+          ),
         ));
   }
 }

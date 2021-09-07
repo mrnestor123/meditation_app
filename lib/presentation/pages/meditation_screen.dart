@@ -39,8 +39,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
   var finished = false;
 
   bool canStart = false;
-  int _selectedstage = 1;
-
 
   Widget freeMeditation() {
     return layout( 
@@ -48,7 +46,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         padding: EdgeInsets.all(6.0),
         child: TimePicker()), 
     () {
-        _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data);
+        _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data, seltime);
         Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
           _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null }));
     }, true);
@@ -56,17 +54,24 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget guidedMeditation() {
     List<int> stages = [1,2,3,4,5,6,7,8,9,10];
-
+    
     List<Widget> meditations() {
       Stage stage = _userstate.data.stages[selectedstage-1];
+      List<Meditation> meditations = new List.empty(growable: true);
       List<Widget> meditcontent = new List.empty(growable: true);
-      
-      for(Meditation meditation in stage.meditpath){
-          //PASAR ESTO A LA LÓGICA
+
+      for(Stage s in _userstate.data.stages){
+        for(Meditation meditation in s.meditpath){
           var _blocked = _userstate.user.isBlocked(meditation);
           meditcontent.add(
             GestureDetector(
-            onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
+            onTap: () => !_blocked ? setState(() {
+               if(_meditationstate.selmeditation == meditation){
+                 _meditationstate.selmeditation = null;
+               }else{
+                _meditationstate.selmeditation = meditation;
+               }
+            }) : null,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
@@ -94,7 +99,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
             )
           );
         }
-
+      }
+      
       return meditcontent;
     }
 
@@ -102,35 +108,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
       Column(
       children: [
         SizedBox(height: 20),
-        Text('Stage ' + selectedstage.toString(),style: Configuration.text('small', Colors.black)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex:1,
-              child: Container(
-                height: Configuration.height*0.4,
-                child: WheelChooser.integer(
-                  onValueChanged: (i) {
-                    setState((){
-                      selectedstage = i;
-                    });
-                  }, 
-                  maxValue: 10, 
-                  minValue: 1
-                  ),
-              ),
-            ),
-            Flexible(
-              flex: 4,
-              child: GridView(
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-                children: meditations(),
-              ),
-            )
-          ],
-        )
+        GridView(
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 150),
+          children: meditations(),
+        ),
           ] 
         ), 
         () => {
@@ -155,7 +137,12 @@ class _MeditationScreenState extends State<MeditationScreen> {
           var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
 
           return GestureDetector(
-            onTap: ()=> setState(()=> !_blocked ? _gamestate.selectgame(game) : null),
+            onTap: ()=> setState((){
+              if(!_blocked){
+                _gamestate.selectgame(game);
+              
+              }
+            }),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
@@ -294,13 +281,14 @@ class _CountdownState extends State<Countdown> {
   var started = false;
   MeditationState _meditationstate;
   UserState _userstate;
-  int _index;
+  int _index = 0;
 
   //podriamos utilizar meditationstate de arriba
   var meditationtype = 'free';
   var selectedstage = 1;
   var selectedtype = 'Meditation';
   var finished = false;
+  var selectedduration = 15;
 
   Widget finish(context) {
     return Column(
@@ -346,34 +334,36 @@ class _CountdownState extends State<Countdown> {
     }
 
     List<Widget> getContent(index) {
-      List<Widget> l = new List.empty(growable: true);
+      List<Widget> l = mapToWidget(_meditationstate.selmeditation.content[index.toString()]);
+  
 
-      if (_meditationstate.selmeditation.content[index.toString()]['title'] != null) {
-        l.add(Text(_meditationstate.selmeditation.content[index.toString()]['title'],
-            style: Configuration.text('medium', Colors.black)));
-      }
-
-      if (_meditationstate.selmeditation.content[index.toString()]['image'] != null) {
-        l.add(Image(
-            image: NetworkImage( _meditationstate.selmeditation.content[index.toString()]['image'])));
-      }
-
-      if (_meditationstate.selmeditation.content[index.toString()]['text'] != null) {
-        l.add(Text(_meditationstate.selmeditation.content[index.toString()]['text'],
-            style: Configuration.text('small', Colors.white,font:'Helvetica')));
-      }
-
-      if (finished) {
+      if (finished && index != null && index == _meditationstate.selmeditation.content.length -1) {
         l.add(SizedBox(height: Configuration.height * 0.02));
         l.add(StartButton(
           onPressed: () {
             // esto hace falta hacerlo ???
-            _meditationstate.setMeditation(_meditationstate.selmeditation, _userstate.user, _userstate.data);
+            _meditationstate.setMeditation(_meditationstate.selmeditation, _userstate.user, _userstate.data, selectedduration);
           },
         ));
       }
 
       return l;
+    }
+
+    Widget durationButton(duration){
+      return OutlinedButton(
+        onPressed: (){
+          setState(() {
+            selectedduration = int.parse(duration);
+          });
+        }, 
+        style: OutlinedButton.styleFrom(
+          backgroundColor: selectedduration.toString() == duration ? Configuration.maincolor : Colors.transparent,
+          primary: Colors.white,
+          textStyle: Configuration.text('small', Colors.white)
+        ),
+        child: Text(duration)
+      );
     }
 
     return Stack(children: [
@@ -404,13 +394,62 @@ class _CountdownState extends State<Countdown> {
               })),
       Align(
         alignment: Alignment.bottomCenter,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: getBalls(),
+          children: [
+            finished && _index ==_meditationstate.selmeditation.content.length -1 ? 
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Choose meditation duration', style: Configuration.text('small',Colors.white)),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        durationButton('5'),
+                        durationButton('10'),
+                        durationButton('15'),
+                        durationButton('30')
+                      ],
+                    ),
+                    SizedBox(height: 15)
+                  ],
+                )
+            : Container(),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: getBalls(),
+            ),
+          ],
         ),
       ),
     ]);
+  }
+
+  List<Widget> mapToWidget(map){  
+     List<Widget> l = new List.empty(growable: true);
+      
+      if (map['title'] != null) {
+        l.add(Text(map['title'],
+            style: Configuration.text('medium', Colors.white)));
+        l.add(SizedBox(height:15));
+      }
+
+      if (map['image'] != null) {
+        l.add(Image(image: NetworkImage( map['image'])));
+      }
+
+      if (map['text'] != null) {
+        l.add(SizedBox(height:15));
+        l.add(Text(map['text'],
+            style: Configuration.text('small', Colors.white,font:'Helvetica')));
+      }
+
+    return l;
+    
   }
 
   Widget countdown(context){
@@ -423,21 +462,9 @@ class _CountdownState extends State<Countdown> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: 
-               _meditationstate.currentsentence != null ? [
-                   GestureDetector(
-                  onDoubleTap: (){
-                    _meditationstate.finishMeditation();
-                  }, 
-                  child:Align(
-                    alignment:Alignment.topCenter, 
-                    child: Text(_meditationstate.selmeditation.title, style: Configuration.text('medium',Colors.white))
-                  )),
-                  SizedBox(height:20),
-                  Text(_meditationstate.currentsentence, 
-                    style: Configuration.text('small', Colors.white), 
-                    textAlign: TextAlign.center
-                  )
-               ]: 
+               _meditationstate.currentsentence != null ? 
+                 mapToWidget(_meditationstate.currentsentence)
+               : 
                [
                   Container(
                     height: Configuration.height*0.35,
@@ -475,9 +502,9 @@ class _CountdownState extends State<Countdown> {
               activeColor: Configuration.maincolor,
               inactiveColor: Colors.white,
               min: 0.0,
-              max: _meditationstate.selmeditation.duration.inMinutes.toDouble(),
+              max: _meditationstate.totalduration.inSeconds.toDouble(),
               onChanged: (a)=> null, 
-              value:_meditationstate.totalduration.inSeconds/60 - _meditationstate.duration.inSeconds/60 ,
+              value:_meditationstate.totalduration.inSeconds - _meditationstate.duration.inSeconds.toDouble() ,
               label:  _meditationstate.duration.inHours > 0
                     ? _meditationstate.duration.toString().substring(0, 7)
                     : _meditationstate.duration.toString().substring(2, 7)

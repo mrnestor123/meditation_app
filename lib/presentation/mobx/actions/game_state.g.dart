@@ -99,6 +99,36 @@ mixin _$GameState on _GameState, Store {
     });
   }
 
+  final _$maxAtom = Atom(name: '_GameState.max');
+
+  @override
+  bool get max {
+    _$maxAtom.reportRead();
+    return super.max;
+  }
+
+  @override
+  set max(bool value) {
+    _$maxAtom.reportWrite(value, super.max, () {
+      super.max = value;
+    });
+  }
+
+  final _$unlockednextAtom = Atom(name: '_GameState.unlockednext');
+
+  @override
+  bool get unlockednext {
+    _$unlockednextAtom.reportRead();
+    return super.unlockednext;
+  }
+
+  @override
+  set unlockednext(bool value) {
+    _$unlockednextAtom.reportWrite(value, super.unlockednext, () {
+      super.unlockednext = value;
+    });
+  }
+
   final _$answeredquestionsAtom = Atom(name: '_GameState.answeredquestions');
 
   @override
@@ -184,6 +214,8 @@ state: ${state},
 user: ${user},
 selectedquestion: ${selectedquestion},
 started: ${started},
+max: ${max},
+unlockednext: ${unlockednext},
 answeredquestions: ${answeredquestions},
 controller: ${controller}
     ''';

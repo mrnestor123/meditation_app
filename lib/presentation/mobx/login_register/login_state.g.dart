@@ -84,19 +84,70 @@ mixin _$LoginState on _LoginState, Store {
     });
   }
 
-  final _$startedloginAtom = Atom(name: '_LoginState.startedlogin');
+  final _$startedgoogleloginAtom = Atom(name: '_LoginState.startedgooglelogin');
 
   @override
-  bool get startedlogin {
-    _$startedloginAtom.reportRead();
-    return super.startedlogin;
+  bool get startedgooglelogin {
+    _$startedgoogleloginAtom.reportRead();
+    return super.startedgooglelogin;
   }
 
   @override
-  set startedlogin(bool value) {
-    _$startedloginAtom.reportWrite(value, super.startedlogin, () {
-      super.startedlogin = value;
+  set startedgooglelogin(bool value) {
+    _$startedgoogleloginAtom.reportWrite(value, super.startedgooglelogin, () {
+      super.startedgooglelogin = value;
     });
+  }
+
+  final _$startedfaceloginAtom = Atom(name: '_LoginState.startedfacelogin');
+
+  @override
+  bool get startedfacelogin {
+    _$startedfaceloginAtom.reportRead();
+    return super.startedfacelogin;
+  }
+
+  @override
+  set startedfacelogin(bool value) {
+    _$startedfaceloginAtom.reportWrite(value, super.startedfacelogin, () {
+      super.startedfacelogin = value;
+    });
+  }
+
+  final _$startedmailloginAtom = Atom(name: '_LoginState.startedmaillogin');
+
+  @override
+  bool get startedmaillogin {
+    _$startedmailloginAtom.reportRead();
+    return super.startedmaillogin;
+  }
+
+  @override
+  set startedmaillogin(bool value) {
+    _$startedmailloginAtom.reportWrite(value, super.startedmaillogin, () {
+      super.startedmaillogin = value;
+    });
+  }
+
+  final _$startloginAsyncAction = AsyncAction('_LoginState.startlogin');
+
+  @override
+  Future<dynamic> startlogin(dynamic context,
+      {dynamic username,
+      dynamic password,
+      dynamic type,
+      dynamic token,
+      dynamic mail,
+      dynamic isTablet = false,
+      dynamic register = false}) {
+    return _$startloginAsyncAction.run(() => super.startlogin(context,
+        username: username,
+        password: password,
+        type: type,
+        token: token,
+        mail: mail,
+        isTablet: isTablet,
+        register: register));
   }
 
   final _$logoutAsyncAction = AsyncAction('_LoginState.logout');
@@ -113,7 +164,9 @@ log: ${log},
 loggeduser: ${loggeduser},
 formKey: ${formKey},
 errorMessage: ${errorMessage},
-startedlogin: ${startedlogin}
+startedgooglelogin: ${startedgooglelogin},
+startedfacelogin: ${startedfacelogin},
+startedmaillogin: ${startedmaillogin}
     ''';
   }
 }

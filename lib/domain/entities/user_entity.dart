@@ -305,25 +305,30 @@ class User {
     };
 
     var objectives =  s.stobjectives.getObjectives();
-    passedObjectives = new Map();
+    if(objectives.length > 0){
+      passedObjectives = new Map();
 
-    // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
-    objectives.forEach((key,value) { 
-        passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
-    });
+      // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
+      objectives.forEach((key,value) { 
+          passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
+      });
 
-    double passedcount = 0;
+      double passedcount = 0;
 
-    passedObjectives.forEach((key, value) { 
-      if(value == true) {
-        passedcount += 1;
-      } else {
-        var passed = percentageCheck[key]();
-        passedcount += passed < 1 ?  passed : 0;
-      }
-    });
+      passedObjectives.forEach((key, value) { 
+        if(value == true) {
+          passedcount += 1;
+        } else {
+          var passed = percentageCheck[key]();
+          passedcount += passed < 1 ?  passed : 0;
+        }
+      });
+    
 
-    this.percentage = ((passedcount / objectives.length) * 100).floor();
+      this.percentage = ((passedcount / objectives.length) * 100).floor();
+    }else{
+      this.percentage = 100;
+    }
   }
 
   void takeLesson(Lesson l, [DataBase d]) {

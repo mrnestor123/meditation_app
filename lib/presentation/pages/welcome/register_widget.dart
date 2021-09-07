@@ -42,7 +42,7 @@ class RegisterWidget extends StatelessWidget {
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-        extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           leading: IconButton(
@@ -52,139 +52,120 @@ class RegisterWidget extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        body: Stack(
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 32),
-              padding: EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Flexible(
-                    flex: 2,
-                    child:Image.asset('assets/logo.png', width: Configuration.width*0.4)
-                  ),
-                  Flexible(
-                    flex: 4,
-                    child: Form(
-                      key: _registerstate.formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          //HHACER COMPONENTES DE ESTO!!
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: TextFormField(
-                              controller: _userController,
-                              decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(4.0),
-                                  filled: true,
-                                  labelText: 'Mail',
-                                  border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-                                  prefixIcon: Icon(Icons.email, size: Configuration.smicon),
-                              ),
-                              validator: (value) { 
-                                if(value == null  || value.isEmpty){
-                                  return 'Please enter a mail';
-                                }else if(!_registerstate.validateMail(value)){
-                                  return 'Please input a valid mail';
-                                } 
-                                return null;
-                              },
-                            ),
+        body: Container(
+          height: Configuration.height,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 30),
+                Image.asset('assets/logo.png', width: Configuration.height*0.2),
+                SizedBox(height: 15),
+                Form(
+                  key: _registerstate.formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      //HHACER COMPONENTES DE ESTO!!
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          controller: _userController,
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(4.0),
+                              filled: true,
+                              labelText: 'Mail',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.email, size: Configuration.smicon),
                           ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: TextFormField(
-                              obscureText: true,
-                              controller: _passwordController,
-                              decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(4.0),
-                                  filled: true,
-                                  labelText: 'password',
-                                  border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-                                  prefixIcon: Icon(Icons.lock, size: Configuration.smicon),
-                              ),
-                              validator: (value) { 
-                                if(value == null  || value.isEmpty){
-                                  return 'Please enter a password';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: TextFormField(
-                              obscureText: true,
-                              controller: _confirmController,
-                              decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.all(4.0),
-                                  filled: true,
-                                  labelText: 'password',
-                                  border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-                                  prefixIcon: Icon(Icons.lock,  size: Configuration.smicon),
-                              ),
-                              validator: (value) { 
-                                if(value == null  || value.isEmpty){
-                                  return 'Please enter a password';
-                                }else if(_confirmController.text != _passwordController.text) {
-                                  return 'Passwords must be equal';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          LoginRegisterButton(
-                            onPressed: () async{
-                              await _registerstate.startRegister(
-                                    context,
-                                    mail:_userController.text,
-                                    password: _passwordController.text,
-                                    type: 'mail');
-                            },
-                            text: 'REGISTER'
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    flex: 1,
-                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      GoogleButton(registerstate: _registerstate, register:true),
-                      FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true)
-                    ]),
-                  )
-                ],
-              ),
-            ),
-          
-          
-            Observer(builder: (context) {
-              if(_registerstate.startedlogin){
-                return Positioned.fill(
-                child:Container(
-                    color: Colors.black.withOpacity(0.8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          color: Configuration.maincolor,
-                          semanticsLabel: 'Getting your user', 
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a mail';
+                            }else if(!_registerstate.validateMail(value)){
+                              return 'Please input a valid mail';
+                            } 
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 15),
-                        Text('Loggin in', style: Configuration.text('small',Colors.white),)
-                      ],
-                    ),
-                  )              
-                );
-              }else{
-                return Container();
-              }
-            }),
-          
-          ],
+                      ),
+                      SizedBox(height: 15),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          obscureText: true,
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(4.0),
+                              filled: true,
+                              labelText: 'password',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.lock, size: Configuration.smicon),
+                          ),
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a password';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: TextFormField(
+                          obscureText: true,
+                          controller: _confirmController,
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(4.0),
+                              filled: true,
+                              labelText: 'password',
+                              border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+                              prefixIcon: Icon(Icons.lock,  size: Configuration.smicon),
+                          ),
+                          validator: (value) { 
+                            if(value == null  || value.isEmpty){
+                              return 'Please enter a password';
+                            }else if(_confirmController.text != _passwordController.text) {
+                              return 'Passwords must be equal';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      LoginRegisterButton(
+                        onPressed: () async{
+                          if(!_registerstate.startedlogin){
+                            await _registerstate.startlogin(
+                              context,
+                              register: true,
+                              mail:_userController.text,
+                              password: _passwordController.text,
+                              type: 'mail');
+                          }
+                        },
+                        content: Observer(builder: (context)  {
+                        if(_registerstate.startedmaillogin){
+                          return CircularProgressIndicator(color: Colors.white);
+                        }else{
+                          return  Text(
+                            'REGISTER',
+                            style: Configuration.text('small', Colors.white),
+                            );
+                        }
+                        })
+                      ),
+                    ],
+                  ),
+                ),
+                Spacer(),
+                GoogleButton(registerstate: _registerstate, register:true),
+                SizedBox(height: 15),
+                FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true),
+                SizedBox(height: 40)
+              ],
+            ),
+          ),
         ));
   }
 }
@@ -205,29 +186,40 @@ class FacebookButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RawMaterialButton(
-        child: Icon(FontAwesomeIcons.facebookF,
-            color: Colors.white, size: Configuration.smicon),
-        padding: EdgeInsets.all(12.0),
-        shape: CircleBorder(),
-        fillColor: Configuration.maincolor,
-        onPressed: () async {
-          String result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CustomWebView(
-                      selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
-                    ),
-                maintainState: true),
-          );
-          if (result != null) {
-            if(register){
-              await _registerstate.startRegister(context, type: 'facebook');
+    return Container(
+      width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.9,
+      child: AspectRatio(
+      aspectRatio: 6/1,
+      child: ElevatedButton(
+          child: Observer( builder: (context){
+            if(_registerstate.startedfacelogin){
+              return CircularProgressIndicator(color: Colors.white);
             }else{
-              await _registerstate.startlogin(context, type: 'facebook');
+             return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Text((register ? 'REGISTER' :'LOGIN') + ' WITH FACEBOOK',  style: Configuration.text('small', Colors.white)),
+                  Icon(FontAwesomeIcons.facebookF,
+                      color: Colors.white, size: Configuration.smicon),
+                ],
+              ); 
             }
-          }
-        });
+            }
+          ),
+          onPressed: () async {
+            String result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CustomWebView(
+                        selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
+                      ),
+                  maintainState: true),
+            );
+            if (result != null) {
+              await _registerstate.startlogin(context, type: 'facebook',register: register); 
+            }
+          }),
+    ));
   }
 }
 
@@ -243,23 +235,39 @@ class GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RawMaterialButton(
-      onPressed: () async{
-        if(register){
-          await _registerstate.startRegister(context, type: 'google');
-        }else{
-          await _registerstate.startlogin(context, type: 'google');
-        }
-      },
-      elevation: 2.0,
-      fillColor: Configuration.maincolor,
-      child: Icon(
-        FontAwesomeIcons.google,
-        color: Colors.white,
-        size: Configuration.smicon,
+
+    return Container(
+      width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.9,
+      child: AspectRatio(
+      aspectRatio: 6/1,
+      child: ElevatedButton(
+        onPressed: () async{
+            await _registerstate.startlogin(context, type: 'google', register:register);
+        },
+        style: OutlinedButton.styleFrom(
+          primary: Colors.white,
+          backgroundColor: Colors.redAccent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          padding: EdgeInsets.all(12.0),
+        ),
+        child: Observer(builder: (context){
+          if(_registerstate.startedgooglelogin){
+            return CircularProgressIndicator(color: Colors.white);
+          } 
+          else{
+            return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text((register ? 'REGISTER' :'LOGIN') + ' WITH GOOGLE', style: Configuration.text('small', Colors.white)),
+              Icon(FontAwesomeIcons.google,
+              color: Colors.white,
+              size: Configuration.smicon,
+              )
+            ]);
+          }
+        })
+        ),
       ),
-      padding: EdgeInsets.all(12.0),
-      shape: CircleBorder(),
     );
   }
 }

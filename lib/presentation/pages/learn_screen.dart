@@ -180,10 +180,13 @@ class _StageViewState extends State<StageView> {
                   minimumSize: Size(double.infinity, double.infinity)),
               child: Stack(
                 children: [
+                  content.image != null && content.image.isNotEmpty ?
                   Align(
                     alignment: Alignment.centerRight,
-                    child: Hero(tag: content.cod ,child: Image.network(content.image)),
-                  ),
+                    child: Hero(tag: content.cod ,
+                    child: Image.network(content.image)
+                    ),
+                  ) : Container(),
                   Positioned(
                       top: 15,
                       left: 15,

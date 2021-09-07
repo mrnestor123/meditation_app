@@ -321,7 +321,7 @@ class _RequestsState extends State<Requests> {
         child: Icon(Icons.add),
       ),
       appBar: AppBar(
-        leading: BackButton(),
+        leading: ButtonBack(),
         backgroundColor: Colors.transparent,
         elevation: 0.0,
       ),
@@ -441,7 +441,7 @@ class _RequestViewState extends State<RequestView> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Configuration.lightgrey,
-        leading: BackButton(),
+        leading: ButtonBack(),
         actions: [
            //Pasar esto a admin
           Container(
@@ -552,8 +552,10 @@ class StateChip extends StatelessWidget {
 }
 
 
-class BackButton extends StatelessWidget {
-  const BackButton() : super();
+class ButtonBack extends StatelessWidget {
+  Color color;
+  
+  ButtonBack({this.color}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -562,7 +564,7 @@ class BackButton extends StatelessWidget {
       icon: Icon(
         Icons.arrow_back_ios,
         size: Configuration.smicon,
-        color: Colors.black,
+        color: color != null ? color : Colors.black,
         )
       );
   }

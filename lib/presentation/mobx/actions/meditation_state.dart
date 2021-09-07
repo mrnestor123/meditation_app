@@ -34,7 +34,7 @@ abstract class _MeditationState with Store {
   PageController practice = new PageController(initialPage: 0);
 
   @observable
-  String currentsentence;
+  Map<String,dynamic> currentsentence;
 
   @observable
   String type = 'free';
@@ -90,12 +90,13 @@ abstract class _MeditationState with Store {
   }
 
   @action
-  void setMeditation(MeditationModel m, User u, DataBase d) {
+  void setMeditation(MeditationModel m, User u, DataBase d, int time) {
     this.user = u;
     this.data = d;
-    this.totalduration = m.duration;
-    this.duration = m.duration;
+    this.totalduration = new Duration(minutes: time);
+    this.duration = new Duration(minutes: time);
     this.selmeditation = m;
+    this.currentsentence = null;
    // finishMeditation();
     startTimer();
   }
@@ -104,6 +105,7 @@ abstract class _MeditationState with Store {
   @action
   void startTimer() {
     var oneSec = new Duration(seconds: 1);
+    var timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
     int count = 0;
     if(timer != null){
       timer.cancel();
@@ -118,18 +120,17 @@ abstract class _MeditationState with Store {
       } else {
         print(type);
         if(selmeditation.type !='free' && selmeditation.followalong != null){
-          var nextsentence = selmeditation.followalong[count.toString()];
-          if(nextsentence != null) {
-            var time = nextsentence['time'].split(':');
-            Duration _timestampduration = Duration(minutes:int.parse(time[0]), seconds: int.parse(time[1]));
-            if(_timestampduration.inSeconds < (selmeditation.duration.inSeconds - this.duration.inSeconds)){
-              currentsentence = nextsentence['text'];
-              assetsAudioPlayer.open(Audio("assets/audios/bowl-sound.mp3"));
-              count++;
-            }
-          } 
+          if(currentsentence == null && this.totalduration.inSeconds - this.duration.inSeconds > 5){
+            currentsentence = selmeditation.followalong[count.toString()];
+            assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+            count++;
+          }else if(this.duration.inSeconds % timeChange == 0 && currentsentence != null){
+            currentsentence = selmeditation.followalong[count.toString()];
+            assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+            count++;
+          }
         }
-        duration = duration - oneSec;
+        this.duration = this.duration - oneSec;
       }
     });
   }

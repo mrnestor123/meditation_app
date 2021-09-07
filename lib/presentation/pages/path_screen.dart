@@ -144,10 +144,11 @@ class PathScreen extends StatelessWidget {
       flex: 2,
       child:Column(
         children: [
+            SizedBox(height: 10),
             Text('You are currently on ', style: Configuration.text('tiny', Colors.grey)),
             Text('Stage ' + _userstate.user.stagenumber.toString(),
              style: Configuration.text('big', Configuration.maincolor)),
-            Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
+            //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
             SizedBox(height: 30),
             porcentaje()
           ]
@@ -155,7 +156,7 @@ class PathScreen extends StatelessWidget {
       ),
 
       Flexible(
-        flex: 2,
+        flex: 2, 
         child:labels() 
       ),
 
