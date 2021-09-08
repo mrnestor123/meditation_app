@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/presentation/pages/oldwidgets/bottomMenu.dart';
-
+/*
 class MeditationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -54,3 +52,4 @@ class TextContainer extends StatelessWidget {
           border: Border.all()));
   }
 }
+*/

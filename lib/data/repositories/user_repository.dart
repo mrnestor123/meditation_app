@@ -29,7 +29,7 @@ class UserRepositoryImpl implements UserRepository {
       } on LoginException {
         return Left(LoginFailure(error: 'User does not exist in the database'));
       } on ServerException {
-        return Left(ServerFailure());
+        return Left(ServerFailure(error: 'Server error'));
       }
     } else {
       //Hay que arreglar este método

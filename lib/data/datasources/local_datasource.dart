@@ -41,6 +41,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
 
   @override
   Future<String> getUser([String usuario]) async {
+    sharedPreferences.clear();
     final jsonUser = sharedPreferences.getString(CACHED_USER);
     if (jsonUser != null) {
       return Future.value(json.decode(jsonUser));

@@ -216,7 +216,7 @@ class FacebookButton extends StatelessWidget {
                   maintainState: true),
             );
             if (result != null) {
-              await _registerstate.startlogin(context, type: 'facebook',register: register); 
+              await _registerstate.startlogin(context, type: 'facebook',register: register,token: result); 
             }
           }),
     ));

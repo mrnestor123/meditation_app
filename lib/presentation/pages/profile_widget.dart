@@ -8,7 +8,6 @@ import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.d
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
 import 'package:provider/provider.dart';
-import 'package:charts_flutter/flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 
@@ -489,7 +488,7 @@ class ProfileInfoCard extends StatelessWidget {
   }
 }
 
-
+/*
 class SimpleBarChart extends StatelessWidget {
   final List<Series> seriesList;
   final bool animate;
@@ -556,7 +555,7 @@ class Ordinal {
   final int min;
 
   Ordinal(this.day, this.min);
-}
+}*/
 
 /* VISTAS DE TABLET
 class TabletProfileScreen extends StatefulWidget {

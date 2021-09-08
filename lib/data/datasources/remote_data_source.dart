@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
+import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
@@ -82,10 +83,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     var url = Uri.parse('$nodejs/connect/$cod');
     http.Response response = await http.get(url);
 
+    if(response.statusCode == 400){
+      return null;
+    }else{
     //comprobar que funciona bien
-    UserModel u = UserModel.fromRawJson(response.body);
-
-    return u;
+      UserModel u = UserModel.fromRawJson(response.body);
+      return u;
+    }
   }
 
   //se ejecuta cuando nos conectamos siempre!
@@ -146,21 +150,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
   @override
   Future<UserModel> loginUser({var usuario}) async {
-    try{
       // Vamos a hacer esto en el server !!
-      UserModel loggeduser = await connect(usuario.uid);
+    UserModel loggeduser = await connect(usuario.uid);
+    if(loggeduser != null){
       getActions(loggeduser);
       Timer.periodic(new Duration(seconds: 30), (timer) {
         getActions(loggeduser);
-      });
-      
-      if(loggeduser !=null){
-        return loggeduser;
-      }else {
-        throw LoginException();
-      }
-    } catch(e) {
-      throw ServerException();
+      });   
+      return loggeduser;
+    }else{
+      throw LoginException();
     }
   }
 
@@ -171,29 +170,34 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     var url = Uri.parse('$nodejs/stage/1');
     http.Response response = await http.get(url);
 
-    //comprobar que funciona bien
-    UserModel u = UserModel.fromRawJson(response.body);
-    StageModel one = StageModel.fromRawJson(response.body);
+    if(response.statusCode != 400){
+      //comprobar que funciona bien
+      //ESTO QUE ES !!!
+      //UserModel u = UserModel.fromRawJson(response.body);
+      StageModel one = StageModel.fromRawJson(response.body);
 
+      //hay que pasar esto al nuevo setting con UserStats
+      UserModel user = new UserModel(
+          coduser: usuario.uid,
+          user: usuario,
+          stagenumber: 1,
+          meditposition: 0,
+          gameposition: 0,
+          role: "meditator",
+          classic: true,
+          position: 0,
+          stage: one,
+          userStats: UserStats.empty()
+        );
 
-    //hay que pasar esto al nuevo setting con UserStats
-    UserModel user = new UserModel(
-        coduser: usuario.uid,
-        user: usuario,
-        stagenumber: 1,
-        meditposition: 0,
-        gameposition: 0,
-        role: "meditator",
-        classic: true,
-        position: 0,
-        stage: one,
-        userStats: UserStats.empty()
-      );
+      //añadimos al usuario en la base de datos de usuarios
+      await database.collection('users').add(user.toJson());
+      
 
-    //añadimos al usuario en la base de datos de usuarios
-    await database.collection('users').add(user.toJson());
-
-    return user;
+      return user;
+    }else{
+      throw ServerException();
+    }
   }
 
   // se carga cada x tiempo las últimas acciones del usuario!
@@ -288,7 +292,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       
       print(url);
 
-
       //esto se ejecutará antes que el clear ??
       //esto desde cuando se ejecuta ??
       user.lastactions.forEach((element) async{
@@ -330,7 +333,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }catch(e){
       throw ServerException();
     }
-
   }
 
   Future updateRequest(Request r) async{

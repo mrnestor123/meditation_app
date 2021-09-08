@@ -71,13 +71,13 @@ abstract class _LoginState with Store {
     startedlogin = true;
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
+    var user;
+
     if (!currentFocus.hasPrimaryFocus) {
       currentFocus.unfocus();
     }
 
     try {
-      var user;
-
       if(type == 'mail'){
           startedmaillogin = true;
           if(formKey.currentState.validate()){
@@ -122,10 +122,15 @@ abstract class _LoginState with Store {
       }
     }on PlatformException catch (e) {
       print(e);
+      errormsg = 'An unexpected error has ocurred';
     }on FirebaseAuthException catch (e) {
       // simply passing error code as a message
       print(e.code);
-      errormsg = switchExceptions(e.code);
+      if(e.message != null) {
+        errormsg = e.message;
+      }else{
+       errormsg = switchExceptions(e.code);
+      }
     }
 
     startedlogin = false;
@@ -133,9 +138,16 @@ abstract class _LoginState with Store {
     startedgooglelogin = false;
     startedmaillogin = false;
 
-    if (loggeduser != null) {
-      Navigator.pushReplacementNamed(context, '/main');
+    if (loggeduser != null && user != null) {
+      if(loggeduser.nombre == null){
+        Navigator.pushReplacementNamed(context, '/setdata');
+      }else{
+        Navigator.pushReplacementNamed(context, '/main');
+      }
     } else if(errormsg != null && errormsg != ''){
+      if(type == 'google' && user != null){
+        googleSignin.disconnect();
+      }
       print(errormsg);
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
@@ -185,6 +197,7 @@ abstract class _LoginState with Store {
 
   @action
   Future logout() async {
+    loggeduser = null;
     googleSignin.disconnect();
     auth.signOut();
     await repository.logout();
@@ -282,6 +295,8 @@ abstract class _LoginState with Store {
         return 'Server failure';
       case CacheFailure:
         return 'Cache failure';
+      case LoginFailure: 
+        return failure.error != null ? failure.error : 'User not found in the database';
       default:
         return 'Unexpected Error';
     }

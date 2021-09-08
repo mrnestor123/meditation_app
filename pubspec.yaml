@@ -40,10 +40,9 @@ dependencies:
   carousel_slider: ^2.3.1
   wakelock: ^0.5.2
   google_sign_in: 5.0.0 
-  flutter_webview_plugin: ^0.3.10+1
+  webview_flutter: ^2.0.12
   flutter_circular_slider: ^2.5.0
   image_picker: ^0.7.3
-  charts_flutter: ^0.10.0
   video_player: ^2.0.2
   firebase_storage: ^8.0.0
   plugin_platform_interface: ^2.0.0
@@ -66,7 +65,6 @@ dev_dependencies:
     sdk: flutter
   build_runner:
   mobx_codegen: ^1.0.3
-  mockito: any
 
 
 # For information on the generic Dart part of this file, see the

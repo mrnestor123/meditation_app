@@ -21,7 +21,7 @@ class WelcomeWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Flexible(
-                    flex: 3,
+                    flex: 2,
                     child:Image.asset('assets/logo.png')
                   ),
                   LoginRegisterButton(

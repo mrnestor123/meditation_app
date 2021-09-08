@@ -110,7 +110,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       if(_loginstate.startedmaillogin){
                        return CircularProgressIndicator(color: Colors.white);
                       }else{
-                        return  Text(
+                        return Text(
                           'LOGIN',
                           style: Configuration.text('small', Colors.white),
                           );
