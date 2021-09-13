@@ -63,9 +63,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
       for(Stage s in _userstate.data.stages){
         for(Meditation meditation in s.meditpath){
           var _blocked = _userstate.user.isBlocked(meditation);
+
           meditcontent.add(
             GestureDetector(
-            onTap: () => !_blocked ? setState(() {
+            onTap: () => !_blocked ? 
+            setState(() {
                if(_meditationstate.selmeditation == meditation){
                  _meditationstate.selmeditation = null;
                }else{
@@ -77,24 +79,45 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 borderRadius: BorderRadius.circular(16.0),
                 color: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Colors.grey.withOpacity(0.1) : Colors.transparent,
               ),
-              child: Column(
+              child: Stack(
                 children: [
-                  SizedBox(height: 10),
-                  Container(
-                  height:_meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Configuration.width*0.2: Configuration.width * 0.15,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.0),
-                      image: DecorationImage(
-                          image: NetworkImage(meditation.image)))),
-                  Flexible(
-                      child: Text(
-                      meditation.title,
-                      style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 10)
-                ]),
+                  Column(
+                    children: [
+                      SizedBox(height: 10),
+                      Container(
+                      height:_meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Configuration.width*0.2: Configuration.width * 0.15,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          image: DecorationImage(
+                              image: NetworkImage(meditation.image)))),
+                      Flexible(
+                          child: Text(
+                          meditation.title,
+                          style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: 10)
+                    ]),
+
+                  _blocked ? 
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.7)
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lock),
+                            Text('Unlocked at stage ' +  meditation.stagenumber.toString(), style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
+                          ],
+                        ),
+                                      ),
+                    ):Container(),
+                ],
+              ),
               )
             )
           );
@@ -110,7 +133,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         SizedBox(height: 20),
         GridView(
           shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 150),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,crossAxisSpacing: 10),
           children: meditations(),
         ),
           ] 
@@ -140,7 +163,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
             onTap: ()=> setState((){
               if(!_blocked){
                 _gamestate.selectgame(game);
-              
               }
             }),
             child: Container(
@@ -172,7 +194,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                           Text('Complete ' +  gamebefore.title , style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
                         ],
                       ),
-                    ):
+                    )  :
                     Stack(
                      children: [
                        _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?
@@ -209,7 +231,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
       ), 
       () {
          _gamestate.startgame();
-        Navigator.pushNamed(context,'/gamestarted');
+        Navigator.pushNamed(context,'/gamestarted').then((value) => setState(()=>{}));
       },
       _gamestate.selectedgame != null 
     );

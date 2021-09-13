@@ -23,6 +23,7 @@ class _RequestsState extends State<Requests> {
   final ImagePicker _picker = ImagePicker();
   bool uploading;
   Request addedReq = new Request(type: 'suggestion', state: 'open');
+  String selectedtype = 'Suggestion';
 
   TextEditingController title = new TextEditingController();
   TextEditingController content = new TextEditingController();
@@ -35,36 +36,39 @@ class _RequestsState extends State<Requests> {
   }
 
   Widget addRequestModal(context){
+    var stateSetter;
     
     void _showPicker(context) {
+    
+
+      void setImage(image) async{
+          uploading = true;
+          String imgstring = await _userState.uploadImage(image);
+          print(imgstring);
+          stateSetter(() {
+            addedReq.image = imgstring;  
+          });
+        }
+
+
       _imgFromCamera() async {
-      PickedFile image = await _picker.getImage(source: ImageSource.camera);
-      
-      if(image != null){
-      setState(() {
-        uploading =true;
-      });
-      
-      setState(() {
-        uploading = false;
-      });
+        PickedFile image = await _picker.getImage(source: ImageSource.camera);
+        
+        if(image != null){
+          setImage(image);
       }
     }
 
-    _imgFromGallery() async {
+      _imgFromGallery() async {
       PickedFile image = await _picker.getImage(source: ImageSource.gallery);
 
       if(image != null){
-        setState(() {
-          uploading =true;
-        });
-        setState(() {
-          uploading = false;
-        });
+        setImage(image);
+
       }
     }
 
-    showModalBottomSheet(
+      showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
           return SafeArea(
@@ -93,10 +97,10 @@ class _RequestsState extends State<Requests> {
       });
     }
   
-    String selectedtype = 'Suggestion';
 
     return StatefulBuilder(
       builder:(BuildContext context, StateSetter setState ) {
+      stateSetter = setState;
       return  Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
@@ -174,8 +178,19 @@ class _RequestsState extends State<Requests> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Add Image', style: Configuration.text('small', Colors.black)),
+                    addedReq.image  != null ? 
+                    Row(
+                      children: [
+                        Image(image: NetworkImage(addedReq.image), height: 50),
+                        IconButton(
+                          onPressed: ()=> setState((){ addedReq.image = null;}), 
+                          icon: Icon(Icons.delete, color: Colors.red)
+                        )
+                      ],
+                    )
+                    :
                     ElevatedButton(
-                      onPressed: ()=> _showPicker(context), 
+                      onPressed: () => _showPicker(context), 
                       child: Text('Image')
                     )
                   ],

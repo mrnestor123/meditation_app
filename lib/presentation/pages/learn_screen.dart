@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
@@ -12,6 +13,7 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'commonWidget/progress_dialog.dart';
 
@@ -48,9 +50,7 @@ class _LearnScreenState extends State<LearnScreen> {
                           builder: (context) => StageView(
                                 stage:_userstate.data.stages[index],
                               )),
-                    ).then((value) => setState(() { 
-                      
-                  }))
+                    ).then((value) => setState(() {}))
                   : null,
               child: 
               Stack(
@@ -202,9 +202,7 @@ class _StageViewState extends State<StageView> {
                                     : Icons.book,
                                 color: Colors.grey),
                           ),
-                          content.position < _userstate.user.position || 
-                            content.stagenumber < _userstate.user.stagenumber || 
-                            _userstate.user.userStats.lastread.where((c) => c['cod'] == content.cod).length > 0
+                          _userstate.user.readLesson(content)
                             ?  
                             Container(
                               width: Configuration.safeBlockHorizontal * 5,
@@ -266,15 +264,18 @@ class _StageViewState extends State<StageView> {
     });
 
     return Container(
-      padding: EdgeInsets.all(Configuration.smpadding),
       width: Configuration.width,
       color: Configuration.lightgrey,
-      child: SingleChildScrollView(
+      child: lessons.length > 0 ? SingleChildScrollView(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: lessons.length > 0 ? lessons : [Text('There are no lessons')]),
-      ),
+            children:  lessons),
+      ) : 
+        Center(
+          child: Text('There are no lessons' ,style: Configuration.text('small', Colors.black),)
+        )
+      ,
     );
   }
 
@@ -287,13 +288,7 @@ class _StageViewState extends State<StageView> {
         title: Text('Stage ' + widget.stage.stagenumber.toString(),
             style: Configuration.text('medium', Colors.black)),
         centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              size: Configuration.smicon, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        leading: ButtonBack(),
         backgroundColor: Configuration.white,
         elevation: 0,
       ),

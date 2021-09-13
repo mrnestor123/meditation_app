@@ -115,6 +115,7 @@ abstract class _UserState with Store {
     return repository.updateUser(user: user);
   }
 
+  //UTILIZAR UPLOADIMAGE EN ESTE!!
   @action 
   Future changeImage(dynamic image) async {
     Either<Failure,String> imageupload = await repository.updateImage(image, user);
@@ -122,6 +123,18 @@ abstract class _UserState with Store {
     imageupload.fold((l) => errorMessage = 'error al subir imagen', (r) => user.image = r);
 
     return repository.updateUser(user: user);
+  }
+
+  @action 
+  Future<String> uploadImage(dynamic image) async{
+    Either<Failure,String> imageupload = await repository.updateImage(image,user);
+    //PASAR TODOS LOS  FOLD AL FINAL !!!
+    String imgstring;
+    imageupload.fold(
+      (l) => errorMessage = 'error al subir imagen', 
+      (r) => imgstring = r
+    );
+    return imgstring;
   }
 
   @action

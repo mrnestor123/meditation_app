@@ -111,7 +111,13 @@ abstract class _LoginState with Store {
 
       if(user != null) {
         if(register){
-          errormsg = await userRegistered(user.user);
+            user.user.sendEmailVerification();
+            var register = await repository.registerUser(usuario: user.user);
+
+            register.fold(
+              (Failure failure) => errormsg = _mapFailureToMessage(failure), 
+              (dynamic u) => loggeduser = u
+              );
         }else{
           log = await repository.loginUser(usuario: user.user);
           log.fold(
@@ -131,6 +137,8 @@ abstract class _LoginState with Store {
       }else{
        errormsg = switchExceptions(e.code);
       }
+    }on Exception catch (e){
+      errormsg ='An unexpected error has ocurred';
     }
 
     startedlogin = false;
@@ -274,18 +282,6 @@ abstract class _LoginState with Store {
     }
   }*/
 
-  //SE UTILIZA ??
-  Future userRegistered(dynamic firebaseuser) async {
-    firebaseuser.sendEmailVerification();
-    var register = await repository.registerUser(usuario: firebaseuser);
-
-    register.fold((Failure failure) {
-      return _mapFailureToMessage(failure);
-    }, (dynamic u) {
-      loggeduser = u;
-      //user = u;
-    });
-  }
 
 
   String _mapFailureToMessage(Failure failure) {

@@ -114,9 +114,12 @@ class User {
     return this.answeredquestions.length > 0 && this.answeredquestions[cod] != null;
   }
 
+  //En el futuro sería  si contains la lista de lessons
   //returns if user has read a lesson
-  bool readLesson(String codlesson){
-    return false;
+  bool readLesson(Content  c){
+    return c.position < this.position || 
+    c.stagenumber < this.stagenumber || 
+    this.userStats.lastread != null && this.userStats.lastread.where((d) => d['cod'] == c.cod).length > 0;
   }
 
   bool isBlocked(Meditation meditation){

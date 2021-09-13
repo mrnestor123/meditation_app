@@ -148,11 +148,11 @@ class _MobileLayoutState extends State<MobileLayout> {
             color: Colors.black,
             icon: Icon(Icons.bug_report),
             onPressed: ()=> Navigator.pushNamed(context, '/requests'),
-          ),
+          ),/*
           IconButton(
               icon: Icon(Icons.ac_unit),
               color: Colors.black,
-              onPressed: () => Navigator.pushNamed(context, '/selectusername')),
+              onPressed: () => Navigator.pushNamed(context, '/selectusername')),*/
           ProfileCircle(userImage: _userstate.user.image, onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))),
         ],
       ),

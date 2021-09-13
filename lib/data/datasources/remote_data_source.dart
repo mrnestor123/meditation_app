@@ -73,8 +73,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'https://public.digitalvalue.es:8002';
-    //nodejs = 'http://192.168.4.67:8802';
+    //nodejs = 'https://public.digitalvalue.es:8002';
+    nodejs = 'http://192.168.4.67:8802';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -170,7 +170,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     var url = Uri.parse('$nodejs/stage/1');
     http.Response response = await http.get(url);
 
-    if(response.statusCode != 400){
+    if(response.statusCode != 400 && response.statusCode != 404){
       //comprobar que funciona bien
       //ESTO QUE ES !!!
       //UserModel u = UserModel.fromRawJson(response.body);
@@ -192,7 +192,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       //añadimos al usuario en la base de datos de usuarios
       await database.collection('users').add(user.toJson());
-      
 
       return user;
     }else{

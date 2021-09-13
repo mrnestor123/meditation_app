@@ -78,11 +78,17 @@ abstract class _GameState with Store {
   }
 
   void getMaxAnswered(User user){
-    if(user.answeredquestions[selectedgame.cod] == null || user.answeredquestions[selectedgame.cod] < answeredquestions.length ){
+    
+    if(user.answeredquestions[selectedgame.cod] == null){
+      user.answeredquestions[selectedgame.cod] = answeredquestions.length;
+    } 
+    
+    if(user.answeredquestions[selectedgame.cod] < answeredquestions.length){
+      
       user.answeredquestions[selectedgame.cod] = answeredquestions.length;
       max = true;
       
-      if(user.gameposition == selectedgame.position){
+      if(user.answeredquestions[selectedgame.cod] == selectedgame.questions.length && user.gameposition == selectedgame.position){
         user.gameposition++;
       }
 
