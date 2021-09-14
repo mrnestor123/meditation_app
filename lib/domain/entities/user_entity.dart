@@ -23,7 +23,7 @@ class User {
   int stagenumber, position, meditposition, gameposition, percentage;
   Stage stage;
   //follows es cuando un usuario TE SIGUE!!
-  bool classic, follows,stageupdated;
+  bool classic, followed, stageupdated;
 
   //para el modal de progreso
   Progress progress;
@@ -39,18 +39,11 @@ class User {
   List<UserAction> thisweekactions = new ObservableList() ;
   List<UserAction> lastactions = new ObservableList();
 
+  //LISTA DE CÓDIGOS DE USUARIOS
+  List<dynamic> following = new List.empty(growable: true);
+  List<dynamic> followers = new List.empty(growable: true);
 
-  //códigos de los usuarios a los que sigue el usuario
-  List<dynamic> followedcods = new List.empty(growable: true);
-  List<dynamic> followsyoucods = new List.empty(growable: true);
-
-  //esto no lo guardaría en caché sino que lo sacaría cada vez del getData
-  final ObservableList<UserModel> following = new ObservableList();
-  final ObservableList<UserModel> notfollowing = new ObservableList();
-  final ObservableList<UserModel> followsyou = new ObservableList();
-  //LIST OF USERS SORTED 
-  final ObservableList<UserModel> allusers = new ObservableList();
-
+  //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
   final ObservableList<Meditation> weekMeditations = new ObservableList();
@@ -62,7 +55,7 @@ class User {
 
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
-        this.role,this.classic = false,this.meditposition= 0,this.userStats, 
+        this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
         this.answeredquestions,this.gameposition = 0 }) {
    
     if(userStats != null){
@@ -207,49 +200,32 @@ class User {
     }*/
   }
 
-  void setFollowedUsers(List<dynamic> u) => followedcods.addAll(u);
-  void setFollowsYou(List<dynamic> u )=>  followsyoucods.addAll(u);
+  void setFollowedUsers(List<dynamic> u) => following.addAll(u);
+  void setFollowsYou(List<dynamic> u )=> followers.addAll(u);
 
-  void addfollow(User u) { u.follows = true;  following.add(u); allusers.add(u);}  
-  void addFollower(User u) { followsyou.add(u); }
-  void addUnfollower(User u ) { u.follows = false; notfollowing.add(u); allusers.add(u);}
-  
-  //se le podrán dar parámetros... por etapa, por tiempo meidtado total, por tiempo meditado en la etapa
-  void sortFollowers() {
-    this.allusers.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
-    this.following.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
-    this.notfollowing.sort((a,b) => b.userStats.total.timemeditated - a.userStats.total.timemeditated);
-  }
   
   void follow(User u) {
-    for(User user in allusers){
-      if(user.coduser == u.coduser){
-        user.follows = true;
-      }
+    u.followed = true;
+
+    if(!following.contains(u.coduser)){
+      // QUE la accion de seguir solo notifique a los que les han seguido!!
+      //setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
+      following.add(u.coduser);
     }
 
-    if(!following.contains(u)){
-      setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.add(u);
-    }
-
-    u.followsyoucods.add(this.coduser);
+    u.followers.add(this.coduser);
   }
 
-  void unfollow(User u) {     
-    for(User user in allusers){
-      if(user.coduser == u.coduser){
-        user.follows = false;
-      }
+  void unfollow(User u) {   
+    u.followed = false;
+
+    if(following.contains(u.coduser)){
+     // setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
+      following.remove(u.coduser);
     }
 
-    if(following.contains(u)){
-      setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.remove(u);
-    }
-
-    if(u.followsyoucods.contains(this.coduser)){
-      u.followsyoucods.remove(this.coduser);
+    if(u.followers.contains(this.coduser)){
+      u.followers.remove(this.coduser);
     }
   }
 

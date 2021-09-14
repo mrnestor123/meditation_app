@@ -28,4 +28,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> uploadRequest(Request r);
 
+  Future<Either<Failure, List<User>>> getUsers(User u);
+
+  Future<Either<Failure, User>> getUser(String cod);
 }

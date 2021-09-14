@@ -298,68 +298,84 @@ class _StageViewState extends State<StageView> {
         color: Configuration.white,
         child: Column(
           children: [
-            Container( 
-              margin: EdgeInsets.only(
-                    left: Configuration.medmargin,
-                    right: Configuration.medmargin,
-                  ),
-              child: StageCard(stage:widget.stage)),
-            Container(
-                padding: EdgeInsets.symmetric(
-                    vertical: Configuration.tinpadding),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            Material(
+              shadowColor: Colors.black,
+              elevation: 30,
+              child: Container( 
+                decoration: BoxDecoration(
+                  color: Colors.white,                  
+                ),
+                child: Column(
                   children: [
-                    Text('Filter',
-                      style: Configuration.text('tiny', Colors.black),
-                    ),
-                    OutlinedButton(
-                      onPressed: () => setState(
-                          () => filter.contains('all') ? '' : filter = ['all']),
-                      child: Icon(Icons.more_vert,
-                          color: filter.contains('all')
-                              ? Colors.white
-                              : Colors.black.withOpacity(0.5)),
-                      style: ButtonStyle(
-                        backgroundColor: filter.contains('all')
-                            ? MaterialStateProperty.all<Color>(
-                                Configuration.maincolor)
-                            : null,
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Configuration.medmargin
                       ),
+                      child: StageCard(stage:widget.stage)),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Text('Filter',
+                          style: Configuration.text('tiny', Colors.black),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => setState(
+                              () => filter.contains('all') ? '' : filter = ['all']),
+                          child: Icon(Icons.more_vert,
+                              color: filter.contains('all')
+                                  ? Colors.white
+                                  : Colors.black.withOpacity(0.5)),
+                          style: ButtonStyle(
+                            backgroundColor: filter.contains('all')
+                                ? MaterialStateProperty.all<Color>(
+                                    Configuration.maincolor)
+                                : null,
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => setState(() {
+                            filter.contains('lesson') ? '' : filter = ['lesson'];
+                          }),
+                          child: Icon(Icons.book,
+                              color: filter.contains('lesson')
+                                  ? Colors.white
+                                  : Colors.black.withOpacity(0.5)),
+                          style: ButtonStyle(
+                            backgroundColor: filter.contains('lesson')
+                                ? MaterialStateProperty.all<Color>(
+                                    Configuration.maincolor)
+                                : null,
+                          ),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => setState(() =>
+                              filter.contains('meditation')
+                                  ? ''
+                                  : filter = ['meditation']),
+                          child: Icon(Icons.self_improvement,
+                              color: filter.contains('meditation')
+                                  ? Colors.white
+                                  : Colors.black.withOpacity(0.5)),
+                          style: ButtonStyle(
+                            backgroundColor: filter.contains('meditation')
+                                ? MaterialStateProperty.all<Color>(
+                                    Configuration.maincolor)
+                                : null,
+                          ),
+                        ),
+                      ],
                     ),
-                    OutlinedButton(
-                      onPressed: () => setState(() {
-                        filter.contains('lesson') ? '' : filter = ['lesson'];
-                      }),
-                      child: Icon(Icons.book,
-                          color: filter.contains('lesson')
-                              ? Colors.white
-                              : Colors.black.withOpacity(0.5)),
-                      style: ButtonStyle(
-                        backgroundColor: filter.contains('lesson')
-                            ? MaterialStateProperty.all<Color>(
-                                Configuration.maincolor)
-                            : null,
-                      ),
-                    ),
-                    OutlinedButton(
-                      onPressed: () => setState(() =>
-                          filter.contains('meditation')
-                              ? ''
-                              : filter = ['meditation']),
-                      child: Icon(Icons.self_improvement,
-                          color: filter.contains('meditation')
-                              ? Colors.white
-                              : Colors.black.withOpacity(0.5)),
-                      style: ButtonStyle(
-                        backgroundColor: filter.contains('meditation')
-                            ? MaterialStateProperty.all<Color>(
-                                Configuration.maincolor)
-                            : null,
-                      ),
-                    ),
-                  ],
+                    SizedBox(height: 8),
+                    Container(
+                      height: 1,
+                      width: Configuration.width,
+                      color: Colors.grey,
+                    )
+                  ],  
                 )),
+            ),
+            
             Expanded(child: getLessons(context))
           ],
         ),

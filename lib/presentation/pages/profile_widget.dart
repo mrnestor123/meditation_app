@@ -112,14 +112,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => ViewFollowers(
-                                    users: _userstate.user.following,
+                                    cods: _userstate.user.following,
                                     title: 'Following',
                           )),
                       ), 
                       child: Column(
                           children: [
                             Text('Following', style: Configuration.text('tiny', Colors.black)),
-                            Text(widget.user != null ? widget.user.followedcods.length.toString() : _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                            Text(widget.user != null ? widget.user.following.length.toString() : _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
                           ],
                         ),
                       ),
@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                               MaterialPageRoute(
                                   builder: (context) => ViewFollowers(
-                                        users: _userstate.user.followsyou,
+                                        cods: _userstate.user.followers,
                                         title: 'Followers',
                               )
                             ),
@@ -138,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                           children: [
                             Text('Followers', style: Configuration.text('tiny', Colors.black)),
-                            Text(widget.user != null ? widget.user.followsyoucods.length.toString() :  _userstate.user.followsyou.length.toString(), style: Configuration.text('tiny',Colors.black))
+                            Text(widget.user != null ? widget.user.following.length.toString() :  _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
                           ],
                         ),
                       ) 
@@ -180,11 +180,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
 //ES IGUAL PARA TABLET QUE PARA Móvil ?? //DEBERÍA
-class ViewFollowers extends StatelessWidget {
-  final List<User> users;
+class ViewFollowers extends StatefulWidget {
+  final List<dynamic> cods;
   final String title;
 
-  ViewFollowers({this.users, this.title});
+  ViewFollowers({this.cods, this.title});
+
+  @override
+  State<ViewFollowers> createState() => _ViewFollowersState();
+}
+
+class _ViewFollowersState extends State<ViewFollowers> {
+  List<User> users = new List.empty(growable: true);
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies()async {
+    super.didChangeDependencies();
+    final _userstate = Provider.of<UserState>(context);
+
+
+    users = await _userstate.getUsersList(_userstate.user.following);
+
+    //COMPROBAR QUE si se sale no haga set state NO SE SALGA DE AQUI
+    setState(() {
+      loading = false;
+    });
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +222,7 @@ class ViewFollowers extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(onPressed: ()=> Navigator.pop(context),  icon: Icon(Icons.arrow_back), color: Colors.black),
-        title: Text(title, style: Configuration.text('small', Colors.black)),
+        title: Text(widget.title, style: Configuration.text('small', Colors.black)),
       ),
       body: Container(
         height: Configuration.height,
@@ -203,7 +231,15 @@ class ViewFollowers extends StatelessWidget {
         child: SingleChildScrollView(
             child: Padding(
                 padding: EdgeInsets.all(Configuration.smpadding),
-                child: users.length > 0 ? Table(  
+                child:loading ? 
+                Column(
+                  children: [
+                    CircularProgressIndicator(
+                      color: Configuration.maincolor,
+                    ),
+                  ],
+                ):
+                users.length > 0 ? Table(  
                 columnWidths: {
                 0: FractionColumnWidth(0.2),
                 1: FractionColumnWidth(0.5),
@@ -249,7 +285,7 @@ class ViewFollowers extends StatelessWidget {
                     )
                 ]);
               }).toList()
-              ) :  title == 'Following' ? 
+              ) :  widget.title == 'Following' ? 
                 Text('You are not following any users', style: Configuration.text('tiny',Colors.black)) :
                 Text('You are not being followed by anyone', style:Configuration.text('tiny', Colors.black))    
             )
@@ -259,6 +295,7 @@ class ViewFollowers extends StatelessWidget {
   }
 }
 
+//BORRAR ESTO!!!
 class ViewData extends StatefulWidget {
   const ViewData({ Key key }) : super(key: key);
 

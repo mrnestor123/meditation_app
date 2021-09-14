@@ -47,6 +47,8 @@ class UserRepositoryImpl implements UserRepository {
       } on Exception {
         return Left(ConnectionFailure(error: "User is not connected to the internet"));
       }
+    }else{
+      return Left(ServerFailure());
     } 
   }
 
@@ -170,6 +172,35 @@ class UserRepositoryImpl implements UserRepository {
     }catch(e){
       return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
     }
+  }
+
+
+   @override
+  Future<Either<Failure, List<User>>> getUsers(User u) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final users = await remoteDataSource.getUsers(u);
+        return Right(users);
+      } on Exception {
+        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      }
+    }else{
+      return Left(ServerFailure());
+    } 
+  }
+
+  @override
+  Future<Either<Failure, User>> getUser(String cod) async{
+     if (await networkInfo.isConnected) {
+      try {
+        final user = await remoteDataSource.getUser(cod);
+        return Right(user);
+      } on Exception {
+        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      }
+    }else{
+      return Left(ServerFailure());
+    } 
   }
 
 }

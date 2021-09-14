@@ -71,19 +71,33 @@ class _Timeline extends StatefulWidget {
 class __TimelineState extends State<_Timeline> {
   UserState _userstate;
   String mode = 'Today'; 
+  List<User> users = new List.empty(growable: true);
   var states = ['Today','This week'];
   
   ScrollController _scrollController = new ScrollController();
 
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies()async {
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+    
+    users = await _userstate.getUsersList(_userstate.user.following);
+  }
+
+
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!
   List<Widget> getMessages() { 
-      List<User> following = _userstate.user.following;
       List<UserAction> sortedlist = new List.empty(growable: true);
       
       mode == 'Today' ? sortedlist.addAll(_userstate.user.todayactions) : sortedlist.addAll(_userstate.user.thisweekactions);
 
       //ESTO NO LO DEBERÍA DE HACER MÁS DE UNA VEZ
-      for(User u in following) {
+      for(User u in users) {
         if(mode == 'Today' && u.todayactions.length > 0){
           sortedlist.addAll(u.todayactions);
         }else if(mode !='Today' && u.thisweekactions.length > 0) {
@@ -198,6 +212,7 @@ class __TimelineState extends State<_Timeline> {
                     padding: EdgeInsets.all(4.0),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
                     onPressed: () {
+                      //HABRA QUE CAMBIAR ESTO
                       widget.isTablet ? 
                       Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
                       Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
@@ -242,7 +257,7 @@ void scheduleNotification()async{
 }
 
 
-  void _requestPermissions() {
+void _requestPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()

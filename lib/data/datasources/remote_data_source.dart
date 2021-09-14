@@ -54,6 +54,9 @@ abstract class UserRemoteDataSource {
 
   Future uploadRequest(Request r);
 
+  Future <List<User>> getUsers(User u);
+
+  Future <User> getUser(String cod);
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -74,7 +77,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
     //nodejs = 'https://public.digitalvalue.es:8002';
-    nodejs = 'http://192.168.4.67:8802';
+    nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -90,60 +93,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       UserModel u = UserModel.fromRawJson(response.body);
       return u;
     }
-  }
-
-  //se ejecuta cuando nos conectamos siempre!
-  addfollowers(User loggeduser) async {    
-    //si sigue a alguien sacamos los que sigue y los que no sigue
-    if(loggeduser.followedcods.length > 0 ){
-      QuerySnapshot notfollowed = await database.collection('users').where('coduser', whereNotIn: loggeduser.followedcods).get();
-
-      loggeduser.followedcods.forEach((element) async { 
-        QuerySnapshot userquery = await database.collection('users').where('coduser', isEqualTo: element).get();
-        UserModel user = UserModel.fromJson(userquery.docs[0].data());  
-        //Sacamos las meditaciones del usuario al que sigue
-        /// NO ESTOY SEGURO DE HACER ESTO !!!! 
-        QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: user.coduser).get();    
-        if (meditations.docs.length > 0) {
-          for (DocumentSnapshot doc in meditations.docs) {
-            user.addMeditation(new MeditationModel.fromJson(doc.data()));
-          }
-        }
-        loggeduser.addfollow(user);
-      });
-
-      if(notfollowed.docs.length > 0){
-        for(DocumentSnapshot doc in notfollowed.docs){
-          loggeduser.addUnfollower(UserModel.fromJson(doc.data()));
-        }
-      }    
-    } else {
-      QuerySnapshot allusers = await database.collection('users').where('coduser', isNotEqualTo: loggeduser.coduser).get();
-
-       if(allusers.docs.length > 0){
-        for(DocumentSnapshot doc in allusers.docs){
-          UserModel user = UserModel.fromJson(doc.data());  
-          QuerySnapshot meditations = await database.collection('meditations').where('coduser', isEqualTo: user.coduser).get();    
-          if (meditations.docs.length > 0) {
-            for (DocumentSnapshot doc in meditations.docs) {
-              user.addMeditation(new MeditationModel.fromJson(doc.data()));
-            }
-          }
-          loggeduser.addUnfollower(user);
-        }
-      }  
-    }
-
-    QuerySnapshot followsyou = await database.collection('users').where('following',arrayContains: loggeduser.coduser).get();
-
-    if(followsyou.docs.length > 0){
-      for(DocumentSnapshot doc in followsyou.docs){
-        UserModel user = UserModel.fromJson(doc.data());
-        loggeduser.addFollower(user);
-      }
-    }
-
-    loggeduser.sortFollowers();
   }
 
   //sacamos todos los datos del usuario.
@@ -219,12 +168,13 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  //SACA LOS USUARIOS QUE HAY AHORA !! HACE FALTA ?? // SE UTILIZA ??? // DEBERÍA QUITARSE !!
-  Future<DataBase> getData() async  {
+  Future<DataBase> getData([bool getStages]) async  {
     DataBase d = new DataBase();
+
+    //HAGO ESTO DEMASIADO
     var url = Uri.parse('$nodejs/stages');
     http.Response response = await http.get(url);
-    List<StageModel>  stages = new List.empty(growable: true);
+    List<StageModel> stages = new List.empty(growable: true);
 
     var stagesquery = json.decode(response.body);
 
@@ -232,17 +182,24 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       d.stages.add(StageModel.fromJson(stage));      
     }
 
-    //Pasar esto al server de node !!
-    QuerySnapshot users = await database.collection('users').get();
+    return d;
+  }
 
-    for (var user in users.docs) {
-      d.users.add(new UserModel.fromJson(user.data()));
+  Future<List<User>> getUsers(User loggeduser) async{
+    List<User> l = new List.empty(growable: true);
+    
+    
+    var usersUrl = Uri.parse('$nodejs/users/${loggeduser.coduser}');
+    http.Response response = await http.get(usersUrl);
+    var users = json.decode(response.body);
+
+    for(var user in users){
+      l.add(UserModel.fromJson(user));
     }
 
-//    d.stages.sort((a, b) => a.stagenumber.compareTo(b.stagenumber));
-    d.users.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
+    l.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
 
-    return d;
+    return l;
   }
 
   Future<String> updateImage(PickedFile image, User u) async {
@@ -269,8 +226,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     return requests;
   }
-
-
 
   @override
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
@@ -331,6 +286,19 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
     }catch(e){
       throw ServerException();
+    }
+  }
+
+  Future <User> getUser(dynamic coduser)async{
+    var url = Uri.parse('$nodejs/user/$coduser');
+    http.Response response = await http.get(url);
+
+    if(response.statusCode == 400){
+      throw Exception();
+    }else{
+      //comprobar que funciona bien
+      UserModel u = UserModel.fromRawJson(response.body);
+      return u;
     }
   }
 

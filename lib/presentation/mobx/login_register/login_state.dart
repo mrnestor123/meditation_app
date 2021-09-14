@@ -282,8 +282,6 @@ abstract class _LoginState with Store {
     }
   }*/
 
-
-
   String _mapFailureToMessage(Failure failure) {
     // Instead of a regular 'if (failure is ServerFailure)...'
     switch (failure.runtimeType) {

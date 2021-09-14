@@ -44,6 +44,9 @@ abstract class _UserState with Store {
   @observable 
   List<Request> requests;
 
+  @observable 
+  List<User> users;
+
   @observable
   Map lessondata;
 
@@ -54,10 +57,28 @@ abstract class _UserState with Store {
     }
   }
 
+   void _mapFailureToMessage(Failure failure) {
+    // Instead of a regular 'if (failure is ServerFailure)...'
+    switch (failure.runtimeType) {
+      case ServerFailure:
+        errorMessage='Server failure';
+        break;
+      case CacheFailure:
+        errorMessage = 'Cache failure';
+        break;
+      case LoginFailure: 
+        errorMessage = failure.error != null ? failure.error : 'User not found in the database';
+        break;
+      default:
+        errorMessage = 'Unexpected Error';
+        break;
+    }
+  }
+
+
   @action
   Future userisLogged() async {
     Either<Failure, User> _isUserCached = await repository.islogged();
-
     _isUserCached.fold((Failure f) => loggedin = false, 
     (User u) {
       user = u;
@@ -87,7 +108,9 @@ abstract class _UserState with Store {
     final result = await repository.getData();
 
     result.fold(
-    (Failure f) => print(f.error), 
+    (Failure f)  {
+       _mapFailureToMessage(f); 
+    },
     (DataBase d) {
       data = d;
     });
@@ -102,10 +125,9 @@ abstract class _UserState with Store {
       user.unfollow(u);
     } 
 
-    // Updateamos también los datos del usuario  al que se sigue
+    // Updateamos también los datos del usuario val que se sigue
     repository.updateUser(user: u);
     repository.updateUser(user:user);
-
   }
 
   
@@ -141,9 +163,9 @@ abstract class _UserState with Store {
   Future updateStage() async {
       //updateamos la stage
     user.updateStage(data);
-
     return repository.updateUser(user: user);
   }
+
 
   @action 
   Future getRequests() async{
@@ -151,7 +173,9 @@ abstract class _UserState with Store {
     requests = new List.empty(growable: true);
 
     res.fold(
-    (Failure f) => print(f.error), 
+    (Failure f) {
+      _mapFailureToMessage(f);  
+    },
     (List<Request> d) {
       requests = d;
     });
@@ -170,13 +194,37 @@ abstract class _UserState with Store {
     }
 
     Either<Failure, void> res = await repository.updateRequest(r);
-   // res.fold((l) => print(l.error), (r) => print('bien'));
+    res.fold((f) => _mapFailureToMessage(f), (r) => print('bien'));
   }
 
   Future uploadRequest(Request r) async{
     r.coduser = user.coduser;
     r.username = user.nombre;
     Either<Failure,void> res = await repository.uploadRequest(r);
+    res.fold((f) => _mapFailureToMessage(f), (r) => print('bien'));
+  }
+
+
+  Future getUsers() async {
+    Either<Failure,List<User>> userlist = await repository.getUsers(user);
+
+    userlist.fold(
+      (l) => _mapFailureToMessage(l), 
+      (r) => users = r
+    );
+  }
+
+  //FROM LIST OF USER CODS WE GET THE USERS
+  Future <List<User>> getUsersList(List<dynamic> cods)async{
+    List<User> l = new List.empty(growable: true);
+
+    for(var cod in cods){
+      Either<Failure,User>u  = await repository.getUser(cod);
+      u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
+    }
+
+    return l;
+
   }
 
 }

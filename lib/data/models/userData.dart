@@ -27,6 +27,7 @@ class UserModel extends User {
       int gameposition,
       UserStats userStats,
       answeredquestions,
+      followed,
       stats})
       : super(
             coduser: coduser,
@@ -39,6 +40,7 @@ class UserModel extends User {
             position: position,
             meditposition: meditposition,
             stage: stage,
+            followed:followed,
             classic: classic,
             answeredquestions: answeredquestions,
             userStats: userStats);
@@ -56,6 +58,7 @@ class UserModel extends User {
         gameposition: json['gameposition'] == null ? 0 : json['gameposition'],
         meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
         image: json['image'] == null ? null : json['image'],
+        followed: json['followed'] == null ? null: json['followed'],
         stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
         stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
@@ -81,9 +84,9 @@ class UserModel extends User {
         "classic": classic == null ? false : classic,
         'stats': userStats == null ? null : userStats.toJson(),
         'image': image == null ? null : image,
-        "following": following.map((element) => element.coduser).toList(),
+        "following": following.map((element) => element).toList(),
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
-        "followsyou": followsyou.map((user) => user.coduser).toList(),
+        "followsyou": followers.map((user) => user).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
         "answeredquestions": answeredquestions
       };

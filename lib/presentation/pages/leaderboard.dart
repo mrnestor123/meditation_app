@@ -22,6 +22,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
   final TextEditingController _searchController = new TextEditingController();
 
   List<User> users;
+  List<User> followedusers;
 
   var time = '';
   TabController _tabController;
@@ -80,13 +81,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                               Column(
                                 children: [
                                   Text('Following', style: Configuration.text('tiny', Colors.white)),
-                                  Text(user.followedcods.length.toString(), style: Configuration.text('tiny',Colors.white))   
+                                  Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.white))   
                                 ],
                               ),
                               Column(
                                 children: [
                                   Text('Followers', style: Configuration.text('tiny', Colors.white)),
-                                  Text(user.followsyoucods.length.toString(), style: Configuration.text('tiny',Colors.white))
+                                  Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.white))
                                 ],
                               )
                           ])
@@ -115,7 +116,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     children: [
                       OutlinedButton(
                         onPressed: () => setState((){
-                          following= !following;  
+                          following = !following;  
                           _userstate.follow(user, following);}), 
                         child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.text('tiny', following ? Colors.red : Colors.lightBlue)),
                         style: OutlinedButton.styleFrom(
@@ -132,8 +133,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
     );
   }
 
-
-  Widget createTable(List<User> list, context) {
+  Widget createTable(List<User> list, context, following) {
     var count = 0;
 
     Widget texticon(IconData icon, String text) {
@@ -186,10 +186,11 @@ class _LeaderBoardState extends State<LeaderBoard> {
               Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    u.coduser != _userstate.user.coduser ?
                     IconButton(
-                      icon: Icon(u.follows != null && u.follows ? Icons.person : Icons.person_add), 
+                      icon: Icon(following || u.followed != null && u.followed ? Icons.person : Icons.person_add), 
                       onPressed: () async { await showUserProfile(u,context); setState((){});}
-                      ),
+                      ) :  Container(),
                   ],
                 )
             ]
@@ -210,11 +211,15 @@ class _LeaderBoardState extends State<LeaderBoard> {
     setState(() {
       loading= true;
     });
-    await _userstate.getData();
+    await _userstate.getUsers();
+    users = _userstate.users;
+
+    followedusers = await _userstate.getUsersList(_userstate.user.following);
+
+    //COMPROBAR QUE si se sale no haga set state NO SE SALGA DE AQUI
     setState(() {
       loading = false;
     });
-    users = _userstate.user.allusers;
   }
 
   @override
@@ -251,9 +256,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 child: !loading ? Stack(
                   fit: StackFit.expand,
                   children: [
-                    Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.data.users[1], large: false, position: 2,)),
-                    Align(child: UserProfile(user: _userstate.data.users[0], large: true, position: 1,)),
-                    Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.data.users[2], large:false, position: 3))
+                    Positioned(bottom: 10, left: 45, child: UserProfile(user: users[1], large: false, position: 2,)),
+                    Align(child: UserProfile(user:users[0], large: true, position: 1,)),
+                    Positioned(bottom: 10, right: 45 , child: UserProfile(user: users[2], large:false, position: 3))
                   ],
                 ) : Container(),
               ),
@@ -322,8 +327,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     physics: NeverScrollableScrollPhysics(),
                     controller: _tabController,
                     children: [
-                    createTable(_userstate.data.users, context),
-                    createTable(_userstate.user.following, context),
+                      createTable(_userstate.users, context,false),
+                      createTable(followedusers, context, true),
                   ])
                 )
               ]),
