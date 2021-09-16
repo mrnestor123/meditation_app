@@ -18,8 +18,6 @@ import 'package:wheel_chooser/wheel_chooser.dart';
 import 'commonWidget/progress_dialog.dart';
 import 'config/configuration.dart';
 
-//esto es mejorable
-int seltime = 1;
 
 class MeditationScreen extends StatefulWidget {
   @override
@@ -31,6 +29,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   MeditationState _meditationstate;
   GameState _gamestate;
   int _index;
+  int seltime = 5;  
 
   //podriamos utilizar meditationstate de arriba
   var meditationtype = 'free';
@@ -42,13 +41,38 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget freeMeditation() {
     return layout( 
-      Container(
-        padding: EdgeInsets.all(6.0),
-        child: TimePicker()), 
+      Column(
+        children: [
+          SizedBox(height: 10),
+          SingleCircularSlider(
+            95,
+            5,
+            baseColor: Colors.grey.withOpacity(0.6),
+            handlerColor: Colors.transparent,
+            handlerOutterRadius: 10,
+            onSelectionChange: (a, b, c) {
+              setState(() {
+                seltime = b;
+              });
+            },
+            height: Configuration.width > 600 ? 200 : Configuration.width*0.9,
+            width: Configuration.width > 600 ? 200 : Configuration.width*0.9,
+            selectionColor: Configuration.maincolor,
+            sliderStrokeWidth: 40,
+            child: Center(
+                child: Text(
+              seltime.toString() + ' min',
+              style: Configuration.text('smallmedium', Colors.black),
+            )),
+          ),
+        ],
+      ), 
     () {
+      if(seltime > 0){
         _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data, seltime);
         Navigator.pushNamed(context, '/countdown').then((value) => setState(()=>{
           _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null }));
+      }
     }, true);
   }
 
@@ -85,11 +109,12 @@ class _MeditationScreenState extends State<MeditationScreen> {
                     children: [
                       SizedBox(height: 10),
                       Container(
-                      height:_meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Configuration.width*0.2: Configuration.width * 0.15,
+                      height:_meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Configuration.width*0.3: Configuration.width * 0.26,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.0),
                           image: DecorationImage(
                               image: NetworkImage(meditation.image)))),
+                      SizedBox(height: 10),
                       Flexible(
                           child: Text(
                           meditation.title,
@@ -97,7 +122,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      SizedBox(height: 10)
                     ]),
 
                   _blocked ? 
@@ -113,8 +137,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
                             Icon(Icons.lock),
                             Text('Unlocked at stage ' +  meditation.stagenumber.toString(), style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
                           ],
-                        ),
-                                      ),
+                        ), 
+                      ),
                     ):Container(),
                 ],
               ),
@@ -133,18 +157,17 @@ class _MeditationScreenState extends State<MeditationScreen> {
         SizedBox(height: 20),
         GridView(
           shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,crossAxisSpacing: 10),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10),
           children: meditations(),
         ),
-          ] 
-        ), 
-        () => {
-                _meditationstate.state ='pre_guided', 
-                Navigator.pushNamed(context, '/countdown').then(
-                  (value) => setState(()=>{
-                    _userstate.user.progress != null ? 
-                    autocloseDialog(context, _userstate.user) : null
-                  })), 
+      ]), 
+      () => {
+            _meditationstate.state ='pre_guided', 
+            Navigator.pushNamed(context, '/countdown').then(
+              (value) => setState(()=>{
+                _userstate.user.progress != null ? 
+                autocloseDialog(context, _userstate.user) : null
+              })), 
       }, _meditationstate.selmeditation != null);
   }
 
@@ -176,7 +199,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   SizedBox(height: 5),
                   Container(
                     width: Configuration.width*0.35,
-                    height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ? Configuration.height*0.17 :Configuration.height*0.15,
+                    height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?  Configuration.width*0.3: Configuration.width * 0.26,
                     decoration: BoxDecoration(
                       image: DecorationImage(image: NetworkImage(game.image)),
                     ),
@@ -595,45 +618,6 @@ class _CountdownState extends State<Countdown> {
   }
 }
 
-class TimePicker extends StatefulWidget {
-
-  TimePicker();
-
-  @override
-  _TimePickerState createState() => _TimePickerState();
-}
-
-class _TimePickerState extends State<TimePicker> {
-  @override
-  void initState() {
-    seltime = 1;
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleCircularSlider(
-      95,
-      1,
-      baseColor: Colors.grey.withOpacity(0.6),
-      handlerColor: Configuration.maincolor,
-      onSelectionChange: (a, b, c) {
-        setState(() {
-          seltime = b;
-          print(seltime);
-        });
-      },
-      height: Configuration.width > 600 ? 200 : Configuration.height*0.2,
-      width: Configuration.width > 600 ? 200 : 200,
-      selectionColor: Configuration.maincolor,
-      child: Center(
-          child: Text(
-        seltime.toString() + ' min',
-        style: Configuration.text('smallmedium', Colors.black),
-      )),
-    );
-  }
-}
 
 class WeekList extends StatefulWidget {
   @override

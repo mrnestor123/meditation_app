@@ -7,6 +7,7 @@ import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:upgrader/upgrader.dart';
 import 'package:video_player/video_player.dart';
 
 class Loading extends StatefulWidget {
@@ -27,8 +28,8 @@ class _LoadingState extends State<Loading> {
   bool started = false;
   VideoPlayerController _controller;
   bool isTablet = false;
+  bool newversion = true;
   bool finishedloading = false;
-
 
   @override
   void initState() {
@@ -52,6 +53,7 @@ class _LoadingState extends State<Loading> {
             })
       );
   }
+
 
   @override 
   void dispose(){
@@ -80,6 +82,14 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<UserState>(context);
+    
+    if(newversion){
+     showDialog(
+      context: context, 
+      builder: (_) {
+        return UpgradeAlert();
+      });
+    }
 
     //comprobamos si el usuario esta loggeado
     if (!started) {

@@ -76,8 +76,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    //nodejs = 'https://public.digitalvalue.es:8002';
-    nodejs = 'http://192.168.4.67:8002';
+    nodejs = 'https://public.digitalvalue.es:8002';
+   // nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;

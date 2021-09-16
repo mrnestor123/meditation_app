@@ -154,9 +154,18 @@ class User {
 
     //this.thisweekactions.add(a);
   }
-  void addMeditation(MeditationModel m) => totalMeditations.add(m);
-  void setLearnedLessons(List<LessonModel> l) => lessonslearned.addAll(l);
-  void setMeditations(List<MeditationModel> m) => totalMeditations.addAll(m);
+  void setLessons(List<dynamic> l){
+    return;
+  } 
+
+  void setMeditations(List<dynamic> m) {   
+    for(var med in m ){
+      totalMeditations.add(MeditationModel.fromJson(med));
+    }
+
+    totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
+  }
+  
   void setActions(json, isToday) {
     for(var action in json){ 
       action['userimage'] = this.image;
@@ -392,7 +401,6 @@ class User {
     this.setPercentage();
 
     if (this.percentage >= 100) {
-     
       this.updateStage(d);
     }
 

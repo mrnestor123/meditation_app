@@ -67,6 +67,7 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       );
 
+      u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
       u.setFollowedUsers(json['following'] != null ? json['following'] : []);
       u.setFollowsYou(json['followsyou'] != null ? json['followsyou'] : []);
 

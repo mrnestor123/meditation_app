@@ -203,8 +203,6 @@ class _ViewFollowersState extends State<ViewFollowers> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     final _userstate = Provider.of<UserState>(context);
-
-
     users = await _userstate.getUsersList(_userstate.user.following);
 
     //COMPROBAR QUE si se sale no haga set state NO SE SALGA DE AQUI
@@ -221,7 +219,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(onPressed: ()=> Navigator.pop(context),  icon: Icon(Icons.arrow_back), color: Colors.black),
+        leading: IconButton(onPressed: ()=> Navigator.pop(context), icon: Icon(Icons.arrow_back), color: Colors.black),
         title: Text(widget.title, style: Configuration.text('small', Colors.black)),
       ),
       body: Container(
