@@ -31,16 +31,26 @@ class _LoadingState extends State<Loading> {
   bool newversion = true;
   bool finishedloading = false;
 
+  String appcastURL ='https://raw.githubusercontent.com/mrnestor123/meditation_app/master/appcast.xml';
+  AppcastConfiguration cfg;
+
+
   @override
   void initState() {
     super.initState();
-     _controller = VideoPlayerController.asset('assets/tenstages.mp4')..initialize().then((_) {
-        _controller.play();
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        setState(() { });
-      });
+    cfg = AppcastConfiguration(url: appcastURL, supportedOS: ['android']);
 
-      _timer = new Timer.periodic(Duration(seconds: 1), 
+    _controller = VideoPlayerController.asset('assets/tenstages.mp4')..initialize().then((_) {
+      _controller.play();
+      // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+      setState(() { });
+    });
+  }
+
+  @override 
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _timer = new Timer.periodic(Duration(seconds: 1), 
         (Timer timer) => setState(() {
              if (_duration.inSeconds == 0) {
                 if(finishedloading) {
@@ -51,7 +61,7 @@ class _LoadingState extends State<Loading> {
                 _duration = _duration - Duration(seconds: 1);
               }
             })
-      );
+    );
   }
 
 
@@ -83,13 +93,6 @@ class _LoadingState extends State<Loading> {
   Widget build(BuildContext context) {
     _user = Provider.of<UserState>(context);
     
-    if(newversion){
-     showDialog(
-      context: context, 
-      builder: (_) {
-        return UpgradeAlert();
-      });
-    }
 
     //comprobamos si el usuario esta loggeado
     if (!started) {
@@ -102,6 +105,10 @@ class _LoadingState extends State<Loading> {
         body: Center(
             child: Stack(
               children: [
+                UpgradeAlert(
+                  appcastConfig: cfg,
+                  child: Center(child: Text('Checking...')),
+                ),
                 _duration.inSeconds == 0 ?
                 Align(
                   alignment: Alignment.topLeft,
