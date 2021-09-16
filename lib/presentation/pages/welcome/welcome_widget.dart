@@ -1,9 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
+import 'package:upgrader/upgrader.dart';
 
 class WelcomeWidget extends StatelessWidget {
+  AppcastConfiguration cfg= AppcastConfiguration(
+    url: 'https://raw.githubusercontent.com/mrnestor123/meditation_app/master/appcast.xml', 
+    supportedOS: ['android']
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -17,25 +24,37 @@ class WelcomeWidget extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
             margin: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Flexible(
-                    flex: 2,
-                    child:Image.asset('assets/logo.png')
+              child: Stack(
+                children: [
+                   UpgradeAlert(
+                     dialogStyle: Platform.isAndroid ? 
+                     UpgradeDialogStyle.material:  
+                     UpgradeDialogStyle.cupertino,
+                    appcastConfig: cfg,
+                    child: Text('checking'),
                   ),
-                  LoginRegisterButton(
-                    text: 'LOGIN',
-                    onPressed: (){
-                      Navigator.pushNamed(context, '/login');
-                    },
-                  ),
-                  SizedBox(height: Configuration.height*0.03),
-                  LoginRegisterButton(
-                    text: 'REGISTER',
-                    onPressed: (){
-                      Navigator.pushNamed(context, '/register');
-                    },
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                     
+                      Flexible(
+                        flex: 2,
+                        child:Image.asset('assets/logo.png')
+                      ),
+                      LoginRegisterButton(
+                        text: 'LOGIN',
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/login');
+                        },
+                      ),
+                      SizedBox(height: Configuration.height*0.03),
+                      LoginRegisterButton(
+                        text: 'REGISTER',
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/register');
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

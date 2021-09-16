@@ -14,6 +14,7 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:upgrader/upgrader.dart';
 
 class LoginWidget extends StatefulWidget {
   @override

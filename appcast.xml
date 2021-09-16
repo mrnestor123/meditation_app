@@ -5,13 +5,16 @@
     <language>en</language>
     <item>
         <title>Version 1.0</title>
-        <link>zity-dashboard.digitalvalue.es</link>
+        <link>https://play.google.com/apps/internaltest/4699307922046630741</link>
         <sparkle:version>4.0</sparkle:version>
         <description>
         <![CDATA[ Actualización tocha ]]>
         </description>
         <pubDate>Thur, 16 Sept 2021</pubDate>
         <enclosure url="https://play.google.com/apps/internaltest/4699307922046630741" sparkle:os="android"/>
+        <sparkle:tags>
+            <sparkle:criticalUpdate></sparkle:criticalUpdate>
+        </sparkle:tags>
     </item>
     </channel>
 </rss>

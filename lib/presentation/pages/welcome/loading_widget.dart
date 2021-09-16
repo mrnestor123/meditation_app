@@ -61,7 +61,8 @@ class _LoadingState extends State<Loading> {
                 _duration = _duration - Duration(seconds: 1);
               }
             })
-    );
+      );
+
   }
 
 
@@ -105,10 +106,6 @@ class _LoadingState extends State<Loading> {
         body: Center(
             child: Stack(
               children: [
-                UpgradeAlert(
-                  appcastConfig: cfg,
-                  child: Center(child: Text('Checking...')),
-                ),
                 _duration.inSeconds == 0 ?
                 Align(
                   alignment: Alignment.topLeft,
