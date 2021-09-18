@@ -1,11 +1,13 @@
 
 // Para las acciones que hace el usuario
 import 'package:flutter/material.dart';
+import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 class UserAction {
   IconData icono;
   String username, userimage, message, type, hour, coduser, day;
+  User user;
   dynamic action;
   DateTime time;
 
@@ -32,7 +34,7 @@ class UserAction {
     this.message += ', ' + action[0];
   }
 
-  UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message, this.userimage}){
+  UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message, this.userimage, this.user}){
     if(this.message == null){
    
     var types = {
@@ -56,6 +58,10 @@ class UserAction {
       hour = localdate.hour.toString() + ':' + (localdate.minute.toString().length > 1 ? localdate.minute.toString() : '0' + localdate.minute.toString() );
       day = localdate.day.toString() + '-' + localdate.month.toString();
     }
+
+    if(user != null){
+      this.userimage = user.image;
+    } 
 
     var icons = {
       'follow' : Icons.person_add,
@@ -82,6 +88,7 @@ class UserAction {
 
   factory UserAction.fromJson(Map<String, dynamic> json) => UserAction(
       time: json["time"] == null ? null : DateTime.parse(json["time"]),
+      user: json['user'] == null ? null : UserModel.fromJson(json['user']),
       message: json['message'] == null ? null : json['message'],
       userimage: json['userimage'] == null ? null : json['userimage'],
       type: json["type"] == null ? null : json["type"],

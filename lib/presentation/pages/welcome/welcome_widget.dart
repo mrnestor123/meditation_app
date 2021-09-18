@@ -31,12 +31,11 @@ class WelcomeWidget extends StatelessWidget {
                      UpgradeDialogStyle.material:  
                      UpgradeDialogStyle.cupertino,
                     appcastConfig: cfg,
-                    child: Text('checking'),
+                    child: Text(''),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                     
                       Flexible(
                         flex: 2,
                         child:Image.asset('assets/logo.png')
