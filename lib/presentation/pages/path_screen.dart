@@ -86,10 +86,10 @@ class PathScreen extends StatelessWidget {
           shrinkWrap: true,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10),
           children: [
-          iconButton('Goals', Icons.tab, _userstate.user.stage.goals),
-          iconButton('Obstacles', Icons.tab, _userstate.user.stage.obstacles),
-          iconButton('Skills', Icons.tab, _userstate.user.stage.skills),
-          iconButton('Mastery', Icons.tab, _userstate.user.stage.mastery)
+          iconButton('Goals', Icons.checklist, _userstate.user.stage.goals),
+          iconButton('Obstacles', Icons.warning, _userstate.user.stage.obstacles),
+          iconButton('Skills', Icons.handyman, _userstate.user.stage.skills),
+          iconButton('Mastery', Icons.check_box, _userstate.user.stage.mastery)
         ]),
       ],
     );
@@ -146,8 +146,7 @@ class PathScreen extends StatelessWidget {
         children: [
             SizedBox(height: 10),
             Text('You are currently on ', style: Configuration.text('tiny', Colors.grey)),
-            Text('Stage ' + _userstate.user.stagenumber.toString(),
-             style: Configuration.text('big', Configuration.maincolor)),
+            Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Configuration.maincolor)),
             //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
             SizedBox(height: 30),
             porcentaje()

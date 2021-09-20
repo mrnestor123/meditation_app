@@ -11,6 +11,7 @@ import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
@@ -285,10 +286,15 @@ class _StageViewState extends State<StageView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Stage ' + widget.stage.stagenumber.toString(),
-            style: Configuration.text('medium', Colors.black)),
-        centerTitle: true,
         leading: ButtonBack(),
+        actions: [
+          IconButton(
+            onPressed: ()=> {
+              stageDialog(context, widget.stage)
+            } , 
+            icon: Icon(Icons.info, color:Colors.black)
+            )
+        ],
         backgroundColor: Configuration.white,
         elevation: 0,
       ),

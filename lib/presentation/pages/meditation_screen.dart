@@ -154,11 +154,13 @@ class _MeditationScreenState extends State<MeditationScreen> {
     return layout(
       Column(
       children: [
-        SizedBox(height: 20),
-        GridView(
-          shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 10),
-          children: meditations(),
+        SizedBox(height: 50),
+        Expanded(
+          child: GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount:Configuration.width > 490 ? 3: 2, crossAxisSpacing: 10),
+            children: meditations(),
+          ),
         ),
       ]), 
       () => {
@@ -168,7 +170,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 _userstate.user.progress != null ? 
                 autocloseDialog(context, _userstate.user) : null
               })), 
-      }, _meditationstate.selmeditation != null);
+      }, _meditationstate.selmeditation != null,
+      'Guided meditations'
+      
+      
+      );
   }
 
   Widget games() {
@@ -256,13 +262,23 @@ class _MeditationScreenState extends State<MeditationScreen> {
          _gamestate.startgame();
         Navigator.pushNamed(context,'/gamestarted').then((value) => setState(()=>{}));
       },
-      _gamestate.selectedgame != null 
+      _gamestate.selectedgame != null,
+      'Concentration games'
     );
   }
 
-  Widget layout(child, onPressed, condition){
-    return Stack(
+  Widget layout(child, onPressed, condition,[title]){
+    return Flex(
+      direction:  Configuration.width > 500 ?  Axis.vertical : Axis.horizontal,
       children: [
+        title != null ? 
+           Column(
+            children: [
+              SizedBox(height: 15),
+              Text(title,style: Configuration.text('smallmedium', Colors.black)),
+            ],
+          ): 
+          Container(),
         Align(
           alignment: Configuration.width > 500 ? Alignment.centerRight : Alignment.bottomCenter,
           child: StartButton(

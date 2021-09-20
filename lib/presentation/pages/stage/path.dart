@@ -3,6 +3,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
@@ -58,27 +59,7 @@ class ImagePath extends StatelessWidget {
                 ],
               ),
               actions: [
-                IconButton(onPressed: ()=> 
-                 showGeneralDialog(
-                    context: context,
-                    barrierLabel: 'dismiss',
-                    barrierDismissible: true,
-                    pageBuilder:(context, anim1, anim2) {
-                      return AbstractDialog(
-                        content: Container(
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0), color: Colors.white),
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Image(image: NetworkImage(stage.shortimage)),
-                              Html(data: stage.shorttext)
-                            ],
-                          ),
-                        ),
-                        );
-                    })
+                IconButton(onPressed: ()=> stageDialog(context, stage)
                 , icon: Icon(Icons.info),color: Colors.black,)
               ],
               elevation: 0,

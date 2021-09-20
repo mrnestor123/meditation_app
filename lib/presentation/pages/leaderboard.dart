@@ -26,7 +26,6 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
   var time = '';
   TabController _tabController;
-
   dynamic condition = true;
   bool searching = false;
   var loading = false;
@@ -35,7 +34,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
    return showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
-          bool following = _userstate.user.following.contains(user);
+          bool following = _userstate.user.following.contains(user.coduser);
 
           return StatefulBuilder(
               builder:(BuildContext context, StateSetter setState ) {
@@ -98,13 +97,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           ProfileInfoBigCard(
                                 firstText: user.userStats.total.meditations.toString(),
                                 secondText: "Meditations\ncompleted",
-                                icon: Icon(Icons.self_improvement, color: Colors.lightBlue),
+                                icon: Icon(Icons.self_improvement, color: Colors.white),
                                 color: 'white',
                           ),
                           ProfileInfoBigCard(
                               firstText: user.userStats.total.lessons.toString(),
                               secondText: "Lessons\ncompleted",
-                              icon: Icon(Icons.book, color: Colors.lightBlue),
+                              icon: Icon(Icons.book, color: Colors.white),
                               color: 'white',
                           )
                         ],
@@ -115,10 +114,19 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       OutlinedButton(
-                        onPressed: () => setState((){
-                          following = !following;  
-                          _userstate.follow(user, following);}), 
-                        child: Text(!following ? 'Follow' : 'Unfollow', style:  Configuration.text('tiny', following ? Colors.red : Colors.lightBlue)),
+                        onPressed: () async{
+                          following = !following;
+                          await _userstate.follow(user, following);
+                          setState(() {
+                            if(following){  
+                              followedusers.add(user);
+                            }else {
+                              followedusers.remove(user);
+                            }
+                          });
+                        }, 
+                        child: Text(!following ? 
+                        'Follow' : 'Unfollow', style:  Configuration.text('tiny', following ? Colors.red : Colors.lightBlue)),
                         style: OutlinedButton.styleFrom(
                         ),
                       )
