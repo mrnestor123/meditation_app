@@ -85,27 +85,16 @@ class __TimelineState extends State<_Timeline> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-    
     users = await _userstate.getUsersList(_userstate.user.following);
   }
-
 
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!
   List<Widget> getMessages() { 
       List<UserAction> sortedlist = new List.empty(growable: true);
       
       mode == 'Today' ? sortedlist.addAll(_userstate.user.todayactions) : sortedlist.addAll(_userstate.user.thisweekactions);
-
-      //ESTO NO LO DEBERÍA DE HACER MÁS DE UNA VEZ
-      for(User u in users) {
-        if(mode == 'Today' && u.todayactions.length > 0){
-          sortedlist.addAll(u.todayactions);
-        }else if(mode !='Today' && u.thisweekactions.length > 0) {
-          sortedlist.addAll(u.thisweekactions);
-        }
-      }
-
-      sortedlist.sort((a,b) => a.time.compareTo(b.time));
+      
+      sortedlist.sort((a,b) => b.time.compareTo(a.time));
 
       List<Widget> widgets = new List.empty(growable: true);
 

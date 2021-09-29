@@ -25,7 +25,6 @@ import 'game_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var initializationSettingsAndroid = AndroidInitializationSettings('ic_launcher');

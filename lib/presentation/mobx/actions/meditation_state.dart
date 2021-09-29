@@ -36,24 +36,19 @@ abstract class _MeditationState with Store {
   @observable
   Map<String,dynamic> currentsentence;
 
-  @observable
-  String type = 'free';
-
   bool finished = false;
-
 
   var selectedstage = 1;
   var selectedtype = 'Meditation';
 
   @observable
-  Duration duration;
+  Duration duration = new Duration(minutes: 5);
 
-  Duration totalduration;
+  Duration totalduration = new Duration(minutes: 5);
 
   @observable
   bool startedmeditation = false;
   
-
   @observable
   String state = 'initial';
 
@@ -62,51 +57,54 @@ abstract class _MeditationState with Store {
 
   _MeditationState({this.meditate});
 
-  //types are guided, free and games
-  @action 
-  void switchtype(String newtype){
-    type = newtype;
-
-    if(type =='guided') {
-      practice.jumpToPage(1);
-      currentpage = 1;
-    }
-
-    if(type == 'free'){
-      practice.jumpToPage(0);
-      currentpage = 0;
-    }
-
-    
-    if(type == 'games') {
-      practice.jumpToPage(2);
-      currentpage = 2;
-    }
-  }
 
   @action 
-  void switchpage(int index) {
+  void switchpage(int index, [avoidjump]) {
     currentpage = index;
+    if(avoidjump == null || !avoidjump ){
+      practice.jumpToPage(index);
+    }
   }
 
   @action
-  void setMeditation(MeditationModel m, User u, DataBase d, int time) {
+  void startMeditation(User u, DataBase d) {
     this.user = u;
+    // PARA QUE QUEREMOS DATA!!
     this.data = d;
-    this.totalduration = new Duration(minutes: time);
-    this.duration = new Duration(minutes: time);
-    this.selmeditation = m;
     this.currentsentence = null;
    // finishMeditation();
     startTimer();
   }
-  
+
+  @action 
+  void selectMeditation(Meditation m){
+    if(this.selmeditation == m){
+      this.selmeditation = null;
+      state = 'free';
+    }else{
+      this.selmeditation = m;
+      state = 'pre_guided';
+    }
+  }
+
+  @action 
+  void setDuration(int time){
+    duration = new Duration(minutes: time);
+    totalduration = new Duration(minutes: time);
+  }
+
 
   @action
   void startTimer() {
     var oneSec = new Duration(seconds: 1);
-    var timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
+    var timeChange; 
+    
+    if(selmeditation != null){
+     timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
+    }
+
     int count = 0;
+    
     if(timer != null){
       timer.cancel();
     }
@@ -118,16 +116,17 @@ abstract class _MeditationState with Store {
         state = 'finished';
         timer.cancel();
       } else {
-        print(type);
-        if(selmeditation.type !='free' && selmeditation.followalong != null){
-          if(currentsentence == null && this.totalduration.inSeconds - this.duration.inSeconds > 5){
-            currentsentence = selmeditation.followalong[count.toString()];
-            assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
-            count++;
-          }else if(this.duration.inSeconds % timeChange == 0 && currentsentence != null){
-            currentsentence = selmeditation.followalong[count.toString()];
-            assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
-            count++;
+        if(selmeditation != null ){
+          if(selmeditation.type !='free' && selmeditation.followalong != null){
+            if(currentsentence == null && this.totalduration.inSeconds - this.duration.inSeconds > 5){
+              currentsentence = selmeditation.followalong[count.toString()];
+              assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+              count++;
+            }else if(this.duration.inSeconds % timeChange == 0 && currentsentence != null){
+              currentsentence = selmeditation.followalong[count.toString()];
+              assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+              count++;
+            }
           }
         }
         this.duration = this.duration - oneSec;
@@ -138,14 +137,18 @@ abstract class _MeditationState with Store {
 
   @action
   void pause() {
-    //this.state = 'paused';
+    this.state = 'paused';
     timer.cancel();
   }
 
   @action
   Future finishMeditation() async {
     int currentposition = user.position;
+    if(selmeditation == null){
+      selmeditation = new MeditationModel(duration: totalduration);
+    }
     Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation, user: user, d: data));
+    selmeditation = null;
 
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
     this.state = 'finished';

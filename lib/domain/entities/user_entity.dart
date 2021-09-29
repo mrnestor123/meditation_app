@@ -168,7 +168,10 @@ class User {
   
   void setActions(json, isToday) {
     for(var action in json){ 
-      action['userimage'] = this.image;
+      if(action['userimage'] == null){
+        action['userimage'] = this.image;
+      }
+      //action['userimage'] = this.image;
       if(isToday) {
         todayactions.add(UserAction.fromJson(action));
       }else{

@@ -5,6 +5,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 
 /*
@@ -245,9 +246,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Configuration.maincolor,
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded),
-            onPressed: () => Navigator.pop(context)),
+        leading: ButtonBack(color: Colors.white),
         title: Text('Leaderboard', style: Configuration.text('medium', Colors.white)),
       ),
       body: DefaultTabController(

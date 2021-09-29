@@ -20,7 +20,7 @@ class StageCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16.0)
       ),
-      child: TextButton(
+      child: ElevatedButton(
         onPressed: () => 
           Navigator.push(
             context,
@@ -52,7 +52,7 @@ class StageCard extends StatelessWidget {
         style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
             primary: Configuration.maincolor,
-            elevation: 0.0,
+            elevation: 2.0,
             onPrimary: Colors.white,
             padding: EdgeInsets.all(Configuration.smpadding),
             minimumSize: Size(double.infinity, double.infinity)),

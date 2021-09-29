@@ -8,7 +8,7 @@ import 'meditation_entity.dart';
 
 class Stage {
   int stagenumber, userscount;
-  String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext;
+  String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext, longdescription;
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
@@ -27,7 +27,8 @@ class Stage {
       this.shortimage,
       this.mastery,
       this.userscount,
-      this.stobjectives});
+      this.stobjectives,
+      this.longdescription});
 
   void addLesson(Lesson l){
     if(stobjectives.lecciones == null){

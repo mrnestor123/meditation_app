@@ -10,6 +10,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
@@ -290,7 +291,26 @@ class _StageViewState extends State<StageView> {
         actions: [
           IconButton(
             onPressed: ()=> {
-              stageDialog(context, widget.stage)
+               showGeneralDialog(
+                  context: context,
+                  barrierLabel: 'dismiss',
+                  barrierDismissible: true,
+                  pageBuilder:(context, anim1, anim2) {
+                    return AbstractDialog(
+                      content: Container(
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0), color: Colors.white),
+                        color:Configuration.maincolor,
+                        padding: EdgeInsets.all(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Html(data: widget.stage.longdescription)
+                          ],
+                        ),
+                      ),
+                      );
+                })
             } , 
             icon: Icon(Icons.info, color:Colors.black)
             )
@@ -451,85 +471,92 @@ class _ContentViewState extends State<ContentView> {
           return Container(
             width: Configuration.width,
             color: Configuration.lightgrey,
-            child: Column(
-              mainAxisAlignment: widget.lesson.text[index]['image'] == ''
-                  ? MainAxisAlignment.center
-                  : MainAxisAlignment.start,
-              children: [
-                 widget.lesson.text[index]["image"] != '' && widget.lesson.text[index]["image"] != null ? Image.network(
-                  widget.lesson.text[index]["image"],
-                  width: Configuration.width,
-                ) : Container(),
-                Container(
-                    width: Configuration.width,
-                    padding: EdgeInsets.all(Configuration.smpadding),
-                    child: Html(
-                      data:widget.lesson.text[index]["text"],
-                    )
-                   ),
-                Row(
-                    mainAxisAlignment: widget.lesson.type == 'meditation'
-                        ? MainAxisAlignment.spaceEvenly
-                        : MainAxisAlignment.center,
-                    children: [
-                      
-                       Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                  AnimatedOpacity(
-                                    opacity: reachedend ? 1.0 : 0.0, 
-                                    duration: Duration(seconds: 1),
-                                    child: Container(
-                                      width: Configuration.width*0.5,
-                                      child: AspectRatio(
-                                        aspectRatio: 9/2,
-                                        child: ElevatedButton(
-                                            onPressed: () async {
-                                            await _userstate.takeLesson(widget.lesson);
-                                            Navigator.pop(context, true);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Configuration.maincolor,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                                          ), 
-                                          child: Text(
-                                            'Finish',
-                                            style: Configuration.text('small', Colors.white),
-                                          )
+            child: Center(
+              child: ListView(
+                physics: ScrollPhysics(),
+                shrinkWrap: true,
+                padding: EdgeInsets.only(top: 0.0),
+                children: [
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: widget.lesson.text[index]["image"] != '' && widget.lesson.text[index]["image"] != null ? 
+                     Image.network(
+                      widget.lesson.text[index]["image"],
+                      width: Configuration.width,
+                    ) : Container(),
+                  ),
+                  Center(
+                    child: Container(
+                        width: Configuration.width,
+                        padding: EdgeInsets.all(Configuration.smpadding),
+                        child: Html(
+                          data:widget.lesson.text[index]["text"],
+                        )
+                      ),
+                  ),
+                  Row(
+                      mainAxisAlignment: widget.lesson.type == 'meditation'
+                          ? MainAxisAlignment.spaceEvenly
+                          : MainAxisAlignment.center,
+                      children: [
+                         Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                    AnimatedOpacity(
+                                      opacity: reachedend ? 1.0 : 0.0, 
+                                      duration: Duration(seconds: 1),
+                                      child: Container(
+                                        width: Configuration.width*0.5,
+                                        child: AspectRatio(
+                                          aspectRatio: 9/2,
+                                          child: ElevatedButton(
+                                              onPressed: () async {
+                                              await _userstate.takeLesson(widget.lesson);
+                                              Navigator.pop(context, true);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Configuration.maincolor,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                                            ), 
+                                            child: Text(
+                                              'Finish',
+                                              style: Configuration.text('small', Colors.white),
+                                            )
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-
-                                ])
-                          ,
-
-                      /*GestureDetector(
-                        onTap: () async {
-                          await _userstate.takeLesson(widget.lesson);
-                          Navigator.pop(context, true);
-                        },
-                        child: AnimatedContainer(
-                          width: reachedend ? Configuration.width * 0.5 : 0,
-                          curve: Curves.easeIn,
-                          duration: Duration(seconds: 1),
-                          padding: EdgeInsets.all(Configuration.smpadding),
-                          decoration: BoxDecoration(
-                              color: Configuration.darkpurple,
-                              shape: BoxShape.circle),
-                          child: reachedend
-                              ? Center(
-                                  child: Text(
-                                    'Finish',
-                                    style: Configuration.text(
-                                        'medium', Colors.white),
-                                  ),
-                                )
-                              : Container(),
-                        ),
-                      ) : Container(),*/
-                    ])
-              ],
+            
+                                  ])
+                            ,
+            
+                        /*GestureDetector(
+                          onTap: () async {
+                            await _userstate.takeLesson(widget.lesson);
+                            Navigator.pop(context, true);
+                          },
+                          child: AnimatedContainer(
+                            width: reachedend ? Configuration.width * 0.5 : 0,
+                            curve: Curves.easeIn,
+                            duration: Duration(seconds: 1),
+                            padding: EdgeInsets.all(Configuration.smpadding),
+                            decoration: BoxDecoration(
+                                color: Configuration.darkpurple,
+                                shape: BoxShape.circle),
+                            child: reachedend
+                                ? Center(
+                                    child: Text(
+                                      'Finish',
+                                      style: Configuration.text(
+                                          'medium', Colors.white),
+                                    ),
+                                  )
+                                : Container(),
+                          ),
+                        ) : Container(),*/
+                      ])
+                ],
+              ),
             ),
           );
         },
@@ -575,6 +602,7 @@ class _ContentViewState extends State<ContentView> {
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
+        extendBody: true,
         appBar: AppBar(
           leading: IconButton(
               icon: Icon(Icons.close,

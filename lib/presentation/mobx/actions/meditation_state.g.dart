@@ -69,21 +69,6 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
-  final _$typeAtom = Atom(name: '_MeditationState.type');
-
-  @override
-  String get type {
-    _$typeAtom.reportRead();
-    return super.type;
-  }
-
-  @override
-  set type(String value) {
-    _$typeAtom.reportWrite(value, super.type, () {
-      super.type = value;
-    });
-  }
-
   final _$durationAtom = Atom(name: '_MeditationState.duration');
 
   @override
@@ -142,33 +127,44 @@ mixin _$MeditationState on _MeditationState, Store {
       ActionController(name: '_MeditationState');
 
   @override
-  void switchtype(String newtype) {
-    final _$actionInfo = _$_MeditationStateActionController.startAction(
-        name: '_MeditationState.switchtype');
-    try {
-      return super.switchtype(newtype);
-    } finally {
-      _$_MeditationStateActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void switchpage(int index) {
+  void switchpage(int index, [dynamic avoidjump]) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.switchpage');
     try {
-      return super.switchpage(index);
+      return super.switchpage(index, avoidjump);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
   }
 
   @override
-  void setMeditation(MeditationModel m, User u, DataBase d, int time) {
+  void startMeditation(User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
-        name: '_MeditationState.setMeditation');
+        name: '_MeditationState.startMeditation');
     try {
-      return super.setMeditation(m, u, d, time);
+      return super.startMeditation(u, d);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void selectMeditation(Meditation m) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.selectMeditation');
+    try {
+      return super.selectMeditation(m);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setDuration(int time) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.setDuration');
+    try {
+      return super.setDuration(time);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
@@ -203,7 +199,6 @@ user: ${user},
 selmeditation: ${selmeditation},
 currentpage: ${currentpage},
 currentsentence: ${currentsentence},
-type: ${type},
 duration: ${duration},
 startedmeditation: ${startedmeditation},
 state: ${state}

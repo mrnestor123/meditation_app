@@ -20,6 +20,7 @@ class StageModel extends Stage {
       String mastery,
       String longimage,
       String shortimage,
+      String longdescription,
       shorttext,
       stobjectives})
       : super(
@@ -51,6 +52,7 @@ class StageModel extends Stage {
         image: json["image"] == null ? null : json["image"],
         goals: json["goals"] == null ? null : json["goals"],
         shortimage: json["shortimage"] == null ? null : json["shortimage"],
+        longdescription: json['longdescription'] == null ? null : json['longdescription'],
         obstacles: json["obstacles"] == null ? null : json["obstacles"],
         stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
         skills: json["skills"] == null ? null : json["skills"],

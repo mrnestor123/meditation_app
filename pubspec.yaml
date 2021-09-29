@@ -19,8 +19,7 @@ environment:
 dependencies:
   rxdart: ^0.26.0
   upgrader: ^3.5.1
-  mobx: ^1.1.1
-  flutter_mobx: ^1.1.0
+  mobx: ^2.0.4
   provider: ^5.0.0
   uuid: ^3.0.1
   path: ^1.6.4
@@ -54,6 +53,10 @@ dependencies:
   wheel_chooser: ^0.1.1
   connectivity_plus: ^1.0.5
   flutter_local_notifications: ^8.1.1+2
+  flutter_mobx: ^2.0.2
+
+
+
 
   flutter:
     sdk: flutter
@@ -64,7 +67,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner:
-  mobx_codegen: ^1.0.3
+  mobx_codegen: ^2.0.3
 
 
 # For information on the generic Dart part of this file, see the

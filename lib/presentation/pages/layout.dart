@@ -10,8 +10,6 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
-import 'package:meditation_app/presentation/pages/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/profile_widget.dart';
@@ -75,7 +73,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     
-    Widget chiporText(String text, bool chip){
+    Widget chiporText(String text, bool chip, int page){
       Widget g;
 
       var types = {'Guided':'guided','Free':'free','Games':'games'};
@@ -95,7 +93,7 @@ class _MobileLayoutState extends State<MobileLayout> {
       return GestureDetector(
         onTap: () {
           setState(() {
-            _meditationstate.switchtype(types[text]);
+            _meditationstate.switchpage(page);
           });
         },
         child: g
@@ -104,6 +102,7 @@ class _MobileLayoutState extends State<MobileLayout> {
 
     return Scaffold(
       appBar: AppBar(
+        elevation: 0.0,
         backgroundColor: Configuration.white,
         bottom: PreferredSize(
             child: currentindex == 2 ?
@@ -114,25 +113,24 @@ class _MobileLayoutState extends State<MobileLayout> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Observer(builder: (BuildContext context) {  
-                        return chiporText('Free', _meditationstate.currentpage == 0);
+                        return chiporText('Meditate', _meditationstate.currentpage == 0, 0);
                       }),
-                      
                       Observer(builder: (BuildContext context) {  
-                        return chiporText('Guided', _meditationstate.currentpage == 1);
-                      },),
-                      
-                      Observer(builder: (BuildContext context) {  
-                        return chiporText('Games', _meditationstate.currentpage == 2);
+                        return chiporText('Games', _meditationstate.currentpage == 1, 1);
                       }),
                     ],
                   ),
+                  Container(
+                    color: Colors.grey,
+                    height: 1.0,
+                  )
                 ],
-              ):
+                ):
               Container(
-                color: Colors.white,
+                color: Colors.grey,
                 height: 1.0,
               ),
-            preferredSize: currentindex == 2 ? Size.fromHeight(Configuration.blockSizeVertical* 8) : Size.fromHeight(4.0)),
+            preferredSize: currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)),
         leading: GestureDetector(
           onTap: (){
             this._c.jumpToPage(0);
@@ -157,7 +155,7 @@ class _MobileLayoutState extends State<MobileLayout> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        elevation: 20.0,
+        elevation: 2.0,
         selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
         unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
         unselectedItemColor: Colors.black,

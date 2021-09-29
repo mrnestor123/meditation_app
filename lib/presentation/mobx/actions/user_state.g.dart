@@ -99,6 +99,21 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
+  final _$usersAtom = Atom(name: '_UserState.users');
+
+  @override
+  List<User> get users {
+    _$usersAtom.reportRead();
+    return super.users;
+  }
+
+  @override
+  set users(List<User> value) {
+    _$usersAtom.reportWrite(value, super.users, () {
+      super.users = value;
+    });
+  }
+
   final _$lessondataAtom = Atom(name: '_UserState.lessondata');
 
   @override
@@ -156,6 +171,13 @@ mixin _$UserState on _UserState, Store {
     return _$changeImageAsyncAction.run(() => super.changeImage(image));
   }
 
+  final _$uploadImageAsyncAction = AsyncAction('_UserState.uploadImage');
+
+  @override
+  Future<String> uploadImage(dynamic image) {
+    return _$uploadImageAsyncAction.run(() => super.uploadImage(image));
+  }
+
   final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');
 
   @override
@@ -192,6 +214,7 @@ nightmode: ${nightmode},
 loggedin: ${loggedin},
 errorMessage: ${errorMessage},
 requests: ${requests},
+users: ${users},
 lessondata: ${lessondata}
     ''';
   }
