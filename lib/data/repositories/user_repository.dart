@@ -7,6 +7,7 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
@@ -156,19 +157,19 @@ class UserRepositoryImpl implements UserRepository {
 
 
   @override
-  Future<Either<Failure,void>> updateRequest(Request r) async{
+  Future<Either<Failure,void>> updateRequest(Request r, [Notify n]) async{
     try{
-      await remoteDataSource.updateRequest(r);
+      await remoteDataSource.updateRequest(r,n);
     }catch(e){
       return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
     }
-  
   }
 
   @override
   Future<Either<Failure, void>> uploadRequest(Request r) async{
     try{
       await remoteDataSource.uploadRequest(r);
+      return Right(null);
     }catch(e){
       return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
     }
@@ -203,4 +204,26 @@ class UserRepositoryImpl implements UserRepository {
     } 
   }
 
+  @override
+  Future<Either<Failure, Request>> getRequest(String cod) async {
+    if (await networkInfo.isConnected) {
+      try {
+        final request = await remoteDataSource.getRequest(cod);
+        return Right(request);
+      } on Exception {
+        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      }
+    }else{
+      return Left(ServerFailure());
+    } 
+  }
+
+  @override
+  Future<Either<Failure, void>> updateNotification(Notify n) async {
+     try{
+      await remoteDataSource.updateNotification(n);
+    }catch(e){
+      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+    }
+  }
 }

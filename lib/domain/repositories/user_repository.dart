@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
@@ -24,11 +25,16 @@ abstract class UserRepository {
 
   Future<Either<Failure,List<Request>>> getRequests();
 
-  Future<Either<Failure,void>> updateRequest(Request r);
+  Future<Either<Failure,void>> updateRequest(Request r,[Notify n]);
 
   Future<Either<Failure,void>> uploadRequest(Request r);
 
   Future<Either<Failure, List<User>>> getUsers(User u);
 
   Future<Either<Failure, User>> getUser(String cod);
+
+  Future<Either<Failure,Request>>getRequest(String cod);
+
+    Future<Either<Failure,void>> updateNotification(Notify n);
+
 }

@@ -3,19 +3,15 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:uuid/uuid.dart';
 
 //intento de hacer enum. Muy complicado serializar
-enum RequestState {
-  Closed,
-  InProgress,
-  Open 
-}
 
 //type issue and suggestion
 //state == open, closed
 // states go from open, to in progress, to closed.
 class Request {
   dynamic cod;
-  String username,type,content,coduser,state,title,image;
-  
+  String username,type,content,coduser,state,title,image,userimage;
+
+  DateTime date;
   List<Comment> comments;
   int points;
   Map<String,dynamic> votes;
@@ -25,12 +21,14 @@ class Request {
       this.username,
       this.type,
       this.content,
+      this.date,
       this.coduser,
       this.state,
       this.comments,
       this.points = 0,
       this.votes,
       this.image,
+      this.userimage,
       this.title}){
 
     if (cod == null) {
@@ -39,6 +37,10 @@ class Request {
     } else {
       this.cod = coduser;
     }     
+
+    if(this.date == null){
+      date = DateTime.now();
+    }
   }
 
   Request.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class Request {
     this.type = json['type'];
     this.content = json['content'] == null ? json['description'] : json ['content'];
     this.coduser = json['coduser'];
+    this.userimage = json['userimage'];
     this.state = json['state'];
     //ESTO SE PUEDE HACER EN OTROS SITIOS
     if (json['comments'] != null) {

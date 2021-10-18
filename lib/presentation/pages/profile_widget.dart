@@ -1,12 +1,16 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
+import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -21,19 +25,81 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  User user;
+  bool uploading;
+  final ImagePicker _picker = ImagePicker();
+  var _userstate;
+
+
+  void _showPicker(context) {
+
+    _imgFromCamera() async {
+      PickedFile image = await _picker.getImage(source: ImageSource.camera);
+      
+      if(image != null){
+      setState(() {
+        uploading =true;
+      });
+      await _userstate.changeImage(image);
+      
+      setState(() {
+        uploading = false;
+      });
+      }
+    }
+
+    _imgFromGallery() async {
+      PickedFile image = await _picker.getImage(source: ImageSource.gallery);
+
+      if(image != null){
+        setState(() {
+          uploading =true;
+        });
+        await _userstate.changeImage(image);
+        setState(() {
+          uploading = false;
+        });
+      }
+    }
+
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final _userstate = Provider.of<UserState>(context);
+    _userstate = Provider.of<UserState>(context);
+    user = widget.user !=null ? widget.user : _userstate.user;
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back,
-                size: Configuration.smicon),
-            color: Colors.white,
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: ButtonBack(color: Colors.white),
           actions: [
             widget.user != null ?
             Container() :
@@ -57,23 +123,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Column(
           children: <Widget>[
             //REFACTORIZAR ESTO
+            //PORQUE TIENEN CADA UNO UNO ????? // NO ES LO MISMO ???
             Expanded(
                 flex: 2,
-                child: widget.user != null ?
-                Column(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: Configuration.blockSizeVertical*1),
+                    SizedBox(height: 15),
                     RadialProgress(
                         width: Configuration.safeBlockHorizontal * 1,
                         goalCompleted: _userstate.user.stage.stagenumber / 10,
-                        child: CircleAvatar(
-                            radius:  Configuration.blockSizeHorizontal * 12,
-                            backgroundColor: Colors.transparent,
-                            backgroundImage: widget.user.image == null
-                                ? null
-                                : NetworkImage(widget.user.image)
+                        child: GestureDetector(
+                          onTap: ()=>{
+                            if(widget.user == null){
+                              _showPicker(context)
+                            }
+                          },
+                          child: CircleAvatar(
+                              radius:  Configuration.blockSizeHorizontal * 12,
+                              backgroundColor: Colors.transparent,
+                              backgroundImage:user.image == null
+                                  ? null
+                                  : NetworkImage(user.image)
+                          ),
                         )
                       ),
                     SizedBox(
@@ -83,15 +155,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                            widget.user.nombre != null ? widget.user.nombre : 'Guest',style: Configuration.text('medium', Colors.white),
+                           user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white),
                         ),
                       ],
                     ),
+                    SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.terrain, color: Colors.white),
+                            SizedBox(width: 5),
+                            Text("Stage " + user.stagenumber.toString(), 
+                              style: Configuration.text('small', Colors.white)
+                            )
+                          ],
+                        ),
+                        
+                        user.isAdmin() ? 
+                        Row(
+                          children: [
+                            Icon(Icons.admin_panel_settings, color:Colors.white),
+                            Text('Admin',style: Configuration.text('small', Colors.white))
+                          ],
+                        ): 
+                        Row(
+                          children: [
+                            Icon(Icons.self_improvement,color: Colors.white),
+                            Text('Meditator',style: Configuration.text('small', Colors.white))
+                          ],
+                        ) 
+                      ],
+                    )
                   ],
                 )
-                : 
-                MyInfo()
-              ),
+            ),
             Expanded(
               flex: 4,
               child: Container(
@@ -104,41 +203,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: <Widget>[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
+                      children: [
                       TextButton(
                         onPressed: ()=>  
-                        widget.user != null ? null :
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ViewFollowers(
-                                    cods: _userstate.user.following,
-                                    title: 'Following',
+                              builder: (context) => 
+                              ViewFollowers(
+                                cods:user.following,
+                                title: 'Following',
                           )),
                       ), 
                       child: Column(
                           children: [
                             Text('Following', style: Configuration.text('tiny', Colors.black)),
-                            Text(widget.user != null ? widget.user.following.length.toString() : _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                            Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
                           ],
                         ),
                       ),
                       TextButton(
                         onPressed: ()=>  
-                        widget.user != null ? null :
                           Navigator.push(
                             context,
                               MaterialPageRoute(
                                   builder: (context) => ViewFollowers(
-                                        cods: _userstate.user.followers,
-                                        title: 'Followers',
+                                  cods: user.followers ,
+                                  title: 'Followers',
                               )
                             ),
                           ),
                           child: Column(
                           children: [
                             Text('Followers', style: Configuration.text('tiny', Colors.black)),
-                            Text(widget.user != null ? widget.user.following.length.toString() :  _userstate.user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                            Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.black))
                           ],
                         ),
                       ) 
@@ -148,20 +246,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Table(children: [
                       TableRow(children: [
                         ProfileInfoBigCard(
-                          firstText:  widget.user != null ? widget.user.userStats.total.meditations.toString() :_userstate.user.userStats.total.meditations.toString(),
+                          firstText:  user.userStats.total.meditations.toString(),
                           secondText: "Meditations\ncompleted",
                           icon: Icon(Icons.self_improvement),
                         ),
                         ProfileInfoBigCard(
-                            firstText: 
-                             widget.user != null ? widget.user.userStats.total.lessons.toString() :
-                            
-                            _userstate
-                                .user.userStats.total.lessons
-                                .toString(),
+                            firstText: user.userStats.total.lessons.toString(),
                             secondText: "Lessons\ncompleted",
                             icon: Icon(Icons.book))
                       ]),
+                      TableRow(
+                        children: [
+                          ProfileInfoBigCard(
+                            firstText:  user.timemeditated,
+                            secondText: "Time \nmeditated",
+                            icon: Icon(Icons.timer),
+                          ),
+                          ProfileInfoBigCard(
+                            firstText: user.userStats.total.maxstreak.toString() + (user.userStats.total.maxstreak == 1 ? ' day' : ' days'),
+                            secondText: "Max \nstreak",
+                            icon: Icon(Icons.calendar_today),
+                          )
+                        ]
+                      )
                     ]),
                     SizedBox(height: Configuration.blockSizeVertical * 3),
                     Text('Meditation record', style: Configuration.text('small', Colors.black)),
@@ -192,7 +299,6 @@ class ViewFollowers extends StatefulWidget {
 
 class _ViewFollowersState extends State<ViewFollowers> {
   List<User> users = new List.empty(growable: true);
-  bool loading = true;
 
   @override
   void initState() {
@@ -203,17 +309,12 @@ class _ViewFollowersState extends State<ViewFollowers> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     final _userstate = Provider.of<UserState>(context);
-    users = await _userstate.getUsersList(_userstate.user.following);
-
-    //COMPROBAR QUE si se sale no haga set state NO SE SALGA DE AQUI
-    setState(() {
-      loading = false;
-    });
-    
+    users = await _userstate.getUsersList(widget.cods);  
   }
 
   @override
   Widget build(BuildContext context) {
+    final _userstate =Provider.of<UserState>(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -229,66 +330,73 @@ class _ViewFollowersState extends State<ViewFollowers> {
         child: SingleChildScrollView(
             child: Padding(
                 padding: EdgeInsets.all(Configuration.smpadding),
-                child:loading ? 
-                Column(
-                  children: [
-                    CircularProgressIndicator(
-                      color: Configuration.maincolor,
-                    ),
-                  ],
-                ):
-                users.length > 0 ? Table(  
-                columnWidths: {
-                0: FractionColumnWidth(0.2),
-                1: FractionColumnWidth(0.5),
-                2: FractionColumnWidth(0.3)
-               },
-                children: users.map((u) {
-                  return TableRow(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
-                      backgroundImage: u.image != null ? NetworkImage(u.image) : null,
-                      child: u.image == null ? null : null,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                child: 
+                Observer(
+                  builder: (context) {
+                    if(_userstate.loading){ 
+                    return Column(
                       children: [
-                        Text(u.nombre == null ? 'Anónimo' : u.nombre,
-                            style: Configuration.text('small', Colors.black)),
-                        Text('Stage ' + u.stagenumber.toString(),
-                            style: Configuration.text('tiny', Colors.grey))
+                        CircularProgressIndicator(
+                          color: Configuration.maincolor,
+                        ),
                       ],
-                    ),
-                    OutlinedButton(
-                        onPressed: () {
-                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileScreen(
-                                        user: u,
-                                  )
-                                ),
-                            );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          elevation: 0.0,
-                          primary: Configuration.maincolor,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
-                        ),
-                        child: Text(
-                          'Profile',
-                          style: Configuration.text('small', Colors.black),
-                        ),
-                    )
-                ]);
-              }).toList()
-              ) :  widget.title == 'Following' ? 
-                Text('You are not following any users', style: Configuration.text('tiny',Colors.black)) :
-                Text('You are not being followed by anyone', style:Configuration.text('tiny', Colors.black))    
+                    );
+                    }else{
+                      return Table( 
+                      defaultVerticalAlignment: TableCellVerticalAlignment.middle, 
+                      columnWidths: {
+                      0: FractionColumnWidth(0.2),
+                      1: FractionColumnWidth(0.5),
+                      2: FractionColumnWidth(0.3)
+                    },
+                    children: _userstate.dynamicusers.map((u) {
+                      return TableRow(
+                        children: [
+                          ProfileCircle(
+                            userImage: u.image,
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(5.0),
+                            margin: EdgeInsets.symmetric(vertical: 7),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(u.nombre == null ? 'Anónimo' : u.nombre,
+                                    style: Configuration.text('small', Colors.black)),
+                                Text('Stage ' + u.stagenumber.toString(),
+                                    style: Configuration.text('tiny', Colors.grey))
+                              ],
+                            ),
+                          ),
+                          OutlinedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ProfileScreen(
+                                              user: u,
+                                        )
+                                      ),
+                                  );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                elevation: 0.0,
+                                primary: Configuration.maincolor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
+                              ),
+                              child: Text(
+                                'Profile',
+                                style: Configuration.text('small', Colors.black),
+                              ),
+                            )
+                            ]);
+                        }).toList());
+                    }
+                  }
+                )
+              )    
             )
-        ),
-      )
+        )
     );
   }
 }
@@ -309,7 +417,7 @@ class _ViewDataState extends State<ViewData> {
     );
   }
 }
-
+/*
 class MyInfo extends StatefulWidget {
   bool isTablet;
 
@@ -326,64 +434,9 @@ class _MyInfoState extends State<MyInfo> {
 
   PickedFile _image;
 
-  _imgFromCamera() async {
-    PickedFile image = await _picker.getImage(source: ImageSource.camera);
-    
-    if(image != null){
-    setState(() {
-      uploading =true;
-    });
-    await _userstate.changeImage(image);
-    
-    setState(() {
-      uploading = false;
-    });
-    }
-  }
+  
 
-  _imgFromGallery() async {
-    PickedFile image = await _picker.getImage(source: ImageSource.gallery);
-
-     if(image != null){
-      setState(() {
-        uploading =true;
-      });
-      await _userstate.changeImage(image);
-      setState(() {
-        uploading = false;
-      });
-     }
-  }
-
-  void _showPicker(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
-                    onTap: () {
-                      _imgFromCamera();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -428,7 +481,7 @@ class _MyInfoState extends State<MyInfo> {
     );
   }
 }
-
+*/
 class ProfileInfoBigCard extends StatelessWidget {
   final String firstText, secondText, color;
   final Widget icon;
@@ -444,7 +497,7 @@ class ProfileInfoBigCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
         border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
       ),
@@ -456,8 +509,8 @@ class ProfileInfoBigCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(firstText, style: Configuration.text('small', color != null ? Colors.white: Colors.black)),
-                Align(alignment: Alignment.centerRight, child: icon),
+                Text(firstText, style: Configuration.text('smallmedium', color != null ? Colors.white: Colors.black)),
+                icon
             ]),
             Text(secondText, style: Configuration.text('tiny', color != null ? Colors.white : Colors.black)),
           ],

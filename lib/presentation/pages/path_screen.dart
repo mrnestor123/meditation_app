@@ -116,21 +116,41 @@ class PathScreen extends StatelessWidget {
   }
 
   Widget labels(){
-    return GridView.count(
-      crossAxisSpacing: 1.5,
-      crossAxisCount: 3,
-      physics: NeverScrollableScrollPhysics(),
-      children: _userstate.user.passedObjectives.keys.map((key) => 
-        Column(
+    int addedcount = 0;
+    List<Widget> l = new List.empty(growable: true);
+
+    for(var key in _userstate.user.passedObjectives.keys) {
+      l.add(Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _userstate.user.passedObjectives[key] == true ? 
             Icon(Icons.check_circle, size: Configuration.medpadding, color: Configuration.maincolor):
             Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
             SizedBox(height: Configuration.blockSizeVertical * 0.2),
-            Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
-          ],)
-      ).toList()
+            Container(
+              width: 100,
+              child: Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
+              )
+          ])
+        );
+    }
+
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children:  [
+        Text('You must complete this objectives in order to pass to the next stage', style: Configuration.text('small', Colors.black),textAlign: TextAlign.center),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: l.sublist(0,3),
+        ),
+
+        l.length > 3 ? 
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: l.sublist(3),
+        ): Container(),
+      ] 
       );
   }
 
@@ -155,12 +175,12 @@ class PathScreen extends StatelessWidget {
       ),
 
       Flexible(
-        flex: 2, 
-        child:labels() 
+        flex: 3, 
+        child:labels()
       ),
 
       Flexible( 
-        flex:2,
+        flex:1,
         child: goals(context)
       )
     ],

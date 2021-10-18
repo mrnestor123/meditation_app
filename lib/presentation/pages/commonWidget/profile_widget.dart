@@ -30,13 +30,16 @@ class ProfileCircle extends StatelessWidget {
       margin: EdgeInsets.only(left: marginLeft !=null ? marginLeft:  Configuration.medmargin, right: marginRight !=null ? marginRight   : Configuration.bigmargin),
       child: GestureDetector(
         onTap: onTap, 
-        child: RadialProgress(
-            width: width != null  ? width: Configuration.safeBlockHorizontal * 0.7,
-            progressColor: color != null ? color: Configuration.maincolor,
-            goalCompleted: 1,
+        child: Container(
+          padding: EdgeInsets.all(2.0),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border.all(color: Configuration.maincolor,width:2.0),
+              shape: BoxShape.circle
+            ),
             child: CircleAvatar(
               backgroundColor: userImage == null
-                  ? Configuration.lightgrey
+                  ? Configuration.maincolor
                   : Colors.transparent,
               backgroundImage: userImage == null
                   ? null

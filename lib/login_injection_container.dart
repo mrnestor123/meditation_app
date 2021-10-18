@@ -9,6 +9,7 @@ import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/answer_question.dart';
+import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,6 +41,9 @@ Future<void> init() async {
     () => GameState(repository: sl()),
   );
 
+  sl.registerFactory(
+    () => RequestState(repository: sl()),
+  );
 
   //Use cases
   sl.registerLazySingleton(() => AnswerQuestionUseCase(sl()));

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -10,6 +11,7 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
+
 import 'package:provider/provider.dart';
 
 import 'commonWidget/profile_widget.dart';
@@ -51,6 +53,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     _c = new PageController(
       initialPage: currentindex,
     );
+    
     super.initState();
   }
   
@@ -65,11 +68,17 @@ class _MobileLayoutState extends State<MobileLayout> {
     if(_userstate.data == null){
       _userstate.getData();
     }
+    
   }
 
   @override
   Widget build(BuildContext context) {
-    Configuration().init(context);
+    DateTime currentBackPressTime;
+
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp
+    ]);
+    
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     
@@ -142,10 +151,29 @@ class _MobileLayoutState extends State<MobileLayout> {
         ),
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            color: Colors.black,
-            icon: Icon(Icons.bug_report),
-            onPressed: ()=> Navigator.pushNamed(context, '/requests'),
+          Stack(
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: IconButton(
+                  color: Colors.black,
+                  icon: Icon(Icons.bug_report),
+                  onPressed: ()=> Navigator.pushNamed(context, '/requests'),
+                ),
+              ),
+              _userstate.user.notifications.where((element) => !element.seen).length > 0 ?
+              Positioned(
+                top: 5,
+                right: 5,
+                child:  Container(
+                  padding: EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.red
+                  ),
+                  child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('small', Colors.white))
+                )) : Container()
+            ],
           ),/*
           IconButton(
               icon: Icon(Icons.ac_unit),
@@ -186,18 +214,37 @@ class _MobileLayoutState extends State<MobileLayout> {
           }
         },
       ),
-      body: Container(
-        padding: EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
-        color: Configuration.lightgrey,
-        child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _c,
-          onPageChanged: (newPage) {
-            setState(() {
-              currentindex = newPage;
-            });
-          },
-          children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+      body: WillPopScope(
+        onWillPop: (){
+          DateTime now = DateTime.now();
+          if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 5)) {
+            currentBackPressTime = now;
+             ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.fixed,
+                  content: Container(
+                    padding: EdgeInsets.all(12.0),
+                    child: Text('Press back two times to exit the app', style: Configuration.text('small', Colors.white))
+                  ),
+                ),
+              );
+            return Future.value(false);
+          }
+          return Future.value(true);
+        },
+        child: Container(
+          padding: EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
+          color: Configuration.lightgrey,
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _c,
+            onPageChanged: (newPage) {
+              setState(() {
+                currentindex = newPage;
+              });
+            },
+            children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+          ),
         ),
       ),
     );

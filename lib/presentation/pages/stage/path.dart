@@ -23,6 +23,21 @@ class ImagePath extends StatelessWidget {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        bottom: PreferredSize(
+          child:Flexible(child: Text(stage.description, style: Configuration.text('small', Colors.black))), 
+          preferredSize: Size.fromHeight(20)
+        ),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        title: Text('Stage ' + stage.stagenumber.toString(), style: Configuration.text('medium', Colors.black)),
+        actions: [
+          IconButton(onPressed: ()=> stageDialog(context, stage)
+          , icon: Icon(Icons.info),color: Colors.black,)
+        ],
+        elevation: 0,
+        leading: ButtonBack()
+      ),
       backgroundColor: Color.fromARGB(255,220,208,186),
       body: Stack(
         children: <Widget>[
@@ -43,29 +58,6 @@ class ImagePath extends StatelessWidget {
             ),
           ),
           
-          //Place it at the top, and not use the entire screen
-          Positioned(
-            top: 0.0,
-            left: 0.0,
-            right: 0.0,
-            child: AppBar(
-              backgroundColor: Colors.transparent,
-              centerTitle: true,
-              title: Column(
-                children: [
-                  Text('Stage ' + stage.stagenumber.toString(), style: Configuration.text('medium', Colors.black)),
-                  SizedBox(height: 5),
-                  Text(stage.description, style: Configuration.text('small', Colors.black))
-                ],
-              ),
-              actions: [
-                IconButton(onPressed: ()=> stageDialog(context, stage)
-                , icon: Icon(Icons.info),color: Colors.black,)
-              ],
-              elevation: 0,
-              leading: ButtonBack()
-            ),
-          ),
         ],
       ),
     );

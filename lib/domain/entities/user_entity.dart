@@ -1,10 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/lesson_model.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/stageData.dart';
-import 'package:meditation_app/data/models/userData.dart';
+
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/progress_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
@@ -43,14 +40,15 @@ class User {
   List<dynamic> following = new List.empty(growable: true);
   List<dynamic> followers = new List.empty(growable: true);
 
+  List<Notify> notifications = new List.empty(growable:true);
+
   //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
-  final ObservableList<Meditation> weekMeditations = new ObservableList();
-  final ObservableList<Meditation> guidedMeditations = new ObservableList();
 
   //List with the lessons that the user has learned
   final ObservableList<Lesson> lessonslearned = new ObservableList();
+  //HACE FALTA ESTO ???
   Map<dynamic,dynamic> answeredquestions = new Map();
 
   User({this.coduser, this.nombre, this.user, this.position = 0, 
@@ -123,6 +121,10 @@ class User {
     return this.gameposition < g.position;
   }
 
+  bool isAdmin(){
+    return this.role == 'admin';
+  }
+
   //how much up to 6 the user has passed the lessons
   int lessonsPercentage(){
     if(this.userStats == 0){
@@ -132,6 +134,8 @@ class User {
     }
   }
 
+
+  //ESTOS METODOS SON BUENOS ?????
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
@@ -154,17 +158,6 @@ class User {
 
     //this.thisweekactions.add(a);
   }
-  void setLessons(List<dynamic> l){
-    return;
-  } 
-
-  void setMeditations(List<dynamic> m) {   
-    for(var med in m ){
-      totalMeditations.add(MeditationModel.fromJson(med));
-    }
-
-    totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
-  }
   
   void setActions(json, isToday) {
     for(var action in json){ 
@@ -178,42 +171,7 @@ class User {
         thisweekactions.add(UserAction.fromJson(action));   
       }
     }
-    /*
-    // ya no hace falta esto !!
-    DateTime today = DateTime.now();
-    var dayOfWeek = 1;
-    DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
-
-    if(isToday) {
-      todayactions = new ObservableList();
-      if(json != null && json.length > 0 ) { 
-        for(var action in json){ 
-          var day = DateTime.parse(action["time"]);
-          if(day.day == DateTime.now().day && day.month == DateTime.now().month){
-            action['userimage'] = this.image;
-            todayactions.add(UserAction.fromJson(action));
-          } else if(day.compareTo(monday) >= 0 && day.compareTo(monday.add(Duration(days: 7))) < 0) {
-            action['userimage'] = this.image;
-            thisweekactions.add(UserAction.fromJson(action));
-          }
-        }
-      }
-    } else {
-      thisweekactions = new ObservableList();
-      if(json != null && json.length > 0){ 
-        for(var action in json){
-           var day = DateTime.parse(action["time"]);
-            if(day.compareTo(monday) >= 0 && day.compareTo(monday.add(Duration(days: 7))) < 0){
-              action['userimage'] = this.image;
-              thisweekactions.add(UserAction.fromJson(action));
-          }
-        }
-      }
-    }*/
   }
-
-  void setFollowedUsers(List<dynamic> u) => following.addAll(u);
-  void setFollowsYou(List<dynamic> u )=> followers.addAll(u);
 
   
   void follow(User u) {
@@ -388,10 +346,10 @@ class User {
       setAction('meditation', attribute: [m.duration.inMinutes]);
     } else {
       //no se si esto funcionará bien
-      if (!guidedMeditations.contains(m)) {
+      if (!totalMeditations.contains(m)) {
         this.userStats.stage.guidedmeditations++;
         this.meditposition++;
-        guidedMeditations.add(m);
+        totalMeditations.add(m);
         progress = Progress(
           done: this.userStats.stage.guidedmeditations,
           total: this.stage.stobjectives.meditguiadas, 

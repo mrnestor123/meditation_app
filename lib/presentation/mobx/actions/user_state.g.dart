@@ -84,21 +84,6 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
-  final _$requestsAtom = Atom(name: '_UserState.requests');
-
-  @override
-  List<Request> get requests {
-    _$requestsAtom.reportRead();
-    return super.requests;
-  }
-
-  @override
-  set requests(List<Request> value) {
-    _$requestsAtom.reportWrite(value, super.requests, () {
-      super.requests = value;
-    });
-  }
-
   final _$usersAtom = Atom(name: '_UserState.users');
 
   @override
@@ -111,6 +96,36 @@ mixin _$UserState on _UserState, Store {
   set users(List<User> value) {
     _$usersAtom.reportWrite(value, super.users, () {
       super.users = value;
+    });
+  }
+
+  final _$loadingAtom = Atom(name: '_UserState.loading');
+
+  @override
+  bool get loading {
+    _$loadingAtom.reportRead();
+    return super.loading;
+  }
+
+  @override
+  set loading(bool value) {
+    _$loadingAtom.reportWrite(value, super.loading, () {
+      super.loading = value;
+    });
+  }
+
+  final _$dynamicusersAtom = Atom(name: '_UserState.dynamicusers');
+
+  @override
+  List<User> get dynamicusers {
+    _$dynamicusersAtom.reportRead();
+    return super.dynamicusers;
+  }
+
+  @override
+  set dynamicusers(List<User> value) {
+    _$dynamicusersAtom.reportWrite(value, super.dynamicusers, () {
+      super.dynamicusers = value;
     });
   }
 
@@ -185,13 +200,6 @@ mixin _$UserState on _UserState, Store {
     return _$updateStageAsyncAction.run(() => super.updateStage());
   }
 
-  final _$getRequestsAsyncAction = AsyncAction('_UserState.getRequests');
-
-  @override
-  Future<dynamic> getRequests() {
-    return _$getRequestsAsyncAction.run(() => super.getRequests());
-  }
-
   final _$_UserStateActionController = ActionController(name: '_UserState');
 
   @override
@@ -213,8 +221,9 @@ data: ${data},
 nightmode: ${nightmode},
 loggedin: ${loggedin},
 errorMessage: ${errorMessage},
-requests: ${requests},
 users: ${users},
+loading: ${loading},
+dynamicusers: ${dynamicusers},
 lessondata: ${lessondata}
     ''';
   }

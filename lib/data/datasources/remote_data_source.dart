@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +14,7 @@ import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -50,13 +52,18 @@ abstract class UserRemoteDataSource {
 
   Future <List<Request>> getRequests();
 
-  Future updateRequest(Request r);
+  Future updateRequest(Request r, [Notify n]);
+
+  Future updateNotification(Notify n);
 
   Future uploadRequest(Request r);
 
   Future <List<User>> getUsers(User u);
 
   Future <User> getUser(String cod);
+
+  Future<Request> getRequest(String cod);
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -77,7 +84,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
     nodejs = 'https://public.digitalvalue.es:8002';
-  //  nodejs = 'http://192.168.4.67:8002';
+   // nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -89,7 +96,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     if(response.statusCode == 400){
       return null;
     }else{
-    //comprobar que funciona bien
+      //comprobar que funciona bien
       UserModel u = UserModel.fromRawJson(response.body);
       return u;
     }
@@ -103,6 +110,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     UserModel loggeduser = await connect(usuario.uid);
     if(loggeduser != null){
       getActions(loggeduser);
+      //HAY QUE QUITAR ESTO UNA VEZ SE DESCONECTA
       Timer.periodic(new Duration(seconds: 30), (timer) {
         getActions(loggeduser);
       });   
@@ -202,8 +210,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return l;
   }
 
+  //DEBERIA DE LLAMARSE IMAGE
   Future<String> updateImage(PickedFile image, User u) async {
-      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}');
+      String randomnumber = new Random().nextInt(100000).toString();
+
+      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}/$randomnumber');
 
       final UploadTask storageUpload = ref.putData(await image.readAsBytes());
 
@@ -302,11 +313,26 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
-  Future updateRequest(Request r) async{
-    QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
-    String docID = query.docs[0].id; 
+  Future updateRequest(Request r, [Notify n]) async{
     try{
+      QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
+      String docID = query.docs[0].id; 
       await database.collection("requests").doc(docID).update(r.toJson());
+      if(n != null){
+        await database.collection('notifications').add(n.toJson());
+      }
+    }catch(e) {
+      throw ServerException();
+    }
+  }
+
+  Future updateNotification(Notify n) async{
+    try{
+      QuerySnapshot query = await database.collection('notifications').where('cod', isEqualTo: n.cod).get();
+      if(query.docs.length  > 0){ 
+        String docID = query.docs[0].id;      
+        await database.collection("notifications").doc(docID).update(n.toJson());
+      }
     }catch(e) {
       throw ServerException();
     }
@@ -316,4 +342,15 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await database.collection('requests').add(r.toJson());
   }
 
+  @override
+  Future<Request> getRequest(String cod) async{
+    try{
+       var url = Uri.parse('$nodejs/request/$cod');
+        http.Response response = await http.get(url);
+        Request request =  new Request.fromJson(json.decode(response.body));
+        return request;
+    }catch(e) {
+      throw ServerException();
+    }
+  }
 }

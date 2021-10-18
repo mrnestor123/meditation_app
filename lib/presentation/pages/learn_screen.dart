@@ -186,7 +186,9 @@ class _StageViewState extends State<StageView> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Hero(tag: content.cod ,
-                    child: Image.network(content.image)
+                    child: AspectRatio(
+                      aspectRatio: 0.9,
+                      child: Image.network(content.image, fit: BoxFit.fitWidth))
                     ),
                   ) : Container(),
                   Positioned(
@@ -299,13 +301,13 @@ class _StageViewState extends State<StageView> {
                     return AbstractDialog(
                       content: Container(
                         decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0), color: Colors.white),
-                        color:Configuration.maincolor,
                         padding: EdgeInsets.all(12),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Html(data: widget.stage.longdescription)
+                            Html(data: widget.stage.longdescription
+                            )
                           ],
                         ),
                       ),

@@ -5,10 +5,14 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
+import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:upgrader/upgrader.dart';
 import 'package:video_player/video_player.dart';
+
+import '../layout.dart';
 
 class Loading extends StatefulWidget {
   @override
@@ -39,9 +43,8 @@ class _LoadingState extends State<Loading> {
   void initState() {
     super.initState();
     cfg = AppcastConfiguration(url: appcastURL, supportedOS: ['android']);
-
     _controller = VideoPlayerController.asset('assets/tenstages.mp4')..initialize().then((_) {
-      _controller.play();
+    _controller.play();
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       setState(() { });
     });
@@ -51,51 +54,67 @@ class _LoadingState extends State<Loading> {
   void didChangeDependencies(){
     super.didChangeDependencies();
     _timer = new Timer.periodic(Duration(seconds: 1), 
-        (Timer timer) => setState(() {
-             if (_duration.inSeconds == 0) {
-                if(finishedloading) {
-                  _user.user != null ? Navigator.pushNamed(context, '/main') : Navigator.pushNamed(context, '/welcome');
-                }
-                timer.cancel();
-              } else {
-                _duration = _duration - Duration(seconds: 1);
-              }
-            })
+        (Timer timer) { 
+          if (_duration.inSeconds == 0) {
+            if(finishedloading){
+              pushPage();
+            }else{
+              setState(() {});
+            }
+            _timer.cancel();
+          } else {
+            _duration = _duration - Duration(seconds: 1);
+          }
+        }   
       );
-
   }
-
 
   @override 
   void dispose(){
     super.dispose();
     _timer.cancel();
+    _controller.dispose();
+  }
+
+  void pushPage(){
+    _user.user != null ?
+          _user.user.nombre == null ? 
+            Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => SetUserData()),
+            (Route<dynamic> route) => false,
+          ) :
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Layout()),
+            (Route<dynamic> route) => false,
+          ) 
+        : 
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => WelcomeWidget()),
+        (Route<dynamic> route) => false,
+      );
   }
 
   void userisLogged(context) async {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
     await _user.userisLogged();
-    setState(() {
-      finishedloading = true;
-    });
+    finishedloading = true;
 
     if(_duration.inSeconds <= 0){
-      _user.user != null ? 
-        _user.user.nombre == null || _user.user.nombre == '' ?
-        Navigator.pushReplacementNamed(context, '/selectusername'):
-        Navigator.pushReplacementNamed(context, '/main') 
-      : 
-      Navigator.pushReplacementNamed(context, '/welcome');
+       pushPage();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     _user = Provider.of<UserState>(context);
-    
+    Configuration().init(context);
 
     //comprobamos si el usuario esta loggeado
+    // SE PODRIA HACER MEJOR!!
     if (!started) {
       userisLogged(context);
       started = true;

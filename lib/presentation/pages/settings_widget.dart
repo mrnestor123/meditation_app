@@ -64,12 +64,12 @@ class Settings extends StatelessWidget {
               }, 
               child: Text('Requests')
             ),
-            
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 primary: Colors.red
               ),
               onPressed: () { 
+              _userstate.user=null;
               _loginstate.logout();
               Navigator.pushReplacementNamed(context, '/welcome');
             }, child: Text('log out')),

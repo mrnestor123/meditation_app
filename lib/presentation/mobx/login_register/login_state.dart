@@ -10,6 +10,8 @@ import 'package:meditation_app/domain/usecases/user/log_out.dart';
 import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:mobx/mobx.dart';
 
 part 'login_state.g.dart';
@@ -138,6 +140,7 @@ abstract class _LoginState with Store {
        errormsg = switchExceptions(e.code);
       }
     }on Exception catch (e){
+      print(e);
       errormsg ='An unexpected error has ocurred';
     }
 
@@ -148,10 +151,18 @@ abstract class _LoginState with Store {
 
     if (loggeduser != null && user != null) {
       if(loggeduser.nombre == null){
-        Navigator.pushReplacementNamed(context, '/setdata');
+        Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => SetUserData()),
+        (Route<dynamic> route) => false
+        );
       }else{
-        Navigator.pushReplacementNamed(context, '/main');
-      }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Layout()),
+          (Route<dynamic> route) => false,
+        );
+      } 
     } else if(errormsg != null && errormsg != ''){
       if(type == 'google' && user != null){
         googleSignin.disconnect();

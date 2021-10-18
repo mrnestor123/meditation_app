@@ -207,16 +207,18 @@ class FacebookButton extends StatelessWidget {
             }
           ),
           onPressed: () async {
-            String result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CustomWebView(
-                        selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
-                      ),
-                  maintainState: true),
-            );
-            if (result != null) {
-              await _registerstate.startlogin(context, type: 'facebook',register: register,token: result); 
+            if(!_registerstate.startedlogin){
+              String result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => CustomWebView(
+                          selectedUrl:'https://www.facebook.com/dialog/oauth?client_id=$your_client_id&redirect_uri=$your_redirect_url&response_type=token&scope=email,public_profile,',
+                        ),
+                    maintainState: true),
+              );
+              if (result != null) {
+                await _registerstate.startlogin(context, type: 'facebook',register: register,token: result); 
+              }
             }
           }),
     ));
@@ -235,14 +237,15 @@ class GoogleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       width:Configuration.width > 500 ? Configuration.width * 0.4 : Configuration.width*0.9,
       child: AspectRatio(
       aspectRatio: 6/1,
       child: ElevatedButton(
         onPressed: () async{
+          if(!_registerstate.startedlogin){
             await _registerstate.startlogin(context, type: 'google', register:register);
+          }
         },
         style: OutlinedButton.styleFrom(
           primary: Colors.white,

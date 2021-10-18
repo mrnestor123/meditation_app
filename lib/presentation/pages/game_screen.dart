@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -18,6 +19,7 @@ class _GameStartedState extends State<GameStarted> {
   GameState _gamestate;
   UserState _userstate;
   bool started = false;
+  bool fullscreen = false;
   int lastsecond;
 
   @override
@@ -32,6 +34,7 @@ class _GameStartedState extends State<GameStarted> {
     controller = new VideoPlayerController.network(_gamestate.selectedgame.video)..initialize();
     lastsecond= 0;
     controller.addListener(() {
+      //QUITAR ESTOS SET STATE !!!!!!!!!!!!!!!!!!!!!
       if(lastsecond != controller.value.position.inSeconds){
         setState(() {});
       }
@@ -51,28 +54,24 @@ class _GameStartedState extends State<GameStarted> {
   }
 
   Widget showingVideo(){
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Stack(
-            children: [
-        GestureDetector(
-          onTap: ()=> {
-            if(controller.value.isPlaying){
-              setState((){controller.pause();})
-            }else{
-              setState((){started = true; controller.play();})
-            }
-          },
-          child: AspectRatio(
-                aspectRatio: controller.value.aspectRatio,
-                child: VideoPlayer(                  
-                  controller
-                ),
-        )),
-          !started || !controller.value.isPlaying ? 
-          Positioned.fill(
-            child: Align(
+    bool showfullscreen = MediaQuery.of(context).orientation == Orientation.landscape || fullscreen;
+    
+    Widget video(){
+      return GestureDetector(
+        onTap: ()=> {
+          if(controller.value.isPlaying){
+            setState((){ controller.pause();})
+          }else{
+            setState((){started = true; controller.play();})
+          }
+        },
+        child: Container(
+          height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
+          width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
+          child: Stack(children:[
+            VideoPlayer(controller),
+            !started || !controller.value.isPlaying ? 
+            Align(
                 alignment: Alignment.center,
                 child: IconButton(
                   icon: Icon(Icons.play_arrow), 
@@ -80,27 +79,61 @@ class _GameStartedState extends State<GameStarted> {
                   onPressed: ()=> setState((){ started = true; controller.play();}), 
                   iconSize: Configuration.medicon
                   )
-              ),
-          ) : Container(),
-            
-            Positioned(
+              ) : Container(),
+            /* Positioned(
               right: 0,
               bottom: 0,
               child: IconButton(
-                onPressed: ()=> null, 
-                icon: Icon(Icons.fullscreen, color: Colors.white, size: Configuration.smicon))
-              )
-        ],
+                onPressed: ()=> setState(() {
+                  fullscreen = !fullscreen;
+                  if(fullscreen){
+                    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+                  }else{
+                    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+                  }
+                }), 
+                icon: Icon(showfullscreen ? Icons.close : Icons.fullscreen, color: Colors.white, size: Configuration.smicon))
+              )*/
+          ] ),
+        )
+      );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text('Try to focus on everything happening in the video', 
+        style: Configuration.text('smallmedium', Colors.black),
+        textAlign: TextAlign.center,
         ),
-      
-        Container(
-          width: Configuration.width*0.8,
-          child: Slider(
-            max: controller.value.duration.inSeconds.roundToDouble(),
-            value:controller.value.position.inSeconds.roundToDouble(), 
-            onChanged: (double){}
-            ),
-        ), 
+        SizedBox(height: 20),
+
+
+        showfullscreen ? 
+        Positioned.fill(
+          child: Container(
+            color: Colors.black,
+          ),
+        ):Container(),
+        
+        video(),
+
+       
+
+        Positioned(
+          bottom: 10,
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            width: showfullscreen? Configuration.width *0.5: Configuration.width,
+            child: Slider(
+              activeColor: Configuration.maincolor,
+              inactiveColor: Colors.grey,
+              max: controller.value.duration.inSeconds.roundToDouble(),
+              value:controller.value.position.inSeconds.roundToDouble(), 
+              onChanged: (double){}
+              ),
+          ),
+        )
       ],
     );
   }
@@ -179,9 +212,10 @@ class _GameStartedState extends State<GameStarted> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-
+  
     return Scaffold(
           extendBodyBehindAppBar: true,
+          backgroundColor: Configuration.lightgrey,
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
@@ -190,17 +224,11 @@ class _GameStartedState extends State<GameStarted> {
                 Navigator.pop(context); 
               }, color: Colors.black),
           ),
-          body: Container(
-          height: Configuration.height,
-          width: Configuration.width,
-          color: Configuration.lightgrey,
-          padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-          child: _gamestate.state == 'question' ? 
-            questionAsk()
+          body: _gamestate.state == 'question' ? 
+               questionAsk()
             :  _gamestate.state == 'answer' ? 
             questionSolved():
             showingVideo()
-          ),
     );
   }
 }

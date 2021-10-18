@@ -39,8 +39,9 @@ class _SetUserDataState extends State<SetUserData> {
                     padding: EdgeInsets.all(12.0)
                   ),
                   onPressed: () async{
-                    await _userstate.getData();
-                    if(_userstate.user == null || _loginstate.loggeduser.coduser != _userstate.user.coduser){
+                    //PPORQUE HAGO GETDATA AQUI????
+                    //await _userstate.getData();
+                    if(_userstate.user == null && _loginstate.loggeduser !=null || _userstate.user != null && _loginstate.loggeduser!=null && _loginstate.loggeduser.coduser != _userstate.user.coduser){
                       _userstate.setUser(_loginstate.loggeduser);
                     }
                     _userstate.changeName(_nameController.text);

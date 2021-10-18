@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
@@ -9,7 +10,7 @@ import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
 
-class   UserState extends _UserState with _$UserState {
+class UserState extends _UserState with _$UserState {
   UserState(
       {
       UserRepository userRepository
@@ -22,9 +23,7 @@ class   UserState extends _UserState with _$UserState {
 abstract class _UserState with Store {
   UserRepository repository;
 
-  _UserState(
-      {this.repository,
-      });
+  _UserState({this.repository});
 
   @observable
   User user;
@@ -42,10 +41,14 @@ abstract class _UserState with Store {
   String errorMessage;
 
   @observable 
-  List<Request> requests;
+  List<User> users;
 
   @observable 
-  List<User> users;
+  bool loading = false;
+
+  //USERS THAT GET EXTRACTED FROM Method getUSersList
+  @observable 
+  List<User> dynamicusers;
 
   @observable
   Map lessondata;
@@ -121,8 +124,10 @@ abstract class _UserState with Store {
   Future follow(User u, bool follow) async {
      if (follow) {
       user.follow(u);
+      dynamicusers.add(u);
     } else {
       user.unfollow(u);
+      dynamicusers.remove(u);
     } 
 
     // Updateamos también los datos del usuario val que se sigue
@@ -150,12 +155,14 @@ abstract class _UserState with Store {
   @action 
   Future<String> uploadImage(dynamic image) async{
     Either<Failure,String> imageupload = await repository.updateImage(image,user);
-    //PASAR TODOS LOS  FOLD AL FINAL !!!
+   
+    //PASAR TODOS LOS FOLD AL FINAL !!!
     String imgstring;
     imageupload.fold(
       (l) => errorMessage = 'error al subir imagen', 
       (r) => imgstring = r
     );
+
     return imgstring;
   }
 
@@ -167,45 +174,8 @@ abstract class _UserState with Store {
   }
 
 
-  @action 
-  Future getRequests() async{
-    Either<Failure, List<Request>> res = await repository.getRequests();
-    requests = new List.empty(growable: true);
-
-    res.fold(
-    (Failure f) {
-      _mapFailureToMessage(f);  
-    },
-    (List<Request> d) {
-      requests = d;
-    });
-  }
-
-  Future updateRequest(Request r, bool like, [String comment]) async{
-    if(like != null){
-      if(like){
-        r.like(user.coduser);
-      }else{
-        r.dislike(user.coduser);
-      }
-    }else if(comment != null){
-      Comment c = new Comment(comment: comment,username: user.nombre, coduser: user.coduser);
-      r.comment(c);
-    }
-
-    Either<Failure, void> res = await repository.updateRequest(r);
-    res.fold((f) => _mapFailureToMessage(f), (r) => print('bien'));
-  }
-
-  Future uploadRequest(Request r) async{
-    r.coduser = user.coduser;
-    r.username = user.nombre;
-    Either<Failure,void> res = await repository.uploadRequest(r);
-    res.fold((f) => _mapFailureToMessage(f), (r) => print('bien'));
-  }
-
-
   Future getUsers() async {
+    loading = true;
     Either<Failure,List<User>> userlist = await repository.getUsers(user);
 
     userlist.fold(
@@ -216,6 +186,7 @@ abstract class _UserState with Store {
 
   //FROM LIST OF USER CODS WE GET THE USERS
   Future <List<User>> getUsersList(List<dynamic> cods)async{
+    loading = true;
     List<User> l = new List.empty(growable: true);
 
     for(var cod in cods){
@@ -223,8 +194,10 @@ abstract class _UserState with Store {
       u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
     }
 
-    return l;
+    dynamicusers = l;
+    loading = false;
 
+    return l;
   }
 
 }

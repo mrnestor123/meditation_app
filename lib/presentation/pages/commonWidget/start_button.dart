@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
 class StartButton extends StatelessWidget {
-
   dynamic onPressed;
   String text;
+  bool justpressed = false;
 
   StartButton({this.onPressed, this.text});
   
@@ -19,10 +19,14 @@ class StartButton extends StatelessWidget {
         aspectRatio: 9/2,
         child: ElevatedButton(
         onPressed: onPressed != null ? () async {
-          onPressed();
+          if(!justpressed){
+            onPressed();
+            justpressed = true;
+            Future.delayed(Duration(seconds: 5),()=> justpressed = false);
+          }
         } : null,
         style: ElevatedButton.styleFrom(
-          elevation: 0.0,
+          elevation: 4.0,
           primary: Configuration.maincolor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0))
         ),
@@ -38,7 +42,6 @@ class StartButton extends StatelessWidget {
 
 
 class TabletStartButton extends StatelessWidget {
-
   dynamic onPressed;
   String text;
 

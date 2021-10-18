@@ -6,6 +6,7 @@ import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 
@@ -36,8 +37,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     UserState _userstate = Provider.of<UserState>(context);
-    return Flex(
-    direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
+    return Column(
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
@@ -73,7 +73,6 @@ class __TimelineState extends State<_Timeline> {
   String mode = 'Today'; 
   List<User> users = new List.empty(growable: true);
   var states = ['Today','This week'];
-  
   ScrollController _scrollController = new ScrollController();
 
   @override
@@ -101,57 +100,68 @@ class __TimelineState extends State<_Timeline> {
       if (sortedlist.length > 0) {
         for (var action in sortedlist) {
           widgets.add(
-            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-              Stack(
-                children: [
-                  Container(
-                  height:  Configuration.width*0.15,
-                  width: Configuration.width*0.12,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
-                      color: action.userimage == null ? Configuration.maincolor : null,
-                      shape: BoxShape.circle
-                    ),
-                    width: Configuration.width*0.1,
-                    height: Configuration.height*0.1
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 27,
-                      height: 27,
-                      padding: EdgeInsets.all(4),
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                      child: Icon(action.icono, color: Colors.white, size: 20.0) ),
-                  ) 
-                ],
-              ),
-              SizedBox(width: 5.0),
-              Expanded(
-                  child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, 
-                  children: [
-                    Text((action.username == _userstate.user.nombre ? 'You': action.username) + ' ' + action.message,
-                        style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
-                        overflow: TextOverflow.fade,
+            GestureDetector(
+              onTap: ()=> {
+                if(action.user != null){
+                  showUserProfile(action.user,context)
+                }
+              },
+              child: Container(
+                width: Configuration.width,
+                color: Colors.transparent,
+                child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                  Stack(
+                    children: [
+                      Container(
+                      height:  Configuration.width*0.15,
+                      width: Configuration.width*0.12,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: action.user != null && action.user.image != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) :  action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
+                          color: action.userimage == null ? Configuration.maincolor : null,
+                          shape: BoxShape.circle
                         ),
-                    Text((mode == 'Today' ? '' : action.day + ' ') +   action.hour,
-                        style: Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
+                        width: Configuration.width*0.1,
+                        height: Configuration.height*0.1
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 27,
+                          height: 27,
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
+                          child: Icon(action.icono, color: Colors.white, size: 20.0) ),
+                      ) 
+                    ],
+                  ),
+                  SizedBox(width: 5.0),
+                  Expanded(
+                      child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start, 
+                      children: [
+                        Text((action.username == _userstate.user.nombre ? 'You': action.username) + ' ' + action.message,
+                            style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
+                            overflow: TextOverflow.fade,
+                            ),
+                        Text((mode == 'Today' ? '' : action.day + ' ') +   action.hour,
+                            style: Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
+                    ]),
+                  )
                 ]),
-              )
-            ]),
+              ),
+            ),
           );
           widgets.add(SizedBox(height: 10));
         }
       } else {
         widgets.add(SizedBox(height: 20));
-        widgets.add(Center(child: Text('No actions realized ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
+        widgets.add(Center(child: Text('No actions done ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
 
-      Timer(Duration(milliseconds: 1), () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
+     // Timer(Duration(milliseconds: 1), () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
 
       return widgets;
     }
@@ -190,7 +200,7 @@ class __TimelineState extends State<_Timeline> {
                     }).toList()
                 ),
               RawMaterialButton(
-                    elevation: 0.0,
+                    elevation: 3.0,
                     fillColor: Configuration.maincolor,
                     child: Row(
                       children: [

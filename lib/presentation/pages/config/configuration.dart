@@ -232,9 +232,9 @@ class Configuration {
       smpadding = 14;
       medpadding = 18;
       bigpadding = 24;
-      smicon = safeBlockHorizontal * 3.5;
-      medicon = safeBlockHorizontal * 5;
-      bigicon = safeBlockHorizontal * 6;
+      smicon = 10;
+      medicon = 12;
+      bigicon = safeBlockHorizontal * 5;
       smmargin = blockSizeHorizontal * 1;
       medmargin = blockSizeHorizontal * 1.5;
       bigmargin = blockSizeHorizontal * 2;
@@ -243,6 +243,7 @@ class Configuration {
       smpadding = 14;
       medpadding = 18;
       bigpadding = 22;
+      //QUITAR TODO ESTO!!!!!
       smicon = safeBlockHorizontal * 6;
       medicon = safeBlockHorizontal * 11;
       bigicon = safeBlockHorizontal * 15;

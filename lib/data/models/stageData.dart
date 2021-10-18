@@ -34,6 +34,7 @@ class StageModel extends Stage {
             mastery: mastery,
             longimage: longimage,
             shorttext: shorttext,
+            longdescription: longdescription,
             stobjectives: stobjectives,
             shortimage: shortimage
             );

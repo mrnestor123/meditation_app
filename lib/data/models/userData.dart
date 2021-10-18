@@ -5,8 +5,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
+import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -25,25 +27,27 @@ class UserModel extends User {
       bool classic,
       int meditposition,
       int gameposition,
+      String userimage,
       UserStats userStats,
       answeredquestions,
       followed,
       stats})
       : super(
-            coduser: coduser,
-            user: user,
-            gameposition: gameposition,
-            image: image,
-            role: role,
-            stagenumber: stagenumber,
-            nombre: nombre,
-            position: position,
-            meditposition: meditposition,
-            stage: stage,
-            followed:followed,
-            classic: classic,
-            answeredquestions: answeredquestions,
-            userStats: userStats);
+        coduser: coduser,
+        user: user,
+        gameposition: gameposition,
+        image: image,
+        role: role,
+        stagenumber: stagenumber,
+        nombre: nombre,
+        position: position,
+        meditposition: meditposition,
+        stage: stage,
+        followed:followed,
+        classic: classic,
+        answeredquestions: answeredquestions,
+        userStats: userStats
+      );
 
   factory UserModel.fromRawJson(String str) =>
       UserModel.fromJson(json.decode(str));
@@ -65,11 +69,33 @@ class UserModel extends User {
         classic: json["classic"] == null ? true : json["classic"],
         answeredquestions: json['answeredquestions'] == null ? new Map() : json['answeredquestions'],
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
-      );
+      ); 
 
-      u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
-      u.setFollowedUsers(json['following'] != null ? json['following'] : []);
-      u.setFollowsYou(json['followsyou'] != null ? json['followsyou'] : []);
+      if(json['meditations'] != null){
+          for(var med in json['meditations'] ){
+            u.totalMeditations.add(MeditationModel.fromJson(med));
+          }
+        
+        u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
+        u.userStats.total.meditations = u.totalMeditations.length;
+      }
+      
+      if(json['following']!=null){
+        u.following.addAll(json['following']);
+      }
+      if(json['followsyou'] != null){
+        u.followers.addAll(json['followsyou']);
+      }
+
+      if(json['notifications']!=null){
+        for(var not in json['notifications']){
+          u.notifications.add(Notify.fromJson(not));
+        }
+      }
+
+    //  u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
+    //  u.setFollowedUsers(json['following'] != null ? json['following'] : []);
+    //  u.setFollowsYou(json['followsyou'] != null ? json['followsyou'] : []);
 
     return u;
   }

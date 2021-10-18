@@ -1,7 +1,9 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/leaderboard.dart';
@@ -45,12 +47,11 @@ void main() async {
         debugPrint(payload);
       }
     }
-  
   );
-  
-  SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-  SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
+ // FirebaseMessaging messaging = FirebaseMessaging.instance;
+  //NotificationSettings settings = await messaging.requestPermission();
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
  // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
 
   await di.init();
@@ -67,7 +68,8 @@ class MyApp extends StatelessWidget {
           Provider<UserState>(create: (context) => sl<UserState>()),
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
           Provider<GameState>(create: (context) => sl<GameState>()),
-          Provider<LoginState>(create: (context) => sl<LoginState>())
+          Provider<LoginState>(create: (context) => sl<LoginState>()),
+          Provider<RequestState>(create: (context) => sl<RequestState>())
         ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,

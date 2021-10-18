@@ -43,7 +43,6 @@ abstract class _MeditationState with Store {
 
   @observable
   Duration duration = new Duration(minutes: 5);
-
   Duration totalduration = new Duration(minutes: 5);
 
   @observable
@@ -98,9 +97,10 @@ abstract class _MeditationState with Store {
   void startTimer() {
     var oneSec = new Duration(seconds: 1);
     var timeChange; 
-    
+
+    //PODRIAMOS HACER QUE EL USUARIO PUEDA ELEGIR CUANDO CAMBIAR DE MEDITACION
     if(selmeditation != null){
-     timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
+      timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
     }
 
     int count = 0;
@@ -142,15 +142,32 @@ abstract class _MeditationState with Store {
   }
 
   @action
+  void cancel() {
+    if(this.selmeditation != null ){
+      state = 'pre_guided';
+    }else{
+      state = 'free';
+    }
+    duration = new Duration(minutes: 5);
+  }
+
+  @action
   Future finishMeditation() async {
     int currentposition = user.position;
+    
+    if(timer.isActive){
+      timer.cancel();
+      duration = new Duration(minutes: 5);
+    }
+
     if(selmeditation == null){
       selmeditation = new MeditationModel(duration: totalduration);
     }
+    
     Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation, user: user, d: data));
     selmeditation = null;
 
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
-    this.state = 'finished';
+    state = 'finished';
   }
 }
