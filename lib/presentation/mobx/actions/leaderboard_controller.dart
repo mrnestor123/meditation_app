@@ -13,6 +13,7 @@ class LeaderBoardController extends _LeaderBoardController with _$LeaderBoardCon
   LeaderBoardController() : super();
 }
 
+  // HAY QUE MIRAR DE EMPEZAR A UTILIZAR ESTO
 abstract class _LeaderBoardController with Store {
   @observable 
   bool isSearching = false;
@@ -37,10 +38,7 @@ abstract class _LeaderBoardController with Store {
 
   @action 
   void startsearch(String user) {
-
+    
 
   }
-
-
-  //todo. ask question ??
 }

@@ -1,4 +1,3 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
@@ -52,7 +51,7 @@ void main() async {
   //NotificationSettings settings = await messaging.requestPermission();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
- // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
 
   await di.init();
   runApp(MyApp());
@@ -67,8 +66,10 @@ class MyApp extends StatelessWidget {
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
+          //METER  GAME DENTRO DE GAME NO EN EL GLOBAL
           Provider<GameState>(create: (context) => sl<GameState>()),
           Provider<LoginState>(create: (context) => sl<LoginState>()),
+          //METER REQUEST SOLO EN LA DE REQUESTS 
           Provider<RequestState>(create: (context) => sl<RequestState>())
         ],
         child: MaterialApp(

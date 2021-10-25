@@ -99,6 +99,21 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
+  final _$filteredusersAtom = Atom(name: '_UserState.filteredusers');
+
+  @override
+  List<User> get filteredusers {
+    _$filteredusersAtom.reportRead();
+    return super.filteredusers;
+  }
+
+  @override
+  set filteredusers(List<User> value) {
+    _$filteredusersAtom.reportWrite(value, super.filteredusers, () {
+      super.filteredusers = value;
+    });
+  }
+
   final _$loadingAtom = Atom(name: '_UserState.loading');
 
   @override
@@ -222,6 +237,7 @@ nightmode: ${nightmode},
 loggedin: ${loggedin},
 errorMessage: ${errorMessage},
 users: ${users},
+filteredusers: ${filteredusers},
 loading: ${loading},
 dynamicusers: ${dynamicusers},
 lessondata: ${lessondata}

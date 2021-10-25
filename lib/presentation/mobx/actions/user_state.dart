@@ -41,14 +41,17 @@ abstract class _UserState with Store {
   String errorMessage;
 
   @observable 
-  List<User> users;
+  List<User> users =  new List.empty(growable: true);
+
+  @observable 
+  List<User> filteredusers = new List.empty(growable: true);
 
   @observable 
   bool loading = false;
 
   //USERS THAT GET EXTRACTED FROM Method getUSersList
   @observable 
-  List<User> dynamicusers;
+  List<User> dynamicusers  = new List.empty(growable: true);
 
   @observable
   Map lessondata;
@@ -182,6 +185,8 @@ abstract class _UserState with Store {
       (l) => _mapFailureToMessage(l), 
       (r) => users = r
     );
+
+    filteredusers = users;
   }
 
   //FROM LIST OF USER CODS WE GET THE USERS

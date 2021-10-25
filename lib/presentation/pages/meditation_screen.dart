@@ -94,7 +94,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 if(_meditationstate.selmeditation != null){
                   return Image(image: NetworkImage(_meditationstate.selmeditation.image), fit: BoxFit.cover);
                 }else{
-                  return Icon(Icons.block);
+                  return Text('Press to select one',style: Configuration.text('small',Configuration.maincolor));
                 }
               }
             )
@@ -108,8 +108,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           })
         ), 
       }, _meditationstate.duration.inMinutes > 0,
-            'Meditate with a guided meditation or set a timer for a free one'
-
+            'Set the timer for a guided or a free meditation' 
       );
   }
 
@@ -267,7 +266,7 @@ class _MeditationListState extends State<MeditationList> {
   UserState _userstate;
   List<int> stages = [1,2,3,4,5,6,7,8,9,10];
     
-  List<Widget> meditations() {
+  List<Widget> meditations() { 
     List<Widget> meditcontent = new List.empty(growable: true);
 
     for(Stage s in _userstate.data.stages){
@@ -293,9 +292,12 @@ class _MeditationListState extends State<MeditationList> {
                     Expanded(
                       child: Center(
                         child: meditation.image.isNotEmpty ? AspectRatio(
-                          aspectRatio: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 1.2: 0.9,
-                          child: Image(
-                            image: NetworkImage(meditation.image)
+                          aspectRatio: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 1.5 : 1,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image(
+                              image: NetworkImage(meditation.image)
+                            ),
                           ),
                         ) : Container(),
                       )
@@ -396,8 +398,13 @@ class _CountdownState extends State<Countdown> {
             children: <Widget>[
               WeekList(),
               SizedBox(height: Configuration.height * 0.05),
-              Text('Total meditations: ' +
-                      (_userstate.user.totalMeditations.length).toString(),
+              Text('Total meditations: ' + (_userstate.user.totalMeditations.length).toString(),
+                  style: Configuration.text('medium', Colors.white)),
+              SizedBox(height: Configuration.height * 0.05),
+              Text('Current streak: ' + (_userstate.user.userStats.streak).toString() + ' days',
+                  style: Configuration.text('medium', Colors.white)),
+              SizedBox(height: Configuration.height*0.05),
+              Text('Total time meditated: ' + _userstate.user.timemeditated,
                   style: Configuration.text('medium', Colors.white)),
               /*
               Text('Total meditations: ' +
@@ -433,7 +440,6 @@ class _CountdownState extends State<Countdown> {
 
     List<Widget> getContent(index) {
       List<Widget> l = mapToWidget(_meditationstate.selmeditation.content[index.toString()]);
-  
 
       if (finished && index != null && index == _meditationstate.selmeditation.content.length -1) {
         l.add(SizedBox(height: Configuration.height * 0.02));
@@ -539,7 +545,9 @@ class _CountdownState extends State<Countdown> {
       }
 
       if (map['image'] != null) {
-        l.add(Image(image: NetworkImage( map['image']), width: Configuration.width*0.6));
+        l.add(ClipRRect(
+          borderRadius: BorderRadius.circular(8.0),
+          child: Image(image: NetworkImage( map['image']), width: Configuration.width*0.6)));
       }
 
       if (map['text'] != null) {
@@ -573,15 +581,20 @@ class _CountdownState extends State<Countdown> {
               mainAxisAlignment: _meditationstate.currentsentence != null ? MainAxisAlignment.start : MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: 
-                 _meditationstate.currentsentence != null ?  
-                 mapToWidget(_meditationstate.currentsentence)
-                 : 
-                 [
-                    Container(
+                 _meditationstate.currentsentence != null ?  [
+                  AnimatedOpacity(
+                    opacity: _meditationstate.newsentence ? 1.0: 0.0, 
+                    child: Column(
+                      children: mapToWidget(_meditationstate.currentsentence),
+                    ),
+                    duration: Duration(seconds: 2))
+                 ] : [
+                   ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      child: Image(image: NetworkImage(_meditationstate.selmeditation.image),
                       height: Configuration.height*0.35,
-                      width: Configuration.height*0.35,
-                      child: Image(image: NetworkImage(_meditationstate.selmeditation.image),fit: BoxFit.cover),
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(32.0)),
+                      width: Configuration.height*0.35
+                      ),
                     ),
                   SizedBox(height: Configuration.blockSizeVertical*3),
                   GestureDetector(
@@ -607,25 +620,19 @@ class _CountdownState extends State<Countdown> {
         ),
         SizedBox(height: Configuration.blockSizeHorizontal * 5),
         Positioned(
-          bottom: 30,
+          bottom: 20,
           right:10,
           left:10,
           child: Stack(
             children: [
               Column(
               children: [
-                _meditationstate.state == 'started' ?
-                  FloatingActionButton(
-                    backgroundColor: Colors.white,
-                    onPressed: () => setState(()=>  _meditationstate.pause()),
-                    child: Icon(Icons.pause, color: Colors.black)
-                    )
-                    :
-                    FloatingActionButton(
-                    backgroundColor: Colors.white,
-                    onPressed: () => setState(()=>_meditationstate.startTimer()),
-                    child: Icon(Icons.play_arrow, color: Colors.black)
-                ),
+                _meditationstate.currentsentence != null? 
+                  Text(
+                    _meditationstate.sentenceindex.toString() + '/' + _meditationstate.selmeditation.followalong.entries.length.toString(), 
+                    style:Configuration.text('small', Colors.white)
+                  ) : 
+                  Container(),
                 Slider(
                   activeColor: Configuration.maincolor,
                   inactiveColor: Colors.white,
@@ -637,8 +644,18 @@ class _CountdownState extends State<Countdown> {
                         ? _meditationstate.duration.toString().substring(0, 7)
                         : _meditationstate.duration.toString().substring(2, 7)
                 ),
-              
-              _meditationstate.currentsentence != null ?  Positioned.fill(child: Container( color: Colors.black.withOpacity(0.9))): Container(),
+                _meditationstate.state == 'started' ?
+                  FloatingActionButton(
+                    backgroundColor: Colors.white,
+                    onPressed: () => setState(()=>  _meditationstate.pause()),
+                    child: Icon(Icons.pause, color: Colors.black)
+                    )
+                    :
+                    FloatingActionButton(
+                    backgroundColor: Colors.white,
+                    onPressed: () => setState(()=>_meditationstate.startTimer()),
+                    child: Icon(Icons.play_arrow, color: Colors.black)
+                )              
             ]),
             ]
           ),
@@ -661,12 +678,20 @@ class _CountdownState extends State<Countdown> {
 
     if(_meditationstate.state != 'pre_guided'){
       _meditationstate.startMeditation(_userstate.user, _userstate.data);
+    }else{
+        if (_meditationstate.selmeditation != null && _meditationstate.selmeditation.followalong != null){
+          var configuration = createLocalImageConfiguration(context);
+          _meditationstate.selmeditation.followalong.values.forEach((value) {
+            if(value['image']!=null){
+              new NetworkImage(value['image'])..resolve(configuration);
+            }
+          });
+        }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -678,7 +703,8 @@ class _CountdownState extends State<Countdown> {
               if(_meditationstate.state == 'started'){
                 _meditationstate.pause();
               }
-              showDialog(
+              if(_meditationstate.state != 'finished'){
+                showDialog(
                 context: context, 
                 builder:(context) {
                     return AlertDialog(
@@ -705,6 +731,9 @@ class _CountdownState extends State<Countdown> {
                     );
                   }
               );
+              }else{
+                Navigator.pop(context);
+              }
             },
           ),
       ),

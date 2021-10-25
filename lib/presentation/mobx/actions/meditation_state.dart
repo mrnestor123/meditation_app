@@ -35,6 +35,11 @@ abstract class _MeditationState with Store {
 
   @observable
   Map<String,dynamic> currentsentence;
+  @observable
+  bool newsentence = false;
+  @observable
+  int sentenceindex = 0;
+
 
   bool finished = false;
 
@@ -92,7 +97,6 @@ abstract class _MeditationState with Store {
     totalduration = new Duration(minutes: time);
   }
 
-
   @action
   void startTimer() {
     var oneSec = new Duration(seconds: 1);
@@ -100,10 +104,8 @@ abstract class _MeditationState with Store {
 
     //PODRIAMOS HACER QUE EL USUARIO PUEDA ELEGIR CUANDO CAMBIAR DE MEDITACION
     if(selmeditation != null){
-      timeChange = selmeditation.followalong != null ? this.totalduration.inSeconds ~/ selmeditation.followalong.length : 1;
+      timeChange = selmeditation.followalong != null ? (this.totalduration.inSeconds - 3) / selmeditation.followalong.length : 1;
     }
-
-    int count = 0;
     
     if(timer != null){
       timer.cancel();
@@ -116,16 +118,15 @@ abstract class _MeditationState with Store {
         state = 'finished';
         timer.cancel();
       } else {
-        if(selmeditation != null ){
+        if(selmeditation != null){
           if(selmeditation.type !='free' && selmeditation.followalong != null){
-            if(currentsentence == null && this.totalduration.inSeconds - this.duration.inSeconds > 5){
-              currentsentence = selmeditation.followalong[count.toString()];
+            if((this.totalduration.inSeconds - this.duration.inSeconds) > (timeChange * sentenceindex) + 3){
+              newsentence = false;
+              currentsentence = selmeditation.followalong[sentenceindex.toString()];
               assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
-              count++;
-            }else if(this.duration.inSeconds % timeChange == 0 && currentsentence != null){
-              currentsentence = selmeditation.followalong[count.toString()];
-              assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
-              count++;
+              sentenceindex++;
+            }else if(currentsentence != null){
+              newsentence = true;
             }
           }
         }
@@ -149,11 +150,15 @@ abstract class _MeditationState with Store {
       state = 'free';
     }
     duration = new Duration(minutes: 5);
+    totalduration = new Duration(minutes: 5);
+    timer.cancel();
+    sentenceindex = 0;
   }
 
   @action
   Future finishMeditation() async {
     int currentposition = user.position;
+    sentenceindex = 0;
     
     if(timer.isActive){
       timer.cancel();
@@ -162,6 +167,8 @@ abstract class _MeditationState with Store {
 
     if(selmeditation == null){
       selmeditation = new MeditationModel(duration: totalduration);
+    }else{
+      selmeditation.duration = totalduration;
     }
     
     Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation, user: user, d: data));

@@ -69,6 +69,36 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$newsentenceAtom = Atom(name: '_MeditationState.newsentence');
+
+  @override
+  bool get newsentence {
+    _$newsentenceAtom.reportRead();
+    return super.newsentence;
+  }
+
+  @override
+  set newsentence(bool value) {
+    _$newsentenceAtom.reportWrite(value, super.newsentence, () {
+      super.newsentence = value;
+    });
+  }
+
+  final _$sentenceindexAtom = Atom(name: '_MeditationState.sentenceindex');
+
+  @override
+  int get sentenceindex {
+    _$sentenceindexAtom.reportRead();
+    return super.sentenceindex;
+  }
+
+  @override
+  set sentenceindex(int value) {
+    _$sentenceindexAtom.reportWrite(value, super.sentenceindex, () {
+      super.sentenceindex = value;
+    });
+  }
+
   final _$durationAtom = Atom(name: '_MeditationState.duration');
 
   @override
@@ -193,12 +223,25 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
+  void cancel() {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.cancel');
+    try {
+      return super.cancel();
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 user: ${user},
 selmeditation: ${selmeditation},
 currentpage: ${currentpage},
 currentsentence: ${currentsentence},
+newsentence: ${newsentence},
+sentenceindex: ${sentenceindex},
 duration: ${duration},
 startedmeditation: ${startedmeditation},
 state: ${state}

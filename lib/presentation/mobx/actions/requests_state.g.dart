@@ -24,6 +24,21 @@ mixin _$RequestState on _RequestState, Store {
     });
   }
 
+  final _$selectedrequestAtom = Atom(name: '_RequestState.selectedrequest');
+
+  @override
+  Request get selectedrequest {
+    _$selectedrequestAtom.reportRead();
+    return super.selectedrequest;
+  }
+
+  @override
+  set selectedrequest(Request value) {
+    _$selectedrequestAtom.reportWrite(value, super.selectedrequest, () {
+      super.selectedrequest = value;
+    });
+  }
+
   final _$gettingrequestsAtom = Atom(name: '_RequestState.gettingrequests');
 
   @override
@@ -53,10 +68,18 @@ mixin _$RequestState on _RequestState, Store {
     return _$uploadRequestAsyncAction.run(() => super.uploadRequest(r));
   }
 
+  final _$setRequestAsyncAction = AsyncAction('_RequestState.setRequest');
+
+  @override
+  Future<dynamic> setRequest(dynamic r) {
+    return _$setRequestAsyncAction.run(() => super.setRequest(r));
+  }
+
   @override
   String toString() {
     return '''
 requests: ${requests},
+selectedrequest: ${selectedrequest},
 gettingrequests: ${gettingrequests}
     ''';
   }

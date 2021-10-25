@@ -83,13 +83,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'https://public.digitalvalue.es:8002';
-   // nodejs = 'http://192.168.4.67:8002';
+    //nodejs = 'https://public.digitalvalue.es:8002';
+    nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
 
   Future<UserModel> connect(String cod) async {
+    try{
     var url = Uri.parse('$nodejs/connect/$cod');
     http.Response response = await http.get(url);
 
@@ -99,6 +100,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       //comprobar que funciona bien
       UserModel u = UserModel.fromRawJson(response.body);
       return u;
+    }
+    }catch(e) {
+      print('EXCEPtion');
     }
   }
 
@@ -181,33 +185,42 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     //HAGO ESTO DEMASIADO
     var url = Uri.parse('$nodejs/stages');
-    http.Response response = await http.get(url);
-    List<StageModel> stages = new List.empty(growable: true);
+    print('getting data');
+    try{
+      http.Response response = await http.get(url);
+      List<StageModel> stages = new List.empty(growable: true);
 
-    var stagesquery = json.decode(response.body);
+      var stagesquery = json.decode(response.body);
 
-    for(var stage in stagesquery){
-      d.stages.add(StageModel.fromJson(stage));      
+      for(var stage in stagesquery){
+        d.stages.add(StageModel.fromJson(stage));      
+      }
+      return d;
+    }catch(e){
+      print('exception');
     }
 
-    return d;
+    throw Exception();
   }
 
   Future<List<User>> getUsers(User loggeduser) async{
     List<User> l = new List.empty(growable: true);
-    
-    
-    var usersUrl = Uri.parse('$nodejs/users/${loggeduser.coduser}');
-    http.Response response = await http.get(usersUrl);
-    var users = json.decode(response.body);
+    try{
+      var usersUrl = Uri.parse('$nodejs/users/${loggeduser.coduser}');
+      http.Response response = await http.get(usersUrl);
+      var users = json.decode(response.body);
+      for(var user in users){
+        l.add(UserModel.fromJson(user));
+      }
 
-    for(var user in users){
-      l.add(UserModel.fromJson(user));
+      l.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
+
+      return l;
+    } catch(e){
+      print('exception');
     }
 
-    l.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
-
-    return l;
+    throw Exception();
   }
 
   //DEBERIA DE LLAMARSE IMAGE

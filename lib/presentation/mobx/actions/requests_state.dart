@@ -121,7 +121,7 @@ abstract class _RequestState with Store {
   }
 
   @action
-  void setRequest(dynamic r)async {
+  Future setRequest(dynamic r)async {
     if(r is Request){
       selectedrequest = r;
       gettingrequests = false;

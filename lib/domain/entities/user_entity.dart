@@ -140,7 +140,8 @@ class User {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
 
-    if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson' && type != 'updatestage'){
+    //MIRAR QUE TYPES SON LOS QUE SE RECUPERAN FOLLOW Y UNFOLLOW ?
+    /*if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson' && type != 'updatestage' &&  type !='guided_meditation'){
       for(UserAction a in this.todayactions) {
         if(a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
           a.setAction(attribute);
@@ -150,10 +151,10 @@ class User {
         }
       }
       this.todayactions.add(a);
-    }else{
+    }else{*/
       this.todayactions.add(a);
-    }
-
+    /*}*/
+    
     this.lastactions.add(a);
 
     //this.thisweekactions.add(a);

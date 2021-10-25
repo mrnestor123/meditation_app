@@ -185,7 +185,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                               child: TextField(
                               onChanged: (string) {
                                 setState(() {
-                                  condition = string;
+                                  _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
                                 });
                               },
                               controller: _searchController,
@@ -213,7 +213,16 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         width: Configuration.width *0.1,
                         child: IconButton(
                           icon: Icon(searching ? Icons.close : Icons.search), 
-                          onPressed: () => setState(() { searching = !searching; _searchController.clear(); condition = true; })
+                          onPressed: () => 
+                          setState(() { 
+                            if(searching){
+                              _userstate.filteredusers = _userstate.users;
+                            }
+
+                              searching = !searching; 
+                              _searchController.clear(); 
+                              condition = true; 
+                            })
                           )
                         )
                     ],
@@ -234,7 +243,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                       physics: NeverScrollableScrollPhysics(),
                       controller: _tabController,
                       children: [
-                        createTable(_userstate.users, context,false),
+                        createTable(_userstate.filteredusers, context,false),
                         createTable(_userstate.dynamicusers, context, true),
                     ]));
                   }
@@ -257,36 +266,41 @@ class UserProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            Container(
-            padding: EdgeInsets.all(2.0),
-            decoration: BoxDecoration(
-              image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
-              border: Border.all(color: Colors.white, width: 2.5),
-              shape: BoxShape.circle
+    return GestureDetector(
+      onTap: ()=> {
+        showUserProfile(user, context)
+      },
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+              padding: EdgeInsets.all(2.0),
+              decoration: BoxDecoration(
+                image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+                border: Border.all(color: Colors.white, width: 2.5),
+                shape: BoxShape.circle
+                ),
+              height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
+              width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
               ),
-            height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
-            width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
-            ),
-            position != null ?
-            Positioned(
-              top: 0,
-              child: Container(
-                padding: EdgeInsets.all(Configuration.tinpadding),
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                child: Text(position.toString(), style: Configuration.text('tiny', Colors.white)),
-              )
-            ) : Container(),
-          ],
-        ),
-        SizedBox(height: 4.0),
-        Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.black)),
-        SizedBox(height: 2.0),
-        Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
-      ],
+              position != null ?
+              Positioned(
+                top: 0,
+                child: Container(
+                  padding: EdgeInsets.all(Configuration.tinpadding),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
+                  child: Text(position.toString(), style: Configuration.text('tiny', Colors.white)),
+                )
+              ) : Container(),
+            ],
+          ),
+          SizedBox(height: 4.0),
+          Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.black)),
+          SizedBox(height: 2.0),
+          Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
+        ],
+      ),
     );
   }
 }
