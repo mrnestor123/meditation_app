@@ -11,7 +11,7 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
   sdk: '>=2.3.3 <3.0.0'
@@ -22,24 +22,23 @@ dependencies:
   mobx: ^2.0.4
   provider: ^5.0.0
   uuid: ^3.0.1
-  path: ^1.6.4
-  path_provider: ^2.0.1 
-  photo_view: ^0.9.2
+  #path_provider: ^2.0.1 
   equatable: ^1.1.0
-  workmanager: ^0.2.0
+ # workmanager: ^0.2.0 PARA BACKGROUND PROCESSING
   dartz: any
   get_it: ^2.0.1  
-  firebase_core: ^1.0.0
+  firebase_core: ^1.8.0
   firebase_auth: ^1.0.1  
   cloud_firestore: ^1.0.1
+ # flutter_local_notifications: ^8.1.1+2
+#  firebase_messaging: ^10.0.8
+  flutter_mobx: ^2.0.2
   collection: ^1.14.12
   shared_preferences: ^2.0.3
-  flutter_spinkit: "^4.1.2"
   http: ^0.13.4
-  font_awesome_flutter: ^8.8.1
   carousel_slider: ^2.3.1
   wakelock: ^0.5.2
-  google_sign_in: 5.0.0 
+  google_sign_in: ^5.0.0 
   webview_flutter: ^2.0.12
   flutter_circular_slider: ^2.5.0
   image_picker: ^0.7.3
@@ -48,13 +47,11 @@ dependencies:
   plugin_platform_interface: ^2.0.0
   table_calendar: ^3.0.0
   assets_audio_player: ^3.0.1
-  numberpicker: ^2.1.1
   flutter_html: ^2.1.0
   wheel_chooser: ^0.1.1
+  font_awesome_flutter: ^9.2.0
   connectivity_plus: ^1.0.5
-  flutter_local_notifications: ^8.1.1+2
-  firebase_messaging: ^10.0.8
-  flutter_mobx: ^2.0.2
+  
 
 
 

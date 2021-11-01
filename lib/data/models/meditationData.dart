@@ -46,7 +46,7 @@ class MeditationModel extends Meditation {
           recording: json["recording"] == null ? null : json["recording"],
           type: json["type"] == null ? null : json["type"],
           image: json["image"] == null ? null : json['image'],
-          stagenumber: json['stagenumber'] == null ? null : json['stagenumber'],
+          stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
           position: json['position'] == null ? null : json['position'],
           coduser: json['coduser'] == null ? null : json['coduser'],
           followalong: json['followalong'] == null ? null : json['followalong'],

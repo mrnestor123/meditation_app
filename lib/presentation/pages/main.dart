@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
@@ -24,10 +23,11 @@ import 'package:provider/provider.dart';
 import '../../login_injection_container.dart';
 import 'game_screen.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+//final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  /*
   var initializationSettingsAndroid = AndroidInitializationSettings('ic_launcher');
 
   var initializationSettingsIOS = IOSInitializationSettings(
@@ -49,7 +49,7 @@ void main() async {
   );
  // FirebaseMessaging messaging = FirebaseMessaging.instance;
   //NotificationSettings settings = await messaging.requestPermission();
-
+*/
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
 

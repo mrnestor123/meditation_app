@@ -142,9 +142,8 @@ class PathScreen extends StatelessWidget {
         Text('You must complete this objectives in order to pass to the next stage', style: Configuration.text('small', Colors.black),textAlign: TextAlign.center),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: l.sublist(0,3),
+          children: l.sublist(0,l.length),
         ),
-
         l.length > 3 ? 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

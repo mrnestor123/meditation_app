@@ -189,7 +189,7 @@ class _CalendarState extends State<CalendarWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               // prev month button
-              _toggleBtn(false),
+              
               Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), 
                 style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('small', Colors.black)
                 ),
@@ -198,6 +198,7 @@ class _CalendarState extends State<CalendarWidget> {
                 label: Text(filteredmeditations.length.toString() + ' meditations', 
                 style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('verytiny', Colors.black))
               ),
+              _toggleBtn(false),
               // next month button
               _toggleBtn(true),
             ],
@@ -252,6 +253,8 @@ class _CalendarState extends State<CalendarWidget> {
 
   // calendar element
   Widget _calendarDates(Calendar calendarDate){
+    var hasMeditated =   filteredmeditations.where((element) => element.day.day == calendarDate.date.day && element.day.month == calendarDate.date.month).length > 0 ;
+
     return InkWell(
       onTap: (){
         if(_selectedDateTime != calendarDate.date){
@@ -271,12 +274,17 @@ class _CalendarState extends State<CalendarWidget> {
               '${calendarDate.date.day}', 
               style: TextStyle(
                 color: (calendarDate.thisMonth) 
-                ? (calendarDate.date.weekday == DateTime.sunday) ? Colors.black : Colors.black 
-                : (calendarDate.date.weekday == DateTime.sunday) ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.5),
+                ? hasMeditated ? Configuration.maincolor : 
+                Colors.black 
+                :Colors.black.withOpacity(0.5),
               ),
             ),
-            filteredmeditations.where((element) => element.day.day == calendarDate.date.day && element.day.month == calendarDate.date.month).length > 0 ?
-            Icon(Icons.self_improvement, size: 9, color: Configuration.maincolor) : Container()
+            /*
+          hasMeditated ?
+            Icon(
+              Icons.self_improvement, size: 5, 
+              color: Configuration.maincolor
+              ) : Container()*/
           ],
         )
       ),

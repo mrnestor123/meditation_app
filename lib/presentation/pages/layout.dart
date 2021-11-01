@@ -238,6 +238,7 @@ class _MobileLayoutState extends State<MobileLayout> {
           child: PageView(
             physics: NeverScrollableScrollPhysics(),
             controller: _c,
+
             onPageChanged: (newPage) {
               setState(() {
                 currentindex = newPage;

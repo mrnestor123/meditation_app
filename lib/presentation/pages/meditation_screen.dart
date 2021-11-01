@@ -5,16 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:wheel_chooser/wheel_chooser.dart';
 
 import 'commonWidget/progress_dialog.dart';
 import 'config/configuration.dart';
@@ -29,7 +26,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
   UserState _userstate;
   MeditationState _meditationstate;
   GameState _gamestate;
-  int _index;
   int seltime = 5;  
 
   //podriamos utilizar meditationstate de arriba
@@ -51,10 +47,17 @@ class _MeditationScreenState extends State<MeditationScreen> {
         ),
         onPressed: ()=>{
           showModalBottomSheet(
-            enableDrag: false,
+            barrierColor: Colors.black.withOpacity(0.5),
+             shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            isScrollControlled:true,
             context: context, 
             builder: (context){
-              return child;
+              return Container(
+                padding: EdgeInsets.all(12),
+                child: child
+              );
             }).then((value) => 
               setState((){})            
             )
@@ -265,99 +268,124 @@ class _MeditationListState extends State<MeditationList> {
   MeditationState _meditationstate;
   UserState _userstate;
   List<int> stages = [1,2,3,4,5,6,7,8,9,10];
-    
+  
+
+  Widget meditation(meditation,_blocked){
+    return GestureDetector(
+      onTap: () => !_blocked ? 
+      setState(() {
+        _meditationstate.selectMeditation(meditation);
+      }) : null,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16.0),
+          color: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Colors.grey.withOpacity(0.1) : Colors.transparent,
+        ),
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Center(
+                    child: meditation.image.isNotEmpty ? AspectRatio(
+                      aspectRatio: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 1.5 : 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: Image(
+                          image: NetworkImage(meditation.image)
+                        ),
+                      ),
+                    ) : Container(),
+                  )
+                ),
+                SizedBox(height: 10),
+                Flexible(
+                    child: Text(
+                    meditation.title,
+                    style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ]
+            ),
+            _blocked ? 
+              Positioned.fill(
+                child: Container(
+                  margin: EdgeInsets.all(5.0),
+                  padding: EdgeInsets.all(5.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.7)
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock),
+                      SizedBox(height: 4),
+                      Text('Unlocked at stage ' +  meditation.stagenumber.toString(), style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
+                    ],
+                  ), 
+                ),
+              ):Container(),
+          ],
+        ),
+        )
+      );
+         
+  }
+
+
   List<Widget> meditations() { 
     List<Widget> meditcontent = new List.empty(growable: true);
 
     for(Stage s in _userstate.data.stages){
-      for(Meditation meditation in s.meditpath){
-        var _blocked = _userstate.user.isBlocked(meditation);
-
-        meditcontent.add(
-          GestureDetector(
-          onTap: () => !_blocked ? 
-          setState(() {
-            _meditationstate.selectMeditation(meditation);
-          }) : null,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              color: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Colors.grey.withOpacity(0.1) : Colors.transparent,
-            ),
-            child: Stack(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: meditation.image.isNotEmpty ? AspectRatio(
-                          aspectRatio: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 1.5 : 1,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: Image(
-                              image: NetworkImage(meditation.image)
-                            ),
-                          ),
-                        ) : Container(),
-                      )
-                    ),
-                    SizedBox(height: 10),
-                    Flexible(
-                        child: Text(
-                        meditation.title,
-                        style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ]
-                ),
-                _blocked ? 
-                  Positioned.fill(
-                    child: Container(
-                      margin: EdgeInsets.all(5.0),
-                      padding: EdgeInsets.all(5.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.7)
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lock),
-                          SizedBox(height: 4),
-                          Text('Unlocked at stage ' +  meditation.stagenumber.toString(), style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
-                        ],
-                      ), 
-                    ),
-                  ):Container(),
-              ],
-            ),
-            )
-          )
-        );
+      for(Meditation med in s.meditpath){
+        var _blocked = _userstate.user.isBlocked(med);
+        meditcontent.add(meditation(med,_blocked));
       }
     }
       
-      return meditcontent;
+    return meditcontent;
+  }
+
+  List<Widget> optionalmeditations(){
+    List<Widget> meditcontent = new List.empty(growable: true);
+
+    for(Meditation m in _userstate.data.nostagemeditations){
+      meditcontent.add(meditation(m,false));
     }
+
+    return meditcontent;
+  }
+
 
   @override
   Widget build(BuildContext context) {
     _meditationstate = Provider.of<MeditationState>(context);
     _userstate = Provider.of<UserState>(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children:[ 
-        SizedBox(height: 30),
-        GridView(
-          shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160),
-          children: meditations()
-        ),
-        SizedBox(height: 30)
-      ]
+    return Container(
+      padding:EdgeInsets.all(12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children:[ 
+          SizedBox(height: 10),
+          Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
+          GridView(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160),
+            children: meditations()
+          ),
+          Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
+          GridView(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160),
+            children: optionalmeditations()
+          ),
+        ]
+      ),
     );
   }
 }
@@ -430,7 +458,7 @@ class _CountdownState extends State<Countdown> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: _index == index
-                ? Color.fromRGBO(0, 0, 0, 0.9)
+                ? Colors.white
                 : Color.fromRGBO(0, 0, 0, 0.4),
           ),
         ));
@@ -453,6 +481,7 @@ class _CountdownState extends State<Countdown> {
       return l;
     }
 
+    /*
     Widget durationButton(duration){
       return OutlinedButton(
         onPressed: (){
@@ -467,7 +496,7 @@ class _CountdownState extends State<Countdown> {
         ),
         child: Text(duration)
       );
-    }
+    }*/
 
     return Stack(children: [
       CarouselSlider.builder(
@@ -521,12 +550,13 @@ class _CountdownState extends State<Countdown> {
                   ],
                 )
             : Container(),*/
-            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: getBalls(),
             ),
+
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -561,6 +591,7 @@ class _CountdownState extends State<Countdown> {
         l.add(Center(child: Html(data: map['html'],
         style: {
           "body": Style(color: Colors.white,fontSize: FontSize(18)),
+          "li": Style(margin: EdgeInsets.symmetric(vertical: 10.0)),
           "h2":Style(textAlign: TextAlign.center)
         })));
       }
@@ -723,7 +754,9 @@ class _CountdownState extends State<Countdown> {
                         TextButton(
                           child: Text('No',style: Configuration.text('small', Colors.black)),
                           onPressed: () {
-                            _meditationstate.startTimer();
+                            if(_meditationstate.state == 'started'){
+                              _meditationstate.startTimer();
+                            }
                             Navigator.pop(context);
                           },
                         )
@@ -899,27 +932,39 @@ class _CirclePickerState extends State<CirclePicker> {
   @override
   Widget build(BuildContext context) {
     final _meditationstate = Provider.of<MeditationState>(context);
-    return SingleCircularSlider(
-            95,
-            _meditationstate.duration.inMinutes,
-            baseColor: Colors.grey.withOpacity(0.6),
-            handlerColor: Colors.transparent,
-            handlerOutterRadius: 10,
-            onSelectionChange: (a, b, c) {
-              setState(() {
-                _meditationstate.setDuration(b);
-              });
-            },
-            height: Configuration.width > 600 ? 200 : Configuration.width*0.9,
-            width: Configuration.width > 600 ? 200 : Configuration.width*0.9,
-            selectionColor: Configuration.maincolor,
-            sliderStrokeWidth: 40,
-            child: Center(
-                child: Text(
-                _meditationstate.duration.inMinutes.toString() + ' min',
-              style: Configuration.text('smallmedium', Colors.black),
-            )),
-      );
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _meditationstate.selmeditation != null ?
+        Text(
+          'Duration must be more than ${_meditationstate.selmeditation.duration.inMinutes.toString()} min for ${_meditationstate.selmeditation.title} meditation',
+          style: Configuration.text('small',Colors.black),
+         ):Container(),
+        SingleCircularSlider(
+                95,
+                _meditationstate.duration.inMinutes,
+                baseColor: Colors.grey.withOpacity(0.6),
+                handlerColor: Colors.transparent,
+                handlerOutterRadius: 10,
+                onSelectionChange: (a, b, c) {
+                  setState(() {
+                    if(_meditationstate.state == 'pre_guided' && _meditationstate.selmeditation.duration.inMinutes < b){
+                      _meditationstate.setDuration(b);
+                    }
+                  });
+                },
+                height: Configuration.width > 600 ? 200 : Configuration.width*0.9,
+                width: Configuration.width > 600 ? 200 : Configuration.width*0.9,
+                selectionColor: Configuration.maincolor,
+                sliderStrokeWidth: 40,
+                child: Center(
+                    child: Text(
+                    _meditationstate.duration.inMinutes.toString() + ' min',
+                  style: Configuration.text('smallmedium', Colors.black),
+                )),
+          ),
+      ],
+    );
   }
 }
 

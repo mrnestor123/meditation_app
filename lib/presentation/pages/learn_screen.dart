@@ -31,6 +31,7 @@ class _LearnScreenState extends State<LearnScreen> {
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
     return GridView.builder(
+        physics: ClampingScrollPhysics() ,
         shrinkWrap: true,
         itemCount: _userstate.data.stages.length,
         gridDelegate: 

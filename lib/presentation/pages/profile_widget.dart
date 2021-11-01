@@ -199,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
                 ),
                 child: ListView(
+                  primary: false,
                   padding: EdgeInsets.all(12.0),
                   children: <Widget>[
                     Row(
@@ -274,6 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Text('Meditation record', style: Configuration.text('small', Colors.black)),
                     SizedBox(height: Configuration.blockSizeVertical*1),
                     CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),

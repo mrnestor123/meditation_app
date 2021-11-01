@@ -4,11 +4,11 @@
     <description>Next update.</description>
     <language>en</language>
     <item>
-        <title>Version 1.0</title>
+        <title>Version 2.0</title>
         <link>https://play.google.com/apps/internaltest/4699307922046630741</link>
-        <sparkle:version>1.0.1</sparkle:version>
+        <sparkle:version>1.0.2</sparkle:version>
         <description>
-        <![CDATA[ Actualización tocha ]]>
+        <![CDATA[ Actualización tocha. O reinstalas o te mato]]>
         </description>
         <pubDate>Thur, 16 Sept 2021</pubDate>
         <enclosure url="https://play.google.com/apps/internaltest/4699307922046630741" sparkle:os="android"/>

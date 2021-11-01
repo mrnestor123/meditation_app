@@ -1,20 +1,16 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
-import 'package:timezone/timezone.dart' as tz;
 
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/stage_card.dart';
-import 'main.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen();
@@ -41,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      SizedBox(height: 20),
+      SizedBox(height: 10),
       /*ElevatedButton(onPressed: (){
         scheduleNotification();
       }, child: Text("NOtification")),
@@ -50,12 +46,14 @@ class _MainScreenState extends State<MainScreen> {
         flex: 2,
         child:StageCard(stage: _userstate.user.stage),
       ),
-      SizedBox(height: 20,width: 20),
+      SizedBox(height: 20),
       Expanded(
         flex: 4,
         child:_Timeline()
       ),
-    ]);
+      SizedBox(height: 10),
+
+          ]);
   }
 }
 
@@ -238,39 +236,3 @@ class __TimelineState extends State<_Timeline> {
         ]));
   }
 }
-
-
-void scheduleNotification()async{
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-        'tenstages', 'tenstages', 'Channel for displaying shitt',
-        importance: Importance.max,
-        priority: Priority.high,
-        showWhen: false);
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    
-    await flutterLocalNotificationsPlugin.show(
-    0, 'plain title', 'plain body', platformChannelSpecifics,
-    payload: 'item x');
-}
-
-
-void _requestPermissions() {
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-    flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-  }

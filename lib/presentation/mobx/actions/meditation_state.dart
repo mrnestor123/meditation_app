@@ -84,9 +84,12 @@ abstract class _MeditationState with Store {
   void selectMeditation(Meditation m){
     if(this.selmeditation == m){
       this.selmeditation = null;
+      //this.duration = totalduration;
       state = 'free';
     }else{
       this.selmeditation = m;
+      this.duration = m.duration;
+      this.totalduration = m.duration;
       state = 'pre_guided';
     }
   }
@@ -149,9 +152,14 @@ abstract class _MeditationState with Store {
     }else{
       state = 'free';
     }
-    duration = new Duration(minutes: 5);
-    totalduration = new Duration(minutes: 5);
-    timer.cancel();
+    if(duration.inMinutes < 1){
+      duration = new Duration(minutes: 5);
+      totalduration = new Duration(minutes: 5);  
+    }
+    
+    if(timer != null && timer.isActive){
+        timer.cancel();
+    }
     sentenceindex = 0;
   }
 

@@ -3,21 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>141053385105-odel3hgbuh4nlmggqlb0fnbvkh17ucaq.apps.googleusercontent.com</string>
+	<string>120106070238-28bq96r5s5a9mncqda53r4l96m1p1q8u.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.141053385105-odel3hgbuh4nlmggqlb0fnbvkh17ucaq</string>
+	<string>com.googleusercontent.apps.120106070238-28bq96r5s5a9mncqda53r4l96m1p1q8u</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>120106070238-3k3kdud9jo3ircli7ta8d22shn1g1bgu.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyAToHv7qBwgVJnRZvaM6fTozSAm-pYVePY</string>
+	<string>AIzaSyDXM2zqe1Ta_RqSu1OPIcDPKAhCv6J-xe0</string>
 	<key>GCM_SENDER_ID</key>
-	<string>141053385105</string>
+	<string>120106070238</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.meditationApp</string>
+	<string>tenStages.ios.meditationApp</string>
 	<key>PROJECT_ID</key>
-	<string>the-mind-illuminated</string>
+	<string>the-mind-illuminated-32dee</string>
 	<key>STORAGE_BUCKET</key>
-	<string>the-mind-illuminated.appspot.com</string>
+	<string>the-mind-illuminated-32dee.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:141053385105:ios:ae954c4b9318ed6678e230</string>
+	<string>1:120106070238:ios:4fca2cd7b86d49e08c524f</string>
 	<key>DATABASE_URL</key>
-	<string>https://the-mind-illuminated.firebaseio.com</string>
+	<string>https://the-mind-illuminated-32dee.firebaseio.com</string>
 </dict>
 </plist>

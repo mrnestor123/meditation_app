@@ -83,8 +83,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    //nodejs = 'https://public.digitalvalue.es:8002';
-    nodejs = 'http://192.168.4.67:8002';
+    nodejs = 'https://public.digitalvalue.es:8002';
+  //  nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -151,6 +151,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           userStats: UserStats.empty()
         );
 
+
       //añadimos al usuario en la base de datos de usuarios
       await database.collection('users').add(user.toJson());
 
@@ -163,8 +164,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   // se carga cada x tiempo las últimas acciones del usuario!
   Future getActions(UserModel u) async {
     var url = Uri.parse('$nodejs/live/${u.coduser}');
-    var response = await http.get(url);
     try{
+      var response = await http.get(url);
       var actions = json.decode(response.body);
 
       if(actions['today'] != null && actions['today'].length > u.todayactions.length){
@@ -195,6 +196,18 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       for(var stage in stagesquery){
         d.stages.add(StageModel.fromJson(stage));      
       }
+
+      QuerySnapshot nostageContent = await database.collection('content').where('stagenumber', isEqualTo: 'none').get();
+
+      for(DocumentSnapshot doc in nostageContent.docs){
+        var data = doc.data();
+        if(data['type'] == 'meditation-practice'){
+          d.nostagemeditations.add(MeditationModel.fromJson(data));
+        }else{
+          d.nostagelessons.add(LessonModel.fromJson(data));
+        }
+      }
+
       return d;
     }catch(e){
       print('exception');

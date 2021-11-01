@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 
+//HAY QUE CREAR CLASE GUIDEDMEDITATION
 class Meditation extends Content {
   String coduser;
   Duration duration;
@@ -43,4 +44,11 @@ class Meditation extends Content {
       }
 
   void setDay(DateTime d) => this.day = d;
+}
+
+
+class GuidedMeditation extends Meditation{
+  
+
+
 }
