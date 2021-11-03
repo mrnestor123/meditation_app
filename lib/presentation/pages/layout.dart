@@ -88,7 +88,10 @@ class _MobileLayoutState extends State<MobileLayout> {
       var types = {'Guided':'guided','Free':'free','Games':'games'};
 
       if (chip){
-        g = Chip(label: Text(text, style: Configuration.text('tiny', Colors.black)));
+        g = Chip(
+          padding: EdgeInsets.all(Configuration.tinpadding),
+          label: Text(text, style: Configuration.text('tiny', Colors.black))
+          );
       } else {
         g =Chip(
           label: Text(text, style: Configuration.text('tiny', Colors.black)), 
@@ -96,7 +99,6 @@ class _MobileLayoutState extends State<MobileLayout> {
           elevation: 0.0,
           side: BorderSide.none
         );
-        
       }
 
       return GestureDetector(
@@ -112,6 +114,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
+        toolbarHeight: Configuration.width > 500 ? 80 : 50,
         backgroundColor: Configuration.white,
         bottom: PreferredSize(
             child: currentindex == 2 ?
@@ -129,24 +132,27 @@ class _MobileLayoutState extends State<MobileLayout> {
                       }),
                     ],
                   ),
+                  SizedBox(height: Configuration.verticalspacing/2),
                   Container(
                     color: Colors.grey,
                     height: 1.0,
                   )
                 ],
-                ):
+              ):
               Container(
                 color: Colors.grey,
                 height: 1.0,
               ),
-            preferredSize: currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)),
+            preferredSize: 
+            currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
+            ),
         leading: GestureDetector(
           onTap: (){
             this._c.jumpToPage(0);
           },
           child: Container(
             padding: EdgeInsets.all(4),
-            child: Image.asset('assets/logo-no-text.png')
+            child: Image.asset('assets/logo-no-text.png',width: Configuration.smicon)
           ),
         ),
         automaticallyImplyLeading: false,
@@ -157,7 +163,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                 alignment: Alignment.center,
                 child: IconButton(
                   color: Colors.black,
-                  icon: Icon(Icons.bug_report),
+                  icon: Icon(Icons.bug_report,  size: Configuration.smicon),
                   onPressed: ()=> Navigator.pushNamed(context, '/requests'),
                 ),
               ),
@@ -190,19 +196,19 @@ class _MobileLayoutState extends State<MobileLayout> {
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home,size: Configuration.smicon),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: Icon(Icons.book,size: Configuration.smicon),
             label: 'Learn',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.self_improvement),
+            icon: Icon(Icons.self_improvement,size: Configuration.smicon),
             label:'Practice'
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.terrain),
+            icon: Icon(Icons.terrain,size: Configuration.smicon),
             label: 'Path',
           )
         ],

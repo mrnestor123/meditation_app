@@ -12,6 +12,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
+import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:upgrader/upgrader.dart';
@@ -32,15 +33,10 @@ class _LoginWidgetState extends State<LoginWidget> {
     
     return Scaffold(
         resizeToAvoidBottomInset: false,
-        extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            color: Colors.black,
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: ButtonBack()
         ),
         body: Center(
           child: Column(
@@ -56,46 +52,34 @@ class _LoginWidgetState extends State<LoginWidget> {
                 children: [
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    child: TextFormField(
+                    child: InputField(
                       controller: _loginstate.userController,
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(12.0),
-                          filled: true,
-                          labelText: 'Mail',
-                          border: new OutlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.purpleAccent)),
-                          prefixIcon: Icon(Icons.email, size: Configuration.smicon),
-                      ),
-                      validator: (value) { 
+                      labeltext:'Mail',
+                      icon: Icons.mail,
+                      validator: (value){
                         if(value == null  || value.isEmpty){
-                          return 'Please enter the username';
+                          return 'Please enter the mail';
                         }else if(!_loginstate.validateMail(value)){
                           return 'Please input a valid mail';
                         } 
                         return null;
                       },
-                    ),
+                      ),
                   ),
                   SizedBox(height: 15),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    child: TextFormField(  
+                    child: InputField(
                       controller: _loginstate.passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(4.0),
-                          filled:true,
-                          labelText: 'Password',
-                          border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-                          prefixIcon: Icon(Icons.lock, size: Configuration.smicon),
-                      ),
+                      labeltext: 'Password',
+                      icon: Icons.lock,
                       validator: (value) { 
                         if(value == null || value.isEmpty){
-                          return 'Please enter a password';
+                          return 'Please enter the password';
                         }
                         return null;
                       },
-                    ),
+                    )
                   ),
                   SizedBox(height: 20),
                   LoginRegisterButton(
@@ -111,10 +95,16 @@ class _LoginWidgetState extends State<LoginWidget> {
                       if(_loginstate.startedmaillogin){
                        return CircularProgressIndicator(color: Colors.white);
                       }else{
-                        return Text(
-                          'LOGIN',
-                          style: Configuration.text('small', Colors.white),
-                          );
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              'LOGIN WITH MAIL',
+                              style: Configuration.text('smallmedium', Colors.white),
+                            ),
+                            Icon(Icons.mail,size: Configuration.smicon)
+                          ],
+                        );
                       }
                     }),
                   )
@@ -131,6 +121,48 @@ class _LoginWidgetState extends State<LoginWidget> {
             ],
           ),
         ));
+  }
+}
+
+class InputField extends StatelessWidget {
+
+  dynamic validator;
+  bool obscuretext;
+  
+  InputField({
+    Key key,
+    this.validator,
+    this.labeltext,
+    this.obscuretext,
+    this.icon,
+    this.controller,
+  }) : super(key: key);
+
+  final String labeltext;
+  final dynamic controller;
+  final IconData icon;  
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: Configuration.width*0.9,
+      child: TextFormField(
+        controller: controller,
+        style: Configuration.text('small', Colors.black),
+        obscureText: obscuretext != null ? true: false,
+        decoration: InputDecoration(
+            
+            errorStyle: Configuration.text('smallmedium', Colors.red),
+            contentPadding:  EdgeInsets.all(Configuration.smpadding),
+            filled: true,
+            labelStyle:  Configuration.text('small',Colors.grey),
+            labelText: labeltext,
+            border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
+            prefixIcon: Icon(icon, size: Configuration.smicon),
+        ),
+        validator: validator 
+      ),
+    );
   }
 }
 

@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      SizedBox(height: 10),
+      SizedBox(height: Configuration.verticalspacing),
       /*ElevatedButton(onPressed: (){
         scheduleNotification();
       }, child: Text("NOtification")),
@@ -46,14 +46,14 @@ class _MainScreenState extends State<MainScreen> {
         flex: 2,
         child:StageCard(stage: _userstate.user.stage),
       ),
-      SizedBox(height: 20),
+      SizedBox(height: Configuration.verticalspacing*2),
       Expanded(
         flex: 4,
         child:_Timeline()
       ),
-      SizedBox(height: 10),
+      SizedBox(height: Configuration.verticalspacing),
 
-          ]);
+    ]);
   }
 }
 
@@ -174,48 +174,54 @@ class __TimelineState extends State<_Timeline> {
           borderRadius: BorderRadius.circular(16.0), 
           border: Border.all(color: Colors.grey, width: 0.15)),
         child: Column(children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-           children:[ 
-              DropdownButton<String>(
-                    value: mode,
-                    elevation: 16,
-                    style: Configuration.text('small', Colors.black),
-                    underline: Container(
-                      height: 0,
-                      color: Colors.deepPurpleAccent,
-                    ),
-                    onChanged: (String newValue) {
-                      setState(() {
-                        mode = newValue;
-                      });
-                    },
-                    items: states.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList()
-                ),
-              RawMaterialButton(
-                    elevation: 3.0,
-                    fillColor: Configuration.maincolor,
-                    child: Row(
-                      children: [
-                        Icon(Icons.leaderboard, color: Colors.white, size: widget.isTablet ? Configuration.tinpadding : Configuration.smicon),
-                        Icon(Icons.person, color: Colors.white,size:widget.isTablet ? Configuration.tinpadding : Configuration.smicon)
-                      ],
-                    ),
-                    padding: EdgeInsets.all(4.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                    onPressed: () {
-                      //HABRA QUE CAMBIAR ESTO
-                      widget.isTablet ? 
-                      Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
-                      Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
-                    },
+          Container(
+            padding: EdgeInsets.all(Configuration.smpadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children:[ 
+                DropdownButton<String>(
+                      value: mode,
+                      elevation: 16,
+                      style: Configuration.text('smallmedium', Colors.black),
+                      underline: Container(
+                        height: 0,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          mode = newValue;
+                        });
+                      },
+                      items: states.map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList()
                   ),
-            ]
+                RawMaterialButton(
+                      elevation: 3.0,
+                      fillColor: Configuration.maincolor,
+                      child: Container(
+                        padding: EdgeInsets.all(Configuration.tinpadding),
+                        child: Row(
+                          children: [
+                            Icon(Icons.leaderboard, color: Colors.white, size: widget.isTablet ? Configuration.tinpadding : Configuration.smicon),
+                            Icon(Icons.person, color: Colors.white,size:widget.isTablet ? Configuration.tinpadding : Configuration.smicon)
+                          ],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(4.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                      onPressed: () {
+                        //HABRA QUE CAMBIAR ESTO
+                        widget.isTablet ? 
+                        Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
+                        Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
+                      },
+                    ),
+              ]
+            ),
           ),
           Row(
             children: [

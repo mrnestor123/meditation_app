@@ -35,10 +35,9 @@ class _LearnScreenState extends State<LearnScreen> {
         shrinkWrap: true,
         itemCount: _userstate.data.stages.length,
         gridDelegate: 
-          SliverGridDelegateWithMaxCrossAxisExtent(
-            childAspectRatio: 1.0, 
-            maxCrossAxisExtent: Configuration.width > 1000 ? 400.0 : 200.0,
+          SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisSpacing: 10,
+            crossAxisCount: Configuration.width > 500 ? 3 : 2,
         ),
         itemBuilder: (context, index) {
           var flex = _userstate.user.stage.stobjectives.lecciones  == 0 ? 0: ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();

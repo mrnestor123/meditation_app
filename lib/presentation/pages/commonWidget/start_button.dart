@@ -13,10 +13,10 @@ class StartButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      margin: EdgeInsets.only(bottom: 12.0),
+      width: Configuration.width*0.9,
+      margin: EdgeInsets.only(bottom:Configuration.verticalspacing * 1.5),
       child: AspectRatio(
-        aspectRatio: 9/2,
+        aspectRatio:Configuration.width > 500 ? 10/1: 9/2,
         child: ElevatedButton(
         onPressed: onPressed != null ? () async {
           if(!justpressed){

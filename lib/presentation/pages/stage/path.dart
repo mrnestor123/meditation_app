@@ -25,15 +25,19 @@ class ImagePath extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         bottom: PreferredSize(
-          child:Flexible(child: Text(stage.description, style: Configuration.text('small', Colors.black))), 
-          preferredSize: Size.fromHeight(20)
+          child:Flexible(child: Center(child: Text(stage.description, style: Configuration.text('small', Colors.black)))), 
+          preferredSize: Size.fromHeight(Configuration.width > 500 ? 60: 20)
         ),
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: Text('Stage ' + stage.stagenumber.toString(), style: Configuration.text('medium', Colors.black)),
         actions: [
-          IconButton(onPressed: ()=> stageDialog(context, stage)
-          , icon: Icon(Icons.info),color: Colors.black,)
+          IconButton(
+            onPressed: ()=> stageDialog(context, stage), 
+            icon: Icon(Icons.info),
+            color: Colors.black,
+            iconSize: Configuration.smicon,
+          )
         ],
         elevation: 0,
         leading: ButtonBack()
@@ -53,7 +57,6 @@ class ImagePath extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: 15),
-               
               ],
             ),
           ),

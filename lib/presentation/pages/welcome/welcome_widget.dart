@@ -16,114 +16,44 @@ class WelcomeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Configuration().init(context);
     return new Scaffold(
-      body: LayoutBuilder(
-      builder: (builder, constraints) {
-        print(constraints.maxWidth);
-        if (constraints.maxWidth < 700) {
-          return Container(
-            padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
-            margin: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
-            child: Center(
-              child: Stack(
-                children: [
-                   UpgradeAlert(
-                     dialogStyle: Platform.isAndroid ? 
-                     UpgradeDialogStyle.material:  
-                     UpgradeDialogStyle.cupertino,
-                    appcastConfig: cfg,
-                    child: Text(''),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        flex: 2,
-                        child:Image.asset('assets/logo.png')
-                      ),
-                      LoginRegisterButton(
-                        text: 'LOGIN',
-                        onPressed: (){
-                          Navigator.pushNamed(context, '/login');
-                        },
-                      ),
-                      SizedBox(height: Configuration.height*0.03),
-                      LoginRegisterButton(
-                        text: 'REGISTER',
-                        onPressed: (){
-                          Navigator.pushNamed(context, '/register');
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+      body: Container(
+        padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
+        margin: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
+        child: Center(
+          child: Stack(
+            children: [
+              UpgradeAlert(
+                  dialogStyle: Platform.isAndroid ? 
+                  UpgradeDialogStyle.material:  
+                  UpgradeDialogStyle.cupertino,
+                appcastConfig: cfg,
+                child: Text(''),
               ),
-            ),
-          );
-        } else {
-          return Container(
-            padding: EdgeInsets.all(12),
-            child: Center(
-              child: Column(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Flexible(
-                    flex: 2,
+                    flex:Configuration.width > 500 ? 1 : 2,
                     child:Image.asset('assets/logo.png')
                   ),
-                  Flexible(
-                    flex: 3,
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                            width: Configuration.width*0.25,
-                            child: AspectRatio(
-                              aspectRatio: 6/2,
-                              child: ElevatedButton(
-                              onPressed: () async {
-                                Navigator.pushNamed(context, '/login');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0.0,
-                                primary: Configuration.maincolor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
-                              ),
-                              child: Text(
-                                'Login',
-                                style: Configuration.tabletText('small', Colors.white),
-                              ),
-                              ),
-                          ),
-                        ),
-                        Container(
-                            width: Configuration.width*0.25,
-                            child: AspectRatio(
-                              aspectRatio: 6/2,
-                              child: ElevatedButton(
-                              onPressed: () async {
-                                Navigator.pushNamed(context, '/register');
-                              },
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0.0,
-                                primary: Configuration.maincolor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0))
-                              ),
-                              child: Text(
-                                'Register',
-                                style: Configuration.tabletText('small', Colors.white),
-                              ),
-                              ),
-                          ),
-                        ),
-                      ],
-                    ) 
+                  LoginRegisterButton(
+                    text: 'LOGIN',
+                    onPressed: (){
+                      Navigator.pushNamed(context, '/login');
+                    },
+                  ),
+                  SizedBox(height: Configuration.height*0.03),
+                  LoginRegisterButton(
+                    text: 'REGISTER',
+                    onPressed: (){
+                      Navigator.pushNamed(context, '/register');
+                    },
                   ),
                 ],
               ),
-            ),
-          );
-        }
-      },
+            ],
+          ),
+        ),
       )
     );
   }

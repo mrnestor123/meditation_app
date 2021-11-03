@@ -11,22 +11,21 @@ class PathScreen extends StatelessWidget {
   UserState _userstate;
 
   Widget porcentaje() {
-    return RadialProgress(
-      goalCompleted: 100.0,
-      progressColor: Colors.transparent,
-      progressBackgroundColor: Colors.grey,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical:20, horizontal: 10),
-        child: RadialProgress(
-          goalCompleted: _userstate.user.percentage/100,
-          progressColor: Configuration.maincolor,
-          progressBackgroundColor: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical:15,horizontal: 35),
-            child: Text(
-              _userstate.user.percentage.toString() + '%',
-              style: Configuration.text('medium', Colors.black),
-            ),
+    return Container(
+      padding: EdgeInsets.all(Configuration.smpadding),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color:Colors.grey,width: 6)
+      ),
+      child: RadialProgress(
+        goalCompleted: _userstate.user.percentage/100,
+        progressColor: Configuration.maincolor,
+        progressBackgroundColor: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical:15,horizontal: Configuration.width > 500 ? 60 : 35),
+          child: Text(
+            _userstate.user.percentage.toString() + '%',
+            style: Configuration.text('medium', Colors.black),
           ),
         ),
       ),
@@ -36,8 +35,16 @@ class PathScreen extends StatelessWidget {
   Widget goals(context) {
     
     Widget iconButton(String text, IconData icon, modaltext){
-      return GestureDetector(
-        onTap: ()=> {
+      return OutlinedButton(
+        style: OutlinedButton.styleFrom(
+            side: BorderSide(
+            width: 3.0,
+            color: Configuration.maincolor,
+            style: BorderStyle.solid,
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: ()=> {
           showGeneralDialog(
               barrierColor: Colors.black.withOpacity(0.5),
               transitionBuilder: (context, a1, a2, widget) {
@@ -67,32 +74,31 @@ class PathScreen extends StatelessWidget {
               pageBuilder: (context, animation1, animation2) {})
         },
         child: Container(
-          padding: EdgeInsets.all(6.0),
-          decoration: BoxDecoration(border: Border.all(color: Configuration.maincolor), borderRadius: BorderRadius.circular(12.0)),
-          child: Column(children: [
-            IconButton(icon: Icon(icon), onPressed: null),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+            Icon(icon, color: Configuration.maincolor,size: Configuration.smicon),
             Text(text,
-                style: Configuration.text('tiny', Colors.black),
+                style: Configuration.text('small', Colors.black),
             ),
           ]),
         ),
       );
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        GridView(
+    return GridView(
           shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, crossAxisSpacing: 10),
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4, 
+            crossAxisSpacing: 10
+          ),
           children: [
-          iconButton('Goals', Icons.checklist, _userstate.user.stage.goals),
-          iconButton('Obstacles', Icons.warning, _userstate.user.stage.obstacles),
-          iconButton('Skills', Icons.handyman, _userstate.user.stage.skills),
-          iconButton('Mastery', Icons.check_box, _userstate.user.stage.mastery)
-        ]),
-      ],
-    );
+            iconButton('Goals', Icons.checklist, _userstate.user.stage.goals),
+            iconButton('Obstacles', Icons.warning, _userstate.user.stage.obstacles),
+            iconButton('Skills', Icons.handyman, _userstate.user.stage.skills),
+            iconButton('Mastery', Icons.check_box, _userstate.user.stage.mastery)
+        ]);
   }
 
   Widget data(dynamic value, dynamic valuestage, String text) {
@@ -156,8 +162,8 @@ class PathScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return Flex(
-    direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
+    return Column(
+    //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
     children: [
       Flexible(
       flex: 2,
@@ -179,7 +185,7 @@ class PathScreen extends StatelessWidget {
       ),
 
       Flexible( 
-        flex:1,
+        flex:2,
         child: goals(context)
       )
     ],

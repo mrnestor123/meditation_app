@@ -82,7 +82,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         buttonModal(
           CirclePicker(),
           'Duration', 
-            Observer(
+          Observer(
               builder: (context) {
                 return Text(_meditationstate.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black));
               }
@@ -92,7 +92,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         buttonModal(
           MeditationList(), 
           'Guided Meditations', 
-            Observer(
+          Observer(
               builder: (context) {
                 if(_meditationstate.selmeditation != null){
                   return Image(image: NetworkImage(_meditationstate.selmeditation.image), fit: BoxFit.cover);
@@ -106,8 +106,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
       () => {
         Navigator.pushNamed(context, '/countdown').then(
           (value) => setState(()=>{
-            _userstate.user.progress != null ? 
-            autocloseDialog(context, _userstate.user) : null
+            _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null
           })
         ), 
       }, _meditationstate.duration.inMinutes > 0,
@@ -271,43 +270,43 @@ class _MeditationListState extends State<MeditationList> {
   
 
   Widget meditation(meditation,_blocked){
+    bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ;
+
     return GestureDetector(
       onTap: () => !_blocked ? 
       setState(() {
         _meditationstate.selectMeditation(meditation);
       }) : null,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16.0),
-          color: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? Colors.grey.withOpacity(0.1) : Colors.transparent,
-        ),
+        padding: EdgeInsets.all(isSelected ? 0 : Configuration.tinpadding),
         child: Stack(
           children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: meditation.image.isNotEmpty ? AspectRatio(
-                      aspectRatio: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 1.5 : 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12.0),
-                        child: Image(
-                          image: NetworkImage(meditation.image)
-                        ),
-                      ),
-                    ) : Container(),
-                  )
+            Positioned.fill(
+              child: Container(
+                padding: EdgeInsets.all(6.0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: meditation.image != null && meditation.image != '' ? Image(
+                    image: NetworkImage(meditation.image)
+                  ) : Container(),
                 ),
-                SizedBox(height: 10),
-                Flexible(
-                    child: Text(
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 50,
+                color: Colors.black.withOpacity(0.5),
+                child: Center(
+                  child: Text(
                     meditation.title,
                     style: Configuration.text('tiny', _blocked ? Colors.grey : Colors.black),
                     textAlign: TextAlign.center,
                   ),
-                ),
-              ]
+                )
+              )
             ),
             _blocked ? 
               Positioned.fill(
@@ -330,7 +329,7 @@ class _MeditationListState extends State<MeditationList> {
               ):Container(),
           ],
         ),
-        )
+      )
       );
          
   }
@@ -375,13 +374,19 @@ class _MeditationListState extends State<MeditationList> {
           Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
           GridView(
             shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Configuration.width > 600 ? 4  : 3,
+              crossAxisSpacing: 10
+            ),
             children: meditations()
           ),
           Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
           GridView(
             shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 160),
+            gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: Configuration.width > 600 ? 4  : 3,
+              crossAxisSpacing: 10
+            ),
             children: optionalmeditations()
           ),
         ]
@@ -389,6 +394,11 @@ class _MeditationListState extends State<MeditationList> {
     );
   }
 }
+
+
+
+
+
 
 //VISTA DE MEDITACIÓN
 class Countdown extends StatefulWidget {
@@ -953,10 +963,10 @@ class _CirclePickerState extends State<CirclePicker> {
                     }
                   });
                 },
-                height: Configuration.width > 600 ? 200 : Configuration.width*0.9,
-                width: Configuration.width > 600 ? 200 : Configuration.width*0.9,
+                height: Configuration.width > 600 ? Configuration.width*0.7 : Configuration.width*0.9,
+                width: Configuration.width > 600 ? Configuration.width*0.7: Configuration.width*0.9,
                 selectionColor: Configuration.maincolor,
-                sliderStrokeWidth: 40,
+                sliderStrokeWidth: Configuration.width > 600 ? 80:  40,
                 child: Center(
                     child: Text(
                     _meditationstate.duration.inMinutes.toString() + ' min',

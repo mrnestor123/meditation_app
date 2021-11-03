@@ -56,6 +56,9 @@ class Configuration {
   static double medmargin;
   static double bigmargin;
 
+
+  static double verticalspacing;
+
   //textstyles
   /*
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
@@ -110,25 +113,25 @@ class Configuration {
     }else{
       switch (size) {
         case 'mini':
-          px = 12.0;
-          break;
-        case 'verytiny':
           px = 14.0;
           break;
-        case "tiny":
+        case 'verytiny':
           px = 16.0;
           break;
-        case "small":
+        case "tiny":
           px = 18.0;
           break;
-        case "smallmedium":
+        case "small":
           px = 20.0;
           break;
-        case "medium":
+        case "smallmedium":
           px = 22.0;
           break;
-        case "big":
+        case "medium":
           px = 24.0;
+          break;
+        case "big":
+          px = 26.0;
           break;
         case "huge":
           px = 30.0;
@@ -150,8 +153,7 @@ class Configuration {
 
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
   */
-  static TextStyle tabletText(String size, Color color,
-      {String style, double spacing, String font}) {
+  static TextStyle tabletText(String size, Color color, {String style, double spacing, String font}) {
     var px;
     var weight = FontWeight.normal;
     double letterspacing = 0;
@@ -205,8 +207,6 @@ class Configuration {
         letterSpacing: letterspacing);
   }
   
-
-
   static List<Color> slidegradient = [
     Colors.grey[300],
     Colors.grey[400],
@@ -228,25 +228,28 @@ class Configuration {
 
     //Paddings
     if(width > 500){
-      tinpadding = 10;
-      smpadding = 14;
-      medpadding = 18;
-      bigpadding = 24;
-      smicon = 10;
-      medicon = 12;
+      tinpadding = 15;
+      verticalspacing = 20;
+      smpadding = 25;
+      medpadding = 28;
+      bigpadding = 35;
+      smicon = 35;
+      medicon = 40;
+      bigicon = 45;
       bigicon = safeBlockHorizontal * 5;
       smmargin = blockSizeHorizontal * 1;
       medmargin = blockSizeHorizontal * 1.5;
       bigmargin = blockSizeHorizontal * 2;
     }else {
       tinpadding = 10;
+      verticalspacing = 10;
       smpadding = 14;
-      medpadding = 18;
-      bigpadding = 22;
+      medpadding = 20;
+      bigpadding = 30;
       //QUITAR TODO ESTO!!!!!
-      smicon = safeBlockHorizontal * 6;
-      medicon = safeBlockHorizontal * 11;
-      bigicon = safeBlockHorizontal * 15;
+      smicon = 12;
+      medicon = 14;
+      bigicon = 20;
       smmargin = blockSizeHorizontal * 1;
       medmargin = blockSizeHorizontal * 2;
       bigmargin = blockSizeHorizontal * 4;
