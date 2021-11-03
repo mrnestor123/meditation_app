@@ -10,9 +10,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.d
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
-import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 
 class ProfileScreen extends StatefulWidget {

@@ -433,9 +433,15 @@ class _ContentViewState extends State<ContentView> {
 
   Widget portada() {
     return Column(children: [
-      Stack(children: [
-        Center(child: Hero(tag: widget.content.cod, child: Image(image: widget.slider,width: Configuration.width,))),
-      ]),
+      Hero(
+        tag: widget.content.cod, 
+        child: Image(
+          image: widget.slider,
+          width: Configuration.width,
+          height: Configuration.height*0.6,
+          fit: BoxFit.cover,
+        )
+      ),
       Expanded(
         child: Container(
           width: Configuration.width,
@@ -450,7 +456,7 @@ class _ContentViewState extends State<ContentView> {
                       top: Configuration.smpadding),
                   child: Text(widget.content.title,
                       textAlign: TextAlign.center,
-                      style: Configuration.text('small', Colors.black)),
+                      style: Configuration.text('smallmedium', Colors.black)),
                 ),
               ),
               Center(

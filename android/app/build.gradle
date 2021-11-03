@@ -66,9 +66,17 @@ android {
 
    buildTypes {
        release {
-           signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
+            shrinkResources true
+            minifyEnabled true
+            useProguard true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
        }
    }
+
+   configurations {
+        all*.exclude group: 'com.google.android.exoplayer', module: 'exoplayer-ui'
+    }
 }
 
   // Google Play services Gradle plugin
@@ -89,5 +97,6 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 }
+
 
 apply plugin: 'com.google.gms.google-services'

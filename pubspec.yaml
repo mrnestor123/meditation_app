@@ -11,7 +11,7 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.2+3
+version: 1.0.2+7
 
 environment:
   sdk: '>=2.3.3 <3.0.0'
@@ -28,7 +28,7 @@ dependencies:
   dartz: any
   get_it: ^2.0.1  
   firebase_core: ^1.8.0
-  firebase_auth: ^1.0.1  
+  firebase_auth: ^3.1.4 
   cloud_firestore: ^1.0.1
  # flutter_local_notifications: ^8.1.1+2
 #  firebase_messaging: ^10.0.8
@@ -42,10 +42,9 @@ dependencies:
   webview_flutter: ^2.0.12
   flutter_circular_slider: ^2.5.0
   image_picker: ^0.7.3
-  video_player: ^2.0.2
-  firebase_storage: ^8.0.0
-  plugin_platform_interface: ^2.0.0
-  table_calendar: ^3.0.0
+  video_player: ^2.2.6
+  firebase_storage: ^10.0.6
+  # PARA CALENDARIOStable_calendar: ^3.0.0
   assets_audio_player: ^3.0.1
   flutter_html: ^2.1.0
   wheel_chooser: ^0.1.1
@@ -85,8 +84,6 @@ flutter:
 
   assets:
     - assets/
-    - assets/stage 1/
-    - assets/stage 2/
     - assets/audios/
   fonts: 
     - family: Gotham

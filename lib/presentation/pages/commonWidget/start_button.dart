@@ -26,13 +26,13 @@ class StartButton extends StatelessWidget {
           }
         } : null,
         style: ElevatedButton.styleFrom(
-          elevation: 4.0,
+          elevation: 2.0,
           primary: Configuration.maincolor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0))
         ),
         child: Text(
           text != null ? text : 'Start',
-          style: Configuration.text('small', Colors.white),
+          style: Configuration.text('smallmedium', Colors.white),
         ),
           ),
       ),

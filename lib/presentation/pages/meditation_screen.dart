@@ -948,7 +948,7 @@ class _CirclePickerState extends State<CirclePicker> {
                 handlerOutterRadius: 10,
                 onSelectionChange: (a, b, c) {
                   setState(() {
-                    if(_meditationstate.state == 'pre_guided' && _meditationstate.selmeditation.duration.inMinutes < b){
+                    if(_meditationstate.selmeditation ==null || _meditationstate.selmeditation.duration.inMinutes < b){
                       _meditationstate.setDuration(b);
                     }
                   });
