@@ -37,7 +37,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget buttonModal(child, text, selected){
     return AspectRatio(
-      aspectRatio: 10/2,
+      aspectRatio: 11/2,
       child: ElevatedButton(
         style: OutlinedButton.styleFrom(
           primary: Configuration.maincolor,
@@ -47,11 +47,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
         ),
         onPressed: ()=>{
           showModalBottomSheet(
+            isScrollControlled: true,
             barrierColor: Colors.black.withOpacity(0.5),
              shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
-            isScrollControlled:true,
             context: context, 
             builder: (context){
               return Container(
@@ -118,23 +118,36 @@ class _MeditationScreenState extends State<MeditationScreen> {
     Widget gamelist(){
       return GridView.builder(
         shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
         itemCount: _userstate.data.stages[0].games.length,
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200), 
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: Configuration.crossAxisCount
+        ), 
         itemBuilder: (context,index) {
           var game = _userstate.data.stages[0].games[index];
           var _blocked = _userstate.user.isGameBlocked(game);
           var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
 
+          return ClickableSquare(
+            text: game.title,
+            image: game.image,
+            onTap: (){
+              _gamestate.selectgame(game);
+              setState(() {});
+            },
+            selected: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod,
+            blocked: _blocked,
+            blockedtext: 'Complete '+ gamebefore.title,
+          );
+          /*
           return GestureDetector(
             onTap: ()=> setState((){
-              if(!_blocked){
-                _gamestate.selectgame(game);
-              }
+              
             }),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
-                color:  _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod  ? Colors.grey.withOpacity(0.1) : Colors.transparent,
+                color:    ? Colors.grey.withOpacity(0.1) : Colors.transparent,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -186,7 +199,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 ]
               ),
             ),
-          );
+          );*/
         });
     }
 
@@ -268,15 +281,12 @@ class _MeditationListState extends State<MeditationList> {
   UserState _userstate;
   List<int> stages = [1,2,3,4,5,6,7,8,9,10];
   
-
+  /*
   Widget meditation(meditation,_blocked){
-    bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ;
 
     return GestureDetector(
       onTap: () => !_blocked ? 
-      setState(() {
-        _meditationstate.selectMeditation(meditation);
-      }) : null,
+       : null,
       child: Container(
         padding: EdgeInsets.all(isSelected ? 0 : Configuration.tinpadding),
         child: Stack(
@@ -333,15 +343,30 @@ class _MeditationListState extends State<MeditationList> {
       );
          
   }
-
+  */
 
   List<Widget> meditations() { 
     List<Widget> meditcontent = new List.empty(growable: true);
 
     for(Stage s in _userstate.data.stages){
-      for(Meditation med in s.meditpath){
-        var _blocked = _userstate.user.isBlocked(med);
-        meditcontent.add(meditation(med,_blocked));
+      for(Meditation m in s.meditpath){
+        var _blocked = _userstate.user.isBlocked(m);
+        bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
+
+        meditcontent.add(
+        ClickableSquare(
+          blocked: _blocked,
+          text: m.title,
+          selected: isSelected,
+          image: m.image,
+          onTap:(){
+            _meditationstate.selectMeditation(m);
+            setState(() {
+            });
+          }    
+        )
+      );
+        //meditcontent.add(meditation(med,_blocked));
       }
     }
       
@@ -352,12 +377,25 @@ class _MeditationListState extends State<MeditationList> {
     List<Widget> meditcontent = new List.empty(growable: true);
 
     for(Meditation m in _userstate.data.nostagemeditations){
-      meditcontent.add(meditation(m,false));
+      bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
+
+      meditcontent.add(
+        ClickableSquare(
+          blocked: false,
+          text: m.title,
+          selected: isSelected,
+          image: m.image,
+          onTap:(){
+            _meditationstate.selectMeditation(m);
+            setState(() {
+            });
+          }    
+        )
+      );
     }
 
     return meditcontent;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -366,38 +404,114 @@ class _MeditationListState extends State<MeditationList> {
 
     return Container(
       padding:EdgeInsets.all(12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children:[ 
-          SizedBox(height: 10),
-          Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
-          GridView(
-            shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: Configuration.width > 600 ? 4  : 3,
-              crossAxisSpacing: 10
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children:[ 
+            SizedBox(height: 10),
+            Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
+            GridView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Configuration.crossAxisCount,
+                crossAxisSpacing: 10
+              ),
+              children: meditations()
             ),
-            children: meditations()
-          ),
-          Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
-          GridView(
-            shrinkWrap: true,
-            gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: Configuration.width > 600 ? 4  : 3,
-              crossAxisSpacing: 10
+            Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
+            GridView(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Configuration.crossAxisCount,
+                crossAxisSpacing: 10
+              ),
+              children: optionalmeditations()
             ),
-            children: optionalmeditations()
-          ),
-        ]
+          ]
+        ),
       ),
     );
   }
 }
 
 
+class ClickableSquare extends StatelessWidget {
+  String blockedtext, image,text;
+  bool selected; 
+  dynamic onTap;
+  bool blocked;
+
+  ClickableSquare({this.blockedtext,this.onTap,this.blocked,this.image,this.selected,this.text}) : super();
 
 
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if(!blocked){
+          onTap();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(selected ? 0 : Configuration.tinpadding),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child:ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0),
+                  child: image != null && image != '' ? 
+                  Image(image: NetworkImage(image)) : Container(),
+              ),
+            ),
+            blocked ? 
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.0),
+                    color: Colors.black.withOpacity(0.7)
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock, size:Configuration.smicon,color: Colors.white),
+                      SizedBox(height: 4),
+                      Text(blockedtext, style: Configuration.text('verytiny', Colors.white), textAlign: TextAlign.center,)
+                    ],
+                  ), 
+                ),
+              ):Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(12.0),
+                    bottomLeft: Radius.circular(12.0),
+                  ),
+                  color: blocked ? Colors.transparent : Colors.black.withOpacity(0.5),
+                ),
+                child: Center(
+                  child: Text(
+                    text,
+                    style: Configuration.text('tiny', Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+      )
+      );
+     
+  }
+}
 
 
 //VISTA DE MEDITACIÓN

@@ -12,6 +12,7 @@ class Configuration {
   static double _safeAreaVertical;
   static double safeBlockHorizontal;
   static double safeBlockVertical;
+  static double lessonratio;
 
   static bool nightmode = false;
 
@@ -58,6 +59,9 @@ class Configuration {
 
 
   static double verticalspacing;
+  static double strokewidth;
+
+  static int crossAxisCount;
 
   //textstyles
   /*
@@ -231,28 +235,28 @@ class Configuration {
       tinpadding = 15;
       verticalspacing = 20;
       smpadding = 25;
-      medpadding = 28;
-      bigpadding = 35;
+      medpadding = 31;
+      bigpadding = 36;
       smicon = 35;
-      medicon = 40;
-      bigicon = 45;
+      medicon = 45;
+      bigicon = 50;
+      strokewidth = 8;
       bigicon = safeBlockHorizontal * 5;
-      smmargin = blockSizeHorizontal * 1;
-      medmargin = blockSizeHorizontal * 1.5;
-      bigmargin = blockSizeHorizontal * 2;
+      crossAxisCount = 3;
+      lessonratio = 11/3;
     }else {
       tinpadding = 10;
       verticalspacing = 10;
+      strokewidth = 4;
       smpadding = 14;
       medpadding = 20;
       bigpadding = 30;
+      crossAxisCount = 2;
+      lessonratio = 8/3;
       //QUITAR TODO ESTO!!!!!
       smicon = 12;
-      medicon = 14;
+      medicon = 16;
       bigicon = 20;
-      smmargin = blockSizeHorizontal * 1;
-      medmargin = blockSizeHorizontal * 2;
-      bigmargin = blockSizeHorizontal * 4;
     }
 
     

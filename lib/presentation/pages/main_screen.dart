@@ -42,13 +42,9 @@ class _MainScreenState extends State<MainScreen> {
         scheduleNotification();
       }, child: Text("NOtification")),
       */
-      Flexible(
-        flex: 2,
-        child:StageCard(stage: _userstate.user.stage),
-      ),
+      StageCard(stage: _userstate.user.stage),
       SizedBox(height: Configuration.verticalspacing*2),
       Expanded(
-        flex: 4,
         child:_Timeline()
       ),
       SizedBox(height: Configuration.verticalspacing),

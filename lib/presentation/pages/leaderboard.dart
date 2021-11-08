@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
@@ -37,7 +38,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-        Icon(icon),
+        Icon(icon, size: Configuration.smicon),
         Text(text,style: Configuration.text('tiny',Colors.black))
       ]);
     }
@@ -48,8 +49,11 @@ class _LeaderBoardState extends State<LeaderBoard> {
             child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: {
-              0: FractionColumnWidth(0.05),
-              2: FractionColumnWidth(0.42)
+              0: FractionColumnWidth(0.1),
+              1:FractionColumnWidth(0.1),
+              2: FractionColumnWidth(0.4),
+              3:FractionColumnWidth(0.3),
+              4:FractionColumnWidth(0.1)
             },
             children: list.map((u) => 
             TableRow(
@@ -65,6 +69,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 ),
                 ),
                 CircleAvatar(
+                  radius: Configuration.strokewidth*3,
                   backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
                   backgroundImage: u.image != null ? NetworkImage(u.image) : null,
                   child: u.image == null ? null : null,
@@ -87,6 +92,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     children: [
                       u.coduser != _userstate.user.coduser ?
                       IconButton(
+                        iconSize: Configuration.smicon,
                         icon: Icon(following || u.followed != null && u.followed ? Icons.person : Icons.person_add), 
                         onPressed: () async { 
                           bool following = _userstate.user.following.contains(u.coduser);
@@ -140,7 +146,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         elevation: 0,
         backgroundColor: Configuration.maincolor,
         leading: ButtonBack(color: Colors.white),
-        title: Text('Leaderboard', style: Configuration.text('medium', Colors.white)),
+        title: Text('Leaderboard', style: Configuration.text('big', Colors.white)),
       ),
       body: DefaultTabController(
         length: 2,
@@ -172,34 +178,30 @@ class _LeaderBoardState extends State<LeaderBoard> {
               flex: 4,
               child: Column(children: [
                 Container(
+                  padding: EdgeInsets.all(Configuration.tinpadding),
                   decoration: BoxDecoration(color: Configuration.lightgrey),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Container(
                       width: Configuration.width*0.85,
                       child: searching ? 
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal:16.0),
-                          child: AspectRatio(
-                            aspectRatio: 9/1,
-                              child: TextField(
-                              onChanged: (string) {
-                                setState(() {
-                                  _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
-                                });
-                              },
-                              controller: _searchController,
-                              decoration: InputDecoration(
-                                hintText: 'Username',
-                                border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
-                              ),
-                            ),
+                      TextField(
+                          onChanged: (string) {
+                            setState(() {
+                              _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
+                            });
+                          },
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Username',
+                            border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
                           ),
-                        )
+                      )
                       : TabBar(
                           controller: _tabController,
                           indicatorSize: TabBarIndicatorSize.label,
-                          indicatorWeight: 2.5,
+                          indicatorWeight: Configuration.width > 500 ?5 : 2.5 ,
                           indicatorColor: Configuration.maincolor,
                           tabs: [
                             Tab(
@@ -212,13 +214,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                       Container( 
                         width: Configuration.width *0.1,
                         child: IconButton(
+                          iconSize: Configuration.smicon,
                           icon: Icon(searching ? Icons.close : Icons.search), 
                           onPressed: () => 
                           setState(() { 
                             if(searching){
                               _userstate.filteredusers = _userstate.users;
                             }
-
                               searching = !searching; 
                               _searchController.clear(); 
                               condition = true; 
@@ -231,11 +233,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 Observer(
                   builder: (context) {
                     return  _userstate.loading ? 
-                      Container(
-                        margin: EdgeInsets.only(top: 16.0),
-                        child: CircularProgressIndicator(
-                          color: Configuration.maincolor,
-                          strokeWidth: 3.0,
+                      Expanded(
+                        child: Center(
+                          child: CircularProgress(),
                         ),
                       ) :
                       Expanded(child: 
@@ -256,6 +256,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
     );
   }
 }
+
 
 class UserProfile extends StatelessWidget {
   final User user;

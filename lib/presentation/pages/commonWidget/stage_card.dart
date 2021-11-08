@@ -15,6 +15,8 @@ class StageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+    width: Configuration.width,
+    height: Configuration.height*0.28,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(16.0)
     ),

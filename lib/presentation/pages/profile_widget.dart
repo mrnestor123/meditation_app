@@ -499,7 +499,7 @@ class ProfileInfoBigCard extends StatelessWidget {
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
-        border: Border.all(color: color != null ? Colors.white : Colors.grey, width: 0.35)
+        border: Border.all(color: Colors.white, width: Configuration.strokewidth/2)
       ),
       child: Padding(
         padding: EdgeInsets.all(Configuration.smpadding),

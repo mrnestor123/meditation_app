@@ -66,8 +66,10 @@ class _GameStartedState extends State<GameStarted> {
           }
         },
         child: Container(
-          height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
-          width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
+          //height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
+         // width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
+          height: Configuration.width / controller.value.aspectRatio,
+          width: Configuration.height * controller.value.aspectRatio,
           child: Stack(children:[
             VideoPlayer(controller),
             !started || !controller.value.isPlaying ? 
@@ -141,6 +143,13 @@ class _GameStartedState extends State<GameStarted> {
   Widget questionAsk(){
     List<Widget> getQuestions(){
       List<Widget> l = new List.empty(growable: true);
+      l.add(Text(
+            _gamestate.selectedquestion.question, 
+            style: Configuration.text('medium', Colors.black)
+      ));
+
+      l.add(SizedBox(height: Configuration.verticalspacing));
+
       for(var option in _gamestate.selectedquestion.options){
         int index =  _gamestate.selectedquestion.options.indexOf(option);
         l.add(Container(
@@ -168,24 +177,32 @@ class _GameStartedState extends State<GameStarted> {
       return l;
     }
 
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Stack(
         children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text('Questions right'),
-            Text(_gamestate.answeredquestions.length.toString()  + '/'+  _gamestate.selectedgame.questions.length.toString())
-          ],
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            margin: EdgeInsets.only(bottom:Configuration.verticalspacing),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text('Questions right', style: Configuration.text('small', Colors.black)),
+                Text(
+                  _gamestate.answeredquestions.length.toString()  + '/'+  _gamestate.selectedgame.questions.length.toString(),
+                  style: Configuration.text('medium',Colors.black),
+                )
+              ],
+            ),
+          ),
         ),
         SizedBox(height: 10),
-        Text(
-          _gamestate.selectedquestion.question, 
-          style: Configuration.text('medium', Colors.black)
-        ),
-        SizedBox(height: Configuration.height * 0.03),
-        Column(children: getQuestions()),
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: getQuestions()
+          ),
+        )
       ]);
   }
 
@@ -219,13 +236,15 @@ class _GameStartedState extends State<GameStarted> {
           appBar: AppBar(
             elevation: 0,
             backgroundColor: Colors.transparent,
-            leading: IconButton(icon: Icon(Icons.close) , 
+            leading: IconButton(
+              iconSize: Configuration.smicon,
+              icon: Icon(Icons.close) , 
               onPressed: () { 
                 Navigator.pop(context); 
               }, color: Colors.black),
           ),
           body: _gamestate.state == 'question' ? 
-               questionAsk()
+              questionAsk()
             :  _gamestate.state == 'answer' ? 
             questionSolved():
             showingVideo()

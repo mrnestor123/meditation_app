@@ -27,17 +27,16 @@ class ProfileCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(
-        left: marginLeft !=null ? marginLeft:  Configuration.medmargin, 
-        right: marginRight !=null ? marginRight   : Configuration.bigmargin
-      ),
       child: GestureDetector(
         onTap: onTap, 
         child: Container(
-          padding: EdgeInsets.all(2.0),
+          padding: EdgeInsets.all(Configuration.strokewidth/2),
           decoration: BoxDecoration(
               color: Colors.transparent,
-              border: Border.all(color: Configuration.maincolor,width:2.0),
+              border: Border.all(
+                color: Configuration.maincolor,
+                width: Configuration.strokewidth/2
+              ),
               shape: BoxShape.circle
             ),
             child: CircleAvatar(

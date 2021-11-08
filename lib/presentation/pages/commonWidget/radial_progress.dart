@@ -1,6 +1,7 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 
 
@@ -59,7 +60,7 @@ class _RadialProgressState extends State<RadialProgress>
   Widget build(BuildContext context) {
     return CustomPaint(
       child: Padding(
-        padding: const EdgeInsets.all(3.5),
+        padding: EdgeInsets.all(Configuration.medpadding),
         child: widget.child,
       ),
       painter: RadialPainter(
