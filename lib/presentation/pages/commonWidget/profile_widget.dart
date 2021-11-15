@@ -8,7 +8,7 @@ class ProfileCircle extends StatelessWidget {
   final String userImage;
   final double width;
   final String height;
-  final Color color;
+  final Color color, bordercolor;
   final double marginLeft;
   final double marginRight;
   final VoidCallback onTap; // Notice the variable type
@@ -19,6 +19,7 @@ class ProfileCircle extends StatelessWidget {
     this.width,
     this.height,
     this.color,
+    this.bordercolor,
     this.marginLeft,
     this.marginRight,
     this.onTap
@@ -30,11 +31,11 @@ class ProfileCircle extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap, 
         child: Container(
-          padding: EdgeInsets.all(Configuration.strokewidth/2),
+          padding: EdgeInsets.all(Configuration.strokewidth/3),
           decoration: BoxDecoration(
-              color: Colors.transparent,
+              color:  Colors.transparent,
               border: Border.all(
-                color: Configuration.maincolor,
+                color: bordercolor!= null ? bordercolor : Configuration.maincolor,
                 width: Configuration.strokewidth/2
               ),
               shape: BoxShape.circle
@@ -42,7 +43,7 @@ class ProfileCircle extends StatelessWidget {
             child: CircleAvatar(
               radius: 50,
               backgroundColor: userImage == null
-                  ? Configuration.maincolor
+                  ? color != null ? color : Configuration.maincolor
                   : Colors.transparent,
               backgroundImage: userImage == null
                   ? null

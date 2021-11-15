@@ -253,10 +253,9 @@ class Configuration {
       bigpadding = 30;
       crossAxisCount = 2;
       lessonratio = 8/3;
-      //QUITAR TODO ESTO!!!!!
-      smicon = 12;
-      medicon = 16;
-      bigicon = 20;
+      smicon = 20;
+      medicon = 30;
+      bigicon = 40;
     }
 
     

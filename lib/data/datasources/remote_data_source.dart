@@ -286,12 +286,16 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       //esto se ejecutará antes que el clear ??
       //esto desde cuando se ejecuta ??
       user.lastactions.forEach((element) async{
+        try{
         var body = json.encode(element.toJson());
-
+        
         var response = await http.post(url,
           headers: {"Content-Type": "application/json"},
           body: body
         );
+        }catch(e){
+          print(e);
+        }
       });
 
       user.lastactions.clear();
@@ -311,9 +315,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       if(u !=null){
         getActions(u);
 
+        /*
+        ESTO NO LO VAMOS A HACER ASI. CADA VEZ QUE ENTRE A MAINSCREEN SACAMOS ACTIONS
         Timer.periodic(new Duration(seconds: 30), (timer) {
           getActions(u);
-        });    
+        }); */   
       
         if(u == null){
           throw Exception();

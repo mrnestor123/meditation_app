@@ -44,16 +44,17 @@ class _LeaderBoardState extends State<LeaderBoard> {
     }
 
     return ListView(
+      physics:ClampingScrollPhysics(),
       children: [
           Container(
             child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: {
-              0: FractionColumnWidth(0.1),
-              1:FractionColumnWidth(0.1),
-              2: FractionColumnWidth(0.4),
-              3:FractionColumnWidth(0.3),
-              4:FractionColumnWidth(0.1)
+              0:FractionColumnWidth(0.1),
+              1:FractionColumnWidth(0.15),
+              2:FractionColumnWidth(0.4),
+              3:FractionColumnWidth(0.2),
+              4:FractionColumnWidth(0.15)
             },
             children: list.map((u) => 
             TableRow(
@@ -112,8 +113,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
                   )
               ]
             )).toList()
-        ),
-          )] 
+          ),
+        )] 
       );
   }
 
@@ -239,13 +240,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         ),
                       ) :
                       Expanded(child: 
-                      TabBarView(
-                      physics: NeverScrollableScrollPhysics(),
-                      controller: _tabController,
-                      children: [
-                        createTable(_userstate.filteredusers, context,false),
-                        createTable(_userstate.dynamicusers, context, true),
-                    ]));
+                        TabBarView(
+                        physics: NeverScrollableScrollPhysics(),
+                        controller: _tabController,
+                        children: [
+                          createTable(_userstate.filteredusers, context,false),
+                          createTable(_userstate.dynamicusers, context, true),
+                        ])
+                      );
                   }
                 )
               ]),

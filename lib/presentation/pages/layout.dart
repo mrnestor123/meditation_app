@@ -185,7 +185,10 @@ class _MobileLayoutState extends State<MobileLayout> {
               icon: Icon(Icons.ac_unit),
               color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),*/
-          ProfileCircle(userImage: _userstate.user.image, onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))),
+          ProfileCircle(
+            userImage: _userstate.user.image, 
+            onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

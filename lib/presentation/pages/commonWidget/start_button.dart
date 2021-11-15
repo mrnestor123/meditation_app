@@ -16,7 +16,7 @@ class StartButton extends StatelessWidget {
       width: Configuration.width*0.9,
       margin: EdgeInsets.only(bottom:Configuration.verticalspacing * 1.5),
       child: AspectRatio(
-        aspectRatio:Configuration.width > 500 ? 10/1: 9/2,
+        aspectRatio:Configuration.width > 500 ? 10/1: 6/1,
         child: ElevatedButton(
         onPressed: onPressed != null ? () async {
           if(!justpressed){

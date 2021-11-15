@@ -120,14 +120,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Configuration.maincolor),
         Column(
           children: <Widget>[
-            //REFACTORIZAR ESTO
-            //PORQUE TIENEN CADA UNO UNO ????? // NO ES LO MISMO ???
             Expanded(
                 flex: 2,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment:CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: 15),
+                    SizedBox(height: Configuration.verticalspacing),
+                    Stack(
+                      fit:StackFit.passthrough,
+                      alignment:AlignmentDirectional.center,
+                      children: [
+                        ProfileCircle(
+                          bordercolor: Colors.white,
+                          userImage: user.image,
+                          color:Colors.transparent,
+                          onTap:()=>{
+                            if(widget.user == null){
+                                _showPicker(context)
+                            }
+                          }
+                        ),
+                        Align(
+                          alignment:Alignment.center,
+                          child: Icon(Icons.album,size: Configuration.smicon, color:Colors.grey.withOpacity(0.8)),
+                        ),
+                      ],
+                    ),
+                    /*
                     RadialProgress(
                         width: Configuration.safeBlockHorizontal * 1,
                         goalCompleted: _userstate.user.stage.stagenumber / 10,
@@ -145,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   : NetworkImage(user.image)
                           ),
                         )
-                      ),
+                    ),*/
                     SizedBox(
                       height: Configuration.safeBlockVertical * 2,
                     ),

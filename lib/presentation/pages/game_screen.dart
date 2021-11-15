@@ -54,12 +54,12 @@ class _GameStartedState extends State<GameStarted> {
   }
 
   Widget showingVideo(){
-    bool showfullscreen = MediaQuery.of(context).orientation == Orientation.landscape || fullscreen;
+    bool showfullscreen = false;  //MediaQuery.of(context).orientation == Orientation.landscape || fullscreen;
     
     Widget video(){
       return GestureDetector(
         onTap: ()=> {
-          if(controller.value.isPlaying){
+          if(controller.value.isPlaying && false){
             setState((){ controller.pause();})
           }else{
             setState((){started = true; controller.play();})
@@ -73,15 +73,29 @@ class _GameStartedState extends State<GameStarted> {
           child: Stack(children:[
             VideoPlayer(controller),
             !started || !controller.value.isPlaying ? 
-            Align(
-                alignment: Alignment.center,
-                child: IconButton(
-                  icon: Icon(Icons.play_arrow), 
-                  color: Colors.white, 
-                  onPressed: ()=> setState((){ started = true; controller.play();}), 
-                  iconSize: Configuration.medicon
-                  )
+            Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.9),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Press to start', 
+                        style: Configuration.text('medium', Colors.white)
+                      ),
+                      SizedBox(height: Configuration.verticalspacing/3),
+                      Text("Be sure you are focused. You won't be able to pause it", 
+                        style:Configuration.text('tiny',Colors.white)
+                      ),
+                      SizedBox(height: Configuration.verticalspacing),
+                      Icon(Icons.play_arrow, color:Colors.white, size: Configuration.bigicon), 
+                        
+                    ],
+                  ),
+                )
               ) : Container(),
+ 
+
             /* Positioned(
               right: 0,
               bottom: 0,
@@ -111,31 +125,28 @@ class _GameStartedState extends State<GameStarted> {
         SizedBox(height: 20),
 
 
-        showfullscreen ? 
+        /*showfullscreen ? 
         Positioned.fill(
           child: Container(
             color: Colors.black,
           ),
         ):Container(),
-        
+        */
         video(),
 
        
 
-        Positioned(
-          bottom: 10,
-          child: Container(
-            padding: EdgeInsets.all(10.0),
-            width: showfullscreen? Configuration.width *0.5: Configuration.width,
-            child: Slider(
-              activeColor: Configuration.maincolor,
-              inactiveColor: Colors.grey,
-              max: controller.value.duration.inSeconds.roundToDouble(),
-              value:controller.value.position.inSeconds.roundToDouble(), 
-              onChanged: (double){}
-              ),
-          ),
-        )
+        Container(
+          padding: EdgeInsets.all(10.0),
+          width: showfullscreen? Configuration.width *0.5: Configuration.width,
+          child: Slider(
+            activeColor: Configuration.maincolor,
+            inactiveColor: Colors.grey,
+            max: controller.value.duration.inSeconds.roundToDouble(),
+            value:controller.value.position.inSeconds.roundToDouble(), 
+            onChanged: (double){}
+            ),
+        ),
       ],
     );
   }

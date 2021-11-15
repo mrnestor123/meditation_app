@@ -10,6 +10,7 @@ import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
@@ -101,12 +102,13 @@ class _LearnScreenState extends State<LearnScreen> {
                 ]
               ) ,
               style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(16.0)),
                   primary: Configuration.maincolor,
                   onPrimary: Colors.white,
                   padding: EdgeInsets.all(Configuration.smpadding),
                   minimumSize:Size(double.infinity, double.infinity),
                   animationDuration: Duration(milliseconds: 50)        
-                  ),
+                ),
             ),
           );
         });
@@ -549,6 +551,7 @@ class _ContentViewState extends State<ContentView> {
           );
         },
         options: CarouselOptions(
+          scrollPhysics: ClampingScrollPhysics(),
             height: Configuration.height,
             viewportFraction: 1,
             initialPage: 0,
@@ -595,7 +598,11 @@ class _ContentViewState extends State<ContentView> {
           leading: IconButton(
               icon: Icon(Icons.close,
                   size: Configuration.smicon, color: Colors.black),
-              onPressed: () => Navigator.pop(context)),
+              onPressed: () => showAlertDialog(
+                title: 'Are you sure you want to exit ?',
+                context: context,
+                text: "This lesson won't count as read one"
+              )),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),

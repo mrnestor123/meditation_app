@@ -178,7 +178,7 @@ class __TimelineState extends State<_Timeline> {
                 DropdownButton<String>(
                       value: mode,
                       elevation: 16,
-                      style: Configuration.text('smallmedium', Colors.black),
+                      style: Configuration.text('small', Colors.black),
                       underline: Container(
                         height: 0,
                         color: Colors.deepPurpleAccent,

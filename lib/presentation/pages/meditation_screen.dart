@@ -255,6 +255,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
     _gamestate = Provider.of<GameState>(context);
 
     return PageView(
+      physics: ClampingScrollPhysics(),
       controller: _meditationstate.practice,
       onPageChanged: (newPage) {
         setState(() {
@@ -635,6 +636,7 @@ class _CountdownState extends State<Countdown> {
                     children: getContent(index)));
           },
           options: CarouselOptions(
+            scrollPhysics: ClampingScrollPhysics(),
               height: Configuration.height,
               viewportFraction: 1,
               initialPage: 0,
