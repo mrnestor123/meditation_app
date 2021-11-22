@@ -6,13 +6,18 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 
-dynamic showUserProfile(User user,  context,[followbutton, followaction, following]) {
+dynamic showUserProfile({User user,String usercod,context,followbutton, followaction, following}) {
+  if(user == null) {
+
+    
+  }
+
+
+
    return showModalBottomSheet<void>(
-     
         context: context,
         builder: (BuildContext context) {
           //bool following = userstate.user.following.contains(user.coduser);
-
           return StatefulBuilder(
               builder:(BuildContext context, StateSetter setState ) {
               return  Container(

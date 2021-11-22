@@ -28,7 +28,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   var _userstate;
 
-
   void _showPicker(context) {
 
     _imgFromCamera() async {
@@ -132,6 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       alignment:AlignmentDirectional.center,
                       children: [
                         ProfileCircle(
+                          width:100,
                           bordercolor: Colors.white,
                           userImage: user.image,
                           color:Colors.transparent,

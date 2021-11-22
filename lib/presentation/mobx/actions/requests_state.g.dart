@@ -54,6 +54,21 @@ mixin _$RequestState on _RequestState, Store {
     });
   }
 
+  final _$selectedfilterAtom = Atom(name: '_RequestState.selectedfilter');
+
+  @override
+  String get selectedfilter {
+    _$selectedfilterAtom.reportRead();
+    return super.selectedfilter;
+  }
+
+  @override
+  set selectedfilter(String value) {
+    _$selectedfilterAtom.reportWrite(value, super.selectedfilter, () {
+      super.selectedfilter = value;
+    });
+  }
+
   final _$getRequestsAsyncAction = AsyncAction('_RequestState.getRequests');
 
   @override
@@ -75,12 +90,27 @@ mixin _$RequestState on _RequestState, Store {
     return _$setRequestAsyncAction.run(() => super.setRequest(r));
   }
 
+  final _$_RequestStateActionController =
+      ActionController(name: '_RequestState');
+
+  @override
+  void filterRequests(String s) {
+    final _$actionInfo = _$_RequestStateActionController.startAction(
+        name: '_RequestState.filterRequests');
+    try {
+      return super.filterRequests(s);
+    } finally {
+      _$_RequestStateActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   String toString() {
     return '''
 requests: ${requests},
 selectedrequest: ${selectedrequest},
-gettingrequests: ${gettingrequests}
+gettingrequests: ${gettingrequests},
+selectedfilter: ${selectedfilter}
     ''';
   }
 }

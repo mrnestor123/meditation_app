@@ -42,6 +42,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         style: OutlinedButton.styleFrom(
           primary: Configuration.maincolor,
           backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
           elevation: 1.5,
           side: BorderSide.none
         ),
@@ -84,7 +85,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           'Duration', 
           Observer(
               builder: (context) {
-                return Text(_meditationstate.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black));
+                return Text(_meditationstate.totalduration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black));
               }
             )
         ),
@@ -458,6 +459,9 @@ class ClickableSquare extends StatelessWidget {
       },
       child: Container(
         padding: EdgeInsets.all(selected ? 0 : Configuration.tinpadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         child: Stack(
           children: [
             Positioned.fill(
@@ -537,6 +541,9 @@ class _CountdownState extends State<Countdown> {
   var selectedtype = 'Meditation';
   var finished = false;
   var selectedduration = 15;
+
+  bool shadow = false;
+  bool delaying = false;
 
   Widget finish(context) {
     return Column(
@@ -727,70 +734,9 @@ class _CountdownState extends State<Countdown> {
   }
 
   Widget countdown(context){
-    return Stack(
-        children: [
-        Align(
-          alignment: Alignment.center,
-          child: _meditationstate.selmeditation != null ? 
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisAlignment: _meditationstate.currentsentence != null ? MainAxisAlignment.start : MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: 
-                 _meditationstate.currentsentence != null ?  [
-                  AnimatedOpacity(
-                    opacity: _meditationstate.newsentence ? 1.0: 0.0, 
-                    child: Column(
-                      children: mapToWidget(_meditationstate.currentsentence),
-                    ),
-                    duration: Duration(seconds: 2))
-                 ] : [
-                   ClipRRect(
-                      borderRadius: BorderRadius.circular(12.0),
-                      child: Image(image: NetworkImage(_meditationstate.selmeditation.image),
-                      height: Configuration.height*0.35,
-                      width: Configuration.height*0.35
-                      ),
-                    ),
-                  SizedBox(height: Configuration.blockSizeVertical*3),
-                  GestureDetector(
-                    onDoubleTap: (){
-                      _meditationstate.finishMeditation();
-                    }, 
-                    child: Text(_meditationstate.selmeditation.title,style: Configuration.text('smallmedium',Colors.white))
-                  )
-                ],
-            ),
-          ) :  
-          Container(
-            height: Configuration.blockSizeHorizontal * 60,
-            width: Configuration.blockSizeHorizontal * 60,
-            decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
-            child: Center(
-              child:GestureDetector(
-                onDoubleTap: (){ _meditationstate.finishMeditation();}, 
-                child:Text('free meditation', style:Configuration.text('smallmedium', Colors.white))
-              )
-            ),
-          ),
-        ),
-        SizedBox(height: Configuration.blockSizeHorizontal * 5),
-        Positioned(
-          bottom: 20,
-          right:10,
-          left:10,
-          child: Stack(
-            children: [
-              Column(
-              children: [
-                _meditationstate.currentsentence != null? 
-                  Text(
-                    _meditationstate.sentenceindex.toString() + '/' + _meditationstate.selmeditation.followalong.entries.length.toString(), 
-                    style:Configuration.text('small', Colors.white)
-                  ) : 
-                  Container(),
-                Slider(
+   
+    Widget slider(){
+      return Slider(
                   activeColor: Configuration.maincolor,
                   inactiveColor: Colors.white,
                   min: 0.0,
@@ -800,23 +746,94 @@ class _CountdownState extends State<Countdown> {
                   label:  _meditationstate.duration.inHours > 0
                         ? _meditationstate.duration.toString().substring(0, 7)
                         : _meditationstate.duration.toString().substring(2, 7)
-                ),
-                _meditationstate.state == 'started' ?
-                  FloatingActionButton(
-                    backgroundColor: Colors.white,
-                    onPressed: () => setState(()=>  _meditationstate.pause()),
-                    child: Icon(Icons.pause, color: Colors.black)
-                    )
-                    :
-                    FloatingActionButton(
-                    backgroundColor: Colors.white,
-                    onPressed: () => setState(()=>_meditationstate.startTimer()),
-                    child: Icon(Icons.play_arrow, color: Colors.black)
-                )              
-            ]),
-            ]
+      );
+    }
+
+    Widget pauseButton(){
+      return  FloatingActionButton(
+      backgroundColor: Colors.white,
+      onPressed: () => setState(()=> _meditationstate.state == 'started' ? _meditationstate.pause() :  _meditationstate.startTimer()),
+      child: Icon(_meditationstate.state == 'started' ?  Icons.pause  : Icons.play_arrow, color: Colors.black)
+      );           
+    }
+
+    Widget freeMeditation(){
+      return Center(
+        child: Container(
+          height: Configuration.blockSizeHorizontal * 60,
+          width: Configuration.blockSizeHorizontal * 60,
+          decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
+          child: Center(
+            child:GestureDetector(
+              onDoubleTap: (){ _meditationstate.finishMeditation();}, 
+              child:Text('free meditation', style:Configuration.text('smallmedium', Colors.white))
+            )
           ),
-        )
+        ),
+      );
+    }
+
+    Widget guidedMeditation(){
+      return Align(
+        alignment:Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: 
+               _meditationstate.currentsentence != null ?  
+                mapToWidget(_meditationstate.currentsentence)
+                : 
+               [
+                 ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image(image: NetworkImage(_meditationstate.selmeditation.image),
+                    height: Configuration.height*0.35,
+                    width: Configuration.height*0.35
+                    ),
+                  ),
+                SizedBox(height: Configuration.blockSizeVertical*3),
+                GestureDetector(
+                  onDoubleTap: (){
+                    _meditationstate.finishMeditation();
+                  }, 
+                  child: Text(_meditationstate.selmeditation.title,style: Configuration.text('smallmedium',Colors.white))
+                )
+              ],
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+        children: [
+        Positioned(
+          bottom: 20,
+          right:10,
+          left:10,
+          child: Column(
+          children: [
+            pauseButton(),
+            SizedBox(height:Configuration.verticalspacing),
+            slider()
+          ]),
+        ),
+        _meditationstate.shadow ? 
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () {
+              _meditationstate.light();
+            },
+            child: Container(
+              decoration: BoxDecoration(color:Colors.black.withOpacity(0.9))
+            ),
+          ),
+        ): Container(), 
+
+        _meditationstate.selmeditation != null ? guidedMeditation(): freeMeditation()
+
+
       ]);
   }
 
@@ -847,85 +864,107 @@ class _CountdownState extends State<Countdown> {
     }
   }
 
+  dynamic exit(context,{nopop = false}){
+    bool pop = false;
+    if(_meditationstate.state == 'started'){
+        _meditationstate.pause();
+    }
+    if(_meditationstate.state != 'finished'){
+      showDialog(
+        context: context, 
+        builder:(context) {
+            return AlertDialog(
+              content: Text("Are you sure you want to exit?. This meditation won't count", 
+                style: Configuration.text('small', Colors.black)
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Yes',style: Configuration.text('small', Colors.black)),
+                  onPressed: () {
+                    _meditationstate.cancel();
+                    if(!nopop){
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    }else{
+                      return true;
+                    }
+                  },
+                ),
+                TextButton(
+                  child: Text('No',style: Configuration.text('small', Colors.black)),
+                  onPressed: () {
+                    if(_meditationstate.state == 'started'){
+                      _meditationstate.startTimer();
+                    }
+                    if(!nopop){
+                      Navigator.pop(context);
+                    }else{
+                      return false;
+                    }
+                  },
+                )
+              ],
+            );
+          }
+      );
+    }else{
+      if(!nopop){
+        Navigator.pop(context);
+      }else{
+        return true;
+      }    
+    }
+    return pop;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-            icon: Icon(Icons.close),
-            color: Colors.white,
-            onPressed: () {
-              if(_meditationstate.state == 'started'){
-                _meditationstate.pause();
-              }
-              if(_meditationstate.state != 'finished'){
-                showDialog(
-                context: context, 
-                builder:(context) {
-                    return AlertDialog(
-                      content: Text("Are you sure you want to exit?. This meditation won't count", 
-                        style: Configuration.text('small', Colors.black)
-                      ),
-                      actions: [
-                        TextButton(
-                          child: Text('Yes',style: Configuration.text('small', Colors.black)),
-                          onPressed: () {
-                            _meditationstate.cancel();
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                        ),
-                        TextButton(
-                          child: Text('No',style: Configuration.text('small', Colors.black)),
-                          onPressed: () {
-                            if(_meditationstate.state == 'started'){
-                              _meditationstate.startTimer();
-                            }
-                            Navigator.pop(context);
-                          },
-                        )
-                      ],
-                    );
-                  }
-              );
-              }else{
-                Navigator.pop(context);
-              }
-            },
-          ),
-      ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration:  BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [
-                Color.fromRGBO(23,23,23,100),
-                Configuration.maincolor,
-              ],
-            )
-          ),
-        child: Observer(
-              builder: (BuildContext context) {
-                if (_meditationstate.state == 'pre_guided') {
-                  return guided(context);
-                } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused'  ) {
-                  return countdown(context);
-                } else if(_meditationstate.state == 'finished') {
-                  return finish(context);
-                }else{
-                  return Container();
-                }
-              }
+    return WillPopScope(
+      onWillPop: () {  
+        return Future.value(exit(context,nopop:true));
+      },
+      child: Scaffold(
+          appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+              icon: Icon(Icons.close),
+              color: Colors.white,
+              onPressed: () {
+                exit(context);
+              },
             ),
-      )
-        );
+        ),
+        extendBodyBehindAppBar: true,
+        body: Container(
+          decoration:  BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  Color.fromRGBO(23,23,23,100),
+                  Configuration.maincolor,
+                ],
+              )
+            ),
+          child: Observer(
+                builder: (BuildContext context) {
+                  if (_meditationstate.state == 'pre_guided') {
+                    return guided(context);
+                  } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused'  ) {
+                    return countdown(context);
+                  } else if(_meditationstate.state == 'finished') {
+                    return finish(context);
+                  }else{
+                    return Container();
+                  }
+                }
+              ),
+        )
+          ),
+    );
   }
 }
-
 
 class WeekList extends StatefulWidget {
   @override

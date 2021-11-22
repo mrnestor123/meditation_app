@@ -345,6 +345,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
+  Future <User> quickUser(dynamic coduser) async {
+
+    
+  }
+
+
+
+
   Future updateRequest(Request r, [Notify n]) async{
     try{
       QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();

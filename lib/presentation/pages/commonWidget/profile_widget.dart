@@ -7,7 +7,6 @@ class ProfileCircle extends StatelessWidget {
  
   final String userImage;
   final double width;
-  final String height;
   final Color color, bordercolor;
   final double marginLeft;
   final double marginRight;
@@ -16,8 +15,7 @@ class ProfileCircle extends StatelessWidget {
 
   ProfileCircle({
     this.userImage,
-    this.width,
-    this.height,
+    this.width = 60,
     this.color,
     this.bordercolor,
     this.marginLeft,
@@ -41,7 +39,7 @@ class ProfileCircle extends StatelessWidget {
               shape: BoxShape.circle
             ),
             child: CircleAvatar(
-              radius: 50,
+              radius: width/2,
               backgroundColor: userImage == null
                   ? color != null ? color : Configuration.maincolor
                   : Colors.transparent,

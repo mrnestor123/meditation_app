@@ -154,13 +154,15 @@ class _GameStartedState extends State<GameStarted> {
   Widget questionAsk(){
     List<Widget> getQuestions(){
       List<Widget> l = new List.empty(growable: true);
-      l.add(Text(
-            _gamestate.selectedquestion.question, 
-            style: Configuration.text('medium', Colors.black)
-      ));
+      l.add(Container(
+        padding: EdgeInsets.all(6.0),
+        child: Text( _gamestate.selectedquestion.question, 
+        textAlign: TextAlign.center,
+        style: Configuration.text('medium', Colors.black)))
+      );
 
       l.add(SizedBox(height: Configuration.verticalspacing));
-
+      
       for(var option in _gamestate.selectedquestion.options){
         int index =  _gamestate.selectedquestion.options.indexOf(option);
         l.add(Container(
@@ -193,7 +195,7 @@ class _GameStartedState extends State<GameStarted> {
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-            margin: EdgeInsets.only(bottom:Configuration.verticalspacing),
+            margin: EdgeInsets.only(bottom:Configuration.verticalspacing*3),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

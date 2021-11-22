@@ -98,14 +98,15 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         onPressed: () async { 
                           bool following = _userstate.user.following.contains(u.coduser);
                           
-                          await showUserProfile(u,context, true, 
+                          await showUserProfile(user:u,context:context, followbutton:true,
+                          followaction: 
                           () async{
                               following = !following;
                               await _userstate.follow(u, following);
                               setState(() {
                                 
                               });
-                            }, following ); 
+                            }, following: following ); 
                           
                           setState((){});}
                         ) :  Container(),
@@ -179,25 +180,26 @@ class _LeaderBoardState extends State<LeaderBoard> {
               flex: 4,
               child: Column(children: [
                 Container(
-                  padding: EdgeInsets.all(Configuration.tinpadding),
                   decoration: BoxDecoration(color: Configuration.lightgrey),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Container(
                       width: Configuration.width*0.85,
-                      child: searching ? 
-                      TextField(
-                          onChanged: (string) {
-                            setState(() {
-                              _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
-                            });
-                          },
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Username',
-                            border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
-                          ),
+                      child: searching 
+                      ? TextField(
+                            onChanged: (string) {
+                              setState(() {
+                                _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
+                              });
+                            },
+                            controller: _searchController,
+                            style: Configuration.text('small',Colors.black),
+                            decoration: InputDecoration(
+                              constraints: BoxConstraints.expand(height:Configuration.height*0.05),
+                              hintText: 'Username',
+                              border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
+                            ),
                       )
                       : TabBar(
                           controller: _tabController,
@@ -271,7 +273,7 @@ class UserProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: ()=> {
-        showUserProfile(user, context)
+        showUserProfile(user:user, context:context)
       },
       child: Column(
         children: [

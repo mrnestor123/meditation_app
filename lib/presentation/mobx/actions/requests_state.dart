@@ -32,6 +32,11 @@ abstract class _RequestState with Store {
   @observable
   bool gettingrequests= false;
 
+  @observable 
+  String selectedfilter = 'None';
+
+  List<String> filters = ['None','Date','Votes'];
+
   _RequestState({this.repository});
 
   void setUser(User u){
@@ -152,5 +157,18 @@ abstract class _RequestState with Store {
     }
 
     repository.updateNotification(n);
+  }
+
+
+  @action
+  void filterRequests(String s){
+    if(s == 'Votes'){
+      requests.sort((a,b)=>b.points-a.points);
+    }else if(s=='Date'){
+      requests.sort((a,b)=> b.date != null && a.date != null ? b.date.compareTo(a.date) : -1);
+    }
+    selectedfilter = s;
+    print(selectedfilter);
+  
   }
 }

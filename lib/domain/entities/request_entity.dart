@@ -41,6 +41,7 @@ class Request {
     if(this.date == null){
       date = DateTime.now();
     }
+    
   }
 
   Request.fromJson(Map<String, dynamic> json) {
@@ -52,6 +53,7 @@ class Request {
     this.coduser = json['coduser'];
     this.userimage = json['userimage'];
     this.state = json['state'];
+    this.date = json['date'] == null ? null : DateTime.parse(json["date"]).toLocal();
     //ESTO SE PUEDE HACER EN OTROS SITIOS
     if (json['comments'] != null) {
       this.comments = new List.empty(growable: true);
@@ -61,6 +63,7 @@ class Request {
     }
     this.points = json['points'];
     this.votes = json['votes'] != null ? json['votes'] : null;
+  
     title = json['title'];
   }
 
@@ -71,6 +74,7 @@ class Request {
     data['content'] = this.content;
     data['coduser'] = this.coduser;
     data['state'] = this.state;
+    data['date'] = this.date.toIso8601String();
     if (this.comments != null) {
       data['comments'] = this.comments.map((v) => v.toJson()).toList();
     }else{
@@ -137,7 +141,7 @@ class Request {
       this.state ='open';
     }
 
-    this.comments.add(Comment(comment: 'Has changed state of the request to ' + this.getState(), username: u.nombre,coduser: u.coduser));
+    //this.comments.add(Comment(comment: 'Has changed state of the request to ' + this.getState(), username: u.nombre,coduser: u.coduser));
   }
 
   void like(String cod){

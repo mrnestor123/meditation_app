@@ -102,13 +102,13 @@ class Configuration {
           px = 14.0;
           break;
         case "smallmedium":
-          px = 18.0;
+          px = 16.0;
           break;
         case "medium":
-          px = 20.0;
+          px = 18.0;
           break;
         case "big":
-          px = 24.0;
+          px = 20.0;
           break;
         case "huge":
           px = 30.0;
@@ -253,7 +253,7 @@ class Configuration {
       bigpadding = 30;
       crossAxisCount = 2;
       lessonratio = 8/3;
-      smicon = 20;
+      smicon = 24;
       medicon = 30;
       bigicon = 40;
     }

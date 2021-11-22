@@ -97,7 +97,7 @@ class __TimelineState extends State<_Timeline> {
             GestureDetector(
               onTap: ()=> {
                 if(action.user != null){
-                  showUserProfile(action.user,context)
+                  showUserProfile(user:action.user,context:context)
                 }
               },
               child: Container(
@@ -194,7 +194,7 @@ class __TimelineState extends State<_Timeline> {
                           child: Text(value),
                         );
                       }).toList()
-                  ),
+                ),
                 RawMaterialButton(
                       elevation: 3.0,
                       fillColor: Configuration.maincolor,

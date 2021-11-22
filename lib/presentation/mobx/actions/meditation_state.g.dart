@@ -145,6 +145,21 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$shadowAtom = Atom(name: '_MeditationState.shadow');
+
+  @override
+  bool get shadow {
+    _$shadowAtom.reportRead();
+    return super.shadow;
+  }
+
+  @override
+  set shadow(bool value) {
+    _$shadowAtom.reportWrite(value, super.shadow, () {
+      super.shadow = value;
+    });
+  }
+
   final _$finishMeditationAsyncAction =
       AsyncAction('_MeditationState.finishMeditation');
 
@@ -234,6 +249,17 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
+  void light() {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.light');
+    try {
+      return super.light();
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 user: ${user},
@@ -244,7 +270,8 @@ newsentence: ${newsentence},
 sentenceindex: ${sentenceindex},
 duration: ${duration},
 startedmeditation: ${startedmeditation},
-state: ${state}
+state: ${state},
+shadow: ${shadow}
     ''';
   }
 }

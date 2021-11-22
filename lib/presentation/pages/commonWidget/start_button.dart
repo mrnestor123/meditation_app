@@ -15,6 +15,9 @@ class StartButton extends StatelessWidget {
     return Container(
       width: Configuration.width*0.9,
       margin: EdgeInsets.only(bottom:Configuration.verticalspacing * 1.5),
+      decoration:BoxDecoration(
+        borderRadius: BorderRadius.circular(16.0)
+      ),
       child: AspectRatio(
         aspectRatio:Configuration.width > 500 ? 10/1: 6/1,
         child: ElevatedButton(

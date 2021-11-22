@@ -6,12 +6,16 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'config/configuration.dart';
 
+
+// CREAR COMPONENTE REQUESTHEADER !!!!!! 
 // VISTA DE LISTA DE REQUESTS
 class Requests extends StatefulWidget {
   const Requests() : super();
@@ -25,12 +29,14 @@ class _RequestsState extends State<Requests> {
   RequestState _requestState;
   PickedFile _image;
   final ImagePicker _picker = ImagePicker();
-  bool uploading;
+  bool uploading = false;
   Request addedReq = new Request(type: 'suggestion', state: 'open');
   String selectedtype = 'Suggestion';
 
   TextEditingController title = new TextEditingController();
   TextEditingController content = new TextEditingController();
+
+  List<String> filters = ['Date', 'Votes'];
 
   @override 
   void didChangeDependencies(){
@@ -44,9 +50,12 @@ class _RequestsState extends State<Requests> {
   Widget addRequestModal(context){
     var stateSetter;
     
+    // ESTO SE PODRIA PASAR A UNA FUNCIÓN COMUN
     void _showPicker(context) {
       void setImage(image) async{
-          uploading = true;
+          stateSetter((){
+            uploading = true;
+          });
           String imgstring = await _userState.uploadImage(image);
           print(imgstring);
           stateSetter(() {
@@ -105,12 +114,12 @@ class _RequestsState extends State<Requests> {
       return  Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
-            height: Configuration.height * 0.5,
             padding: EdgeInsets.all(12.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 10),
+                SizedBox(height: Configuration.verticalspacing),
                 Text('Title', style:Configuration.text('small', Colors.black)),
                 TextField(
                   controller: title,
@@ -123,35 +132,32 @@ class _RequestsState extends State<Requests> {
                         borderSide: new BorderSide(color: Colors.black)
                     ),),
                 ),
+                SizedBox(height:Configuration.verticalspacing/2),
                 Text('Content', style:Configuration.text('small', Colors.black)),
                 SizedBox(height: 6),
-                Expanded(
-                  child: TextField(
-                    controller: content,
-                    onChanged: (str) {
-                      addedReq.content = str;
-                    },
-                    expands: true,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      hintText: "Enter your text here",
-                      border: new OutlineInputBorder(
-                          borderSide: new BorderSide(color: Colors.black)
-                      ),),
-                  ),
+                TextField(
+                  controller: content,
+                  onChanged: (str) {
+                    addedReq.content = str;
+                  },
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText: "Enter your text here",
+                    border: new OutlineInputBorder(
+                        borderSide: new BorderSide(color: Colors.black)
+                    ),),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: Configuration.verticalspacing),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Type of request', style: Configuration.text('small', Colors.black)), 
                     DropdownButton<String>(
                       value: selectedtype,
-                      icon: Icon(Icons.arrow_downward_sharp, color: Colors.black,size: Configuration.smicon),
                       elevation: 16,
                       style: TextStyle(color: Colors.black),
                       underline: Container(
-                        height: 2,
+                        height: 0,
                         color: Colors.black,
                       ),
                       onChanged: (String newValue) {
@@ -173,8 +179,7 @@ class _RequestsState extends State<Requests> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                SizedBox(height: 10),
+                SizedBox(height: Configuration.verticalspacing*2),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -184,22 +189,25 @@ class _RequestsState extends State<Requests> {
                       children: [
                         Image(image: NetworkImage(addedReq.image), height: 50),
                         IconButton(
+                          iconSize:Configuration.smicon,
                           onPressed: ()=> setState((){ addedReq.image = null;}), 
                           icon: Icon(Icons.delete, color: Colors.red)
                         )
                       ],
                     )
-                    :
+                    : uploading ?
+                    CircularProgress(strokewidth: 2):
                     ElevatedButton(
                       onPressed: () => _showPicker(context), 
                       child: Text('Image')
                     )
                   ],
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: Configuration.verticalspacing),
                 ElevatedButton(
                   onPressed: () async { 
                     _requestState.uploadRequest(addedReq);
+                    setState((){});
                     addedReq.title ='';
                     addedReq.content = '';
                     addedReq.type = 'suggestion';
@@ -211,7 +219,8 @@ class _RequestsState extends State<Requests> {
                     padding: EdgeInsets.symmetric(vertical:10.0,horizontal: 4.0)
                   ), 
                   child: Text('Send Request', style: Configuration.text('small', Colors.white))
-                )
+                ),
+                SizedBox(height: Configuration.verticalspacing*2)
               ],
             )
           ),
@@ -234,20 +243,51 @@ class _RequestsState extends State<Requests> {
         )
       ) :
      ListView.builder(
-      itemCount:request.length,
-      itemBuilder: (context,index) => 
-        GestureDetector(
+      physics:ClampingScrollPhysics(),
+      itemCount:request.length + 1,
+      itemBuilder: (context,index) {
+        if(index == 0){
+          return Container(
+            padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+            child: Row(
+              children: [
+                Text('Filter',style:Configuration.text('small',Colors.grey)),
+                SizedBox(width: Configuration.verticalspacing),
+                DropdownButton<String>(
+                  value: _requestState.selectedfilter,
+                  elevation: 16,
+                  style: Configuration.text('small', Colors.black),
+                  underline: Container(
+                    height: 0,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String newValue) {
+                    _requestState.filterRequests(newValue);
+                    setState(() {});
+                  },
+                  items: _requestState.filters.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList()
+                )
+            ]),
+          );
+        }else{
+          --index;
+          return GestureDetector(
           onTap: (){
-          _requestState.setRequest(request[index]);
-          Navigator.push(context,
-            MaterialPageRoute(
-              builder: (context) => RequestView(request: request[index])
-            )
-          ).then((value) => setState((){}));
+            _requestState.setRequest(request[index]);
+            Navigator.push(context,
+              MaterialPageRoute(
+                builder: (context) => RequestView(request: request[index])
+              )
+            ).then((value) => setState((){}));
           },
           child: Card(
             child: Container(
-              padding: EdgeInsets.all(6.0),
+              padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding,vertical:6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -256,23 +296,28 @@ class _RequestsState extends State<Requests> {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: 40,
-                            child:ProfileCircle(
-                              userImage:request[index].userimage, 
-                              width: 2, 
-                              marginLeft: 2, 
-                              marginRight: 2
-                            ),
+                          ProfileCircle(
+                            userImage:request[index].userimage,
+                            width: 40, 
+                            marginLeft: 2, 
+                            marginRight: 2
                           ),
-                          SizedBox(width: 4),
-                          Text(request[index].username, style: Configuration.text('tiny', Colors.black)),
+                          SizedBox(width: Configuration.verticalspacing),
+                          Text(request[index].username, style: Configuration.text('small', Colors.black)),
+                          SizedBox(width:Configuration.verticalspacing/2),
+                          request[index].date != null ? 
+                          Text(datetoString(request[index].date),style: Configuration.text('tiny',Colors.grey)) 
+                          : Container(),
                       ]),
-                      StateChip(request: request[index])
+                      StateChip(request: request[index]),
+
                     ],
                   ),
                   SizedBox(height: 5.0),
-                  Text(request[index].title, style: Configuration.text('small', Colors.black)),
+                  Container(
+                    margin: EdgeInsets.only(left:5),
+                    child: Text(request[index].title, style: Configuration.text('smallmedium', Colors.black))
+                  ),
                   SizedBox(height: 5.0),
                   Divider(),
                   Row(
@@ -281,6 +326,7 @@ class _RequestsState extends State<Requests> {
                       Row(
                         children:[
                            IconButton(
+                            iconSize:Configuration.smicon,
                             onPressed: ()=> 
                               setState(() {
                                 _requestState.updateRequest(request[index], true); 
@@ -289,19 +335,21 @@ class _RequestsState extends State<Requests> {
                           ),
                           Text(request[index].points.toString(), style: Configuration.text('small', Colors.black),),
                           IconButton(
+                            iconSize: Configuration.smicon,
                             onPressed: ()=> 
                               setState(() {
                                 _requestState.updateRequest(request[index], false);
                               }),
-                            icon:  Icon(Icons.arrow_downward , color:  request[index].votes[_userState.user.coduser] == -1 ? Colors.red : Colors.black)
+                            icon:  Icon(Icons.arrow_downward, color:  request[index].votes[_userState.user.coduser] == -1 ? Colors.red : Colors.black)
                           ),
-                         
                         ]
                       ),
                       Row(
                         children: [
-                          Icon(Icons.comment),
+                          Icon(Icons.comment, size:Configuration.smicon),
+                          SizedBox(width:4),
                           Text(request[index].comments == null ? '0': request[index].comments.length.toString()),
+                          SizedBox(width:Configuration.verticalspacing)
                         ],
                       )
                   ])
@@ -309,8 +357,10 @@ class _RequestsState extends State<Requests> {
               ),
             ),
           ),
-        )
-      );
+        );
+      }
+      }
+    );
   }
   
   Widget notifications(){
@@ -350,7 +400,7 @@ class _RequestsState extends State<Requests> {
                           children: [
                             ProfileCircle(
                                 userImage:n[index].userimage, 
-                                width: 2, 
+                                width: 40, 
                                 marginLeft: 2, 
                                 marginRight: 2
                               ),
@@ -392,9 +442,9 @@ class _RequestsState extends State<Requests> {
             builder: (BuildContext context) {
               return addRequestModal(context);
             }
-          );
+          ).then((value) => setState((){}));
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, size:Configuration.smicon),
       ),
       appBar: AppBar(
         leading: ButtonBack(),
@@ -410,6 +460,7 @@ class _RequestsState extends State<Requests> {
                     }
                   )
                 }, 
+                iconSize:Configuration.smicon,
                 icon: Icon(Icons.notifications,color: Colors.black)
               ),
               _userState.user.notifications.where((element) => !element.seen).toList().length > 0 ?
@@ -475,7 +526,8 @@ class _RequestsState extends State<Requests> {
                         ),
                       ),
                     ],
-                  ): TabBarView(
+                  ): 
+                  TabBarView(
                     physics: NeverScrollableScrollPhysics(),
                     children: [
                       requests('issue') ,
@@ -527,23 +579,34 @@ class _RequestViewState extends State<RequestView> {
       bottomSheet: Material(
         elevation: 10,
         child: Container(
-          child: TextField(
-            controller: _controller,
-            textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(6.0),
-              hintText: 'Add comment',
-              isDense: true,
-              suffixIcon: IconButton(
-                onPressed: (){
-                  setState(() {
-                    _requestState.updateRequest(_requestState.selectedrequest, null, _controller.text);
-                    _controller.clear();
-                  });
-                },   
-                icon: Icon(Icons.send)
-              )
-            ),
+          color: Colors.white,
+          child: Column(
+            mainAxisSize:MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _controller,
+                textAlignVertical: TextAlignVertical.center, 
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(Configuration.smpadding),
+                  hintText: 'Add comment',
+                  isDense: true,
+                  suffixIcon: IconButton(
+                    onPressed: (){
+                      if(_controller.text.trim().isNotEmpty){
+                        _requestState.updateRequest(_requestState.selectedrequest, null, _controller.text);
+                        _controller.clear();
+                        setState(() {
+                        
+                        });
+                      }
+                    },   
+                    icon: Icon(Icons.send)
+                  )
+                ),
+              ),
+              SizedBox(height: Configuration.verticalspacing*1.5)
+            ],
           ),
         ),
       ),
@@ -591,6 +654,7 @@ class _RequestViewState extends State<RequestView> {
               ],
             );
           }else return ListView(
+            physics:ClampingScrollPhysics(),
             children: [
               Container(
                 color: Colors.white,
@@ -604,15 +668,18 @@ class _RequestViewState extends State<RequestView> {
                     children: [
                       Row(
                         children: [
-                          Container(
-                            width: Configuration.width*0.12,
-                            child:ProfileCircle(
-                              userImage:_requestState.selectedrequest.userimage, 
-                              width: 2,
-                              marginLeft: 3,
-                              marginRight: 3,
-                            )
+                          GestureDetector(
+                            onTap: ()=>{
+
+                            },
+                            child: ProfileCircle(
+                                userImage:_requestState.selectedrequest.userimage, 
+                                width: 40,
+                                marginLeft: 3,
+                                marginRight: 3,
+                            ),
                           ),
+                          SizedBox(width: Configuration.verticalspacing),
                           Text(_requestState.selectedrequest.username,style:Configuration.text('small',Colors.black))
                         ],
                       ),
@@ -641,22 +708,22 @@ class _RequestViewState extends State<RequestView> {
               Container(
                 width: Configuration.width,
                 decoration: BoxDecoration(color: Colors.white),
-                child: 
-                _requestState.selectedrequest.comments.length > 0 ?
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: _requestState.selectedrequest.comments.length,
-                  itemBuilder: (context,index){
-                    return comment(_requestState.selectedrequest.comments[index]);
-                  }, 
-                  separatorBuilder: (BuildContext context, int index) {  
-                    return Container(
-                      width: Configuration.width,
-                      height: 10,
-                      color: Configuration.lightgrey,
-                    );
-                  })
+                child:  _requestState.selectedrequest.comments.length > 0 ?
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: _requestState.selectedrequest.comments.length,
+                    itemBuilder: (context,index){
+                      return comment(_requestState.selectedrequest.comments[index]);
+                    }, 
+                    separatorBuilder: (BuildContext context, int index) {  
+                      return Container(
+                        width: Configuration.width,
+                        height: 10,
+                        color: Configuration.lightgrey,
+                      );
+                    }
+                  )
                   :
                   Padding(
                     padding: EdgeInsets.all(12.0),
@@ -671,6 +738,19 @@ class _RequestViewState extends State<RequestView> {
     );
   }
 }
+
+
+class RequestHeader extends StatelessWidget {
+  const RequestHeader() : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      
+    );
+  }
+}
+
 
 class StateChip extends StatelessWidget {
   const StateChip({
