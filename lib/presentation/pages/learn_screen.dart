@@ -42,11 +42,12 @@ class _LearnScreenState extends State<LearnScreen> {
         ),
         itemBuilder: (context, index) {
           var flex = _userstate.user.stage.stobjectives.lecciones  == 0 ? 0: ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
+          
           return Container(
             margin: EdgeInsets.only(top: 10),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
             child: ElevatedButton(
-              onPressed: _userstate.user.stagenumber > index
+              onPressed: !_userstate.user.isStageBlocked(_userstate.data.stages[index])
                   ?  () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -63,7 +64,7 @@ class _LearnScreenState extends State<LearnScreen> {
                       style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
                     ),
                   ),
-                  _userstate.user.stagenumber > index ? 
+                  !_userstate.user.isStageBlocked(_userstate.data.stages[index]) ? 
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: AspectRatio(
@@ -242,8 +243,7 @@ class _StageViewState extends State<StageView> {
                       padding: EdgeInsets.all(0),
                       key: Key(content.cod),
                       duration: Duration(seconds: 2),
-                      child:  _userstate.user.position < content.position &&
-                              _userstate.user.stagenumber <= content.stagenumber ?
+                      child:  _userstate.user.isLessonBlocked(content)?
                               Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,

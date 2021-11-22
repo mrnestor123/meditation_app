@@ -4,8 +4,9 @@ import 'package:uuid/uuid.dart';
 class Content {
   String cod, title, description, image, type;
   int stagenumber, position;
+  bool blocked;
 
-  Content({cod, @required this.stagenumber, this.title, this.description, this.image, this.type, this.position}) {
+  Content({cod, @required this.stagenumber, this.title, this.description, this.image, this.type, this.position, this.blocked}) {
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();

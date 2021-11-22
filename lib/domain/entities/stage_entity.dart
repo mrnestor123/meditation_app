@@ -13,7 +13,9 @@ class Stage {
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
   //hay que empezar a utilizar stobjectives!!
-  StageObjectives stobjectives; 
+  StageObjectives stobjectives;
+  //PARA EL FUTURO !!! 
+  bool locked;
 
   Stage(
       {@required this.stagenumber,
@@ -28,7 +30,9 @@ class Stage {
       this.mastery,
       this.userscount,
       this.stobjectives,
-      this.longdescription});
+      this.longdescription,
+      this.locked
+      });
 
   void addLesson(Lesson l){
     if(stobjectives.lecciones == null){
@@ -79,13 +83,9 @@ class Stage {
       }
     }
   }
-
-
 }
 
 
-
-///POR HACER !!!!!
 class StageObjectives {
   int totaltime, streak, lecciones, meditguiadas, meditationcount, meditationfreetime;
   String freemeditationlabel;

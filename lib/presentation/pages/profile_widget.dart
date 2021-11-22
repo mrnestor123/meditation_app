@@ -261,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ) 
                     ],
                     ),
-                    SizedBox(height: Configuration.blockSizeVertical*3),
+                    SizedBox(height: Configuration.verticalspacing*1.5),
                     Table(children: [
                       TableRow(children: [
                         ProfileInfoBigCard(
@@ -289,11 +289,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ]
                       )
                     ]),
-                    SizedBox(height: Configuration.blockSizeVertical * 3),
+                    SizedBox(height: Configuration.verticalspacing*2),
                     Text('Meditation record', style: Configuration.text('small', Colors.black)),
-                    SizedBox(height: Configuration.blockSizeVertical*1),
+                    SizedBox(height: Configuration.verticalspacing),
+                    user.userStats.streak > 1 ?
+                    Container(
+                      width: Configuration.width,
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey)
+                      ),
+                      child: Row(
+                        mainAxisAlignment:MainAxisAlignment.spaceAround,
+                        children:[
+                          Text('Current streak', style:Configuration.text('small',Colors.black)),
+                          Text(user.userStats.streak.toString() + ' DAYS',style:Configuration.text('smallmedium',Colors.black)),
+                       ]
+                     ), 
+                    ): Container(),
                     CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations),
-                    SizedBox(height: 10),
+                    SizedBox(height: Configuration.verticalspacing),
                   ],
                 ),
               ),
@@ -519,7 +534,7 @@ class ProfileInfoBigCard extends StatelessWidget {
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), 
-        border: Border.all(color: Colors.white, width: Configuration.strokewidth/2)
+        border: Border.all(color: color != null ? Colors.white : Colors.grey, width: Configuration.strokewidth/2)
       ),
       child: Padding(
         padding: EdgeInsets.all(Configuration.smpadding),

@@ -5,6 +5,7 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/progress_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
+import 'package:meditation_app/domain/entities/user_settings_entity.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
 import 'game_entity.dart';
@@ -24,6 +25,10 @@ class User {
 
   //para el modal de progreso
   Progress progress;
+
+  UserSettings settings;
+  
+
 
   //estadísticas
   UserStats userStats;
@@ -54,7 +59,7 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions,this.gameposition = 0 }) {
+        this.answeredquestions,this.gameposition = 0, this.settings}) {
    
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
@@ -83,7 +88,7 @@ class User {
     if(this.userStats != null && this.userStats.streak > 0) {
       var lastmeditated = DateTime.parse(this.userStats.lastmeditated);
       if(lastmeditated.day != DateTime.now().day && lastmeditated.day != DateTime.now().subtract(Duration(days: 1)).day){
-        userStats.streak = 0;
+        //userStats.streak = 0;
       }
     } 
 
@@ -114,12 +119,21 @@ class User {
   }
 
   bool isBlocked(Meditation meditation){
-    return this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber;
+    return !this.settings.unlocksMeditation() && (this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber);
   }
   
   bool isGameBlocked(Game g){
     return this.gameposition < g.position;
   }
+
+  bool isLessonBlocked(Lesson l){
+    return !settings.unlocksLesson() || (this.position < l.position && this.stagenumber <= l.stagenumber );
+  }
+
+  bool isStageBlocked(Stage s){
+    return !settings.unlocksLesson() && this.stagenumber < s.stagenumber;
+  }
+
 
   bool isAdmin(){
     return this.role == 'admin';

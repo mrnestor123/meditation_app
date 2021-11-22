@@ -385,10 +385,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<Request> getRequest(String cod) async{
     try{
-       var url = Uri.parse('$nodejs/request/$cod');
-        http.Response response = await http.get(url);
-        Request request =  new Request.fromJson(json.decode(response.body));
-        return request;
+      var url = Uri.parse('$nodejs/request/$cod');
+      http.Response response = await http.get(url);
+      Request request =  new Request.fromJson(json.decode(response.body));
+      return request;
     }catch(e) {
       throw ServerException();
     }

@@ -357,6 +357,7 @@ class _MeditationListState extends State<MeditationList> {
 
         meditcontent.add(
         ClickableSquare(
+          blockedtext: 'Unlocked at stage '+ m.stagenumber.toString(),
           blocked: _blocked,
           text: m.title,
           selected: isSelected,
