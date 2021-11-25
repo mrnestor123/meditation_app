@@ -5,10 +5,12 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'commonWidget/stage_card.dart';
 
@@ -33,9 +35,8 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     UserState _userstate = Provider.of<UserState>(context);
-    return Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.center,
+    return ListView(
+    physics: ClampingScrollPhysics(),
     children: [
       SizedBox(height: Configuration.verticalspacing),
       /*ElevatedButton(onPressed: (){
@@ -44,9 +45,33 @@ class _MainScreenState extends State<MainScreen> {
       */
       StageCard(stage: _userstate.user.stage),
       SizedBox(height: Configuration.verticalspacing*2),
-      Expanded(
-        child:_Timeline()
+      AspectRatio(
+        aspectRatio: 6/1,
+        child: Container(
+          width: Configuration.width,
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+              backgroundColor: Colors.grey.withOpacity(0.6)
+            ),
+            onPressed: () { 
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context)=> WebView(initialUrl:'https://www.amazon.de/-/en/John-Yates-Phd/dp/1781808201/ref=sr_1_1?adgrpid=82460957179&gclid=CjwKCAiAv_KMBhAzEiwAs-rX1Bo6Q8WImFMLs5t4p67OFcglUBMhHJkNp_cCg2N-GjbcYsLJ2UlynxoCYmoQAvD_BwE&hvadid=394592758731&hvdev=c&hvlocphy=20297&hvnetw=g&hvqmt=b&hvrand=2610658949964129015&hvtargid=kwd-488309045472&hydadcr=24491_1812059&keywords=the+mind+illuminated&qid=1637694427&sr=8-1' ,javascriptMode: JavascriptMode.unrestricted))
+              ); 
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children:[
+                Text('Get The Mind Illuminated',style:Configuration.text('small',Colors.black)),
+                Image(image:AssetImage('assets/tenstages-book.png'),fit: BoxFit.cover)
+              ]
+            ),
+          ),
+        ),
       ),
+      SizedBox(height: Configuration.verticalspacing*2),
+      _Timeline(),
       SizedBox(height: Configuration.verticalspacing),
 
     ]);
@@ -135,7 +160,9 @@ class __TimelineState extends State<_Timeline> {
                   Expanded(
                       child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start, 
+                      mainAxisAlignment:MainAxisAlignment.spaceEvenly,
                       children: [
+                        //QUITAR LOS IFS DEL CÓDIGO !!!!
                         Text((action.username == _userstate.user.nombre ? 'You': action.username) + ' ' + action.message,
                             style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                             overflow: TextOverflow.fade,
@@ -168,7 +195,8 @@ class __TimelineState extends State<_Timeline> {
         decoration: BoxDecoration(
           color:Colors.white,  
           borderRadius: BorderRadius.circular(16.0), 
-          border: Border.all(color: Colors.grey, width: 0.15)),
+          border: Border.all(color: Colors.grey, width: 0.15)
+        ),
         child: Column(children: [
           Container(
             padding: EdgeInsets.all(Configuration.smpadding),
@@ -219,22 +247,17 @@ class __TimelineState extends State<_Timeline> {
               ]
             ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 0.15,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
+          Container(
+            width:Configuration.width,
+            height: 0.15,
+            color: Colors.grey,
           ),
-          Expanded(child: Container(
+          Container(
             padding: EdgeInsets.symmetric(horizontal: 5),
+            height:Configuration.height*0.4,
             child: ListView(
               controller: _scrollController,
               children: getMessages()))
-            )
         ]));
   }
 }

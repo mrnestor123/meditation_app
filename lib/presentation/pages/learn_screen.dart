@@ -250,7 +250,7 @@ class _StageViewState extends State<StageView> {
                                   children: [
                                     Icon(Icons.lock, size: Configuration.smicon),
                                     SizedBox(height: 10),
-                                    Text('Unlocked after reading ' + widget.stage.path[content.position-1].title , style: Configuration.text('verytiny', Colors.white), ),
+                                    Text('Unlocked after reading ' + widget.stage.path[content.position == 0? content.position :content.position-1].title , style: Configuration.text('verytiny', Colors.white), ),
                                   ],
                                 )
                               ) :Container(),
@@ -442,6 +442,7 @@ class _ContentViewState extends State<ContentView> {
               ),
               Center(
                 child: StartButton(
+                  text:'Start Lesson',
                   onPressed: () async{
                       setState(() => _index = 0);
                   } 
@@ -495,28 +496,15 @@ class _ContentViewState extends State<ContentView> {
                                     AnimatedOpacity(
                                       opacity: reachedend ? 1.0 : 0.0, 
                                       duration: Duration(seconds: 1),
-                                      child: Container(
-                                        width: Configuration.width*0.5,
-                                        child: AspectRatio(
-                                          aspectRatio: 9/2,
-                                          child: ElevatedButton(
-                                              onPressed: () async {
-                                              await _userstate.takeLesson(widget.lesson);
-                                              Navigator.pop(context, true);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              primary: Configuration.maincolor,
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-                                            ), 
-                                            child: Text(
-                                              'Finish',
-                                              style: Configuration.text('small', Colors.white),
-                                            )
-                                          ),
-                                        ),
+                                      child: StartButton(
+                                        text:'Finish',
+                                        onPressed: () async{
+                                          //NOSE SI HABRA QUE ESPERAR
+                                          await _userstate.takeLesson(widget.lesson);
+                                          Navigator.pop(context, true);
+                                        },
                                       ),
-                                    ),
-            
+                                    )
                                   ])
                             ,
             

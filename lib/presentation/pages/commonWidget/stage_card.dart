@@ -16,9 +16,9 @@ class StageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
     width: Configuration.width,
-    height: Configuration.width > 500 ? Configuration.height*0.28: 200,
+    height: Configuration.width > 500 ? Configuration.height*0.28: 180,
     decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16.0)
+      borderRadius: BorderRadius.circular(Configuration.borderRadius)
     ),
     child: ElevatedButton(
       onPressed: () => 
@@ -40,7 +40,7 @@ class StageCard extends StatelessWidget {
               child: Image(
                 image: stage.shortimage  != null ? 
                 NetworkImage(stage.shortimage) : AssetImage('assets/stage 1/stage 1.png'),
-                height:Configuration.width > 500 ? 240 : 130,
+                height:Configuration.width > 500 ? 240 : 110,
                 width: Configuration.width,
                 fit: BoxFit.cover
                 ),

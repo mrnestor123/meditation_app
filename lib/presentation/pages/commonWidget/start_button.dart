@@ -19,7 +19,7 @@ class StartButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16.0)
       ),
       child: AspectRatio(
-        aspectRatio:Configuration.width > 500 ? 10/1: 6/1,
+        aspectRatio:Configuration.buttonRatio,
         child: ElevatedButton(
         onPressed: onPressed != null ? () async {
           if(!justpressed){
@@ -31,7 +31,7 @@ class StartButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           elevation: 2.0,
           primary: Configuration.maincolor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0))
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
         ),
         child: Text(
           text != null ? text : 'Start',

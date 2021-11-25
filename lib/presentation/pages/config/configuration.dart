@@ -58,8 +58,12 @@ class Configuration {
   static double bigmargin;
 
 
+  static double borderRadius;
+
   static double verticalspacing;
   static double strokewidth;
+  static double buttonRatio;
+
 
   static int crossAxisCount;
 
@@ -230,6 +234,8 @@ class Configuration {
     safeBlockHorizontal = (width - _safeAreaHorizontal) / 100;
     safeBlockVertical = (height - _safeAreaVertical) / 100;
 
+    borderRadius = 32;
+
     //Paddings
     if(width > 500){
       tinpadding = 15;
@@ -244,6 +250,7 @@ class Configuration {
       bigicon = safeBlockHorizontal * 5;
       crossAxisCount = 3;
       lessonratio = 11/3;
+      buttonRatio = 10/1;
     }else {
       tinpadding = 10;
       verticalspacing = 10;
@@ -253,11 +260,12 @@ class Configuration {
       bigpadding = 30;
       crossAxisCount = 2;
       lessonratio = 8/3;
+      buttonRatio = 8/3;
       smicon = 24;
       medicon = 30;
       bigicon = 40;
+      buttonRatio = 6/1;
     }
-
     
     //icons
     tablettinicon = safeBlockHorizontal *2;

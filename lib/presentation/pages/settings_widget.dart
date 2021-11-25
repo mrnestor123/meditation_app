@@ -69,6 +69,7 @@ class _SettingsState extends State<Settings> {
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     primary: Colors.red,
+                    shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
                     padding: EdgeInsets.all(12)
                   ),
                   onPressed: () { 
@@ -76,7 +77,8 @@ class _SettingsState extends State<Settings> {
                   _loginstate.logout();
                   Navigator.pushReplacementNamed(context, '/welcome');
                 }, child: Text('LOG OUT',style: Configuration.text('small', Colors.white),)),
-            )
+            ),
+            SizedBox(height: Configuration.verticalspacing*2),
           ],
         ),
       ),    

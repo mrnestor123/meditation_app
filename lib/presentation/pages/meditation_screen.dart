@@ -605,6 +605,7 @@ class _CountdownState extends State<Countdown> {
       if (finished && index != null && index == _meditationstate.selmeditation.content.length -1) {
         l.add(SizedBox(height: Configuration.height * 0.02));
         l.add(StartButton(
+          text:'Start Meditation',
           onPressed: () {
             _meditationstate.startMeditation(_userstate.user, _userstate.data);
           },

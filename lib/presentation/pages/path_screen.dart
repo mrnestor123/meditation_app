@@ -13,6 +13,8 @@ class PathScreen extends StatelessWidget {
   Widget porcentaje() {
     return Container(
       padding: EdgeInsets.all(Configuration.smpadding),
+      width:Configuration.height*0.2,
+      height: Configuration.height*0.2,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color:Colors.grey,width: 6)
@@ -21,9 +23,10 @@ class PathScreen extends StatelessWidget {
         goalCompleted: _userstate.user.percentage/100,
         progressColor: Configuration.maincolor,
         progressBackgroundColor: Colors.transparent,
-        child: Text(
-          _userstate.user.percentage.toString() + '%',
-          style: Configuration.text('smallmedium', Colors.black
+        child: Center(
+          child: Text(
+            _userstate.user.percentage.toString() + '%',
+            style: Configuration.text('smallmedium', Colors.black)
           ),
         ),
       ),
@@ -48,7 +51,8 @@ class PathScreen extends StatelessWidget {
               transitionBuilder: (context, a1, a2, widget) {
                 return AbstractDialog(
                   content: Container(
-                    height: Configuration.height*0.2,
+                    padding:EdgeInsets.all(Configuration.smpadding),
+                    height: Configuration.height*0.3,
                     width: Configuration.width*0.9,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -59,7 +63,7 @@ class PathScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(text, style: Configuration.text('smallmedium', Colors.black)),
-                        SizedBox(height: 10),
+                        SizedBox(height: Configuration.verticalspacing),
                         Text(modaltext, style:Configuration.text('small', Colors.black, font: 'Helvetica'), textAlign: TextAlign.center,),
                       ],
                     )) ,
@@ -76,8 +80,7 @@ class PathScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
             Icon(icon, color: Configuration.maincolor,size: Configuration.smicon),
-            Text(text,
-                style: Configuration.text('small', Colors.black),
+            Text(text,style: Configuration.text('tiny', Colors.black),
             ),
           ]),
         ),
@@ -163,15 +166,16 @@ class PathScreen extends StatelessWidget {
     return Column(
     //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
     children: [
+      SizedBox(height: Configuration.verticalspacing),
+      
       Flexible(
-      flex: 2,
+      flex: 3,
       child:Column(
         children: [
-            SizedBox(height: Configuration.verticalspacing),
-            Text('You are currently on ', style: Configuration.text('tiny', Colors.grey)),
-            Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Configuration.maincolor)),
+            Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
+            Text(_userstate.user.stage.description, style:Configuration.text('small',Colors.grey)),
             //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
-            SizedBox(height: Configuration.verticalspacing*1.5),
+            SizedBox(height: Configuration.verticalspacing),
             porcentaje()
           ]
         )

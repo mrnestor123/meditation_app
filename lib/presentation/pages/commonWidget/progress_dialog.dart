@@ -32,10 +32,9 @@ void autocloseDialog(context, User user, {isTablet = false}) async {
       });
 
       return AbstractDialog(
-          content: isTablet ? 
-          TabletAnimatedProgress(progress:user.progress)
-          : 
-          AnimatedProgress(progress: user.progress),
+          content: isTablet 
+          ? TabletAnimatedProgress(progress:user.progress)
+          : AnimatedProgress(progress: user.progress),
       );
       }).then((val){
         if (_timer.isActive) {
@@ -68,7 +67,7 @@ class _TabletAnimatedProgressState extends State<TabletAnimatedProgress> {
       height: Configuration.width*0.1,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0), 
-        color: Colors.white,
+        color: Configuration.lightgrey,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.4),
@@ -141,7 +140,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
       height: widget.progress.what.contains('stage') ? Configuration.width *0.5: Configuration.width*0.2,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12.0), 
-        color: Colors.white,
+        color: Configuration.lightgrey
         /*boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.4),
