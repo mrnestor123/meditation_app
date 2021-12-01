@@ -41,7 +41,7 @@ class MeditationModel extends Meditation {
       MeditationModel(
           cod: json["cod"] == null ? null : json["cod"],
           title: json["title"] == null ? null : json["title"],
-          duration:json["duration"] == null ? null : json['duration'] is String ? parseDuration(json['duration']) : Duration(minutes: json['duration']),
+          duration:json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']),
           day: json["day"] == null ? null : DateTime.parse(json["day"]),
           recording: json["recording"] == null ? null : json["recording"],
           type: json["type"] == null ? null : json["type"],

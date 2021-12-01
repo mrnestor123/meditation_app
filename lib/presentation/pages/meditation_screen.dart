@@ -225,7 +225,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
         Expanded(child: 
           child,
         ),
-        StartButton(
+        BaseButton(
+          margin:true,
           onPressed:condition ? ()=> onPressed() : null,
         ),
       ],
@@ -604,7 +605,8 @@ class _CountdownState extends State<Countdown> {
 
       if (finished && index != null && index == _meditationstate.selmeditation.content.length -1) {
         l.add(SizedBox(height: Configuration.height * 0.02));
-        l.add(StartButton(
+        l.add(BaseButton(
+          margin:true,
           text:'Start Meditation',
           onPressed: () {
             _meditationstate.startMeditation(_userstate.user, _userstate.data);

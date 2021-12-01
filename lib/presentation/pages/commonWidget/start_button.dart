@@ -3,21 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
-class StartButton extends StatelessWidget {
+class BaseButton extends StatelessWidget {
   dynamic onPressed;
   String text;
   bool justpressed = false;
+  bool margin;
 
-  StartButton({this.onPressed, this.text});
+  BaseButton({this.onPressed, this.text, this.margin= false});
   
   @override
   Widget build(BuildContext context) {
     return Container(
       width: Configuration.width*0.9,
-      margin: EdgeInsets.only(bottom:Configuration.verticalspacing * 1.5),
-      decoration:BoxDecoration(
-        borderRadius: BorderRadius.circular(16.0)
-      ),
+      margin: EdgeInsets.only(bottom: margin ? Configuration.verticalspacing * 1.5 : 0),
       child: AspectRatio(
         aspectRatio:Configuration.buttonRatio,
         child: ElevatedButton(
@@ -25,7 +23,7 @@ class StartButton extends StatelessWidget {
           if(!justpressed){
             onPressed();
             justpressed = true;
-            Future.delayed(Duration(seconds: 5),()=> justpressed = false);
+            Future.delayed(Duration(seconds: 2),()=> justpressed = false);
           }
         } : null,
         style: ElevatedButton.styleFrom(

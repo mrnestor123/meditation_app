@@ -50,38 +50,32 @@ class _LoginWidgetState extends State<LoginWidget> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: InputField(
-                      controller: _loginstate.userController,
-                      labeltext:'Mail',
-                      icon: Icons.mail,
-                      validator: (value){
-                        if(value == null  || value.isEmpty){
-                          return 'Please enter the mail';
-                        }else if(!_loginstate.validateMail(value)){
-                          return 'Please input a valid mail';
-                        } 
-                        return null;
-                      },
-                      ),
+                  InputField(
+                    controller: _loginstate.userController,
+                    labeltext:'Mail',
+                    icon: Icons.mail,
+                    validator: (value){
+                      if(value == null  || value.isEmpty){
+                        return 'Please enter the mail';
+                      }else if(!_loginstate.validateMail(value)){
+                        return 'Please input a valid mail';
+                      } 
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 15),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: InputField(
-                      controller: _loginstate.passwordController,
-                      labeltext: 'Password',
-                      icon: Icons.lock,
-                      validator: (value) { 
-                        if(value == null || value.isEmpty){
-                          return 'Please enter the password';
-                        }
-                        return null;
-                      },
-                    )
+                  SizedBox(height: Configuration.verticalspacing*1.5),
+                  InputField(
+                    controller: _loginstate.passwordController,
+                    labeltext: 'Password',
+                    icon: Icons.lock,
+                    validator: (value) { 
+                      if(value == null || value.isEmpty){
+                        return 'Please enter the password';
+                      }
+                      return null;
+                    },
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: Configuration.verticalspacing*2),
                   LoginRegisterButton(
                     onPressed: () async {
                       if(!_loginstate.startedlogin){ 
@@ -96,10 +90,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                        return CircularProgressIndicator(color: Colors.white);
                       }else{
                         return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'LOGIN WITH MAIL',
+                            Text('LOGIN WITH MAIL',
                               style: Configuration.text('smallmedium', Colors.white),
                             ),
                             Icon(Icons.mail,size: Configuration.smicon)
@@ -146,21 +139,27 @@ class InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: Configuration.width*0.9,
-      child: TextFormField(
-        controller: controller,
-        style: Configuration.text('small', Colors.black),
-        obscureText: obscuretext != null ? true: false,
-        decoration: InputDecoration(
-            
-            errorStyle: Configuration.text('smallmedium', Colors.red),
-            contentPadding:  EdgeInsets.all(Configuration.smpadding),
-            filled: true,
-            labelStyle:  Configuration.text('small',Colors.grey),
-            labelText: labeltext,
-            border: new OutlineInputBorder(borderSide: new BorderSide(color: Colors.purpleAccent)),
-            prefixIcon: Icon(icon, size: Configuration.smicon),
+      child: AspectRatio(
+        aspectRatio: Configuration.width > 500 ? 10/1 : 6/1,
+        child: TextFormField(
+          maxLines:null,
+          keyboardType: TextInputType.multiline,
+          expands: true,
+          controller: controller,
+          style: Configuration.text('small', Colors.black),
+          obscureText: obscuretext != null ? true: false,
+          
+          decoration: InputDecoration(
+              errorStyle: Configuration.text('smallmedium', Colors.red),
+              contentPadding: EdgeInsets.symmetric(vertical: Configuration.smpadding,horizontal:Configuration.bigpadding),
+              filled: true,
+              labelStyle:  Configuration.text('small',Colors.grey),
+              labelText: labeltext,
+              border: new OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+              prefixIcon: Icon(icon, size: Configuration.smicon),
+          ),
+          validator: validator 
         ),
-        validator: validator 
       ),
     );
   }

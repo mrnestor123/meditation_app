@@ -80,8 +80,7 @@ class RegisterWidget extends StatelessWidget {
                       InputField(
                         controller: _passwordController,
                         labeltext: 'password',
-                        icon: Icons.email,
-                        obscuretext: true,
+                        icon: Icons.lock,
                         validator: (value){
                           if(value == null  || value.isEmpty){
                               return 'Please enter the password';
@@ -93,8 +92,7 @@ class RegisterWidget extends StatelessWidget {
                       InputField(
                         controller: _confirmController,
                         labeltext: 'Confirm password',
-                        icon: Icons.email,
-                        obscuretext: true,
+                        icon: Icons.lock,
                         validator: (value){
                            if(value == null  || value.isEmpty){
                               return 'Please enter the password';
@@ -121,7 +119,7 @@ class RegisterWidget extends StatelessWidget {
                           return CircularProgressIndicator(color: Colors.white);
                         }else{
                           return  Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 'REGISTER WITH MAIL',
@@ -172,16 +170,22 @@ class FacebookButton extends StatelessWidget {
       child: AspectRatio(
       aspectRatio:  Configuration.width > 500 ? 11/1: 6/1 ,
       child: ElevatedButton(
+          style: OutlinedButton.styleFrom(
+            primary: Colors.white,
+            backgroundColor: Colors.blueAccent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+            padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
+
+          ),
           child: Observer( builder: (context){
             if(_registerstate.startedfacelogin){
               return CircularProgressIndicator(color: Colors.white);
             }else{
              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text((register ? 'REGISTER' :'LOGIN') + ' WITH FACEBOOK',  style: Configuration.text('smallmedium', Colors.white)),
-                  Icon(FontAwesomeIcons.facebookF,
-                      color: Colors.white, size: Configuration.smicon),
+                  Icon(FontAwesomeIcons.facebookF, color: Colors.white, size: Configuration.smicon),
                 ],
               ); 
             }
@@ -231,8 +235,8 @@ class GoogleButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           primary: Colors.white,
           backgroundColor: Colors.redAccent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-          padding: EdgeInsets.all(12.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+          padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
         ),
         child: Observer(builder: (context){
           if(_registerstate.startedgooglelogin){
@@ -240,7 +244,7 @@ class GoogleButton extends StatelessWidget {
           } 
           else{
             return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text((register ? 'REGISTER' :'LOGIN') + ' WITH GOOGLE', style: Configuration.text('smallmedium', Colors.white)),
               Icon(FontAwesomeIcons.google,

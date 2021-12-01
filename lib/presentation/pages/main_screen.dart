@@ -227,7 +227,6 @@ class __TimelineState extends State<_Timeline> {
                       elevation: 3.0,
                       fillColor: Configuration.maincolor,
                       child: Container(
-                        padding: EdgeInsets.all(Configuration.tinpadding),
                         child: Row(
                           children: [
                             Icon(Icons.leaderboard, color: Colors.white, size: widget.isTablet ? Configuration.tinpadding : Configuration.smicon),
@@ -235,8 +234,8 @@ class __TimelineState extends State<_Timeline> {
                           ],
                         ),
                       ),
-                      padding: EdgeInsets.all(4.0),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
                       onPressed: () {
                         //HABRA QUE CAMBIAR ESTO
                         widget.isTablet ? 

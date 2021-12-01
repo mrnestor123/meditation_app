@@ -6,12 +6,14 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:provider/provider.dart';
 
+import 'commonWidget/start_button.dart';
 import 'config/configuration.dart';
 
 
@@ -121,6 +123,7 @@ class _RequestsState extends State<Requests> {
               children: [
                 SizedBox(height: Configuration.verticalspacing),
                 Text('Title', style:Configuration.text('small', Colors.black)),
+                SizedBox(height: Configuration.verticalspacing/2),
                 TextField(
                   controller: title,
                   maxLines: 1,
@@ -132,9 +135,9 @@ class _RequestsState extends State<Requests> {
                         borderSide: new BorderSide(color: Colors.black)
                     ),),
                 ),
-                SizedBox(height:Configuration.verticalspacing/2),
+                SizedBox(height:Configuration.verticalspacing),
                 Text('Content', style:Configuration.text('small', Colors.black)),
-                SizedBox(height: 6),
+                SizedBox(height: Configuration.verticalspacing/2),
                 TextField(
                   controller: content,
                   onChanged: (str) {
@@ -204,21 +207,40 @@ class _RequestsState extends State<Requests> {
                   ],
                 ),
                 SizedBox(height: Configuration.verticalspacing),
-                ElevatedButton(
-                  onPressed: () async { 
-                    _requestState.uploadRequest(addedReq);
-                    setState((){});
-                    addedReq.title ='';
-                    addedReq.content = '';
-                    addedReq.type = 'suggestion';
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size.fromWidth(Configuration.width),
-                    primary: Configuration.maincolor,
-                    padding: EdgeInsets.symmetric(vertical:10.0,horizontal: 4.0)
-                  ), 
-                  child: Text('Send Request', style: Configuration.text('small', Colors.white))
+                Center(
+                  child: BaseButton(
+                    onPressed: () async { 
+                      if(addedReq.title != null && addedReq.content != null && addedReq.title.isNotEmpty &&  addedReq.content.isNotEmpty){
+                        _requestState.uploadRequest(addedReq);
+                        addedReq.title ='';
+                        addedReq.content = '';
+                        addedReq.type = 'suggestion';
+                        setState((){});
+
+                        Navigator.pop(context);
+                      }else{
+                        showDialog(
+                          context:context,
+                          builder:(context)=>
+                            AbstractDialog(
+
+                              content:Container(
+                                padding:EdgeInsets.all(Configuration.smpadding),
+                                decoration: BoxDecoration(
+                                  
+                                  color:Colors.white,
+
+                                  borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                                ),
+                                child: Text(
+                                  'You must type a title and a content for creating a request', style: Configuration.text('small',Colors.red)),
+                              )
+                            
+                            ));
+                      }
+                    },
+                    text: 'Send Request'
+                  ),
                 ),
                 SizedBox(height: Configuration.verticalspacing*2)
               ],
@@ -309,14 +331,13 @@ class _RequestsState extends State<Requests> {
                           Text(datetoString(request[index].date),style: Configuration.text('tiny',Colors.grey)) 
                           : Container(),
                       ]),
-                      StateChip(request: request[index]),
-
+                      StateChip(request: request[index])
                     ],
                   ),
                   SizedBox(height: 5.0),
                   Container(
                     margin: EdgeInsets.only(left:5),
-                    child: Text(request[index].title, style: Configuration.text('smallmedium', Colors.black))
+                    child: Text(request[index].title != null ? request[index].title : 'no title', style: Configuration.text('smallmedium', Colors.black))
                   ),
                   SizedBox(height: 5.0),
                   Divider(),

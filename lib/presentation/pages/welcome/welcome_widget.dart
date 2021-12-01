@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:upgrader/upgrader.dart';
@@ -36,14 +37,14 @@ class WelcomeWidget extends StatelessWidget {
                     flex:Configuration.width > 500 ? 1 : 2,
                     child:Image.asset('assets/logo.png')
                   ),
-                  LoginRegisterButton(
+                  BaseButton(
                     text: 'LOGIN',
                     onPressed: (){
                       Navigator.pushNamed(context, '/login');
                     },
                   ),
-                  SizedBox(height: Configuration.height*0.03),
-                  LoginRegisterButton(
+                  SizedBox(height: Configuration.verticalspacing*2),
+                  BaseButton(
                     text: 'REGISTER',
                     onPressed: (){
                       Navigator.pushNamed(context, '/register');

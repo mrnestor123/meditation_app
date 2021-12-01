@@ -127,7 +127,7 @@ class User {
   }
 
   bool isLessonBlocked(Lesson l){
-    return !settings.unlocksLesson() || (this.position < l.position && this.stagenumber <= l.stagenumber );
+    return !settings.unlocksLesson() && (this.position < l.position && this.stagenumber <= l.stagenumber );
   }
 
   bool isStageBlocked(Stage s){

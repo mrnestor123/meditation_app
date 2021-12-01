@@ -150,6 +150,7 @@ class _StageViewState extends State<StageView> {
     widget.stage.path.forEach((content) {
       count++;
       var image;
+      var _blocked = _userstate.user.isLessonBlocked(content);
 
       if (content.image != null) {
         var configuration = createLocalImageConfiguration(context);
@@ -228,10 +229,9 @@ class _StageViewState extends State<StageView> {
                         width: Configuration.width * 0.5,
                         child: Text(
                           content.title,
-                          style:
-                              Configuration.text("verytiny", _userstate.user.position < content.position &&
+                          style:Configuration.text("verytiny", _userstate.user.position < content.position &&
                                   _userstate.user.stagenumber <= content.stagenumber ? Colors.grey : Colors.black, 
-                                   ),
+                                ),
                         ),
                       )),
                   Positioned(
@@ -243,7 +243,7 @@ class _StageViewState extends State<StageView> {
                       padding: EdgeInsets.all(0),
                       key: Key(content.cod),
                       duration: Duration(seconds: 2),
-                      child:  _userstate.user.isLessonBlocked(content)?
+                      child: _blocked?
                               Center(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -255,8 +255,7 @@ class _StageViewState extends State<StageView> {
                                 )
                               ) :Container(),
                       decoration: BoxDecoration(
-                          color: _userstate.user.position < content.position &&
-                                  _userstate.user.stagenumber <= content.stagenumber
+                          color: _blocked
                               ? Colors.grey.withOpacity(0.6)
                               : Colors.transparent),
                       curve: Curves.fastOutSlowIn,
@@ -441,7 +440,8 @@ class _ContentViewState extends State<ContentView> {
                 ),
               ),
               Center(
-                child: StartButton(
+                child: BaseButton(
+                  margin:true,
                   text:'Start Lesson',
                   onPressed: () async{
                       setState(() => _index = 0);
@@ -481,6 +481,15 @@ class _ContentViewState extends State<ContentView> {
                         width: Configuration.width,
                         padding: EdgeInsets.all(Configuration.smpadding),
                         child: Html(
+                          style:{
+                            "table":Style(
+                              border:Border.all(color:Colors.grey,width:1)
+                            ),
+                            "td":Style(
+                              border:Border(top: BorderSide(color:Colors.grey, width:1)),
+                              padding: EdgeInsets.all(Configuration.smpadding)
+                            )
+                          },
                           data:widget.lesson.text[index]["text"],
                         )
                       ),
@@ -496,7 +505,7 @@ class _ContentViewState extends State<ContentView> {
                                     AnimatedOpacity(
                                       opacity: reachedend ? 1.0 : 0.0, 
                                       duration: Duration(seconds: 1),
-                                      child: StartButton(
+                                      child: BaseButton(
                                         text:'Finish',
                                         onPressed: () async{
                                           //NOSE SI HABRA QUE ESPERAR
@@ -539,20 +548,19 @@ class _ContentViewState extends State<ContentView> {
           );
         },
         options: CarouselOptions(
-          scrollPhysics: ClampingScrollPhysics(),
-            height: Configuration.height,
-            viewportFraction: 1,
-            initialPage: 0,
-            enableInfiniteScroll: false,
-            reverse: false,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _index = index;
-                if (_index == widget.lesson.text.length - 1) {
-                  Future.delayed(Duration(seconds: 2),() => setState(()=> reachedend = true));
-                }
-              });
-            }));
+          height: Configuration.height,
+          viewportFraction: 1,
+          initialPage: 0,
+          enableInfiniteScroll: false,
+          reverse: false,
+          onPageChanged: (index, reason) {
+            setState(() {
+              _index = index;
+              if (_index == widget.lesson.text.length - 1) {
+                Future.delayed(Duration(seconds: 2),() => setState(()=> reachedend = true));
+              }
+            });
+          }));
   }
 
   @override
@@ -597,34 +605,40 @@ class _ContentViewState extends State<ContentView> {
         extendBodyBehindAppBar: true,
         body: _index == -1
             ? portada()
-            : Stack(children: [
-                vistaLeccion(),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    margin: EdgeInsets.all(15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: widget.lesson.text.map((url) {
-                        int index = widget.lesson.text.indexOf(url);
-                        return Container(
-                          width: Configuration.safeBlockHorizontal * 3,
-                          height: Configuration.safeBlockHorizontal * 3,
-                          margin: EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 2.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _index == index
-                                ? Color.fromRGBO(0, 0, 0, 0.9)
-                                : Color.fromRGBO(0, 0, 0, 0.4),
-                          ),
-                        );
-                      }).toList(),
+            : WillPopScope(
+              onWillPop: () {  
+                print('CANT Go back');
+                return Future.value(true);
+              },
+              child: Stack(children: [
+                  vistaLeccion(),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      margin: EdgeInsets.all(15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: widget.lesson.text.map((url) {
+                          int index = widget.lesson.text.indexOf(url);
+                          return Container(
+                            width: Configuration.safeBlockHorizontal * 3,
+                            height: Configuration.safeBlockHorizontal * 3,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 10.0, horizontal: 2.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _index == index
+                                  ? Color.fromRGBO(0, 0, 0, 0.9)
+                                  : Color.fromRGBO(0, 0, 0, 0.4),
+                            ),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-              ]));
+                ]),
+            ));
   }
 }
 

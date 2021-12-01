@@ -22,8 +22,9 @@ class LoginRegisterButton extends StatelessWidget {
             this.onPressed();
           },
           style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
             primary: Configuration.maincolor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0))
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
           ),
           child: text != null ? Text(
             text,
