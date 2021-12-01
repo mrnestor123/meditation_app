@@ -34,11 +34,13 @@ apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+
+   
 
     lintOptions {
         disable 'InvalidPackage'
@@ -78,6 +80,7 @@ android {
         all*.exclude group: 'com.google.android.exoplayer', module: 'exoplayer-ui'
     }
 }
+
 
   // Google Play services Gradle plugin
 
