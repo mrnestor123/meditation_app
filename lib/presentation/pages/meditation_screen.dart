@@ -35,7 +35,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   var finished = false;
   bool canStart = false;
 
-  Widget buttonModal(child, text, selected){
+  Widget buttonModal(child, text, selected,[scroll = false]){
     return AspectRatio(
       aspectRatio: 11/2,
       child: ElevatedButton(
@@ -48,7 +48,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
         ),
         onPressed: ()=>{
           showModalBottomSheet(
-            isScrollControlled: true,
+            isScrollControlled: scroll,
             barrierColor: Colors.black.withOpacity(0.5),
              shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
@@ -101,8 +101,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   return Text('Press to select one',style: Configuration.text('small',Configuration.maincolor));
                 }
               }
-            )
-          )
+            ),
+            true
+          ),
       ]), 
       () => {
         Navigator.pushNamed(context, '/countdown').then(

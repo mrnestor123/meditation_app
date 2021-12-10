@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
       StageCard(stage: _userstate.user.stage),
       SizedBox(height: Configuration.verticalspacing*2),
       AspectRatio(
-        aspectRatio: 6/1,
+        aspectRatio: Configuration.buttonRatio,
         child: Container(
           width: Configuration.width,
           child: OutlinedButton(
@@ -126,37 +126,35 @@ class __TimelineState extends State<_Timeline> {
                 }
               },
               child: Container(
+                margin:EdgeInsets.only(top: Configuration.verticalspacing,left:Configuration.verticalspacing/2),
                 width: Configuration.width,
                 color: Colors.transparent,
-                child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                child: Row(mainAxisAlignment: MainAxisAlignment.start, 
+                children: [
                   Stack(
-                    children: [
-                      Container(
-                      height:  Configuration.width*0.15,
-                      width: Configuration.width*0.12,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: action.user != null && action.user.image != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) :  action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
-                          color: action.userimage == null ? Configuration.maincolor : null,
-                          shape: BoxShape.circle
-                        ),
-                        width: Configuration.width*0.1,
-                        height: Configuration.height*0.1
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 27,
-                          height: 27,
-                          padding: EdgeInsets.all(4),
-                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                          child: Icon(action.icono, color: Colors.white, size: 20.0) ),
-                      ) 
-                    ],
-                  ),
-                  SizedBox(width: 5.0),
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            image: action.user != null && action.user.image != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) :  action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
+                            color: action.userimage == null ? Configuration.maincolor : null,
+                            shape: BoxShape.circle
+                          ),
+                          width: Configuration.width*0.1,
+                          height: Configuration.width*0.1
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            width: Configuration.verticalspacing*2,
+                            height: Configuration.verticalspacing*2,
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
+                            child: Icon(action.icono, color: Colors.white, size: 20.0) ),
+                        ) 
+                      ],
+                    ),
+                  SizedBox(width: Configuration.verticalspacing),
                   Expanded(
                       child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start, 
@@ -167,6 +165,7 @@ class __TimelineState extends State<_Timeline> {
                             style: Configuration.text('tiny', Colors.black, font: 'Helvetica'),
                             overflow: TextOverflow.fade,
                             ),
+                        SizedBox(height: Configuration.verticalspacing/2),
                         Text((mode == 'Today' ? '' : action.day + ' ') +   action.hour,
                             style: Configuration.text('tiny', Configuration.grey, font: 'Helvetica'))
                     ]),
@@ -178,7 +177,7 @@ class __TimelineState extends State<_Timeline> {
           widgets.add(SizedBox(height: 10));
         }
       } else {
-        widgets.add(SizedBox(height: 20));
+        widgets.add(SizedBox(height: Configuration.verticalspacing*2));
         widgets.add(Center(child: Text('No actions done ' + (mode == 'Today' ? 'today' : 'this week'), style: Configuration.text('small', Colors.grey, font: 'Helvetica'))));
       }
 

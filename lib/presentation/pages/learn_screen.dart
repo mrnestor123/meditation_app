@@ -42,13 +42,14 @@ class _LearnScreenState extends State<LearnScreen> {
         ),
         itemBuilder: (context, index) {
           var flex = _userstate.user.stage.stobjectives.lecciones  == 0 ? 0: ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
-          
+          var _blocked = _userstate.user.isStageBlocked(_userstate.data.stages[index]);
+
           return Container(
             margin: EdgeInsets.only(top: 10),
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
             child: ElevatedButton(
-              onPressed: !_userstate.user.isStageBlocked(_userstate.data.stages[index])
-                  ?  () => Navigator.push(
+              onPressed: 
+                  !_blocked ?  () => Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => StageView(
@@ -61,10 +62,10 @@ class _LearnScreenState extends State<LearnScreen> {
                 children: [
                   Center(
                     child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
-                      style: Configuration.text("smallmedium", _userstate.user.stagenumber > index ? Colors.white : Colors.grey),
+                      style: Configuration.text("smallmedium", !_blocked ? Colors.white : Colors.grey),
                     ),
                   ),
-                  !_userstate.user.isStageBlocked(_userstate.data.stages[index]) ? 
+                  !_blocked &&  _userstate.user.isNormalProgression() ? 
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: AspectRatio(
@@ -78,7 +79,7 @@ class _LearnScreenState extends State<LearnScreen> {
                        child: Row(
                          mainAxisAlignment: MainAxisAlignment.center,
                          children: [
-                           flex < 6 && _userstate.user.stagenumber == (index +1) ? 
+                         flex < 6 && _userstate.user.stagenumber == (index +1) ? 
                            Flexible(
                              flex: flex,
                               child: Container(
@@ -216,9 +217,7 @@ class _StageViewState extends State<StageView> {
                             Container(
                               width: Configuration.safeBlockHorizontal * 5,
                               height: Configuration.safeBlockHorizontal * 5,
-                              child: Icon(Icons.visibility,
-                                color: Colors.lightBlue
-                              ),
+                              child: Icon(Icons.visibility,color: Colors.lightBlue),
                             ): Container(),
                         ],
                       )),
@@ -294,6 +293,7 @@ class _StageViewState extends State<StageView> {
         leading: ButtonBack(),
         actions: [
           IconButton(
+            iconSize:Configuration.smicon,
             onPressed: ()=> {
                showGeneralDialog(
                   context: context,

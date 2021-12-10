@@ -3,18 +3,18 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:uuid/uuid.dart';
 
 //intento de hacer enum. Muy complicado serializar
-
-//type issue and suggestion
-//state == open, closed
+//class State{}
+// type = issue and suggestion
+//  state = open, closed
 // states go from open, to in progress, to closed.
 class Request {
   dynamic cod;
   String username,type,content,coduser,state,title,image,userimage;
 
   DateTime date;
-  List<Comment> comments;
+  List<Comment> comments = new List.empty(growable: true);
   int points;
-  Map<String,dynamic> votes;
+  Map<String,dynamic> votes = new Map();
 
   Request(
       {this.cod,
@@ -24,9 +24,7 @@ class Request {
       this.date,
       this.coduser,
       this.state,
-      this.comments,
       this.points = 0,
-      this.votes,
       this.image,
       this.userimage,
       this.title}){
@@ -53,16 +51,15 @@ class Request {
     this.coduser = json['coduser'];
     this.userimage = json['userimage'];
     this.state = json['state'];
-    this.date = json['date'] == null ? null : DateTime.parse(json["date"]).toLocal();
+    this.date = json['date'] == null ? DateTime.now().subtract(Duration(days: 30))  : DateTime.parse(json["date"]).toLocal();
     //ESTO SE PUEDE HACER EN OTROS SITIOS
     if (json['comments'] != null) {
-      this.comments = new List.empty(growable: true);
       json['comments'].forEach((v) {
         this.comments.add(new Comment.fromJson(v));
       });
     }
     this.points = json['points'];
-    this.votes = json['votes'] != null ? json['votes'] : null;
+    this.votes = json['votes'] != null ? json['votes'] : new Map<String,dynamic>();
   
     title = json['title'];
   }
@@ -74,6 +71,7 @@ class Request {
     data['content'] = this.content;
     data['coduser'] = this.coduser;
     data['state'] = this.state;
+    data['image'] = this.image;
     data['date'] = this.date.toIso8601String();
     if (this.comments != null) {
       data['comments'] = this.comments.map((v) => v.toJson()).toList();
@@ -167,11 +165,14 @@ class Request {
         this.points--;
         this.votes[cod] = -1;
       }else if(votes[cod] == 1){
+        print('ha votado');
         this.points--;
         if(this.points > 0){
           this.points--;
+          this.votes[cod] = -1;
+        }else{
+          this.votes.removeWhere((key, value) => key == cod);
         }
-        this.votes[cod] = -1;
       } 
     }
   }

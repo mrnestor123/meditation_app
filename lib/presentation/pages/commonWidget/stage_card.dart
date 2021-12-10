@@ -16,10 +16,8 @@ class StageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
     width: Configuration.width,
-    height: Configuration.width > 500 ? Configuration.height*0.28 : 180,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(Configuration.borderRadius)
-    ),
+    height: Configuration.width > 500 ? Configuration.height*0.25 : 180,
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
     child: ElevatedButton(
       onPressed: () => 
         Navigator.push(
@@ -28,20 +26,17 @@ class StageCard extends StatelessWidget {
               builder: (context) => ImagePath(stage: stage)
           )
         ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment:CrossAxisAlignment.start,
         children: [
-          Text('Stage ' + stage.stagenumber.toString(),
-            style: Configuration.text('medium', Colors.white),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
+          Text('Stage ' + stage.stagenumber.toString(),style: Configuration.text('medium', Colors.white)),
+          SizedBox(height: Configuration.verticalspacing),
+          Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: Image(
-                image: stage.shortimage  != null ? 
-                NetworkImage(stage.shortimage) : AssetImage('assets/stage 1/stage 1.png'),
-                height:Configuration.width > 500 ? 240 : 110,
                 width: Configuration.width,
+                image: stage.shortimage  != null ? NetworkImage(stage.shortimage) : AssetImage('assets/stage 1/stage 1.png'),
                 fit: BoxFit.cover
                 ),
             ),
@@ -53,7 +48,7 @@ class StageCard extends StatelessWidget {
           primary: Configuration.maincolor,
           elevation: 2.0,
           onPrimary: Colors.white,
-          padding: EdgeInsets.all(Configuration.smpadding),
+          padding: EdgeInsets.all(Configuration.tinpadding),
           minimumSize: Size(double.infinity, double.infinity)),
     ),
     );

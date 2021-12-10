@@ -23,15 +23,11 @@ class Layout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //cambiar por orientation builder
-    return OrientationBuilder(
-      builder: (builder, orientation) {
        // if (orientation == Orientation.portrait) {
-          return MobileLayout();
+      return MobileLayout();
        // } else {
          // return TabletLayout();
         //}
-      },
-    );
   }
 }
 
@@ -146,13 +142,14 @@ class _MobileLayoutState extends State<MobileLayout> {
             preferredSize: 
             currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
             ),
+        leadingWidth: 90,
         leading: GestureDetector(
           onTap: (){
             this._c.jumpToPage(0);
           },
           child: Container(
-            padding: EdgeInsets.all(4),
-            child: Image.asset('assets/logo-no-text.png',width: Configuration.smicon)
+            
+            child: Image.asset('assets/logo-no-text.png')
           ),
         ),
         automaticallyImplyLeading: false,
@@ -185,9 +182,12 @@ class _MobileLayoutState extends State<MobileLayout> {
               icon: Icon(Icons.ac_unit),
               color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),*/
-          ProfileCircle(
-            userImage: _userstate.user.image, 
-            onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
+          Container(
+            margin:EdgeInsets.only(right:Configuration.tinpadding),
+            child: ProfileCircle(
+              userImage: _userstate.user.image, 
+              onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
+            ),
           ),
         ],
       ),

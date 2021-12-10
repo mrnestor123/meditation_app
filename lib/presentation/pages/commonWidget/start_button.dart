@@ -8,8 +8,10 @@ class BaseButton extends StatelessWidget {
   String text;
   bool justpressed = false;
   bool margin;
+  Color color;
+  Color textcolor;
 
-  BaseButton({this.onPressed, this.text, this.margin= false});
+  BaseButton({this.onPressed, this.text, this.margin= false, this.color, this.textcolor});
   
   @override
   Widget build(BuildContext context) {
@@ -23,17 +25,17 @@ class BaseButton extends StatelessWidget {
           if(!justpressed){
             onPressed();
             justpressed = true;
-            Future.delayed(Duration(seconds: 2),()=> justpressed = false);
+            Future.delayed(Duration(seconds: 1),()=> justpressed = false);
           }
         } : null,
         style: ElevatedButton.styleFrom(
           elevation: 2.0,
-          primary: Configuration.maincolor,
+          primary: color != null ? color: Configuration.maincolor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
         ),
         child: Text(
           text != null ? text : 'Start',
-          style: Configuration.text('smallmedium', Colors.white),
+          style: Configuration.text('smallmedium',textcolor != null ? textcolor : Colors.white),
         ),
           ),
       ),

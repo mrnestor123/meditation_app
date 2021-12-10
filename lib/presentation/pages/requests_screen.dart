@@ -32,8 +32,9 @@ class _RequestsState extends State<Requests> {
   PickedFile _image;
   final ImagePicker _picker = ImagePicker();
   bool uploading = false;
-  Request addedReq = new Request(type: 'suggestion', state: 'open');
+
   String selectedtype = 'Suggestion';
+  String uploadedImage;
 
   TextEditingController title = new TextEditingController();
   TextEditingController content = new TextEditingController();
@@ -61,7 +62,8 @@ class _RequestsState extends State<Requests> {
           String imgstring = await _userState.uploadImage(image);
           print(imgstring);
           stateSetter(() {
-            addedReq.image = imgstring;  
+            uploading= false;
+            uploadedImage  = imgstring;  
           });
         }
 
@@ -127,7 +129,6 @@ class _RequestsState extends State<Requests> {
                 TextField(
                   controller: title,
                   maxLines: 1,
-                  onChanged: (str){addedReq.title = str;},
                   decoration: InputDecoration(
                     hintText: "Enter title",
                     hintMaxLines: 2,
@@ -140,9 +141,6 @@ class _RequestsState extends State<Requests> {
                 SizedBox(height: Configuration.verticalspacing/2),
                 TextField(
                   controller: content,
-                  onChanged: (str) {
-                    addedReq.content = str;
-                  },
                   maxLines: 5,
                   decoration: InputDecoration(
                     hintText: "Enter your text here",
@@ -158,18 +156,13 @@ class _RequestsState extends State<Requests> {
                     DropdownButton<String>(
                       value: selectedtype,
                       elevation: 16,
-                      style: TextStyle(color: Colors.black),
+                      style: Configuration.text('small',Colors.black),
                       underline: Container(
                         height: 0,
                         color: Colors.black,
                       ),
                       onChanged: (String newValue) {
                         setState(() {
-                          if(newValue =='Suggestion'){
-                            addedReq.type = 'suggestion';
-                          }else{
-                            addedReq.type = 'issue';  
-                          }
                           selectedtype = newValue;
                         });
                       },
@@ -187,22 +180,25 @@ class _RequestsState extends State<Requests> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Add Image', style: Configuration.text('small', Colors.black)),
-                    addedReq.image  != null ? 
+                    uploadedImage != null ? 
                     Row(
                       children: [
-                        Image(image: NetworkImage(addedReq.image), height: 50),
+                        Image(image: NetworkImage(uploadedImage), height: 50),
                         IconButton(
                           iconSize:Configuration.smicon,
-                          onPressed: ()=> setState((){ addedReq.image = null;}), 
+                          onPressed: ()=> setState((){ uploadedImage = null; }), 
                           icon: Icon(Icons.delete, color: Colors.red)
                         )
                       ],
                     )
-                    : uploading ?
-                    CircularProgress(strokewidth: 2):
+                    : 
+                    uploading ? CircularProgress(strokewidth: 2):
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.all(Configuration.tinpadding)
+                      ),
                       onPressed: () => _showPicker(context), 
-                      child: Text('Image')
+                      child: Text('Image', style:Configuration.text('small',Colors.white))
                     )
                   ],
                 ),
@@ -210,20 +206,16 @@ class _RequestsState extends State<Requests> {
                 Center(
                   child: BaseButton(
                     onPressed: () async { 
-                      if(addedReq.title != null && addedReq.content != null && addedReq.title.isNotEmpty &&  addedReq.content.isNotEmpty){
-                        _requestState.uploadRequest(addedReq);
-                        addedReq.title ='';
-                        addedReq.content = '';
-                        addedReq.type = 'suggestion';
-                        setState((){});
-
+                      if(title.value.text.isNotEmpty && content.value.text.isNotEmpty){
+                        _requestState.uploadRequest(title.value.text,content.value.text,uploadedImage, selectedtype.toLowerCase());
+                        title.clear();
+                        content.clear();
                         Navigator.pop(context);
                       }else{
                         showDialog(
                           context:context,
                           builder:(context)=>
                             AbstractDialog(
-
                               content:Container(
                                 padding:EdgeInsets.all(Configuration.smpadding),
                                 decoration: BoxDecoration(
@@ -448,15 +440,20 @@ class _RequestsState extends State<Requests> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Configuration.maincolor,
+      floatingActionButton: ElevatedButton(
+        style:ElevatedButton.styleFrom(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          primary: Configuration.maincolor,
+          shape: CircleBorder()
+        ),
         onPressed: () {
+          /*
           if(addedReq.title != null){
             title.text = addedReq.title;
           }
           if(addedReq.content != null){
             content.text = addedReq.content;
-          }
+          }*/
           return showModalBottomSheet<void>(
             isScrollControlled: true,
             context: context,
@@ -465,7 +462,8 @@ class _RequestsState extends State<Requests> {
             }
           ).then((value) => setState((){}));
         },
-        child: Icon(Icons.add, size:Configuration.smicon),
+        child: Container(
+          child: Icon(Icons.add, size:Configuration.smicon)),
       ),
       appBar: AppBar(
         leading: ButtonBack(),
@@ -547,7 +545,7 @@ class _RequestsState extends State<Requests> {
                         ),
                       ),
                     ],
-                  ): 
+                  ) : 
                   TabBarView(
                     physics: NeverScrollableScrollPhysics(),
                     children: [
@@ -751,7 +749,7 @@ class _RequestViewState extends State<RequestView> {
                     child: Text('There are no comments at the moment. You can add one at the bottom'),
                   ) 
               ),
-              SizedBox(height: 70)
+              SizedBox(height: Configuration.verticalspacing*2)
             ],
           );
         }

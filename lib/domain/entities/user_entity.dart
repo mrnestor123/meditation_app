@@ -113,13 +113,15 @@ class User {
   //En el futuro sería  si contains la lista de lessons
   //returns if user has read a lesson
   bool readLesson(Content  c){
-    return c.position < this.position || 
-    c.stagenumber < this.stagenumber || 
-    this.userStats.lastread != null && this.userStats.lastread.where((d) => d['cod'] == c.cod).length > 0;
+    return c.position < this.position  && c.stagenumber == this.stagenumber ||  c.stagenumber < this.stagenumber || this.userStats.lastread != null && this.userStats.lastread.where((d) => d['cod'] == c.cod).length > 0;
   }
 
   bool isBlocked(Meditation meditation){
     return !this.settings.unlocksMeditation() && (this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber);
+  }
+
+  bool isNormalProgression(){
+    return settings.getProgression() == 'casual';
   }
   
   bool isGameBlocked(Game g){
@@ -296,32 +298,33 @@ class User {
   }
 
   void takeLesson(Lesson l, [DataBase d]) {
-    if (l.stagenumber == this.stagenumber 
-        && this.position <= l.position 
-        && (
-          this.userStats.lastread.length == 0 
-        || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0
-        )
-      ) {
-      this.userStats.takeLesson();
-      this.progress = Progress(
-        done: this.userStats.stage.lessons,
-        total: this.stage.stobjectives.lecciones, 
-        what: ' Lessons'
-      );
+    if(l.stagenumber ==this.stagenumber){
+      if (this.position <= l.position 
+          && (
+            this.userStats.lastread.length == 0 
+          || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0
+          )
+        ) {
+        this.userStats.takeLesson();
+        this.progress = Progress(
+          done: this.userStats.stage.lessons,
+          total: this.stage.stobjectives.lecciones, 
+          what: ' Lessons'
+        );
 
-      setPercentage();
+        setPercentage();
 
-      if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
-        this.position += 1;
-        this.userStats.lastread.clear();
-      } else {
-        this.userStats.lastread.add({'cod': l.cod});
+        if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
+          this.position += 1;
+          this.userStats.lastread.clear();
+        } else {
+          this.userStats.lastread.add({'cod': l.cod});
+        }
       }
-    }
-    
-    if (this.percentage >= 100) {
-      this.updateStage(d);
+      
+      if (this.percentage >= 100) {
+        this.updateStage(d);
+      }
     }
 
     setAction('lesson', attribute: l.title);
@@ -333,52 +336,57 @@ class User {
     m.coduser = this.coduser;
     this.totalMeditations.add(m);
 
+    if(m.stagenumber != null && m.stagenumber == this.stagenumber){
     //comprobamos la racha
-    if (this.userStats.streak > 0) {
-      DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
-      //si meditamos ayer
-      if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
+      if (this.userStats.streak > 0) {
+        DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
+        //si meditamos ayer
+        if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
+          this.userStats.streakUp();
+        } else if (lastmeditation.day != m.day.day) {
+          this.userStats.streak = 1;
+        }
+      } else {
         this.userStats.streakUp();
-      } else if (lastmeditation.day != m.day.day) {
-        this.userStats.streak = 1;
       }
-    } else {
-      this.userStats.streakUp();
+      
+      this.userStats.meditate(m);
+
+      this.setPercentage();
+
+      if (this.percentage >= 100) {
+        this.updateStage(d);
+      }
+      if (m.title == null) {
+          if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
+            this.userStats.stage.timemeditations++;
+            this.progress = Progress(
+              done: this.userStats.stage.timemeditations,
+              total: this.stage.stobjectives.meditationcount, 
+              what: this.stage.stobjectives.freemeditationlabel
+            ); 
+          }
+        } else {
+          //no se si esto funcionará bien
+          if (!totalMeditations.contains(m)) {
+            this.userStats.stage.guidedmeditations++;
+            this.meditposition++;
+            totalMeditations.add(m);
+            progress = Progress(
+              done: this.userStats.stage.guidedmeditations,
+              total: this.stage.stobjectives.meditguiadas, 
+              what: ' guided meditations');
+          }
+        }
     }
-    
-    this.userStats.meditate(m);
-
     // si la meditación es free no tiene título !!
-    if (m.title == null) {
-      if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
-        this.userStats.stage.timemeditations++;
-        this.progress = Progress(
-          done: this.userStats.stage.timemeditations,
-          total: this.stage.stobjectives.meditationcount, 
-          what: this.stage.stobjectives.freemeditationlabel
-        ); 
-      }
+    
+    if(m.title == null ){
       setAction('meditation', attribute: [m.duration.inMinutes]);
-    } else {
-      //no se si esto funcionará bien
-      if (!totalMeditations.contains(m)) {
-        this.userStats.stage.guidedmeditations++;
-        this.meditposition++;
-        totalMeditations.add(m);
-        progress = Progress(
-          done: this.userStats.stage.guidedmeditations,
-          total: this.stage.stobjectives.meditguiadas, 
-          what: ' guided meditations');
-      }
-
+    }else{
       setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);
     }
-
-    this.setPercentage();
-
-    if (this.percentage >= 100) {
-      this.updateStage(d);
-    }
+    
 
     return false;
 

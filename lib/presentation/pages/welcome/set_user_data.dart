@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
 import 'package:provider/provider.dart';
 
@@ -27,30 +30,28 @@ class _SetUserDataState extends State<SetUserData> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Select your username', style: Configuration.text('small', Colors.white)),
-            SizedBox(height: Configuration.height * 0.03),
+            Text('Type your username', style: Configuration.text('small', Colors.white)),
+            SizedBox(height: Configuration.verticalspacing),
             TextField(controller: _nameController),
-            SizedBox(height: Configuration.height * 0.03),
-            AspectRatio(
-              aspectRatio: 8/1,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.white,
-                    padding: EdgeInsets.all(12.0)
-                  ),
-                  onPressed: () async{
+            SizedBox(height: Configuration.verticalspacing * 2),
+            BaseButton(
+              text: 'Set',
+              textcolor: Colors.black,
+              color: Colors.white,
+              onPressed:() async{
                     //PPORQUE HAGO GETDATA AQUI????
-                    //await _userstate.getData();
-                    if(_userstate.user == null && _loginstate.loggeduser !=null || _userstate.user != null && _loginstate.loggeduser!=null && _loginstate.loggeduser.coduser != _userstate.user.coduser){
-                      _userstate.setUser(_loginstate.loggeduser);
+                    if(_nameController.text !=null &&  _nameController.text.isNotEmpty){
+                      if(_userstate.user == null && _loginstate.loggeduser !=null || _userstate.user != null && _loginstate.loggeduser!=null && _loginstate.loggeduser.coduser != _userstate.user.coduser){
+                        _userstate.setUser(_loginstate.loggeduser);
+                      }
+                      _userstate.changeName(_nameController.text);
+                       Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => Layout()),
+                        (Route<dynamic> route) => false,
+                      );
                     }
-                    _userstate.changeName(_nameController.text);
-                    Navigator.pushReplacementNamed(context, '/main');
                   },
-                  child: Text(
-                    'Set',
-                    style: Configuration.text('medium', Colors.black),
-                  )),
             ),
           ],
         ),

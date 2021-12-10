@@ -114,6 +114,21 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$totaldurationAtom = Atom(name: '_MeditationState.totalduration');
+
+  @override
+  Duration get totalduration {
+    _$totaldurationAtom.reportRead();
+    return super.totalduration;
+  }
+
+  @override
+  set totalduration(Duration value) {
+    _$totaldurationAtom.reportWrite(value, super.totalduration, () {
+      super.totalduration = value;
+    });
+  }
+
   final _$startedmeditationAtom =
       Atom(name: '_MeditationState.startedmeditation');
 
@@ -269,6 +284,7 @@ currentsentence: ${currentsentence},
 newsentence: ${newsentence},
 sentenceindex: ${sentenceindex},
 duration: ${duration},
+totalduration: ${totalduration},
 startedmeditation: ${startedmeditation},
 state: ${state},
 shadow: ${shadow}

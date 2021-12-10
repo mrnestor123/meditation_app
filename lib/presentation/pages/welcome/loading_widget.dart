@@ -78,7 +78,7 @@ class _LoadingState extends State<Loading> {
 
   void pushPage(){
     _user.user != null ?
-          _user.user.nombre == null ? 
+          _user.user.nombre == null|| _user.user.nombre.isEmpty ? 
             Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => SetUserData()),

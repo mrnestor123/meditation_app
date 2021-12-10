@@ -12,6 +12,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -43,107 +44,104 @@ class RegisterWidget extends StatelessWidget {
     _userstate = Provider.of<UserState>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           leading: ButtonBack(),
           elevation: 0,
         ),
-        body: Container(
-          height: Configuration.height,
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                SizedBox(height: 30),
-                Image.asset('assets/logo.png', width: Configuration.height*0.2),
-                SizedBox(height: 15),
-                Form(
-                  key: _registerstate.formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      InputField(
-                        controller: _userController,
-                        labeltext: 'Mail',
-                        icon: Icons.email,
-                        validator: (value){
-                          if(value == null  || value.isEmpty){
-                              return 'Please enter the mail';
-                            }else if(!_registerstate.validateMail(value)){
-                              return 'Please input a valid mail';
-                            } 
-                            return null;
-                        },
-                      ),
-                      SizedBox(height: 15),
-                      InputField(
-                        controller: _passwordController,
-                        labeltext: 'password',
-                        icon: Icons.lock,
-                        validator: (value){
-                          if(value == null  || value.isEmpty){
-                              return 'Please enter the password';
-                            }
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              Image.asset('assets/logo.png', width: Configuration.height*0.2),
+              SizedBox(height: Configuration.verticalspacing),
+              Form(
+                key: _registerstate.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InputField(
+                      controller: _userController,
+                      labeltext: 'Mail',
+                      icon: Icons.email,
+                      validator: (value){
+                        if(value == null  || value.isEmpty){
+                            return 'Please enter the mail';
+                          }else if(!_registerstate.validateMail(value)){
+                            return 'Please input a valid mail';
+                          } 
                           return null;
-                        }
-                      ),
-                      SizedBox(height: 15),
-                      InputField(
-                        controller: _confirmController,
-                        labeltext: 'Confirm password',
-                        icon: Icons.lock,
-                        validator: (value){
-                           if(value == null  || value.isEmpty){
-                              return 'Please enter the password';
-                            }else if(_confirmController.text != _passwordController.text) {
-                              return 'Passwords must be equal';
-                            }
-                            return null;
-                        }
-                      ),
-                      SizedBox(height: 15),
-                      LoginRegisterButton(
-                        onPressed: () async{
-                          if(!_registerstate.startedlogin){
-                            await _registerstate.startlogin(
-                              context,
-                              register: true,
-                              mail:_userController.text,
-                              password: _passwordController.text,
-                              type: 'mail');
+                      },
+                    ),
+                    SizedBox(height: Configuration.verticalspacing),
+                    InputField(
+                      controller: _passwordController,
+                      labeltext: 'password',
+                      icon: Icons.lock,
+                      obscuretext: true,
+                      validator: (value){
+                        if(value == null  || value.isEmpty){
+                            return 'Please enter the password';
                           }
-                        },
-                        content: Observer(builder: (context)  {
-                        if(_registerstate.startedmaillogin){
-                          return CircularProgressIndicator(color: Colors.white);
-                        }else{
-                          return  Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'REGISTER WITH MAIL',
-                                style: Configuration.text('smallmedium', Colors.white),
-                              ),
-                              Icon(
-                                Icons.mail,
-                                size: Configuration.smicon,
-                              )
-                            ],
-                          );
+                        return null;
+                      }
+                    ),
+                    SizedBox(height: Configuration.verticalspacing),
+                    InputField(
+                      controller: _confirmController,
+                      labeltext: 'Confirm password',
+                      icon: Icons.lock,
+                      obscuretext:true,
+                      validator: (value){
+                         if(value == null  || value.isEmpty){
+                            return 'Please enter the password';
+                          }else if(_confirmController.text != _passwordController.text) {
+                            return 'Passwords must be equal';
+                          }
+                          return null;
+                      }
+                    ),
+                    SizedBox(height: Configuration.verticalspacing * 2),
+                    LoginRegisterButton(
+                      onPressed: () async{
+                        if(!_registerstate.startedlogin){
+                          await _registerstate.startlogin(
+                            context,
+                            register: true,
+                            mail:_userController.text,
+                            password: _passwordController.text,
+                            type: 'mail');
                         }
-                        })
-                      ),
-                    ],
-                  ),
+                      },
+                      content: Observer(builder: (context)  {
+                      if(_registerstate.startedmaillogin){
+                        return CircularProgressIndicator(color: Colors.white);
+                      }else{
+                        return  Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'REGISTER WITH MAIL',
+                              style: Configuration.text('smallmedium', Colors.white),
+                            ),
+                            Icon(
+                              Icons.mail,
+                              size: Configuration.smicon,
+                            )
+                          ],
+                        );
+                      }
+                      })
+                    ),
+                  ],
                 ),
-                Spacer(),
-                GoogleButton(registerstate: _registerstate, register:true),
-                SizedBox(height: 15),
-                FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true),
-                SizedBox(height: 40)
-              ],
-            ),
+              ),
+              Spacer(),
+              GoogleButton(registerstate: _registerstate, register:true),
+              SizedBox(height: 15),
+              FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true),
+              SizedBox(height: 40)
+            ],
           ),
         ));
   }
@@ -168,18 +166,17 @@ class FacebookButton extends StatelessWidget {
     return Container(
       width:Configuration.width*0.9,
       child: AspectRatio(
-      aspectRatio:  Configuration.width > 500 ? 11/1: 6/1 ,
+      aspectRatio: Configuration.buttonRatio,
       child: ElevatedButton(
           style: OutlinedButton.styleFrom(
             primary: Colors.white,
             backgroundColor: Colors.blueAccent,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-            padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
-
+            padding: EdgeInsets.symmetric(horizontal:Configuration.bigpadding),
           ),
           child: Observer( builder: (context){
             if(_registerstate.startedfacelogin){
-              return CircularProgressIndicator(color: Colors.white);
+              return CircularProgress(color:Colors.white);
             }else{
              return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,7 +222,7 @@ class GoogleButton extends StatelessWidget {
     return Container(
       width:Configuration.width*0.9,
       child: AspectRatio(
-      aspectRatio:Configuration.width > 500 ? 11/1: 6/1,
+      aspectRatio:Configuration.buttonRatio,
       child: ElevatedButton(
         onPressed: () async{
           if(!_registerstate.startedlogin){
@@ -236,15 +233,16 @@ class GoogleButton extends StatelessWidget {
           primary: Colors.white,
           backgroundColor: Colors.redAccent,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-          padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
+          padding: EdgeInsets.symmetric(horizontal:Configuration.bigpadding),
         ),
         child: Observer(builder: (context){
           if(_registerstate.startedgooglelogin){
-            return CircularProgressIndicator(color: Colors.white);
+            return CircularProgress(color:Colors.white);
           } 
           else{
             return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text((register ? 'REGISTER' :'LOGIN') + ' WITH GOOGLE', style: Configuration.text('smallmedium', Colors.white)),
               Icon(FontAwesomeIcons.google,

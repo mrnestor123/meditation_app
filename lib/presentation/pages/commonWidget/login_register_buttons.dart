@@ -16,19 +16,19 @@ class LoginRegisterButton extends StatelessWidget {
     return Container(
         width: Configuration.width*0.9,
         child: AspectRatio(
-          aspectRatio:  Configuration.width > 500 ?  10/1 : 6/1,
+          aspectRatio:  Configuration.buttonRatio,
           child: ElevatedButton(
           onPressed: () async {
             this.onPressed();
           },
           style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(vertical:Configuration.smpadding,horizontal:Configuration.bigpadding),
+            padding: EdgeInsets.symmetric(horizontal:Configuration.bigpadding),
             primary: Configuration.maincolor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
           ),
           child: text != null ? Text(
             text,
-            style: Configuration.text('small', Colors.white),
+            style: Configuration.text('small', Colors.white)
             ) : content,
           ),
         ),

@@ -49,6 +49,8 @@ abstract class _MeditationState with Store {
 
   @observable
   Duration duration = new Duration(minutes: 5);
+  
+  @observable
   Duration totalduration = new Duration(minutes: 5);
 
   @observable

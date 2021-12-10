@@ -17,8 +17,10 @@ class UserSettings{
   UserSettings({this.meditSettings,this.progression});
 
   void getSettings(){
-    return;
+    return ; 
   }
+
+  String getProgression() => this.progression;
 
   //PODEMOS comprobar que este dentro de lasp rogresiones posibles
   void setProgression(String name) => this.progression = name;

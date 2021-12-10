@@ -112,11 +112,10 @@ abstract class _RequestState with Store {
   }
 
   @action
-  Future uploadRequest(Request r) async{
-    r.coduser = user.coduser;
-    r.username = user.nombre;
-    r.userimage = user.image;
-    r.votes =  new Map<String,dynamic>();
+  Future uploadRequest( String title, String content, String  image, String type) async{
+    Request  r = new Request(
+      coduser: user.coduser, username:user.nombre, userimage:user.image,
+      type:type, content: content, title: title, state:'open');
     requests.add(r);
     //requests.add(r);
     Either<Failure,void> res = await repository.uploadRequest(r);
@@ -159,16 +158,13 @@ abstract class _RequestState with Store {
     repository.updateNotification(n);
   }
 
-
   @action
   void filterRequests(String s){
     if(s == 'Votes'){
       requests.sort((a,b)=>b.points-a.points);
     }else if(s=='Date'){
-      requests.sort((a,b)=> b.date != null && a.date != null ? b.date.compareTo(a.date) : -1);
+      requests.sort((a,b)=> b.date.compareTo(a.date));
     }
-    selectedfilter = s;
-    print(selectedfilter);
-  
+    selectedfilter = s;  
   }
 }

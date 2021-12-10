@@ -79,8 +79,10 @@ mixin _$RequestState on _RequestState, Store {
   final _$uploadRequestAsyncAction = AsyncAction('_RequestState.uploadRequest');
 
   @override
-  Future<dynamic> uploadRequest(Request r) {
-    return _$uploadRequestAsyncAction.run(() => super.uploadRequest(r));
+  Future<dynamic> uploadRequest(
+      String title, String content, String image, String type) {
+    return _$uploadRequestAsyncAction
+        .run(() => super.uploadRequest(title, content, image, type));
   }
 
   final _$setRequestAsyncAction = AsyncAction('_RequestState.setRequest');

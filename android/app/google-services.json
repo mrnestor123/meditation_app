@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "120106070238-21f03hi41bn2m4vt18hnsm2cdsaivbfb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.meditationApp",
+            "certificate_hash": "1b0f2508b8dec0ce3b1c03843abf12062c994f79"
+          }
+        },
+        {
           "client_id": "120106070238-ia8tjk15sd5v2jcre2hmnesujpurb7i9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -38,6 +46,13 @@
             {
               "client_id": "120106070238-2rl449luqi76dlms48v215oejt9u7uo2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "120106070238-28bq96r5s5a9mncqda53r4l96m1p1q8u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "tenStages.ios.meditationApp"
+              }
             }
           ]
         }
@@ -57,6 +72,14 @@
           "android_info": {
             "package_name": "tenStages.meditationApp",
             "certificate_hash": "f7f8d5c78123bf13a1e4b8c7da597aacb3774fde"
+          }
+        },
+        {
+          "client_id": "120106070238-q2bqot30cb5g4qbj6i22g67nhbl2o9bi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tenStages.meditationApp",
+            "certificate_hash": "1b0f2508b8dec0ce3b1c03843abf12062c994f79"
           }
         },
         {
@@ -91,6 +114,13 @@
             {
               "client_id": "120106070238-2rl449luqi76dlms48v215oejt9u7uo2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "120106070238-28bq96r5s5a9mncqda53r4l96m1p1q8u.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "tenStages.ios.meditationApp"
+              }
             }
           ]
         }

@@ -7,6 +7,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
@@ -33,6 +34,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     
     return Scaffold(
         resizeToAvoidBottomInset: false,
+        extendBodyBehindAppBar: false,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -43,7 +45,6 @@ class _LoginWidgetState extends State<LoginWidget> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              SizedBox(height: 30),
               Image.asset('assets/logo.png', width: Configuration.height*0.2),
               Form(
               key: _loginstate.formKey,
@@ -63,11 +64,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                       return null;
                     },
                   ),
-                  SizedBox(height: Configuration.verticalspacing*1.5),
+                  SizedBox(height: Configuration.verticalspacing),
                   InputField(
                     controller: _loginstate.passwordController,
                     labeltext: 'Password',
                     icon: Icons.lock,
+                    obscuretext: true,
                     validator: (value) { 
                       if(value == null || value.isEmpty){
                         return 'Please enter the password';
@@ -87,9 +89,10 @@ class _LoginWidgetState extends State<LoginWidget> {
                     },
                     content: Observer(builder: (context)  {
                       if(_loginstate.startedmaillogin){
-                       return CircularProgressIndicator(color: Colors.white);
+                        return CircularProgress(color:Colors.white);
                       }else{
                         return Row(
+                          crossAxisAlignment:CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('LOGIN WITH MAIL',
@@ -139,27 +142,26 @@ class InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: Configuration.width*0.9,
-      child: AspectRatio(
-        aspectRatio: Configuration.width > 500 ? 10/1 : 6/1,
-        child: TextFormField(
-          maxLines:null,
-          keyboardType: TextInputType.multiline,
-          expands: true,
-          controller: controller,
-          style: Configuration.text('small', Colors.black),
-          obscureText: obscuretext != null ? true: false,
-          
-          decoration: InputDecoration(
-              errorStyle: Configuration.text('smallmedium', Colors.red),
-              contentPadding: EdgeInsets.symmetric(vertical: Configuration.smpadding,horizontal:Configuration.bigpadding),
-              filled: true,
-              labelStyle:  Configuration.text('small',Colors.grey),
-              labelText: labeltext,
-              border: new OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-              prefixIcon: Icon(icon, size: Configuration.smicon),
-          ),
-          validator: validator 
+      child: TextFormField(
+        maxLines:1,
+        controller: controller,
+        style: Configuration.text('small', Colors.black),
+        obscureText: obscuretext != null ? true: false,
+        decoration: InputDecoration(
+            focusColor: Configuration.maincolor,
+           // focusedBorder: new OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+            errorStyle: Configuration.text('small', Colors.red),
+            contentPadding: EdgeInsets.symmetric(vertical: Configuration.smpadding,horizontal:Configuration.bigpadding),
+            filled: true,
+            labelStyle:  Configuration.text('small',Colors.grey),
+            labelText: labeltext,
+            border: OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+            prefixIcon: Container(
+              margin:EdgeInsets.symmetric(horizontal: Configuration.tinpadding), 
+              child: Icon(icon, size: Configuration.smicon)
+            ),
         ),
+        validator: validator 
       ),
     );
   }

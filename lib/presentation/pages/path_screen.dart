@@ -79,9 +79,8 @@ class PathScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-            Icon(icon, color: Configuration.maincolor,size: Configuration.smicon),
-            Text(text,style: Configuration.text('tiny', Colors.black),
-            ),
+            Icon(icon, color: Configuration.maincolor,size: Configuration.medicon),
+           // Text(text,style: Configuration.text('tiny', Colors.black)),
           ]),
         ),
       );

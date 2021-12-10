@@ -23,20 +23,22 @@ class WelcomeWidget extends StatelessWidget {
         child: Center(
           child: Stack(
             children: [
-              UpgradeAlert(
+              /*UpgradeAlert(
                   dialogStyle: Platform.isAndroid ? 
                   UpgradeDialogStyle.material:  
                   UpgradeDialogStyle.cupertino,
                 appcastConfig: cfg,
                 child: Text(''),
-              ),
+              ),*/
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Flexible(
-                    flex:Configuration.width > 500 ? 1 : 2,
-                    child:Image.asset('assets/logo.png')
+                  Spacer(),
+                  Center(
+                    child: Image.asset('assets/logo.png', 
+                      height:Configuration.height*0.4
+                    ),
                   ),
+                  Spacer(),
                   BaseButton(
                     text: 'LOGIN',
                     onPressed: (){
@@ -50,6 +52,7 @@ class WelcomeWidget extends StatelessWidget {
                       Navigator.pushNamed(context, '/register');
                     },
                   ),
+                  SizedBox(height: Configuration.verticalspacing*2)
                 ],
               ),
             ],
