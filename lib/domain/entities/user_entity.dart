@@ -44,7 +44,6 @@ class User {
   //LISTA DE CÓDIGOS DE USUARIOS
   List<dynamic> following = new List.empty(growable: true);
   List<dynamic> followers = new List.empty(growable: true);
-
   List<Notify> notifications = new List.empty(growable:true);
 
   //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN

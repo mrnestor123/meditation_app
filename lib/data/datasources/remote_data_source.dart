@@ -19,6 +19,7 @@ import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:http/http.dart' as http;
+import 'package:meditation_app/domain/entities/version_entity.dart';
 
 
 import '../models/lesson_model.dart';
@@ -115,9 +116,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     if(loggeduser != null){
       getActions(loggeduser);
       //HAY QUE QUITAR ESTO UNA VEZ SE DESCONECTA
+      /*
       Timer.periodic(new Duration(seconds: 30), (timer) {
         getActions(loggeduser);
-      });   
+      });*/   
       return loggeduser;
     }else{
       throw LoginException();
@@ -208,9 +210,17 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         }
       }
 
+      QuerySnapshot versions = await database.collection('versions').get();
+
+      for(DocumentSnapshot doc in versions.docs){
+        d.addVersion(Version.fromJson(doc.data()));
+      }
+
+      d.getLastVersion();
+
       return d;
     }catch(e){
-      print('exception');
+      print({'exception',e.toString()});
     }
 
     throw Exception();
@@ -230,7 +240,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       return l;
     } catch(e){
-      print('exception');
+      print({'exception',e.toString()});
     }
 
     throw Exception();
@@ -345,6 +355,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
+
+  //MIRAR DE COMO IMPLEMENTAR ESTO !!
   Future <User> quickUser(dynamic coduser) async {
 
     

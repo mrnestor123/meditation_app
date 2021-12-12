@@ -40,7 +40,7 @@ class Notify{
     requesttitle: json['requesttitle'],
     userimage: json['userimage'],
     type: json['type'],
-    seen: json['seen'],
+    seen: json['seen'] != null ? json['seen'] : false,
     r: json['request'] != null ? Request.fromJson(json['request']): null,
     date : json["date"] == null ? DateTime.now() : DateTime.parse(json["date"])
   );

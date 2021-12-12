@@ -28,7 +28,7 @@ class StageCard extends StatelessWidget {
         ),
       child: Column(
         crossAxisAlignment:CrossAxisAlignment.start,
-        children: [
+        children: [ 
           Text('Stage ' + stage.stagenumber.toString(),style: Configuration.text('medium', Colors.white)),
           SizedBox(height: Configuration.verticalspacing),
           Expanded(
@@ -48,7 +48,7 @@ class StageCard extends StatelessWidget {
           primary: Configuration.maincolor,
           elevation: 2.0,
           onPrimary: Colors.white,
-          padding: EdgeInsets.all(Configuration.tinpadding),
+          padding: EdgeInsets.all(Configuration.smpadding),
           minimumSize: Size(double.infinity, double.infinity)),
     ),
     );

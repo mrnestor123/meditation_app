@@ -138,9 +138,10 @@ class RegisterWidget extends StatelessWidget {
               ),
               Spacer(),
               GoogleButton(registerstate: _registerstate, register:true),
-              SizedBox(height: 15),
+              SizedBox(height: Configuration.verticalspacing*2),
+              /*
               FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true),
-              SizedBox(height: 40)
+              SizedBox(height: 40)*/
             ],
           ),
         ));

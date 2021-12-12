@@ -142,7 +142,7 @@ class _MobileLayoutState extends State<MobileLayout> {
             preferredSize: 
             currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
             ),
-        leadingWidth: 90,
+        leadingWidth: Configuration.width > 500 ? 90 : 50,
         leading: GestureDetector(
           onTap: (){
             this._c.jumpToPage(0);
@@ -161,10 +161,10 @@ class _MobileLayoutState extends State<MobileLayout> {
                 child: IconButton(
                   color: Colors.black,
                   icon: Icon(Icons.bug_report,  size: Configuration.smicon),
-                  onPressed: ()=> Navigator.pushNamed(context, '/requests'),
+                  onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
                 ),
               ),
-              _userstate.user.notifications.where((element) => !element.seen).length > 0 ?
+              _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
               Positioned(
                 top: 5,
                 right: 5,
@@ -183,7 +183,7 @@ class _MobileLayoutState extends State<MobileLayout> {
               color: Colors.black,
               onPressed: () => Navigator.pushNamed(context, '/selectusername')),*/
           Container(
-            margin:EdgeInsets.only(right:Configuration.tinpadding),
+            margin:EdgeInsets.only(right: Configuration.width > 500 ? Configuration.tinpadding : 0),
             child: ProfileCircle(
               userImage: _userstate.user.image, 
               onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))

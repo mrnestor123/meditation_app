@@ -384,17 +384,20 @@ class _RequestsState extends State<Requests> {
         height: Configuration.height*0.5,
         width: Configuration.width,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Configuration.borderRadius),
           color: Colors.white,
         ),
         child: Column(
           children: [
-            SizedBox(height: 10),
+            SizedBox(height: Configuration.verticalspacing),
             Text('Notifications', style: Configuration.text('medium',Colors.black)),
-            SizedBox(height: 10),
+            SizedBox(height: Configuration.verticalspacing),
             Expanded(
               child: Container(
-                color: Configuration.lightgrey,
+                decoration:BoxDecoration(
+                  color:Configuration.lightgrey,
+                  borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                ),
                 child: ListView.separated(
                   itemBuilder: (context,index){
                     return TextButton(
@@ -413,11 +416,10 @@ class _RequestsState extends State<Requests> {
                           children: [
                             ProfileCircle(
                                 userImage:n[index].userimage, 
-                                width: 40, 
-                                marginLeft: 2, 
-                                marginRight: 2
-                              ),
-                            Flexible(child: Text(n[index].message,style: Configuration.text('small',Colors.black),))
+                                width: 40
+                            ),
+                            SizedBox(width:Configuration.verticalspacing),
+                            Expanded(child: Text(n[index].message,style: Configuration.text('small',Colors.black),))
                           ],
                         ),
                       ),
@@ -477,7 +479,7 @@ class _RequestsState extends State<Requests> {
                     builder: (context){
                       return notifications();
                     }
-                  )
+                  ).then((value) => setState((){}))
                 }, 
                 iconSize:Configuration.smicon,
                 icon: Icon(Icons.notifications,color: Colors.black)

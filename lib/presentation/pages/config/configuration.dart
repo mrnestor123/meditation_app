@@ -243,6 +243,7 @@ class Configuration {
       smpadding = 25;
       medpadding = 31;
       bigpadding = 36;
+      tinicon = 25;
       smicon = 35;
       medicon = 45;
       bigicon = 50;
@@ -261,6 +262,7 @@ class Configuration {
       crossAxisCount = 2;
       lessonratio = 8/3;
       buttonRatio = 8/3;
+      tinicon = 15;
       smicon = 24;
       medicon = 30;
       bigicon = 40;

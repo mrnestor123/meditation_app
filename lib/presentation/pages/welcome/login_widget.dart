@@ -108,12 +108,12 @@ class _LoginWidgetState extends State<LoginWidget> {
               )
               ),
               Spacer(),
-              SizedBox(height: 30),
               GoogleButton(registerstate: _loginstate,register: false),
-              SizedBox(height: 15),
+              SizedBox(height: Configuration.verticalspacing*2),
+              /*
               FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
               SizedBox(height: 40
-              ,)
+              ,)*/
             ],
           ),
         ));

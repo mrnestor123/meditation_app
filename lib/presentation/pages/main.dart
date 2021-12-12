@@ -19,6 +19,8 @@ import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
 
 import '../../login_injection_container.dart';
 import 'game_screen.dart';
@@ -50,6 +52,18 @@ void main() async {
  // FirebaseMessaging messaging = FirebaseMessaging.instance;
   //NotificationSettings settings = await messaging.requestPermission();
 */
+
+  
+  PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      String appName = packageInfo.appName;
+      String packageName = packageInfo.packageName;
+      String version = packageInfo.version;
+      String buildNumber = packageInfo.buildNumber;
+
+      print({appName,packageName,version,buildNumber});
+
+  });
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
 

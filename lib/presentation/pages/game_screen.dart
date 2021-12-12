@@ -41,7 +41,7 @@ class _GameStartedState extends State<GameStarted> {
 
       if(controller.value.duration.inSeconds > 0 && started && controller.value.position == controller.value.duration) {
         setState(() {
-            _gamestate.finishvideo();          
+          _gamestate.finishvideo();          
         });
       }
     });
@@ -72,7 +72,7 @@ class _GameStartedState extends State<GameStarted> {
           width: Configuration.height * controller.value.aspectRatio,
           child: Stack(children:[
             VideoPlayer(controller),
-            !started || !controller.value.isPlaying ? 
+            !started && !controller.value.isPlaying ? 
             Positioned.fill(
                 child: Container(
                   color: Colors.black.withOpacity(0.9),
@@ -118,7 +118,7 @@ class _GameStartedState extends State<GameStarted> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Try to focus on everything happening in the video', 
+        Text('Try to be aware of as many things as possible', 
         style: Configuration.text('smallmedium', Colors.black),
         textAlign: TextAlign.center,
         ),

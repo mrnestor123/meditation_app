@@ -146,11 +146,11 @@ class __TimelineState extends State<_Timeline> {
                           bottom: 0,
                           right: 0,
                           child: Container(
+                            clipBehavior: Clip.hardEdge,
                             width: Configuration.verticalspacing*2,
                             height: Configuration.verticalspacing*2,
-                            padding: EdgeInsets.all(4),
                             decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                            child: Icon(action.icono, color: Colors.white, size: 20.0) ),
+                            child: Icon(action.icono, color: Colors.white, size: Configuration.tinicon)),
                         ) 
                       ],
                     ),

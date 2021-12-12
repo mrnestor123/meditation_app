@@ -413,6 +413,7 @@ class _ContentViewState extends State<ContentView> {
 
   Widget portada() {
     return Column(children: [
+      widget.slider.url.isNotEmpty ?
       Hero(
         tag: widget.content.cod, 
         child: Image(
@@ -421,7 +422,7 @@ class _ContentViewState extends State<ContentView> {
           height: Configuration.height*0.6,
           fit: BoxFit.cover,
         )
-      ),
+      ) : Container(color: Configuration.lightgrey, height: Configuration.height * 0.6),
       Expanded(
         child: Container(
           width: Configuration.width,
