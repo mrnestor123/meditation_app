@@ -2,7 +2,7 @@
 class Version {
   int versionNumber;
   String description;
-  List<dynamic> content = new List.empty();
+  List<dynamic> content = new List.empty(growable: true);
 
   void updateVersion(){}
 

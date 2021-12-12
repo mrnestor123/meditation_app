@@ -4,6 +4,7 @@ import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 
@@ -32,9 +33,98 @@ class _MainScreenState extends State<MainScreen> {
         (c.blue * f).round());
   }
 
+
+  @override 
+  void initState(){
+    super.initState();
+   
+  }
+
+  @override 
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+  
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+      if(_userstate.user.version < _userstate.data.lastVersion.versionNumber){
+       // _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
+
+       showDialog(
+         context: context, 
+         builder: (context){
+           return AbstractDialog(
+             content: Container(
+               decoration: BoxDecoration(
+                 color:Colors.white,
+                 borderRadius: BorderRadius.circular(Configuration.borderRadius)
+               ),
+               child: Column(
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   Container(
+                     width:Configuration.width,
+                     decoration: BoxDecoration(
+                        color:Configuration.maincolor,
+                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius)) 
+                    ),
+                     padding: EdgeInsets.all(Configuration.smpadding),
+                     child: Center(
+                       child: Text('Version ' + _userstate.data.lastVersion.versionNumber.toString(),  
+                       style:Configuration.text('smallmedium',Colors.white)),
+                     )
+                   ),
+                   SizedBox(height:Configuration.verticalspacing),
+                   Text(_userstate.data.lastVersion.description, style:Configuration.text('small',Colors.black)),
+                   SizedBox(height:Configuration.verticalspacing),
+                   Container(
+                     width:Configuration.width,
+                     color: Configuration.maincolor,
+                     padding: EdgeInsets.all(Configuration.smpadding),
+                     child: Text('Functionalities',style:Configuration.text('small',Colors.white))
+                   ),
+                   SizedBox(height:Configuration.verticalspacing/2),
+                   Container(
+                     padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: 
+                      _userstate.data.lastVersion.content.map((e) {
+                       return Container(
+                         margin: EdgeInsets.only(top:Configuration.verticalspacing/2),
+                         child: Row(children: [
+                           Container(
+                             height: Configuration.verticalspacing,
+                             width: Configuration.verticalspacing,
+                             decoration: BoxDecoration(
+                               shape: BoxShape.circle,
+                               color:Colors.black
+                             ),
+                           ),
+                           SizedBox(width: Configuration.verticalspacing),
+                           Expanded(child: 
+                            Text(e['text'],style:Configuration.text('tiny',Colors.black))
+                           )
+                         ]),
+                       );
+                     }).toList()
+                     ),
+                   ),
+                   SizedBox(height:Configuration.verticalspacing*2)
+                 ],
+               ),
+             )
+           );
+         });
+    
+      }
+    });
+
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    UserState _userstate = Provider.of<UserState>(context);
     return ListView(
     physics: ClampingScrollPhysics(),
     children: [

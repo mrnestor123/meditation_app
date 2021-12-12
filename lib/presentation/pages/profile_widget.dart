@@ -28,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   var _userstate;
 
+  bool isMe;
+
   void _showPicker(context) {
 
     _imgFromCamera() async {
@@ -88,13 +90,162 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
   }
 
+
+  Widget identificationText(){
+    List<Widget> widgets = new List.empty(growable:true);
+
+    Widget stageText() {
+      Row(
+        children: [
+          Icon(Icons.terrain, color: Colors.white),
+          SizedBox(width: 5),
+          Text("Stage " + user.stagenumber.toString(), 
+            style: Configuration.text('small', Colors.white)
+          )
+        ],
+      );
+    }
+
+    if(user.isAdmin()){
+      widgets.add(Icon(Icons.admin_panel_settings, color:Colors.white));
+      widgets.add(Text('Admin',style: Configuration.text('small', Colors.white)));
+      widgets.add(stageText());           
+    }else if(user.isTeacher()){
+      widgets.add(Icon(Icons.school,color:Colors.white));
+      widgets.add(Text('TMI Teacher',style: Configuration.text('small',Colors.white)));
+      widgets.add(Container());
+    }else{
+      widgets.add(Icon(Icons.self_improvement,color: Colors.white));
+      widgets.add(Text('Meditator',style: Configuration.text('small', Colors.white)));
+      widgets.add(stageText());
+    }
+
+    return Row(
+      mainAxisAlignment: user.isTeacher() ? MainAxisAlignment.center : MainAxisAlignment.spaceAround,
+      children:[
+        widgets[2],
+        Row(children: [
+          widgets[0],
+          SizedBox(width:Configuration.verticalspacing/2),
+          widgets[1]
+        ])
+      ] 
+    );
+  }
+
+  Widget  teacherProfile(){
+    return Column(
+      children: [
+        Text('HELLO QUE PASA')
+      ],
+    );
+  }
+
+  Widget userProfile(){
+    return  ListView(
+      primary: false,
+      padding: EdgeInsets.all(12.0),
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+          TextButton(
+            onPressed: ()=>  
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => 
+                  ViewFollowers(
+                    cods:user.following,
+                    title: 'Following',
+              )),
+          ), 
+          child: Column(
+              children: [
+                Text('Following', style: Configuration.text('tiny', Colors.black)),
+                Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: ()=>  
+              Navigator.push(
+                context,
+                  MaterialPageRoute(
+                      builder: (context) => ViewFollowers(
+                      cods: user.followers ,
+                      title: 'Followers',
+                  )
+                ),
+              ),
+              child: Column(
+              children: [
+                Text('Followers', style: Configuration.text('tiny', Colors.black)),
+                Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.black))
+              ],
+            ),
+          ) 
+        ],
+        ),
+        SizedBox(height: Configuration.verticalspacing*1.5),
+        Table(children: [
+          TableRow(children: [
+            ProfileInfoBigCard(
+              firstText:  user.userStats.total.meditations.toString(),
+              secondText: "Meditations\ncompleted",
+              icon: Icon(Icons.self_improvement),
+            ),
+            ProfileInfoBigCard(
+                firstText: user.userStats.total.lessons.toString(),
+                secondText: "Lessons\ncompleted",
+                icon: Icon(Icons.book))
+          ]),
+          TableRow(
+            children: [
+              ProfileInfoBigCard(
+                firstText:  user.timemeditated,
+                secondText: "Time \nmeditated",
+                icon: Icon(Icons.timer),
+              ),
+              ProfileInfoBigCard(
+                firstText: user.userStats.total.maxstreak.toString() + (user.userStats.total.maxstreak == 1 ? ' day' : ' days'),
+                secondText: "Max \nstreak",
+                icon: Icon(Icons.calendar_today),
+              )
+            ]
+          )
+        ]),
+        SizedBox(height: Configuration.verticalspacing*2),
+        Text('Meditation record', style: Configuration.text('small', Colors.black)),
+        SizedBox(height: Configuration.verticalspacing),
+        user.userStats.streak > 1 ?
+        Container(
+          width: Configuration.width,
+          padding: EdgeInsets.all(Configuration.smpadding),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey)
+          ),
+          child: Row(
+            mainAxisAlignment:MainAxisAlignment.spaceAround,
+            children:[
+              Text('Current streak', style:Configuration.text('small',Colors.black)),
+              Text(user.userStats.streak.toString() + ' DAYS',style:Configuration.text('smallmedium',Colors.black)),
+            ]
+          ), 
+        ): Container(),
+        CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations),
+        SizedBox(height: Configuration.verticalspacing),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
     user = widget.user !=null ? widget.user : _userstate.user;
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Configuration.maincolor,
           elevation: 0,
           leading: ButtonBack(color: Colors.white),
           actions: [
@@ -111,7 +262,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
       ),
-      extendBodyBehindAppBar: true,
       body: Stack(children: <Widget>[
         Container(
             height: Configuration.height,
@@ -119,198 +269,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Configuration.maincolor),
         Column(
           children: <Widget>[
-            Expanded(
-                flex: 2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment:CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: Configuration.verticalspacing),
-                    Stack(
-                      fit:StackFit.passthrough,
-                      alignment:AlignmentDirectional.center,
-                      children: [
-                        ProfileCircle(
-                          width:100,
-                          bordercolor: Colors.white,
-                          userImage: user.image,
-                          color:Colors.transparent,
-                          onTap:()=>{
-                            if(widget.user == null){
-                                _showPicker(context)
-                            }
-                          }
-                        ),
-                        Align(
-                          alignment:Alignment.center,
-                          child: Icon(Icons.album,size: Configuration.smicon, color:Colors.grey.withOpacity(0.8)),
-                        ),
-                      ],
-                    ),
-                    /*
-                    RadialProgress(
-                        width: Configuration.safeBlockHorizontal * 1,
-                        goalCompleted: _userstate.user.stage.stagenumber / 10,
-                        child: GestureDetector(
-                          onTap: ()=>{
-                            if(widget.user == null){
-                              _showPicker(context)
-                            }
-                          },
-                          child: CircleAvatar(
-                              radius:  Configuration.blockSizeHorizontal * 12,
-                              backgroundColor: Colors.transparent,
-                              backgroundImage:user.image == null
-                                  ? null
-                                  : NetworkImage(user.image)
-                          ),
-                        )
-                    ),*/
-                    SizedBox(
-                      height: Configuration.safeBlockVertical * 2,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                           user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.terrain, color: Colors.white),
-                            SizedBox(width: 5),
-                            Text("Stage " + user.stagenumber.toString(), 
-                              style: Configuration.text('small', Colors.white)
-                            )
-                          ],
-                        ),
-                        
-                        user.isAdmin() ? 
-                        Row(
-                          children: [
-                            Icon(Icons.admin_panel_settings, color:Colors.white),
-                            Text('Admin',style: Configuration.text('small', Colors.white))
-                          ],
-                        ): 
-                        Row(
-                          children: [
-                            Icon(Icons.self_improvement,color: Colors.white),
-                            Text('Meditator',style: Configuration.text('small', Colors.white))
-                          ],
-                        ) 
-                      ],
-                    )
-                  ],
-                )
+            Stack(
+              fit:StackFit.passthrough,
+              alignment:AlignmentDirectional.center,
+              children: [
+                ProfileCircle(
+                  width:100,
+                  bordercolor: Colors.white,
+                  userImage: user.image,
+                  color:Colors.transparent,
+                  onTap:()=>{
+                    if(widget.user == null){
+                        _showPicker(context)
+                    }
+                  }
+                ),
+                Align(
+                  alignment:Alignment.center,
+                  child: Icon(Icons.album,size: Configuration.smicon, color:Colors.grey.withOpacity(0.8)),
+                ),
+              ],
             ),
+            SizedBox(height: Configuration.verticalspacing),
+            Text(user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white)),
+            SizedBox(height: Configuration.verticalspacing),
+            identificationText(),
+            SizedBox(height:Configuration.verticalspacing*2),
             Expanded(
               flex: 4,
               child: Container(
+                width:Configuration.width,
+                height:Configuration.height,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
                 ),
-                child: ListView(
-                  primary: false,
-                  padding: EdgeInsets.all(12.0),
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                      TextButton(
-                        onPressed: ()=>  
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => 
-                              ViewFollowers(
-                                cods:user.following,
-                                title: 'Following',
-                          )),
-                      ), 
-                      child: Column(
-                          children: [
-                            Text('Following', style: Configuration.text('tiny', Colors.black)),
-                            Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
-                          ],
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: ()=>  
-                          Navigator.push(
-                            context,
-                              MaterialPageRoute(
-                                  builder: (context) => ViewFollowers(
-                                  cods: user.followers ,
-                                  title: 'Followers',
-                              )
-                            ),
-                          ),
-                          child: Column(
-                          children: [
-                            Text('Followers', style: Configuration.text('tiny', Colors.black)),
-                            Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.black))
-                          ],
-                        ),
-                      ) 
-                    ],
-                    ),
-                    SizedBox(height: Configuration.verticalspacing*1.5),
-                    Table(children: [
-                      TableRow(children: [
-                        ProfileInfoBigCard(
-                          firstText:  user.userStats.total.meditations.toString(),
-                          secondText: "Meditations\ncompleted",
-                          icon: Icon(Icons.self_improvement),
-                        ),
-                        ProfileInfoBigCard(
-                            firstText: user.userStats.total.lessons.toString(),
-                            secondText: "Lessons\ncompleted",
-                            icon: Icon(Icons.book))
-                      ]),
-                      TableRow(
-                        children: [
-                          ProfileInfoBigCard(
-                            firstText:  user.timemeditated,
-                            secondText: "Time \nmeditated",
-                            icon: Icon(Icons.timer),
-                          ),
-                          ProfileInfoBigCard(
-                            firstText: user.userStats.total.maxstreak.toString() + (user.userStats.total.maxstreak == 1 ? ' day' : ' days'),
-                            secondText: "Max \nstreak",
-                            icon: Icon(Icons.calendar_today),
-                          )
-                        ]
-                      )
-                    ]),
-                    SizedBox(height: Configuration.verticalspacing*2),
-                    Text('Meditation record', style: Configuration.text('small', Colors.black)),
-                    SizedBox(height: Configuration.verticalspacing),
-                    user.userStats.streak > 1 ?
-                    Container(
-                      width: Configuration.width,
-                      padding: EdgeInsets.all(Configuration.smpadding),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey)
-                      ),
-                      child: Row(
-                        mainAxisAlignment:MainAxisAlignment.spaceAround,
-                        children:[
-                          Text('Current streak', style:Configuration.text('small',Colors.black)),
-                          Text(user.userStats.streak.toString() + ' DAYS',style:Configuration.text('smallmedium',Colors.black)),
-                       ]
-                     ), 
-                    ): Container(),
-                    CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations),
-                    SizedBox(height: Configuration.verticalspacing),
-                  ],
-                ),
+                child: user.isTeacher() ? teacherProfile(): userProfile()
               ),
             ),
           ],

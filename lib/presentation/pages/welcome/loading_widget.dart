@@ -130,7 +130,7 @@ class _LoadingState extends State<Loading> {
                   alignment: Alignment.topLeft,
                   child: Container(
                     width: 25,
-                    margin: EdgeInsets.all(12.0),
+                    margin: EdgeInsets.all(20),
                     height: 25,
                     child: CircularProgressIndicator(
                       color: Configuration.maincolor,

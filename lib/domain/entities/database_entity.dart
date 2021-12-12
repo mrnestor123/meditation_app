@@ -18,11 +18,6 @@ class DataBase {
   ObservableList<Meditation> nostagemeditations = new ObservableList();
   ObservableList<Lesson>  nostagelessons = new ObservableList();
 
-  //La VERSION ESTA BIEN. LOS USUARIOS LOS GUARDAMOS EN LA DATABASE
-  //habría que empezar a hacer versionnotes
-  String version;
-  String versionnotes;
-
   List<Version> versions = new List.empty(growable: true);
   Version lastVersion;
 
@@ -30,6 +25,7 @@ class DataBase {
   DataBase();
 
   void addVersion(Version v){
+    print('Adding version');
     versions.add(v);
   }
 

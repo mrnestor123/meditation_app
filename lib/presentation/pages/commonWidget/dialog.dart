@@ -10,6 +10,7 @@ class AbstractDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
         backgroundColor: Colors.transparent,

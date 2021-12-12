@@ -33,12 +33,14 @@ class UserModel extends User {
       answeredquestions,
       followed,
       settings,
+      version,
       stats})
       : super(
         coduser: coduser,
         user: user,
         gameposition: gameposition,
         image: image,
+        version:version,
         settings: settings,
         role: role,
         stagenumber: stagenumber,
@@ -65,6 +67,7 @@ class UserModel extends User {
         gameposition: json['gameposition'] == null ? 0 : json['gameposition'],
         meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
         image: json['image'] == null ? null : json['image'],
+        version: json['version'] == null ? 0  : int.parse(json['version']),
         settings: json['settings'] == null ? UserSettings.empty() : UserSettings.fromJson(json['settings']),
         followed: json['followed'] == null ? null: json['followed'],
         stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
@@ -120,6 +123,7 @@ class UserModel extends User {
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "followsyou": followers.map((user) => user).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
-        "answeredquestions": answeredquestions
+        "answeredquestions": answeredquestions,
+        "version": version
       };
 }

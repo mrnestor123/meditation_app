@@ -18,7 +18,7 @@ class User {
   String coduser, nombre, role, image, timemeditated;
   //USUARIO DE FIREBASE
   var user;
-  int stagenumber, position, meditposition, gameposition, percentage;
+  int stagenumber, position, meditposition, gameposition, percentage, version;
   Stage stage;
   //follows es cuando un usuario TE SIGUE!!
   bool classic, followed, stageupdated;
@@ -58,7 +58,7 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions,this.gameposition = 0, this.settings}) {
+        this.answeredquestions,this.gameposition = 0, this.settings,  this.version}) {
    
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
@@ -140,6 +140,11 @@ class User {
     return this.role == 'admin';
   }
 
+  bool isTeacher(){
+    return this.role =='teacher';
+  }
+
+
   //how much up to 6 the user has passed the lessons
   int lessonsPercentage(){
     if(this.userStats == 0){
@@ -149,6 +154,8 @@ class User {
     }
   }
 
+
+  void setVersion(int version) => this.version = version;
 
   //ESTOS METODOS SON BUENOS ?????
   void setAction(String type, {dynamic attribute}) {
@@ -295,6 +302,7 @@ class User {
       this.percentage = 100;
     }
   }
+
 
   void takeLesson(Lesson l, [DataBase d]) {
     if(l.stagenumber ==this.stagenumber){

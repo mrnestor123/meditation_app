@@ -103,7 +103,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       return u;
     }
     }catch(e) {
-      print('EXCEPtion');
+      print({'EXCEPtion', e.toString()});
     }
   }
 
@@ -290,7 +290,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
 
       var url = Uri.parse('$nodejs/action/${user.coduser}');
-      
+
       print(url);
 
       //esto se ejecutará antes que el clear ??
@@ -310,7 +310,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       user.lastactions.clear();
     }catch(e){  
-      print(e);
+      print(e.toString());
+      throw ServerException();
     }
   }
 
@@ -361,8 +362,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
     
   }
-
-
 
 
   Future updateRequest(Request r, [Notify n]) async{

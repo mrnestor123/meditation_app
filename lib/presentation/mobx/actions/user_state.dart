@@ -53,6 +53,9 @@ abstract class _UserState with Store {
   @observable 
   List<User> dynamicusers  = new List.empty(growable: true);
 
+  @observable 
+  List<User> teachers = new List.empty(growable: true);
+
   @observable
   Map lessondata;
 
@@ -170,8 +173,9 @@ abstract class _UserState with Store {
   }
 
   @action
+  // PARA SUBIR UNA ETAPA
   Future updateStage() async {
-      //updateamos la stage
+    //updateamos la stage
     user.updateStage(data);
     return repository.updateUser(user: user);
   }
@@ -183,10 +187,12 @@ abstract class _UserState with Store {
 
     userlist.fold(
       (l) => _mapFailureToMessage(l), 
-      (r) => users = r
+      (r) {
+        users = r;
+        filteredusers = users;
+        teachers =  users.where((element) => element.role =='teacher').toList();  
+      }
     );
-
-    filteredusers = users;
   }
 
   //FROM LIST OF USER CODS WE GET THE USERS
@@ -203,6 +209,12 @@ abstract class _UserState with Store {
     loading = false;
 
     return l;
+  }
+
+  Future setVersion(int versionNumber){
+    user.setVersion(versionNumber);
+
+    return repository.updateUser(user:user);
   }
 
 }
