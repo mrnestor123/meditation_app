@@ -31,10 +31,16 @@ abstract class UserRepository {
 
   Future<Either<Failure, List<User>>> getUsers(User u);
 
+  Future<Either<Failure, List<User>>> getTeachers();
+
   Future<Either<Failure, User>> getUser(String cod);
 
   Future<Either<Failure,Request>>getRequest(String cod);
 
-    Future<Either<Failure,void>> updateNotification(Notify n);
+  Future<Either<Failure,void>> updateNotification(Notify n);
+
+  Future<Either<Failure,void>> sendClassRequest(User you, User teacher);
+
+
 
 }

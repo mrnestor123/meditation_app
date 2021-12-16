@@ -85,6 +85,20 @@ abstract class _UserState with Store {
   }
 
 
+  @action 
+  Future getTeachers() async {
+    loading = true;
+    Either<Failure,List<User>> userlist = await repository.getTeachers();
+
+    userlist.fold(
+      (l) => _mapFailureToMessage(l), 
+      (r) {
+        loading = false;
+        teachers = r;
+      }
+    );
+  }
+
   @action
   Future userisLogged() async {
     Either<Failure, User> _isUserCached = await repository.islogged();
@@ -142,10 +156,16 @@ abstract class _UserState with Store {
   }
 
   
+
   @action
   Future changeName(String username) async {
     user.nombre = username;
     return repository.updateUser(user: user);
+  }
+
+  @action 
+  Future updateUser()async{
+    return repository.updateUser(user:user);
   }
 
   //UTILIZAR UPLOADIMAGE EN ESTE!!
@@ -190,10 +210,26 @@ abstract class _UserState with Store {
       (r) {
         users = r;
         filteredusers = users;
-        teachers =  users.where((element) => element.role =='teacher').toList();  
       }
     );
   }
+
+
+  Future sendClassRequest(User teacher) async {
+    user.sendMessage(teacher,'classrequest');
+    //SENDMESSAGE DEBERÍA DE SER !!!
+    Either<Failure,void> userlist = await repository.sendClassRequest(user,teacher);
+
+    userlist.fold(
+      (l) => _mapFailureToMessage(l), 
+      (r) {
+        
+      }
+    );
+
+  }
+
+
 
   //FROM LIST OF USER CODS WE GET THE USERS
   Future <List<User>> getUsersList(List<dynamic> cods)async{

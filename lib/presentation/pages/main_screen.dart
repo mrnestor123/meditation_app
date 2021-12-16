@@ -46,9 +46,10 @@ class _MainScreenState extends State<MainScreen> {
     _userstate = Provider.of<UserState>(context);
   
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      if(_userstate.user.version < _userstate.data.lastVersion.versionNumber){
-       // _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
+      // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
+      
+      if(_userstate.user.version < _userstate.data.lastVersion.versionNumber && false){
+        _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
 
        showDialog(
          context: context, 
@@ -119,7 +120,7 @@ class _MainScreenState extends State<MainScreen> {
     
       }
     });
-
+  
   }
 
 
@@ -139,10 +140,10 @@ class _MainScreenState extends State<MainScreen> {
         aspectRatio: Configuration.buttonRatio,
         child: Container(
           width: Configuration.width,
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-              backgroundColor: Colors.grey.withOpacity(0.6)
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2)),
+              primary: Colors.grey.withOpacity(0.6)
             ),
             onPressed: () { 
               Navigator.push(
@@ -161,6 +162,40 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
       SizedBox(height: Configuration.verticalspacing*2),
+      AspectRatio(
+        aspectRatio: Configuration.buttonRatio,
+        child: ElevatedButton(
+          onPressed:(){
+            Navigator.pushNamed(context, '/teachers');
+          },
+          child: Row(
+            mainAxisAlignment:MainAxisAlignment.spaceAround,
+            children: [
+              Text('Find a teacher', 
+                style:Configuration.text('small',Colors.white)
+              ),
+              Row(
+                children: [
+                  Icon(Icons.group,
+                    size: Configuration.smicon,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width:Configuration.verticalspacing/2),
+                  Icon(Icons.school,
+                    size:Configuration.smicon,
+                    color:Colors.white
+                  )
+                ],
+              )
+            ],
+          ),
+          style:ElevatedButton.styleFrom(
+            primary: Configuration.maincolor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2))
+          )
+        ),
+      ),
+      SizedBox(height:Configuration.verticalspacing*2),
       _Timeline(),
       SizedBox(height: Configuration.verticalspacing),
 

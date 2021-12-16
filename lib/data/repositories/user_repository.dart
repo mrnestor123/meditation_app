@@ -220,10 +220,42 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<Either<Failure, void>> updateNotification(Notify n) async {
-     try{
-      await remoteDataSource.updateNotification(n);
-    }catch(e){
-      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
-    }
+    if(await networkInfo.isConnected){
+      try{
+        await remoteDataSource.updateNotification(n);
+        }catch(e){
+        return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+      }
+    }else{
+      return Left(ServerFailure());
+    } 
+  }
+
+  @override
+  Future<Either<Failure, List<User>>> getTeachers() async{
+     if(await networkInfo.isConnected){
+        try{
+          final teachers = await remoteDataSource.getTeachers();
+          return Right(teachers);
+        }catch(e){
+          return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+        }
+      }else{
+        return Left(ServerFailure());
+      }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendClassRequest(User you, User to) async{
+     if(await networkInfo.isConnected){
+        try{
+          await remoteDataSource..sendMessage(you, to);
+          return Right(null);
+        }catch(e){
+          return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+        }
+      }else{
+        return Left(ServerFailure());
+      }
   }
 }

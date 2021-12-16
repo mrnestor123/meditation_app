@@ -5,12 +5,15 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/class_requests.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
+
+import 'commonWidget/start_button.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -26,9 +29,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User user;
   bool uploading;
   final ImagePicker _picker = ImagePicker();
-  var _userstate;
+  UserState _userstate;
 
-  bool isMe;
+  bool editingProfile = false;
+  bool isMe = false;
 
   void _showPicker(context) {
 
@@ -91,11 +95,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 
+  Widget textIcon(IconData icon, String text){
+    return Row(
+      children: [
+        Icon(icon,size: Configuration.smicon, color:Colors.black),
+        SizedBox(width:Configuration.verticalspacing),
+        Text(text, 
+          style:Configuration.text('small',Colors.black)
+        )
+      ],
+    );
+  }
+
   Widget identificationText(){
     List<Widget> widgets = new List.empty(growable:true);
 
     Widget stageText() {
-      Row(
+      return Row(
         children: [
           Icon(Icons.terrain, color: Colors.white),
           SizedBox(width: 5),
@@ -133,19 +149,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget  teacherProfile(){
-    return Column(
-      children: [
-        Text('HELLO QUE PASA')
-      ],
+
+  Widget teacherProfile(){
+    Widget teacherView(){
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          isMe ? 
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary:Colors.lightBlue
+                ),
+                onPressed: () {  
+                  setState(() {
+                    editingProfile =true;
+                  });
+                },
+                child: Text('Edit profile',style:Configuration.text('small',Colors.white)),
+              ),
+            ],
+          ) : Container(),
+
+          SizedBox(height:Configuration.verticalspacing*2),
+          Text(user.description != null ? user.description : 'The description goes here',
+            style:Configuration.text('small',Colors.black,font:'Helvetica')
+          ),
+          SizedBox(height:Configuration.verticalspacing*1.5),
+          textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com'),
+          SizedBox(height: Configuration.verticalspacing*1.5),
+          textIcon(Icons.place, user.location != null ?  user.location : 'Spain, Valencia'),
+          SizedBox(height: Configuration.verticalspacing*1.5),
+          textIcon(Icons.date_range, user.location != null ?  user.location : 'Available from 10 to 14 pm'),
+          SizedBox(height: Configuration.verticalspacing*1.5),
+          Text('You can also add videos', style:Configuration.text('small',Colors.black)),
+          Spacer(),
+          true ? 
+          BaseButton(
+            margin:true,
+            onPressed:(){
+              _userstate.sendClassRequest(user);
+            },
+            color:Configuration.maincolor,
+            text: 'Send a class request'
+          ) : Container(),
+          
+          SizedBox(height:Configuration.verticalspacing*2)
+      ]);
+    } 
+
+    Widget teacherEdit(){
+      Widget formElement(String text, value, onchange){  
+        TextEditingController controller = new TextEditingController.fromValue(
+          TextEditingValue(text:value != null ? value : '')
+        );
+
+        return Column(
+          mainAxisAlignment:MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(text, style:Configuration.text('small',Colors.black)),
+            TextField(
+              controller: controller,
+              onChanged:onchange 
+            )
+          ],
+        );
+      }
+
+
+      return Column(
+        children:[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                style:ElevatedButton.styleFrom(
+                  primary:Colors.lightBlue
+                ),
+                onPressed: (){
+                  _userstate.updateUser();
+                  setState(() {
+                    editingProfile = false;
+                  });
+                },
+                child:Text('Save', style:Configuration.text('small',Colors.white))
+              ),
+            ],
+          ),
+          formElement('Description', user.description, (text){
+            user.description = text;
+          }),
+          SizedBox(height:Configuration.verticalspacing*2),
+          formElement('Website', user.website, (text){
+            user.website = text;
+          }),
+          SizedBox(height:Configuration.verticalspacing*2),
+          formElement('Hours available', user.teachinghours, (text){
+            user.teachinghours = text;
+          }),
+          SizedBox(height:Configuration.verticalspacing*2),
+          formElement('Location', user.location , (text){
+            user.location = text;
+          })
+        ]
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+      child: !editingProfile ? teacherView() : teacherEdit()
     );
   }
 
   Widget userProfile(){
     return  ListView(
       primary: false,
-      padding: EdgeInsets.all(12.0),
+      physics: ClampingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
       children: <Widget>[
+        SizedBox(height: Configuration.verticalspacing*2),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -242,24 +368,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    user = widget.user !=null ? widget.user : _userstate.user;
+    user = widget.user != null ? widget.user : _userstate.user;
+    isMe =  user.coduser == _userstate.user.coduser;
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Configuration.maincolor,
           elevation: 0,
           leading: ButtonBack(color: Colors.white),
-          actions: [
-            widget.user != null ?
-            Container() :
-            IconButton(
-              padding: EdgeInsets.all(0.0),
-              onPressed: () => Navigator.pushNamed(context, '/settings'),
-              icon: Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: Configuration.smicon,
+          actions: 
+            isMe ? [
+              Stack(
+                children:[
+                  IconButton(
+                    icon:Icon(
+                      Icons.mail,
+                      color:Colors.white,
+                      size:Configuration.smicon
+                    ), 
+                    onPressed: () {  
+                      showClassRequests(context, user);
+                    }, 
+                  ),
+                  user.messages.length >  0 ?
+                  Positioned(
+                    top:0,
+                    right:0,
+                    child: Container(
+                      padding: EdgeInsets.all(Configuration.tinpadding/2),
+                      decoration:BoxDecoration(
+                        shape: BoxShape.circle,
+                        color:Colors.lightBlue
+                      ),
+                      child: Text(
+                        user.messages.length.toString(),style:Configuration.text('small',Colors.white),
+                      )
+                    )
+                  ) : Container()
+                ]
               ),
-            ),
+              IconButton(
+                padding: EdgeInsets.all(0.0),
+                onPressed: () => Navigator.pushNamed(context, '/settings'),
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.white,
+                  size: Configuration.smicon,
+                ),
+              ),
+            ]: 
+            [
+              Container()
           ],
       ),
       body: Stack(children: <Widget>[
@@ -279,15 +437,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   userImage: user.image,
                   color:Colors.transparent,
                   onTap:()=>{
-                    if(widget.user == null){
-                        _showPicker(context)
+                    if(isMe){
+                      _showPicker(context)
                     }
                   }
                 ),
-                Align(
-                  alignment:Alignment.center,
-                  child: Icon(Icons.album,size: Configuration.smicon, color:Colors.grey.withOpacity(0.8)),
-                ),
+                isMe ?
+                Positioned(
+                  right:0,
+                  top:0,
+                  child: GestureDetector(
+                    onTap: (){
+                      if(widget.user == null){
+                          _showPicker(context);
+                      }
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(Configuration.tinpadding),
+                      decoration:BoxDecoration(
+                        shape:BoxShape.circle,
+                        color:Colors.white
+                      ),
+                      child: Icon(Icons.edit_rounded,
+                      size: Configuration.tinicon, color:Colors.black
+                      ),
+                    ),
+                  ),
+                ) :Container(),
               ],
             ),
             SizedBox(height: Configuration.verticalspacing),
@@ -304,7 +480,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
                 ),
-                child: user.isTeacher() ? teacherProfile(): userProfile()
+                child: user.isTeacher() ? 
+                teacherProfile() 
+                : userProfile()
               ),
             ),
           ],

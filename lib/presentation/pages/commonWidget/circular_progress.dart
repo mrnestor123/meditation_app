@@ -15,8 +15,8 @@ class CircularProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height:Configuration.verticalspacing,
-      width: Configuration.verticalspacing,
+      height:Configuration.verticalspacing*2,
+      width: Configuration.verticalspacing*2,
       child: CircularProgressIndicator(
         color:  color != null ? color : Configuration.maincolor,
         strokeWidth: strokewidth != null ? strokewidth : Configuration.strokewidth,

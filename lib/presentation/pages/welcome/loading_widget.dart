@@ -101,6 +101,9 @@ class _LoadingState extends State<Loading> {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     await _user.getData();
     await _user.userisLogged();
+    _user.getTeachers();
+    _user.getUsers();
+
     finishedloading = true;
 
     if(_duration.inSeconds <= 0){

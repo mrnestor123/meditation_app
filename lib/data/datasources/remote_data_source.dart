@@ -7,12 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
-import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
@@ -64,6 +61,10 @@ abstract class UserRemoteDataSource {
   Future <User> getUser(String cod);
 
   Future<Request> getRequest(String cod);
+
+  Future <List<User>> getTeachers();
+
+  Future sendMessage(User you, User to);
 
 }
 
@@ -291,7 +292,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       var url = Uri.parse('$nodejs/action/${user.coduser}');
 
-      print(url);
 
       //esto se ejecutará antes que el clear ??
       //esto desde cuando se ejecuta ??
@@ -368,6 +368,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try{
       QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
       String docID = query.docs[0].id; 
+      // UPDATE REQUEST DEBERÍA DE  SER UNA TRANSACCIÓN !!!!!
       await database.collection("requests").doc(docID).update(r.toJson());
       if(n != null){
         await database.collection('notifications').add(n.toJson());
@@ -393,6 +394,20 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     await database.collection('requests').add(r.toJson());
   }
 
+
+  Future sendMessage(User u,  User to) async {
+    try {
+    QuerySnapshot teacherRef = await database.collection('users').where('coduser', isEqualTo: to.coduser).get();
+
+    DocumentReference teacherdoc = await database.collection('users').doc(teacherRef.docs[0].id);
+
+    teacherdoc.update({'messages': FieldValue.arrayUnion(to.messages.map((r)=>r.toJson()).toList())});
+    }catch(e){
+      throw ServerException();
+    }
+  }
+
+
   @override
   Future<Request> getRequest(String cod) async{
     try{
@@ -400,6 +415,23 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       http.Response response = await http.get(url);
       Request request =  new Request.fromJson(json.decode(response.body));
       return request;
+    }catch(e) {
+      throw ServerException();
+    }
+  }
+
+  @override
+  //PASAR ESTA FUNCION AL SERVIDOR
+  Future<List<User>> getTeachers() async{ 
+    try{
+        List<User> teachers = new List.empty(growable: true);
+        QuerySnapshot query = await database.collection('users').where('role', isEqualTo: 'teacher').get();
+
+        for(DocumentSnapshot doc in query.docs){
+          teachers.add(UserModel.fromJson(doc.data()));
+        }
+
+        return teachers;
     }catch(e) {
       throw ServerException();
     }

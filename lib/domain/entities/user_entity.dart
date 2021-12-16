@@ -1,4 +1,5 @@
 
+import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -14,8 +15,10 @@ import 'meditation_entity.dart';
 import 'action_entity.dart';
 
 //MIRAR DE REFACTORIZAR ESTA CLASE !!!!!
+// HAY QUE CREAR SUBCLASES,
+//   TEACHER , ADMIN , MEDITATOR , BASEUSER = usuario del que no sacamos ninguna información
 class User {
-  String coduser, nombre, role, image, timemeditated;
+  String coduser, nombre, role, image, timemeditated, description, location, website, teachinghours;
   //USUARIO DE FIREBASE
   var user;
   int stagenumber, position, meditposition, gameposition, percentage, version;
@@ -25,13 +28,12 @@ class User {
 
   //para el modal de progreso
   Progress progress;
-
   UserSettings settings;
-  
-
-
   //estadísticas
   UserStats userStats;
+
+
+  List<Message> messages = new List.empty(growable:true);
 
   //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
@@ -58,7 +60,9 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions,this.gameposition = 0, this.settings,  this.version}) {
+        this.answeredquestions,this.gameposition = 0, this.settings, this.version, 
+        this.website,this.teachinghours,this.location,this.description
+        }) {
    
     if(userStats != null){
       var time = this.userStats.total.timemeditated;
@@ -196,6 +200,10 @@ class User {
     }
   }
 
+
+  void sendMessage(User to, String type){
+    to.messages.add(Message(coduser: this.coduser,date: DateTime.now(),username: nombre, type: type));
+  }
   
   void follow(User u) {
     u.followed = true;

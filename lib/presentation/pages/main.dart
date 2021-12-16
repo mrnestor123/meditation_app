@@ -13,6 +13,7 @@ import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
+import 'package:meditation_app/presentation/pages/teachers_screen.dart';
 import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
@@ -20,7 +21,6 @@ import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
 
 import '../../login_injection_container.dart';
 import 'game_screen.dart';
@@ -61,11 +61,12 @@ void main() async {
       String buildNumber = packageInfo.buildNumber;
 
       print({appName,packageName,version,buildNumber});
-
   });
 
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp,DeviceOrientation.portraitDown]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom]);
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   await di.init();
   runApp(MyApp());
@@ -83,27 +84,28 @@ class MyApp extends StatelessWidget {
           //METER  GAME DENTRO DE GAME NO EN EL GLOBAL
           Provider<GameState>(create: (context) => sl<GameState>()),
           Provider<LoginState>(create: (context) => sl<LoginState>()),
-          //METER REQUEST SOLO EN LA DE REQUESTS 
+          //METER REQUEST SOLO EN LA DE REQUESTS
           Provider<RequestState>(create: (context) => sl<RequestState>())
         ],
         child: MaterialApp(
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
-            routes: <String, WidgetBuilder> {
+            routes: <String, WidgetBuilder>{
               '/welcome': (BuildContext context) => WelcomeWidget(),
               '/loading': (BuildContext context) => Loading(),
               '/login': (BuildContext context) => LoginWidget(),
               '/register': (BuildContext context) => RegisterWidget(),
               '/profile': (BuildContext context) => ProfileScreen(),
               '/imagepath': (BuildContext context) => ImagePath(),
-              '/countdown' : (BuildContext context) => Countdown(),
-              '/setdata':(BuildContext context) => SetUserData(),
+              '/countdown': (BuildContext context) => Countdown(),
+              '/setdata': (BuildContext context) => SetUserData(),
               '/leaderboard': (BuildContext context) => LeaderBoard(),
               '/main': (BuildContext context) => Layout(),
               '/requests': (BuildContext context) => Requests(),
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),
-              '/gamestarted': (BuildContext context) => GameStarted()
+              '/gamestarted': (BuildContext context) => GameStarted(),
+              '/teachers': (BuildContext context) => TeachersScreen()
             }));
   }
 }
