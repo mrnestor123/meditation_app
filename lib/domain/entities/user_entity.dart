@@ -32,7 +32,8 @@ class User {
   //estadísticas
   UserStats userStats;
 
-
+  List<User> students = new List.empty(growable: true);
+  List<Content> addedcontent =  new List.empty(growable:true);
   List<Message> messages = new List.empty(growable:true);
 
   //passed objectives también deberia estar en stats
@@ -201,8 +202,21 @@ class User {
   }
 
 
-  void sendMessage(User to, String type){
-    to.messages.add(Message(coduser: this.coduser,date: DateTime.now(),username: nombre, type: type));
+  void sendMessage(User to, String type,[String msg]){
+    var msgtypes= {
+      'classrequest': nombre +  ' has requested to join your program', 
+      'txt': msg,
+    };
+
+    to.messages.add(
+      Message(
+        coduser: this.coduser,
+        date: DateTime.now(),
+        username: nombre, 
+        text: msgtypes[type],
+        type: type
+      )
+    );
   }
   
   void follow(User u) {
@@ -311,6 +325,13 @@ class User {
     }
   }
 
+
+  void changeRequest(Message m, confirm, [User u]){
+    this.messages.removeWhere((element) => element.coduser == m.coduser);
+    if(confirm){
+      this.students.add(u);
+    }
+  }
 
   void takeLesson(Lesson l, [DataBase d]) {
     if(l.stagenumber ==this.stagenumber){

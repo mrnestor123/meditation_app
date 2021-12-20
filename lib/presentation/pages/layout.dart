@@ -11,6 +11,7 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
+import 'package:meditation_app/presentation/pages/teachers_screen.dart';
 
 import 'package:provider/provider.dart';
 
@@ -107,6 +108,31 @@ class _MobileLayoutState extends State<MobileLayout> {
       );
     }
 
+
+    List<BottomNavigationBarItem> bottomItems(){
+
+      return [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home,size: Configuration.smicon),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.book,size: Configuration.smicon),
+          label: 'Learn',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.self_improvement,size: Configuration.smicon),
+          label:'Practice'
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.terrain,size: Configuration.smicon),
+          label: 'Path',
+        )
+      ];
+
+    }
+
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -197,24 +223,14 @@ class _MobileLayoutState extends State<MobileLayout> {
         unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
         unselectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
-        items: [
+        items: 
+        _userstate.user.isTeacher() ? 
+          bottomItems() + [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home,size: Configuration.smicon),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book,size: Configuration.smicon),
-            label: 'Learn',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.self_improvement,size: Configuration.smicon),
-            label:'Practice'
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.terrain,size: Configuration.smicon),
-            label: 'Path',
-          )
-        ],
+            icon: Icon(Icons.school,size: Configuration.smicon),
+            label: 'Teacher',
+          )] : bottomItems()
+        ,
         currentIndex: currentindex,
         selectedItemColor: Configuration.maincolor,
         onTap: (int index) {
@@ -254,7 +270,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                 currentindex = newPage;
               });
             },
-            children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen()],
+            children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen(), TeachersManagement()],
           ),
         ),
       ),

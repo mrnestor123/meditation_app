@@ -39,7 +39,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> updateNotification(Notify n);
 
-  Future<Either<Failure,void>> sendClassRequest(User you, User teacher);
+  Future<Either<Failure,void>> sendMessage(User you, User teacher);
 
 
 

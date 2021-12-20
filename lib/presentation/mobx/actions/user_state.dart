@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -164,8 +165,8 @@ abstract class _UserState with Store {
   }
 
   @action 
-  Future updateUser()async{
-    return repository.updateUser(user:user);
+  Future updateUser({User u})async{
+    return repository.updateUser(user: u != null ? u : user);
   }
 
   //UTILIZAR UPLOADIMAGE EN ESTE!!
@@ -215,10 +216,10 @@ abstract class _UserState with Store {
   }
 
 
-  Future sendClassRequest(User teacher) async {
-    user.sendMessage(teacher,'classrequest');
+  Future sendMessage(User teacher, String type, [String text]) async {
+    user.sendMessage(teacher,type, text);
     //SENDMESSAGE DEBERÍA DE SER !!!
-    Either<Failure,void> userlist = await repository.sendClassRequest(user,teacher);
+    Either<Failure,void> userlist = await repository.sendMessage(user,teacher);
 
     userlist.fold(
       (l) => _mapFailureToMessage(l), 
@@ -226,6 +227,19 @@ abstract class _UserState with Store {
         
       }
     );
+
+  }
+
+
+  Future changeRequest(Message m, bool confirm){
+    user.changeRequest(m,confirm);
+    var messages ={
+      'accept': 'Has accepted your request to join his courses',
+      'deny': 'Has denied your request to join his courses'
+    };
+    //user.sendMessage(to, 'text', confirm ? messages['accept']: messages['deny']);
+
+    repository.updateUser(user: user);
 
   }
 

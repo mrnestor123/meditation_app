@@ -5,13 +5,14 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/class_requests.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import 'commonWidget/start_button.dart';
 
@@ -95,15 +96,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
 
-  Widget textIcon(IconData icon, String text){
-    return Row(
-      children: [
-        Icon(icon,size: Configuration.smicon, color:Colors.black),
-        SizedBox(width:Configuration.verticalspacing),
-        Text(text, 
-          style:Configuration.text('small',Colors.black)
-        )
-      ],
+  Widget textIcon(IconData icon, String text, [onclick]){
+    return GestureDetector(
+      onTap: (){
+        if(onclick != null){
+          onclick();
+        }
+      },
+      child: Row(
+        children: [
+          Icon(icon,size: Configuration.smicon, color:Colors.black),
+          SizedBox(width:Configuration.verticalspacing),
+          Text(text, 
+            style:Configuration.text('small',Colors.black)
+          ),
+          onclick !=null ? 
+          Container(
+            margin:EdgeInsets.only(left:Configuration.verticalspacing),
+            child: ElevatedButton(
+              onPressed: onclick, 
+              style:ElevatedButton.styleFrom(
+                primary: Colors.lightBlue,
+              ),
+              child:Text('View website',style:Configuration.text('small',Colors.white))
+            ),
+          ) : Container()
+        ],
+      ),
     );
   }
 
@@ -149,7 +168,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   Widget teacherProfile(){
     Widget teacherView(){
       return Column(
@@ -173,29 +191,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ) : Container(),
-
           SizedBox(height:Configuration.verticalspacing*2),
           Text(user.description != null ? user.description : 'The description goes here',
-            style:Configuration.text('small',Colors.black,font:'Helvetica')
+            style:Configuration.text('small',Colors.black, font:'Helvetica')
           ),
+          SizedBox(height: Configuration.verticalspacing*1.5),
+          textIcon(Icons.group, user.students.length.toString() + ' students'),
           SizedBox(height:Configuration.verticalspacing*1.5),
-          textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com'),
+          textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
+          (){
+             Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context)=> Scaffold(
+                    appBar: AppBar(
+                      leading: ButtonBack(),
+                      backgroundColor:Colors.white,
+                      elevation: 0,
+                    ),
+                    body: WebView(
+                      initialUrl:'https:' + _userstate.user.website,
+                      javascriptMode: JavascriptMode.unrestricted),
+                  )
+                  )
+              );
+          }),
           SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.place, user.location != null ?  user.location : 'Spain, Valencia'),
+          textIcon(Icons.place, user.location != null ?  user.location : 'Add a location'),
           SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.date_range, user.location != null ?  user.location : 'Available from 10 to 14 pm'),
+          textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
           SizedBox(height: Configuration.verticalspacing*1.5),
-          Text('You can also add videos', style:Configuration.text('small',Colors.black)),
           Spacer(),
-          true ? 
+          //!isMe && user.messages.where((element) => element.coduser == _userstate.user.coduser).length == 0 ? 
           BaseButton(
             margin:true,
             onPressed:(){
-              _userstate.sendClassRequest(user);
+              _userstate.sendMessage(user,'classrequest');
+              setState(() {
+                
+              });
             },
             color:Configuration.maincolor,
             text: 'Send a class request'
-          ) : Container(),
+          ),// : Container(),
           
           SizedBox(height:Configuration.verticalspacing*2)
       ]);
@@ -220,7 +258,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
 
-
       return Column(
         children:[
           Row(
@@ -240,20 +277,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-          formElement('Description', user.description, (text){
+          formElement('Description', _userstate.user.description, (text){
             user.description = text;
+            _userstate.user.description = text;
           }),
           SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Website', user.website, (text){
+          formElement('Website',  _userstate.user.website, (text){
             user.website = text;
+            _userstate.user.website = text;
           }),
           SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Hours available', user.teachinghours, (text){
+          formElement('Hours available', _userstate.user.teachinghours, (text){
             user.teachinghours = text;
+            _userstate.user.teachinghours = text;
           }),
           SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Location', user.location , (text){
+          formElement('Location',  _userstate.user.location , (text){
             user.location = text;
+            _userstate.user.location = text;
           })
         ]
       );
@@ -370,6 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userstate = Provider.of<UserState>(context);
     user = widget.user != null ? widget.user : _userstate.user;
     isMe =  user.coduser == _userstate.user.coduser;
+
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Configuration.maincolor,
@@ -386,7 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       size:Configuration.smicon
                     ), 
                     onPressed: () {  
-                      showClassRequests(context, user);
+                      showMessages(context, _userstate);
                     }, 
                   ),
                   user.messages.length >  0 ?
@@ -448,8 +490,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   top:0,
                   child: GestureDetector(
                     onTap: (){
-                      if(widget.user == null){
-                          _showPicker(context);
+                      if(isMe){
+                        _showPicker(context);
                       }
                     },
                     child: Container(
@@ -608,22 +650,34 @@ class _ViewFollowersState extends State<ViewFollowers> {
   }
 }
 
-//BORRAR ESTO!!!
-class ViewData extends StatefulWidget {
-  const ViewData({ Key key }) : super(key: key);
+
+
+class Students extends StatefulWidget {
+  const Students() : super();
 
   @override
-  _ViewDataState createState() => _ViewDataState();
+  _StudentsState createState() => _StudentsState();
 }
 
-class _ViewDataState extends State<ViewData> {
+class _StudentsState extends State<Students> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
+    return Scaffold(
+
+
+      body: Container(
+        
+      ),
     );
   }
 }
+
+
+
+
+
+
+
 /*
 class MyInfo extends StatefulWidget {
   bool isTablet;

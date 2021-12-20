@@ -46,7 +46,6 @@ class _TeachersScreenState extends State<TeachersScreen> {
           IconButton(
             iconSize: Configuration.smicon,
             onPressed: (){
-              
               showDialog(context: context, builder: (context){
                 return AbstractDialog(
                   content: Container(
@@ -106,6 +105,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
                           }));
                         },
                         style: TextButton.styleFrom(
+                          padding: EdgeInsets.all(0)
                         ),
                         child: ListTile(
                           subtitle: Text('subtitle', 
@@ -136,6 +136,92 @@ class _TeachersScreenState extends State<TeachersScreen> {
               ),
             ),
           )
+        ],
+      ),
+    );
+  }
+}
+
+
+
+class TeachersManagement extends StatefulWidget {
+  const TeachersManagement() : super();
+
+  @override
+  _TeachersManagementState createState() => _TeachersManagementState();
+}
+
+class _TeachersManagementState extends State<TeachersManagement> {
+  UserState _userstate;
+  TabController _tabController;
+
+
+  Widget students(){
+    if(_userstate.user.students.length >0){
+      return Container();
+    }else{
+      return Center(
+        child: Text("You don't have any students at the moment",
+          style:Configuration.text('small',Colors.black)
+        )
+      );
+    }
+  } 
+
+  Widget content(){
+    if(_userstate.user.students.length >0){
+      return Container();
+    }else{
+      return Center(
+        child: Text("You have not added any content",
+          style:Configuration.text('small',Colors.black)
+        )
+      );
+    }
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          SizedBox(height: Configuration.verticalspacing),
+          Text('Teachers management', style:Configuration.text('medium',Colors.black)),
+          SizedBox(height:Configuration.verticalspacing),
+          Text('Here you can see how many students you have, send a message to them, manage the content and so on.', 
+            style:Configuration.text('small',Colors.black)
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+          Container(
+            color: Colors.grey,
+            width: Configuration.width,
+            child: TabBar(
+              controller: _tabController,
+              indicatorWeight: Configuration.width > 500 ? 5 : 2.5 ,
+              indicatorColor: Colors.white,
+              tabs: [
+                Tab(child: Text('Students',style: Configuration.text('small', Colors.black))),
+                Tab(child: Text('Content', style:Configuration.text('small', Colors.black))),
+              ]
+            ),
+          ),
+          Expanded(child:
+          Container(
+            padding:EdgeInsets.all(Configuration.tinpadding),
+            color: Colors.white,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                students(),content()
+              ]),
+            )
+          ),
+          SizedBox(height:Configuration.verticalspacing)
+          
         ],
       ),
     );

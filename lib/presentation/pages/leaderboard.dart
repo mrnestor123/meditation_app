@@ -151,7 +151,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
         title: Text('Leaderboard', style: Configuration.text('big', Colors.white)),
       ),
       body: DefaultTabController(
-        length: 3,
+        length: 2,
+        initialIndex: 0,
         child: Container(
           height: Configuration.height,
           width: Configuration.width,
@@ -209,9 +210,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           tabs: [
                             Tab(
                                 child: Text('All users',style: Configuration.text('small', Colors.black))),
-                            Tab(
-                              child:Text('Teachers', style:Configuration.text('small', Colors.black))
-                            ),
+                           
                             Tab(
                               child: Text('Following', style:Configuration.text('small', Colors.black)),
                             ),
@@ -250,7 +249,6 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         controller: _tabController,
                         children: [
                           createTable(_userstate.filteredusers, context,false),
-                          createTable(_userstate.teachers, context, false),
                           createTable(_userstate.dynamicusers, context, true),
                         ])
                       );

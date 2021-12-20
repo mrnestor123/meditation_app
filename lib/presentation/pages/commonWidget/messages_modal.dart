@@ -2,20 +2,34 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
-void showClassRequests(context,User user){
-  var messages ={
-    'classrequest': '',
-  };
+void showMessages(context,UserState state){
+  
+
+  User user =  state.user;
+
+  // HACER DIFERENTES MENSAJES !!!
+  Widget message(Message m){
 
 
-  Widget message(Message r){
+
+
+
     return ListTile(
       contentPadding: EdgeInsets.all(Configuration.tinpadding),
-      title: Text(r.username + ' has requested a class',style: Configuration.text('small',Colors.black)),
-      subtitle: Text(r.date.toString(),style: Configuration.text('small',Colors.grey)),
+      title: Text(m.text,style: Configuration.text('small',Colors.black)),
+      subtitle: Text(m.date.toString(),style: Configuration.text('small',Colors.grey)),
+      trailing:m.type == 'classrequest' ?
+       Row(
+        mainAxisSize:MainAxisSize.min,
+        children: [
+          IconButton(onPressed: ()=> {state.changeRequest(m, true)},color: Colors.green, icon: Icon(Icons.check_circle_outline),iconSize: Configuration.smicon),
+          IconButton(onPressed: ()=> {state.changeRequest(m, false)},color: Colors.red, icon: Icon(Icons.highlight_off),iconSize: Configuration.smicon)        
+        ],
+      ): Container(), 
     );
   }
 
@@ -34,13 +48,13 @@ void showClassRequests(context,User user){
             children: [
               Container(
                 width: Configuration.width,
-                padding: EdgeInsets.all(Configuration.tinpadding),
+                padding: EdgeInsets.all(Configuration.smpadding),
                 decoration: BoxDecoration(
                   color:Configuration.maincolor,
                   borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius))
                 ),
                 child: Center(
-                  child: Text('Class Requests', 
+                  child: Text('Messages', 
                     style:Configuration.text('smallmedium',Colors.white)
                   ),
                 )
@@ -49,6 +63,7 @@ void showClassRequests(context,User user){
                 child:
                 user.messages.length > 0 ?
                   ListView.separated(
+                    physics: ClampingScrollPhysics(),
                     itemBuilder: (context,i){
                       return message(user.messages[i]);
                     }, 
@@ -60,7 +75,7 @@ void showClassRequests(context,User user){
                  Center(
                     child: Padding(
                       padding:  EdgeInsets.all(Configuration.smpadding),
-                      child: Text('There are no class requests at the moment', style:Configuration.text('small',Colors.black)),
+                      child: Text('There are no messages at the moment', style:Configuration.text('small',Colors.black)),
                     )
                   )
                 
@@ -70,6 +85,5 @@ void showClassRequests(context,User user){
         ),
       );
     });
-
 
 }

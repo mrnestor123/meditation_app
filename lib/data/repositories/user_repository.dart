@@ -246,10 +246,10 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, void>> sendClassRequest(User you, User to) async{
+  Future<Either<Failure, void>> sendMessage(User you, User to) async{
      if(await networkInfo.isConnected){
         try{
-          await remoteDataSource..sendMessage(you, to);
+          await remoteDataSource.sendMessage(you, to);
           return Right(null);
         }catch(e){
           return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
