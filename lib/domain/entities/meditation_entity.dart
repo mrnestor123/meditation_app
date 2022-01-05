@@ -47,6 +47,7 @@ class Meditation extends Content {
 }
 
 
+// HAY QUE HACER ESTO !!!!!!!
 class GuidedMeditation extends Meditation{
   
 

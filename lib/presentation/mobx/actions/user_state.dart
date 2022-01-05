@@ -1,6 +1,9 @@
 import 'package:dartz/dartz.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -172,7 +175,7 @@ abstract class _UserState with Store {
   //UTILIZAR UPLOADIMAGE EN ESTE!!
   @action 
   Future changeImage(dynamic image) async {
-    Either<Failure,String> imageupload = await repository.updateImage(image, user);
+    Either<Failure,String> imageupload = await repository.uploadFile(image:image, u: user);
     //PASAR TODOS LOS  FOLD AL FINAL !!!
     imageupload.fold((l) => errorMessage = 'error al subir imagen', (r) => user.image = r);
 
@@ -180,8 +183,9 @@ abstract class _UserState with Store {
   }
 
   @action 
-  Future<String> uploadImage(dynamic image) async{
-    Either<Failure,String> imageupload = await repository.updateImage(image,user);
+  Future<String> uploadFile({dynamic image, FilePickerResult audio, XFile video}) async{
+
+    Either<Failure,String> imageupload = await repository.uploadFile(image:image,audio:audio,video: video, u:user);
    
     //PASAR TODOS LOS FOLD AL FINAL !!!
     String imgstring;
@@ -216,31 +220,59 @@ abstract class _UserState with Store {
   }
 
 
-  Future sendMessage(User teacher, String type, [String text]) async {
-    user.sendMessage(teacher,type, text);
-    //SENDMESSAGE DEBERÍA DE SER !!!
-    Either<Failure,void> userlist = await repository.sendMessage(user,teacher);
-
-    userlist.fold(
+  Future sendMessage(User to, String type, [String text]) async {
+      Message m = user.sendMessage(to,type, text);
+      Either<Failure,void> userlist = await repository.sendMessage(sender:user,receiver:to,message: m);
+      
+      userlist.fold(
       (l) => _mapFailureToMessage(l), 
       (r) {
-        
+  
       }
     );
-
   }
 
 
-  Future changeRequest(Message m, bool confirm){
+  void changeRequest(Message m, bool confirm){
     user.changeRequest(m,confirm);
     var messages ={
       'accept': 'Has accepted your request to join his courses',
       'deny': 'Has denied your request to join his courses'
     };
     //user.sendMessage(to, 'text', confirm ? messages['accept']: messages['deny']);
-
+    // ESTO NO DEBERÍA SER ASI !!!!!
+    repository.updateUser(user: m.user);
     repository.updateUser(user: user);
 
+  }
+
+  Future deleteMessage(Message m){
+    user.messages.remove(m);
+
+  }
+
+
+
+  Future uploadContent({Content c, FilePickerResult audio, XFile video}) async{
+    user.uploadContent(c);
+    
+    Either <Failure,String> upload = await repository.uploadFile(audio:audio, video:video, u: user);
+
+    upload.fold(
+      (l) => errorMessage = 'error al subir imagen', 
+      (r) => {
+        print('imagen subida perfectamente')
+      });
+  }
+
+
+
+  void seeMessages(){
+    if(user.messages.where((element) => !element.read).length>0){
+      for(Message m in user.messages){
+        m.read = true;
+      }
+    }
   }
 
 
@@ -251,7 +283,7 @@ abstract class _UserState with Store {
     List<User> l = new List.empty(growable: true);
 
     for(var cod in cods){
-      Either<Failure,User>u  = await repository.getUser(cod);
+      Either<Failure,User> u  = await repository.getUser(cod);
       u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
     }
 

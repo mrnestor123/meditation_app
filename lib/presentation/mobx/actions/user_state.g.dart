@@ -144,6 +144,21 @@ mixin _$UserState on _UserState, Store {
     });
   }
 
+  final _$teachersAtom = Atom(name: '_UserState.teachers');
+
+  @override
+  List<User> get teachers {
+    _$teachersAtom.reportRead();
+    return super.teachers;
+  }
+
+  @override
+  set teachers(List<User> value) {
+    _$teachersAtom.reportWrite(value, super.teachers, () {
+      super.teachers = value;
+    });
+  }
+
   final _$lessondataAtom = Atom(name: '_UserState.lessondata');
 
   @override
@@ -157,6 +172,13 @@ mixin _$UserState on _UserState, Store {
     _$lessondataAtom.reportWrite(value, super.lessondata, () {
       super.lessondata = value;
     });
+  }
+
+  final _$getTeachersAsyncAction = AsyncAction('_UserState.getTeachers');
+
+  @override
+  Future<dynamic> getTeachers() {
+    return _$getTeachersAsyncAction.run(() => super.getTeachers());
   }
 
   final _$userisLoggedAsyncAction = AsyncAction('_UserState.userisLogged');
@@ -194,6 +216,13 @@ mixin _$UserState on _UserState, Store {
     return _$changeNameAsyncAction.run(() => super.changeName(username));
   }
 
+  final _$updateUserAsyncAction = AsyncAction('_UserState.updateUser');
+
+  @override
+  Future<dynamic> updateUser({User u}) {
+    return _$updateUserAsyncAction.run(() => super.updateUser(u: u));
+  }
+
   final _$changeImageAsyncAction = AsyncAction('_UserState.changeImage');
 
   @override
@@ -201,11 +230,13 @@ mixin _$UserState on _UserState, Store {
     return _$changeImageAsyncAction.run(() => super.changeImage(image));
   }
 
-  final _$uploadImageAsyncAction = AsyncAction('_UserState.uploadImage');
+  final _$uploadFileAsyncAction = AsyncAction('_UserState.uploadFile');
 
   @override
-  Future<String> uploadImage(dynamic image) {
-    return _$uploadImageAsyncAction.run(() => super.uploadImage(image));
+  Future<String> uploadFile(
+      {dynamic image, FilePickerResult audio, XFile video}) {
+    return _$uploadFileAsyncAction
+        .run(() => super.uploadFile(image: image, audio: audio, video: video));
   }
 
   final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');
@@ -240,6 +271,7 @@ users: ${users},
 filteredusers: ${filteredusers},
 loading: ${loading},
 dynamicusers: ${dynamicusers},
+teachers: ${teachers},
 lessondata: ${lessondata}
     ''';
   }

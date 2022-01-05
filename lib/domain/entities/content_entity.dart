@@ -5,8 +5,9 @@ class Content {
   String cod, title, description, image, type;
   int stagenumber, position;
   bool blocked;
+  String audio, video; 
 
-  Content({cod, @required this.stagenumber, this.title, this.description, this.image, this.type, this.position, this.blocked}) {
+  Content({cod, @required this.stagenumber, this.title, this.description, this.image, this.type, this.position, this.blocked, this.audio, this.video}) {
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();

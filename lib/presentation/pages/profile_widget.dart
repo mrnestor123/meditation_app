@@ -110,7 +110,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(text, 
             style:Configuration.text('small',Colors.black)
           ),
-          onclick !=null ? 
+          
+          /*onclick !=null ? 
           Container(
             margin:EdgeInsets.only(left:Configuration.verticalspacing),
             child: ElevatedButton(
@@ -120,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child:Text('View website',style:Configuration.text('small',Colors.white))
             ),
-          ) : Container()
+          ) : Container()*/
         ],
       ),
     );
@@ -196,7 +197,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style:Configuration.text('small',Colors.black, font:'Helvetica')
           ),
           SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.group, user.students.length.toString() + ' students'),
+          textIcon(Icons.group, user.students.length.toString() + ' students', (){
+            Navigator.push(
+                context,
+                  MaterialPageRoute(
+                      builder: (context) => ViewFollowers(
+                      users: user.students,
+                      title: 'Students'
+                  )
+              ),
+            );
+          }),
           SizedBox(height:Configuration.verticalspacing*1.5),
           textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
           (){
@@ -205,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(
                   builder: (context)=> Scaffold(
                     appBar: AppBar(
-                      leading: ButtonBack(),
+                      leading: ButtonClose(),
                       backgroundColor:Colors.white,
                       elevation: 0,
                     ),
@@ -227,9 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             margin:true,
             onPressed:(){
               _userstate.sendMessage(user,'classrequest');
-              setState(() {
-                
-              });
+              setState(() {});
             },
             color:Configuration.maincolor,
             text: 'Send a class request'
@@ -419,35 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           leading: ButtonBack(color: Colors.white),
           actions: 
             isMe ? [
-              Stack(
-                children:[
-                  IconButton(
-                    icon:Icon(
-                      Icons.mail,
-                      color:Colors.white,
-                      size:Configuration.smicon
-                    ), 
-                    onPressed: () {  
-                      showMessages(context, _userstate);
-                    }, 
-                  ),
-                  user.messages.length >  0 ?
-                  Positioned(
-                    top:0,
-                    right:0,
-                    child: Container(
-                      padding: EdgeInsets.all(Configuration.tinpadding/2),
-                      decoration:BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:Colors.lightBlue
-                      ),
-                      child: Text(
-                        user.messages.length.toString(),style:Configuration.text('small',Colors.white),
-                      )
-                    )
-                  ) : Container()
-                ]
-              ),
+              MessagesIcon(color: Colors.white),
               IconButton(
                 padding: EdgeInsets.all(0.0),
                 onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -540,7 +521,9 @@ class ViewFollowers extends StatefulWidget {
   final List<dynamic> cods;
   final String title;
 
-  ViewFollowers({this.cods, this.title});
+  final List<User> users;
+
+  ViewFollowers({this.cods, this.title,this.users});
 
   @override
   State<ViewFollowers> createState() => _ViewFollowersState();
@@ -558,7 +541,12 @@ class _ViewFollowersState extends State<ViewFollowers> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     final _userstate = Provider.of<UserState>(context);
-    users = await _userstate.getUsersList(widget.cods);  
+
+    if(widget.cods != null){
+      users = await _userstate.getUsersList(widget.cods);  
+    }else{
+      users = widget.users;
+    }
   }
 
   @override
@@ -569,7 +557,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(onPressed: ()=> Navigator.pop(context), icon: Icon(Icons.arrow_back), color: Colors.black),
+        leading: ButtonBack(color: Colors.black),
         title: Text(widget.title, style: Configuration.text('small', Colors.black)),
       ),
       body: Container(
@@ -598,7 +586,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
                       1: FractionColumnWidth(0.5),
                       2: FractionColumnWidth(0.3)
                     },
-                    children: _userstate.dynamicusers.map((u) {
+                    children: users.map((u) {
                       return TableRow(
                         children: [
                           ProfileCircle(

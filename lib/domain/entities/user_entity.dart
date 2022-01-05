@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
@@ -48,6 +50,8 @@ class User {
   List<dynamic> following = new List.empty(growable: true);
   List<dynamic> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
+
+  List<File> files = new List.empty(growable:true);
 
   //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
   final ObservableList<Meditation> totalMeditations = new ObservableList();
@@ -202,22 +206,27 @@ class User {
   }
 
 
-  void sendMessage(User to, String type,[String msg]){
+  void uploadContent(Content c){
+    this.addedcontent.add(c);
+  }
+
+  Message sendMessage(User to, String type,[String msg]){
     var msgtypes= {
-      'classrequest': nombre +  ' has requested to join your program', 
-      'txt': msg,
+      'classrequest': nombre +  ' wants to be your student', 
+      'text': msg,
+      'broadcast':msg
     };
 
-    to.messages.add(
-      Message(
-        coduser: this.coduser,
-        date: DateTime.now(),
-        username: nombre, 
-        text: msgtypes[type],
-        type: type
-      )
+    return Message(
+      sender: this.coduser,
+      receiver: to == null ? this.students : to.coduser,
+      date: DateTime.now(),
+      username: nombre, 
+      text: msgtypes[type],
+      type: type,
     );
   }
+
   
   void follow(User u) {
     u.followed = true;
@@ -325,11 +334,23 @@ class User {
     }
   }
 
+// EL NOMBRE NO ES DESCRIPTIVO !!! NO SE QUE ES
+  void changeRequest(Message m, confirm){
+    this.messages.removeWhere((element) => element.sender == m.sender);
 
-  void changeRequest(Message m, confirm, [User u]){
-    this.messages.removeWhere((element) => element.coduser == m.coduser);
+    Message reply = new Message(
+      sender: this.coduser,
+      date:DateTime.now(),
+      type:'classrequest',
+    );
+
     if(confirm){
-      this.students.add(u);
+      this.students.add(m.user);
+      reply.text = 'Your class request has been accepted';
+      m.user.messages.add(reply);
+    }else{
+      reply.text = 'Your class request has been denied';
+      m.user.messages.add(reply);
     }
   }
 

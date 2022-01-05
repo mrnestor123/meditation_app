@@ -7,6 +7,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/user/change_data.dart';
 
+/*
 class UpdateImageUseCase extends UseCase<User, UParams> {
   UserRepository repository;
 
@@ -22,4 +23,4 @@ class UpdateImageUseCase extends UseCase<User, UParams> {
 
     return repository.updateUser(user: params.user);
   }
-}
+}*/

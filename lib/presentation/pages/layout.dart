@@ -6,6 +6,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
@@ -73,7 +74,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     DateTime currentBackPressTime;
 
     SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp
+      DeviceOrientation.portraitUp
     ]);
     
     _userstate = Provider.of<UserState>(context);
@@ -180,15 +181,14 @@ class _MobileLayoutState extends State<MobileLayout> {
         ),
         automaticallyImplyLeading: false,
         actions: [
+          MessagesIcon(),
           Stack(
+            alignment:Alignment.center,
             children: [
-              Align(
-                alignment: Alignment.center,
-                child: IconButton(
-                  color: Colors.black,
-                  icon: Icon(Icons.bug_report,  size: Configuration.smicon),
-                  onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
-                ),
+              IconButton(
+                color: Colors.black,
+                icon: Icon(Icons.bug_report,  size: Configuration.smicon),
+                onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
               ),
               _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
               Positioned(

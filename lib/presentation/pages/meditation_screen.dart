@@ -10,6 +10,7 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:provider/provider.dart';
 
@@ -872,53 +873,26 @@ class _CountdownState extends State<Countdown> {
   dynamic exit(context,{nopop = false}){
     bool pop = false;
     if(_meditationstate.state == 'started'){
-        _meditationstate.pause();
+      _meditationstate.pause();
     }
     if(_meditationstate.state != 'finished'){
-      showDialog(
-        context: context, 
-        builder:(context) {
-            return AlertDialog(
-              content: Text("Are you sure you want to exit?. This meditation won't count", 
-                style: Configuration.text('small', Colors.black)
-              ),
-              actions: [
-                TextButton(
-                  child: Text('Yes',style: Configuration.text('small', Colors.black)),
-                  onPressed: () {
-                    _meditationstate.cancel();
-                    if(!nopop){
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    }else{
-                      return true;
-                    }
-                  },
-                ),
-                TextButton(
-                  child: Text('No',style: Configuration.text('small', Colors.black)),
-                  onPressed: () {
-                    if(_meditationstate.state == 'started'){
-                      _meditationstate.startTimer();
-                    }
-                    if(!nopop){
-                      Navigator.pop(context);
-                    }else{
-                      return false;
-                    }
-                  },
-                )
-              ],
-            );
+      showAlertDialog(
+        context:context,
+        title: 'Are you sure you want to exit?',
+        text:'This meditation will not count',
+        onYes:(){
+          _meditationstate.cancel();
+          pop = true;
+        },
+        onNo:(){
+          if(_meditationstate.state == 'started'){
+            _meditationstate.startTimer();
+            pop = false;
           }
+        }
       );
-    }else{
-      if(!nopop){
-        Navigator.pop(context);
-      }else{
-        return true;
-      }    
     }
+
     return pop;
   }
 
@@ -926,7 +900,7 @@ class _CountdownState extends State<Countdown> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {  
-        return Future.value(exit(context,nopop:true));
+        return Future.value(exit(context));
       },
       child: Scaffold(
           appBar: AppBar(

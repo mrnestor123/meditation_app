@@ -29,9 +29,9 @@ dependencies:
  # workmanager: ^0.2.0 PARA BACKGROUND PROCESSING
   dartz: any
   get_it: ^2.0.1  
-  firebase_core: ^1.8.0
-  firebase_auth: ^3.1.4 
-  cloud_firestore: ^1.0.1
+  firebase_core: ^1.10.6
+  firebase_auth: ^3.3.4
+  cloud_firestore: ^3.1.5
  # flutter_local_notifications: ^8.1.1+2
 #  firebase_messaging: ^10.0.8
   flutter_mobx: ^2.0.2
@@ -43,9 +43,11 @@ dependencies:
   google_sign_in: ^5.0.0 
   webview_flutter: ^2.0.12
   flutter_circular_slider: ^2.5.0
-  image_picker: ^0.7.3
+  image_picker: ^0.8.4
   video_player: ^2.2.7
-  firebase_storage: ^10.0.6
+  file_picker: ^4.3.0
+
+  firebase_storage: ^10.2.4
   
   # PARA CALENDARIOStable_calendar: ^3.0.0
   assets_audio_player: ^3.0.3+6

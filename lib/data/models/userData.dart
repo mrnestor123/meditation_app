@@ -2,6 +2,7 @@
 //
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
@@ -65,7 +66,7 @@ class UserModel extends User {
 
   String toRawJson() => json.encode(toJson());
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =true]) {
     UserModel u = UserModel(
         coduser: json["coduser"],
         nombre: json['nombre'],
@@ -89,33 +90,52 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       ); 
 
-      if(json['meditations'] != null){
-          for(var med in json['meditations'] ){
-            u.totalMeditations.add(MeditationModel.fromJson(med));
-          }
+      if(expand){
+        if(json['meditations'] != null){
+            for(var med in json['meditations'] ){
+              u.totalMeditations.add(MeditationModel.fromJson(med));
+            }
+          
+          u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
+          u.userStats.total.meditations = u.totalMeditations.length;
+        }
         
-        u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
-        u.userStats.total.meditations = u.totalMeditations.length;
-      }
-      
-      if(json['following']!=null){
-        u.following.addAll(json['following']);
-      }
-      if(json['followsyou'] != null){
-        u.followers.addAll(json['followsyou']);
-      }
+        if(json['following']!=null){
+          u.following.addAll(json['following']);
+        }
+        if(json['followsyou'] != null){
+          u.followers.addAll(json['followsyou']);
+        }
 
-      if(json['notifications']!=null){
-        for(var not in json['notifications']){
-          u.notifications.add(Notify.fromJson(not));
+        if(json['notifications']!=null){
+          for(var not in json['notifications']){
+            u.notifications.add(Notify.fromJson(not));
+          }
+        }
+
+        if(json['messages']!=null){
+          for(var msg in json['messages']){
+            u.messages.add(Message.fromJson(msg));
+          }
+        }
+
+        if(json['students']!= null){
+          for(var user in json['students']){
+            u.students.add(UserModel.fromJson(user,false));
+          }
+        }
+
+        if(json['files']!= null){
+          try{
+          for(var file in json['files']){
+            u.files.add(File.fromUri(Uri.file(file)));
+          }
+          }catch(e){
+            print(e);
+          }
         }
       }
 
-      if(json['messages']!=null){
-        for(var msg in json['messages']){
-          u.messages.add(Message.fromJson(msg));
-        }
-      }
 
     //  u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
     //  u.setFollowedUsers(json['following'] != null ? json['following'] : []);
@@ -141,8 +161,10 @@ class UserModel extends User {
         'website': website,
         "settings": settings == null ? null: settings.toJson(),
         "following": following.map((element) => element).toList(),
+        //MENSAJES Y ACTIONS MUCHO JSON !!!!
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
-        'messages': messages.map((msg)=> msg.toJson()).toList(), 
+        "students": students.map((stud)=> stud.coduser).toList(),
+     //   'messages': messages.map((msg)=> msg.toJson()).toList(), 
         "followsyou": followers.map((user) => user).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
         "answeredquestions": answeredquestions,

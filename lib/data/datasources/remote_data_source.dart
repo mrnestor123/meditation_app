@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
@@ -11,6 +12,7 @@ import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
@@ -46,7 +48,7 @@ abstract class UserRemoteDataSource {
 
   Future getActions(UserModel u);
 
-  Future updateImage(PickedFile image, User u);
+  Future uploadFile({PickedFile image,FilePickerResult audio, XFile video, User u});
 
   Future <List<Request>> getRequests();
 
@@ -64,8 +66,7 @@ abstract class UserRemoteDataSource {
 
   Future <List<User>> getTeachers();
 
-  Future sendMessage(User you, User to);
-
+  Future sendMessage(User you, User to, Message m);
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -85,7 +86,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'https://public.digitalvalue.es:8002';
+  //  nodejs = 'https://public.digitalvalue.es:8002';
+      nodejs = 'http://192.168.4.187:8002';
   //  nodejs = 'http://192.168.4.67:8002';
   }
 
@@ -203,7 +205,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       QuerySnapshot nostageContent = await database.collection('content').where('stagenumber', isEqualTo: 'none').get();
 
       for(DocumentSnapshot doc in nostageContent.docs){
-        var data = doc.data();
+        Map data = doc.data();
         if(data['type'] == 'meditation-practice'){
           d.nostagemeditations.add(MeditationModel.fromJson(data));
         }else{
@@ -234,7 +236,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       http.Response response = await http.get(usersUrl);
       var users = json.decode(response.body);
       for(var user in users){
-        l.add(UserModel.fromJson(user));
+        l.add(UserModel.fromJson(user,false));
       }
 
       l.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
@@ -248,16 +250,32 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   //DEBERIA DE LLAMARSE IMAGE
-  Future<String> updateImage(PickedFile image, User u) async {
-      String randomnumber = new Random().nextInt(100000).toString();
+  Future<String> uploadFile({PickedFile image, FilePickerResult audio, XFile video, User u}) async {
+      print('ENTRA AQUI');
+      String name ;
 
-      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}/$randomnumber');
+      var bytes;
 
-      final UploadTask storageUpload = ref.putData(await image.readAsBytes());
+      if(image != null){
+        bytes = await image.readAsBytes();
+        name = image.path;
+      }else if(audio != null){
+        bytes = audio.files[0].bytes;
+        name = audio.names[0];
+      }else if(video != null){
+        bytes = await video.readAsBytes();
+        name = video.name;
+      }
+
+
+      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}/$name');
+
+      
+      final UploadTask storageUpload = ref.putData(bytes);
 
       final urlString = await (await storageUpload.whenComplete(()=> null));
       String profilepath = await ref.getDownloadURL();
-
+      print({'filetodownload',profilepath});
       return profilepath;
   }
 
@@ -396,14 +414,14 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
 
-  Future sendMessage(User u,  User to) async {
-    try {
-    QuerySnapshot teacherRef = await database.collection('users').where('coduser', isEqualTo: to.coduser).get();
-
-    DocumentReference teacherdoc = await database.collection('users').doc(teacherRef.docs[0].id);
-
-    teacherdoc.update({'messages': FieldValue.arrayUnion(to.messages.map((r)=>r.toJson()).toList())});
-    }catch(e){
+  Future sendMessage(User u,  User to, Message m) async {
+    try{
+      var url = Uri.parse('$nodejs/sendmessage');
+      var response = await http.post(url,
+          headers: {"Content-Type": "application/json"},
+          body: json.encode(m.toJson())
+      );
+    }catch(e) {
       throw ServerException();
     }
   }
@@ -426,10 +444,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<List<User>> getTeachers() async{ 
     try{
         List<User> teachers = new List.empty(growable: true);
-        QuerySnapshot query = await database.collection('users').where('role', isEqualTo: 'teacher').get();
+        var url  =  Uri.parse('$nodejs/teachers');
+        http.Response response = await http.get(url); 
+        var users = json.decode(response.body);
 
-        for(DocumentSnapshot doc in query.docs){
-          teachers.add(UserModel.fromJson(doc.data()));
+        for(var user in  users){
+          teachers.add(UserModel.fromJson(user,false));
         }
 
         return teachers;
@@ -437,4 +457,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       throw ServerException();
     }
   }
+
+  
 }

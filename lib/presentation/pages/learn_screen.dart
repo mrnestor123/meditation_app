@@ -598,7 +598,7 @@ class _ContentViewState extends State<ContentView> {
               onPressed: () => showAlertDialog(
                 title: 'Are you sure you want to exit ?',
                 context: context,
-                text: "This lesson won't count as read one"
+                text: "This lesson will not count as read one"
               )),
           backgroundColor: Colors.transparent,
           elevation: 0,

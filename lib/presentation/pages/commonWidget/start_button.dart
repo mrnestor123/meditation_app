@@ -10,8 +10,9 @@ class BaseButton extends StatelessWidget {
   bool margin;
   Color color;
   Color textcolor;
+  bool noelevation, border;
 
-  BaseButton({this.onPressed, this.text, this.margin= false, this.color, this.textcolor});
+  BaseButton({this.onPressed, this.text, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
   
   @override
   Widget build(BuildContext context) {
@@ -29,9 +30,12 @@ class BaseButton extends StatelessWidget {
           }
         } : null,
         style: ElevatedButton.styleFrom(
-          elevation: 2.0,
+          elevation: noelevation ? 0.0 : 2.0,
           primary: color != null ? color: Configuration.maincolor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
+          shape: RoundedRectangleBorder(
+            side:border ? BorderSide(color:Colors.grey) :  BorderSide.none ,
+            borderRadius: BorderRadius.circular(Configuration.borderRadius)
+          )
         ),
         child: Text(
           text != null ? text : 'Start',

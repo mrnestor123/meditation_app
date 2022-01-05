@@ -7,6 +7,7 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -126,9 +127,9 @@ class UserRepositoryImpl implements UserRepository {
 
  
   @override
-  Future<Either<Failure, String>> updateImage(PickedFile image, User u) async{
+  Future<Either<Failure, String>> uploadFile({PickedFile image,dynamic audio, dynamic video, User u}) async{
     try{
-      var string = await remoteDataSource.updateImage(image, u);
+      var string = await remoteDataSource.uploadFile(image:image,audio:audio,video:video, u: u);
 
       if(string != null) {
         return Right(string);
@@ -138,9 +139,6 @@ class UserRepositoryImpl implements UserRepository {
     }catch(e){
       return Left(ConnectionFailure(error: 'No se ha podido subir'));
     }
-
-
-    // TODO: implement updateImage
   }
 
 
@@ -246,16 +244,16 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure, void>> sendMessage(User you, User to) async{
-     if(await networkInfo.isConnected){
-        try{
-          await remoteDataSource.sendMessage(you, to);
-          return Right(null);
-        }catch(e){
-          return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
-        }
-      }else{
-        return Left(ServerFailure());
+  Future<Either<Failure, void>> sendMessage({User sender, User receiver, Message message}) async{
+    if(await networkInfo.isConnected){
+      try{
+        await remoteDataSource.sendMessage(sender, receiver, message);
+        return Right(null);
+      }catch(e){
+        return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
       }
+    }else{
+      return Left(ServerFailure());
+    }
   }
 }

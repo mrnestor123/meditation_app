@@ -59,7 +59,7 @@ class _RequestsState extends State<Requests> {
           stateSetter((){
             uploading = true;
           });
-          String imgstring = await _userState.uploadImage(image);
+          String imgstring = await _userState.uploadFile(image:image);
           print(imgstring);
           stateSetter(() {
             uploading= false;
@@ -793,7 +793,7 @@ class StateChip extends StatelessWidget {
 class ButtonBack extends StatelessWidget {
   Color color;
   
-  ButtonBack({this.color}) : super();
+  ButtonBack({this.color = Colors.black}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -803,7 +803,25 @@ class ButtonBack extends StatelessWidget {
       icon: Icon(
         Icons.arrow_back_ios,
         size: Configuration.smicon,
-        color: color != null ? color : Colors.black,
+        color: color
+        )
+      );
+  }
+}
+
+class ButtonClose extends StatelessWidget {
+  Color color;
+  
+  ButtonClose({this.color = Colors.black}) : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: ()=> Navigator.pop(context), 
+      icon: Icon(
+        Icons.close,
+        size: Configuration.smicon,
+        color: color,
         )
       );
   }

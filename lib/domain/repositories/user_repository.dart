@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -21,7 +22,7 @@ abstract class UserRepository {
 
   Future<Either<Failure, User>> updateUser({User user,DataBase d, String type, dynamic toAdd});
 
-  Future<Either<Failure,String>> updateImage(PickedFile image, User u);
+  Future<Either<Failure,String>> uploadFile({PickedFile image,dynamic audio, dynamic video, User u});
 
   Future<Either<Failure,List<Request>>> getRequests();
 
@@ -39,8 +40,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> updateNotification(Notify n);
 
-  Future<Either<Failure,void>> sendMessage(User you, User teacher);
-
+  Future<Either<Failure,void>> sendMessage({User sender, User receiver, Message message});
 
 
 }
