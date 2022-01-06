@@ -9,13 +9,17 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
+import 'package:meditation_app/presentation/pages/learn_screen.dart';
+import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 import 'config/configuration.dart';
 
@@ -162,10 +166,7 @@ class _TeachersManagementState extends State<TeachersManagement> {
 
   int selectedstage = 1;
   String contenttype = 'lesson';
-  Content toAdd = new Content(stagenumber: 1, type:'meditation-practice');
   ImagePicker picker = new ImagePicker(); 
-
-
 
   Widget bottomButton(String text,onPressed, IconData icon ){
     return Align(
@@ -186,7 +187,6 @@ class _TeachersManagementState extends State<TeachersManagement> {
       )
     );
   }
-
 
   Widget students(){
     if(_userstate.user.students.length >0){
@@ -245,246 +245,39 @@ class _TeachersManagementState extends State<TeachersManagement> {
 
   Widget content(){
 
-    void contentAdd(){
-      List<int> stages = [1,2,3,4,5,6,7,8,9,10];
-      List<dynamic> types = [
-        {'label':'Meditation practice','value':'meditation-practice'},
-        {'label':'lesson','value':'lesson'},
-        {'label':'Meditation lesson', 'value':'meditation'}
-      ];
-      var currentStep = 0;
-      TextEditingController controller = new TextEditingController(text:toAdd.title);
-      var setState;
-      
-      FilePickerResult audio;
-      XFile video;
-
-      Widget basicInformation(){
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children:[
-            SizedBox(height: Configuration.verticalspacing*1.5),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Stagenumber',style:Configuration.text('tiny',Colors.black)),
-                DropdownButton(
-                  value: toAdd.stagenumber,
-                  onChanged: (value){
-                    setState(() {
-                      toAdd.stagenumber = value;
-                    });
-                  },
-                  items: stages.map<DropdownMenuItem<int>>((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(value.toString()),
-                      );
-                    }).toList()
-                  )
-                ]
-              ),
-              SizedBox(height: Configuration.verticalspacing*1.5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Type of content',style:Configuration.text('tiny',Colors.black)),
-                  DropdownButton(
-                    value: toAdd.type,
-                    onChanged:(value){
-                      setState(() {
-                        toAdd.type = value;
-                      });
-                    },
-                    items: types.map<DropdownMenuItem<String>>((dynamic value) {
-                      return DropdownMenuItem<String>(
-                        value: value['value'],
-                        child: Text(value['label'],style:Configuration.text('tiny',Colors.black)),
-                      );
-                    }).toList())
-                ],
-              ),
-              SizedBox(height: Configuration.verticalspacing*1.5),
-              Text('Title',style:Configuration.text('tiny',Colors.black)),
-              TextField(
-                controller:controller,
-                onChanged:(string){
-                  toAdd.title = string;
-                },
-                style: Configuration.text('tiny',Colors.black),
-              ),
-              SizedBox(height: Configuration.verticalspacing*2),
-              BaseButton(
-                text:'Continue',
-                color:Colors.lightBlue,
-                margin: true,
-                noelevation: true,
-                onPressed:(){
-                   setState(() {
-                     currentStep++;
-                    });
-                }
-              )
-              ],
-            );
-      }
-
-      Widget addcontent(){
-
-        Widget squareButton(IconData icon, String text,onPressed){
-          return ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              primary:Colors.lightBlue
-            ),
-            onPressed: onPressed,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:[
-                Text(text,style:Configuration.text('small', Colors.white)),
-                Icon(icon,size:Configuration.smicon)
-              ]
-            ),
-          );
-        }
-        
-        Widget uploadFile(){
-          return Column(
-            children:[
-              squareButton(Icons.video_camera_front, 'Add Video', () async {
-                XFile result = await  picker.pickVideo(source: ImageSource.gallery);
-
-                if(result != null){
-                  video = result;
-                  setState((){});
-                }
-
-              }),
-              SizedBox(height:Configuration.verticalspacing *1.5),
-              squareButton(Icons.audiotrack, 'Add recording', ()async {
-                FilePickerResult result = await FilePicker.platform.pickFiles();
-
-                if(result != null){
-                  audio = result;
-                  setState((){});
-                }
-              }),
-            ]
-          );
-        }
-
-
-        
-        Widget fileSelected(){
-          bool isVideo = video != null;
-          
-          return Column(
-            children:[  
-              Text('You have added ' + (isVideo ? ' a video' : ' an audio')),
-              Text((isVideo ? video.name : audio.names.toString()), style:Configuration.text('small',Colors.black))
-            ] 
-          );
-        }
-
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: Configuration.verticalspacing*2),
-            Text('Add the content', style: Configuration.text('small',Colors.black)),
-
-            video == null && audio == null ?
-            uploadFile(): fileSelected(),
-           
-            SizedBox(height:Configuration.verticalspacing *2),
-            BaseButton(
-              text:'Finish',
-              margin:true,
-              color: Colors.lightBlue,
-              onPressed: video != null || audio != null ? 
-                () {
-                  _userstate.uploadContent(c:toAdd,audio:audio,video:video);
-                } : null
-              ,
-            )
-
-          ],
-        );
-      }
-
-
-      showDialog(
-        context: context, 
-        builder: (context){
-          return StatefulBuilder(
-            builder: (context,s) {
-              setState= s;
-              return AbstractDialog(
-                content:Container(
-                  padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-
-
-                  ),
-                  child: currentStep == 0 ?
-                  basicInformation(): addcontent()
-                  ),
-              );
-            }
-          );
-        });
-
-    }
-
-
     return Stack(
       children: [
         _userstate.user.addedcontent.length > 0 ? 
-        Container() :
+        GridView.builder(
+          itemCount: _userstate.user.addedcontent.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2), 
+          itemBuilder: (context,i){
+            Content content = _userstate.user.addedcontent[i];
+
+            return ClickableSquare(
+              text: content.title,
+              onTap: (){
+                Navigator.push(context, 
+                MaterialPageRoute(builder:(context)=> ContentShow(content:content))
+                );
+              },
+            );
+          }
+        ):
         Center(
           child: Text("You have not added any content",
             style:Configuration.text('small',Colors.black)
           )
         ),
-        bottomButton('Add content',contentAdd, Icons.add)
-
+        bottomButton('Add content', (){
+          Navigator.pushNamed(context, '/addcontent').then((value) => setState((){}));
+        }, Icons.add)
       ],
     );
   }
 
-
   Widget files(){
     var audio, video;
-
-
-    Widget displayFile(File file){
-      List<String> splittedfile = file.path.split('/');
-      String filename =  splittedfile[splittedfile.length-1].split('?')[0];
-
-      if(file.path.toLowerCase().contains('aud')){
-        return OutlinedButton(
-          onPressed: (){
-            AssetsAudioPlayer().open(Audio.network(file.path));
-          }, 
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment:MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(child: Text(filename,style:Configuration.text('tiny',Colors.black))),
-              Icon(Icons.audiotrack, size: Configuration.smicon)
-            ]
-          ) 
-        );
-      }else if(file.path.contains('jpg|png')){
-
-      }else{
-        return Container();
-      }
-
-
-    }
-
 
     Widget squareButton(IconData icon, String text,onPressed){
       return ElevatedButton(
@@ -495,66 +288,55 @@ class _TeachersManagementState extends State<TeachersManagement> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children:[
-            Text(text,style:Configuration.text('small', Colors.white)),
+            Text(text,style:Configuration.text('tiny', Colors.white)),
+            SizedBox(width:Configuration.verticalspacing/2),
             Icon(icon,size:Configuration.smicon)
           ]
         ),
       );
     }
-
-    Widget uploadFile(){
-      return Column(  
-        children:[
-          squareButton(Icons.video_camera_front, 'Add Video', () async {
-            XFile result = await picker.pickVideo(source: ImageSource.gallery);
-
-            if(result != null){
-              video = result;
-              _userstate.uploadFile(video: video);
-              setState((){});
-            }
-
-          }),
-          SizedBox(height:Configuration.verticalspacing *1.5),
-
-          squareButton(Icons.audiotrack, 'Add recording', ()async {
-            FilePickerResult result = await FilePicker.platform.pickFiles(
-              withData: true
-            );
-
-            if(result != null){
-              audio = result;
-              _userstate.uploadFile(audio:audio);
-              setState((){});
-            }
-          }),
-        ]
-      );
-    }
     
-    return Column(
+    return Stack(
       children:[
         _userstate.user.files.length > 0 ?
-        
-        GridView.builder(
-          shrinkWrap:true,
-          itemCount: _userstate.user.files.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemBuilder: (context,i){
-            File file = _userstate.user.files[i];
+          FilesGrid()
+          : Text('You have not uploaded any files', style:Configuration.text('small',Colors.black)),
+       
+        Positioned(
+          bottom:0,
+          right:0,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end, 
+            children:[
+              squareButton(Icons.video_camera_front, 'Add Video', () async {
+                XFile result = await picker.pickVideo(source: ImageSource.gallery);
 
-            return displayFile(file);
-          }
+                if(result != null){
+                  video = result;
+                  await _userstate.uploadFile(video: video);
+                  setState((){});
+                }
+
+              }),
+              SizedBox(height:Configuration.verticalspacing),
+              squareButton(Icons.audiotrack, 'Add recording', ()async {
+                FilePickerResult result = await FilePicker.platform.pickFiles(
+                  type: FileType.audio,
+                  withData: true
+                );
+
+                if(result != null){
+                  audio = result;
+                  await _userstate.uploadFile(audio:audio);
+                  setState((){});
+                }
+              }),
+            ]
           )
-        :
-        Text('You have not uploaded any files', style:Configuration.text('small',Colors.black)),
-        SizedBox(height:Configuration.verticalspacing),
-        uploadFile()
-
+        )
       ]
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -603,3 +385,406 @@ class _TeachersManagementState extends State<TeachersManagement> {
     );
   }
 }
+
+class FilesGrid extends StatefulWidget {
+  
+  bool selectable;
+  dynamic onSelect;
+
+
+  FilesGrid({this.selectable=false,this.onSelect});
+
+  @override
+  State<FilesGrid> createState() => _FilesGridState();
+}
+
+class _FilesGridState extends State<FilesGrid> {
+  int selectedindex = -1; 
+
+  UserState _userstate;
+
+  Widget displayFile(File file,context){
+      List<String> splittedfile = file.path.split('/');
+      String filename =  splittedfile[splittedfile.length-1].split('?')[0];
+      
+      void viewAudio(){
+        AssetsAudioPlayer player = new AssetsAudioPlayer();
+        bool isPlaying = false;
+        bool started = false;
+         
+        showModalBottomSheet(
+          isDismissible: false,
+          context: context, 
+          builder: (context){
+            return StatefulBuilder(
+              builder: (context,setState) {
+                return WillPopScope(
+                  onWillPop:(){
+                    player.pause();
+                    player.dispose();
+
+                    return Future.value(true);
+                  },
+                  child: Container(
+                    color:Colors.black,
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(filename, style: Configuration.text('small',Colors.white)),
+                        SizedBox(height:Configuration.verticalspacing),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              color:Colors.white,
+                              iconSize: Configuration.medicon,
+                              onPressed: (){
+                                if(!started){
+                                  player.open(Audio.network(file.path));
+                                  started = true;
+                                }
+                                
+                                player.playOrPause();
+                                isPlaying = !isPlaying;
+                                setState((){});
+                              }, 
+                              icon: Icon(isPlaying ? Icons.pause: Icons.play_arrow)
+                            ),
+                            IconButton(
+                              color:Colors.white,
+                              iconSize: Configuration.medicon,
+                              onPressed: (){
+                                player.stop();
+                                player.dispose();
+                                Navigator.pop(context);
+                              }, 
+                              icon: Icon(Icons.stop)
+                            )
+                          ],
+                        )  
+                      ],
+                    ),
+                  ),
+                );
+              }
+            );
+        });
+      }
+
+         
+      void viewVideo()async{
+        VideoPlayerController controller =  VideoPlayerController.network(file.path);
+        await controller.initialize();
+        bool hasStarted = false;
+
+        showDialog(
+          context: context, 
+          barrierDismissible: false,
+          builder: (context){
+            return StatefulBuilder(
+              builder: (context,setState) {
+                return WillPopScope(
+                  onWillPop:(){
+                    if(controller.value.isPlaying){
+                      controller.pause();
+                    }
+                    controller.dispose();
+                    return Future.value(true);
+                  },
+                  child: AbstractDialog(
+                    content: Container(
+                      height: Configuration.width / controller.value.aspectRatio,
+                      width: Configuration.height * controller.value.aspectRatio,
+                      child: Stack(
+                        children: [
+                          VideoPlayer(controller),
+                          !hasStarted ? Align(
+                            alignment: Alignment.center,
+                            child: IconButton(
+                              iconSize: Configuration.medicon,
+                              color: Colors.white,
+                              onPressed: (){controller.play(); hasStarted = true; setState((){});}, 
+                              icon: Icon(Icons.play_arrow
+                            ))
+                          ): Container(),
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color:Colors.red
+                            ),
+                            child: IconButton(
+                              padding:EdgeInsets.all(4),
+                              onPressed: (){
+                                if(controller.value.isPlaying){
+                                  controller.pause();
+                                }
+                                controller.dispose();
+                                Navigator.pop(context);
+                              },
+                              icon:Icon(Icons.close),
+                              iconSize: Configuration.smicon,
+                              color:Colors.white,
+                              
+                            ),
+                          ),
+                        ],
+                      )
+                    )
+                  ),
+                );
+              }
+            );
+          });
+      }
+
+
+      if(file.path.toLowerCase().contains(RegExp('aud|m4a|mp3'))){
+        return OutlinedButton(
+          onPressed: (){
+           viewAudio();
+          }, 
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment:MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: Text(filename,style:Configuration.text('tiny',Colors.black))),
+              Icon(Icons.audiotrack, size: Configuration.smicon)
+            ]
+          ) 
+        );
+        //HAY QUE QUITAR ESTO !!!
+      }else if(file.path.contains(RegExp('jpg|png'))){
+        return Container(
+          child: Image.network(file.path)
+        );
+      }else{
+        return OutlinedButton(
+          onPressed: (){
+           viewVideo();
+          }, 
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment:MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: Text(filename,style:Configuration.text('tiny',Colors.black))),
+              Icon(Icons.video_library, size: Configuration.smicon)
+            ]
+          ) 
+        );
+      }
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    
+    return ListView.builder(
+          shrinkWrap:true,
+          itemCount: _userstate.user.files.length,
+         // gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,crossAxisSpacing: 10,mainAxisSpacing: 10),
+          itemBuilder: (context,i){
+            File file = _userstate.user.files[i];
+            bool selected = i == selectedindex;
+            return Row(
+              mainAxisSize:MainAxisSize.max,
+              children: [
+                Expanded(child: displayFile(file,context)),
+                widget.selectable ? GestureDetector(
+                  onTap: (){
+                    setState(() {
+                      selectedindex = i;
+                      widget.onSelect(file);
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(left:Configuration.verticalspacing),
+                    width:Configuration.verticalspacing*3,
+                    height: Configuration.verticalspacing*3,
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.black : Colors.white,
+                      shape:BoxShape.circle,
+                      border: Border.all(color:Colors.black)
+                    ),
+                  ),
+                ): Container()
+
+              ],
+            );
+          }
+    );
+
+
+  }
+}
+
+
+
+class AddContent extends StatefulWidget {
+
+  AddContent() : super();
+
+  @override
+  State<AddContent> createState() => _AddContentState();
+}
+
+class _AddContentState extends State<AddContent> {
+  List<int> stages = [1,2,3,4,5,6,7,8,9,10];
+
+  List<dynamic> types = [
+    {'label':'Meditation practice','value':'meditation-practice'},
+    {'label':'lesson','value':'lesson'},
+    {'label':'Meditation lesson', 'value':'meditation'}
+  ];
+
+  var _userstate;
+
+  var currentStep = 0;
+
+  Content toAdd = new Content(stagenumber: 1, type:'meditation-practice');
+
+  File selectedFile;
+
+
+  Widget basicInformation(){
+      TextEditingController controller = new TextEditingController(text:toAdd.title);
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children:[
+          SizedBox(height: Configuration.verticalspacing*1.5),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Stagenumber',style:Configuration.text('tiny',Colors.black)),
+              DropdownButton(
+                value: toAdd.stagenumber,
+                onChanged: (value){
+                  setState(() {
+                    toAdd.stagenumber = value;
+                  });
+                },
+                items: stages.map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Text(value.toString()),
+                    );
+                  }).toList()
+                )
+              ]
+            ),
+            SizedBox(height: Configuration.verticalspacing),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Type of content',style:Configuration.text('tiny',Colors.black)),
+                DropdownButton(
+                  value: toAdd.type,
+                  onChanged:(value){
+                    setState(() {
+                      toAdd.type = value;
+                    });
+                  },
+                  items: types.map<DropdownMenuItem<String>>((dynamic value) {
+                    return DropdownMenuItem<String>(
+                      value: value['value'],
+                      child: Text(value['label'],style:Configuration.text('tiny',Colors.black)),
+                    );
+                  }).toList())
+              ],
+            ),
+            SizedBox(height: Configuration.verticalspacing),
+            Row(
+              children: [
+                Text('Title',style:Configuration.text('tiny',Colors.black)),
+                SizedBox(width:Configuration.verticalspacing),
+                Expanded(
+                   child: TextField(
+                      
+                      onChanged:(string){
+                        toAdd.title = string;
+                        setState(() {});
+                      },
+                      style: Configuration.text('tiny',Colors.black),
+                    ),
+                 ),
+              ],
+            ),
+           
+            SizedBox(height: Configuration.verticalspacing*2),
+            Text('Description',style: Configuration.text('tiny',Colors.black)),
+            TextField(
+              onChanged:(string){
+                toAdd.description = string;
+                setState(() {});
+              },
+              style: Configuration.text('tiny',Colors.black),
+            ),
+            ],
+          );
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1.0),
+          child: Container(
+                color: Colors.grey,
+                height: 1.0,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+        leading: CloseButton(
+          color: Colors.black,
+        ),
+        title: Text('Add Content',style: Configuration.text('medium',Colors.black),),
+      ),
+      body: Container(
+        color:Colors.white,
+        padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child: Column(
+          children:[
+            SizedBox(height: Configuration.verticalspacing),
+            Text('First, input basic information',style: Configuration.text('small',Colors.black)),
+            basicInformation(),
+            SizedBox(height:Configuration.verticalspacing*1.5),
+            Text('Add Video or recording', style:Configuration.text('small',Colors.black)),
+            SizedBox(height:Configuration.verticalspacing),
+            _userstate.user.files.length > 0 ? 
+            Expanded(child: FilesGrid(
+              selectable: true, 
+              onSelect:(file){
+                toAdd.file = file.path;
+                setState((){});
+            })): 
+            Text('First, you have to upload the files in the files manager',style: Configuration.text('tiny', Colors.black)),
+            BaseButton(
+              text:'Finish',
+              margin:true,
+              color: Configuration.maincolor,
+              onPressed: toAdd.file != null && toAdd.title != null && toAdd.description != null ? 
+                () {
+                  _userstate.uploadContent(c:toAdd);
+                  Navigator.pop(context);
+                } : null
+              ,
+            ),
+            SizedBox(height: Configuration.verticalspacing)
+          ]
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+// WIDGE
+

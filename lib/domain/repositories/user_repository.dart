@@ -22,7 +22,7 @@ abstract class UserRepository {
 
   Future<Either<Failure, User>> updateUser({User user,DataBase d, String type, dynamic toAdd});
 
-  Future<Either<Failure,String>> uploadFile({PickedFile image,dynamic audio, dynamic video, User u});
+  Future<Either<Failure,String>> uploadFile({dynamic image,dynamic audio, dynamic video, User u});
 
   Future<Either<Failure,List<Request>>> getRequests();
 

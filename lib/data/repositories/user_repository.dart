@@ -127,7 +127,7 @@ class UserRepositoryImpl implements UserRepository {
 
  
   @override
-  Future<Either<Failure, String>> uploadFile({PickedFile image,dynamic audio, dynamic video, User u}) async{
+  Future<Either<Failure, String>> uploadFile({dynamic image,dynamic audio, dynamic video, User u}) async{
     try{
       var string = await remoteDataSource.uploadFile(image:image,audio:audio,video:video, u: u);
 

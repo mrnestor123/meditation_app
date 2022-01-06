@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -191,7 +193,10 @@ abstract class _UserState with Store {
     String imgstring;
     imageupload.fold(
       (l) => errorMessage = 'error al subir imagen', 
-      (r) => imgstring = r
+      (r) {
+        user.files.add(File.fromUri(Uri.file(r)));
+        imgstring = r;
+      }
     );
 
     return imgstring;
@@ -253,16 +258,11 @@ abstract class _UserState with Store {
 
 
 
-  Future uploadContent({Content c, FilePickerResult audio, XFile video}) async{
+  Future uploadContent({Content c}) async{
     user.uploadContent(c);
     
-    Either <Failure,String> upload = await repository.uploadFile(audio:audio, video:video, u: user);
 
-    upload.fold(
-      (l) => errorMessage = 'error al subir imagen', 
-      (r) => {
-        print('imagen subida perfectamente')
-      });
+   
   }
 
 

@@ -68,6 +68,7 @@ class _GameStartedState extends State<GameStarted> {
         child: Container(
           //height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
          // width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
+         // ESTO ESTA BIEN ???
           height: Configuration.width / controller.value.aspectRatio,
           width: Configuration.height * controller.value.aspectRatio,
           child: Stack(children:[

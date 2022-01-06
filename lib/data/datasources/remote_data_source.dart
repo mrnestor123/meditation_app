@@ -48,7 +48,7 @@ abstract class UserRemoteDataSource {
 
   Future getActions(UserModel u);
 
-  Future uploadFile({PickedFile image,FilePickerResult audio, XFile video, User u});
+  Future uploadFile({XFile image,FilePickerResult audio, XFile video, User u});
 
   Future <List<Request>> getRequests();
 
@@ -250,30 +250,32 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   //DEBERIA DE LLAMARSE IMAGE
-  Future<String> uploadFile({PickedFile image, FilePickerResult audio, XFile video, User u}) async {
+  Future<String> uploadFile({XFile image, FilePickerResult audio, XFile video, User u}) async {
       print('ENTRA AQUI');
       String name ;
 
       var bytes;
-
+      //IMAGE Y VIDEO SON LO MISMO !!!!!!!
       if(image != null){
         bytes = await image.readAsBytes();
-        name = image.path;
+        List<String> path = image.path.split('/');
+        name = path[path.length-1];
       }else if(audio != null){
         bytes = audio.files[0].bytes;
         name = audio.names[0];
       }else if(video != null){
         bytes = await video.readAsBytes();
+       // List<String> path = video.path.split('/');
+       // name = path[path.length-1];
         name = video.name;
       }
 
 
       Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}/$name');
-
       
       final UploadTask storageUpload = ref.putData(bytes);
 
-      final urlString = await (await storageUpload.whenComplete(()=> null));
+      await (await storageUpload.whenComplete(()=> null));
       String profilepath = await ref.getDownloadURL();
       print({'filetodownload',profilepath});
       return profilepath;

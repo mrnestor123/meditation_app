@@ -450,7 +450,7 @@ class ClickableSquare extends StatelessWidget {
   dynamic onTap;
   bool blocked;
 
-  ClickableSquare({this.blockedtext,this.onTap,this.blocked,this.image,this.selected,this.text}) : super();
+  ClickableSquare({this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text}) : super();
 
 
   @override

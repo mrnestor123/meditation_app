@@ -405,6 +405,7 @@ class ContentView extends StatefulWidget {
   _ContentViewState createState() => _ContentViewState();
 }
 
+// PODRIAMOS HACER CONTENTVIEW PARA TODO ???
 class _ContentViewState extends State<ContentView> {
   int _index = -1;
   var _userstate;
@@ -592,14 +593,13 @@ class _ContentViewState extends State<ContentView> {
     return Scaffold(
         extendBody: true,
         appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(Icons.close,
-                  size: Configuration.smicon, color: Colors.black),
+          leading: CloseButton(
+              color: Colors.black,
               onPressed: () => showAlertDialog(
                 title: 'Are you sure you want to exit ?',
                 context: context,
                 text: "This lesson will not count as read one"
-              )),
+          )),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
@@ -642,6 +642,21 @@ class _ContentViewState extends State<ContentView> {
             ));
   }
 }
+
+
+
+class Portada extends StatelessWidget {
+  const Portada() : super();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      
+    );
+  }
+}
+
+
 
 
 

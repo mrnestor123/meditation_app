@@ -105,7 +105,8 @@ class MyApp extends StatelessWidget {
               '/selectusername': (BuildContext context) => SetUserData(),
               '/settings': (BuildContext context) => Settings(),
               '/gamestarted': (BuildContext context) => GameStarted(),
-              '/teachers': (BuildContext context) => TeachersScreen()
+              '/teachers': (BuildContext context) => TeachersScreen(),
+              '/addcontent':(BuildContext context)=> AddContent()
             }));
   }
 }

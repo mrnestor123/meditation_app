@@ -38,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _showPicker(context) {
 
     _imgFromCamera() async {
-      PickedFile image = await _picker.getImage(source: ImageSource.camera);
+      XFile image = await _picker.pickImage(source: ImageSource.camera);
       
       if(image != null){
       setState(() {
@@ -53,7 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     _imgFromGallery() async {
-      PickedFile image = await _picker.getImage(source: ImageSource.gallery);
+      XFile image = await _picker.pickImage(source: ImageSource.gallery);
 
       if(image != null){
         setState(() {
@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
           SizedBox(height: Configuration.verticalspacing*1.5),
           Spacer(),
-          //!isMe && user.messages.where((element) => element.coduser == _userstate.user.coduser).length == 0 ? 
+          !isMe && user.messages.where((element) => element.sender == _userstate.user.coduser).length == 0 ? 
           BaseButton(
             margin:true,
             onPressed:(){
@@ -242,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             color:Configuration.maincolor,
             text: 'Send a class request'
-          ),// : Container(),
+          ) : Container(),
           
           SizedBox(height:Configuration.verticalspacing*2)
       ]);
