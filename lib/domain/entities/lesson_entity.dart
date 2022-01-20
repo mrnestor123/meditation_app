@@ -13,16 +13,18 @@ class Lesson extends Content {
       stagenumber,
       type,
       position,
+      file,
       @required description,
       @required this.text})
       : super(
-            cod: cod,
-            title: title,
-            type: type,
-            image: image,
-            stagenumber: stagenumber,
-            description: description,
-            position: position);
+          cod: cod,
+          title: title,
+          type: type,
+          image: image,
+          stagenumber: stagenumber,
+          description: description,
+          position: position,
+          file: file);
 
 //  @override
   //List<Object> get props =>

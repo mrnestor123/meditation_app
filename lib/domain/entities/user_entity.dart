@@ -165,6 +165,8 @@ class User {
 
 
   void setVersion(int version) => this.version = version;
+  void setImage(String image) => this.image = image;
+
 
   //ESTOS METODOS SON BUENOS ?????
   void setAction(String type, {dynamic attribute}) {
@@ -206,7 +208,7 @@ class User {
   }
 
 
-  void uploadContent(Content c){
+  void uploadContent({Content c}){
     this.addedcontent.add(c);
   }
 

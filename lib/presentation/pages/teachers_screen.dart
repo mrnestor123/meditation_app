@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
@@ -539,7 +541,7 @@ class _FilesGridState extends State<FilesGrid> {
       }
 
 
-      if(file.path.toLowerCase().contains(RegExp('aud|m4a|mp3'))){
+      if(isAudio(file.path)){
         return OutlinedButton(
           onPressed: (){
            viewAudio();
@@ -554,7 +556,7 @@ class _FilesGridState extends State<FilesGrid> {
           ) 
         );
         //HAY QUE QUITAR ESTO !!!
-      }else if(file.path.contains(RegExp('jpg|png'))){
+      }else if(isImage(file.path)){
         return Container(
           child: Image.network(file.path)
         );
@@ -617,8 +619,6 @@ class _FilesGridState extends State<FilesGrid> {
 
   }
 }
-
-
 
 class AddContent extends StatefulWidget {
 
@@ -770,6 +770,11 @@ class _AddContentState extends State<AddContent> {
               color: Configuration.maincolor,
               onPressed: toAdd.file != null && toAdd.title != null && toAdd.description != null ? 
                 () {
+                  if(toAdd.isMeditation()){
+                    toAdd = new Meditation.fromContent(toAdd);
+                  }else {
+
+                  }
                   _userstate.uploadContent(c:toAdd);
                   Navigator.pop(context);
                 } : null

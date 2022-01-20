@@ -5,10 +5,12 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:mobx/mobx.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -28,6 +30,8 @@ abstract class _MeditationState with Store {
 
   @observable
   MeditationModel selmeditation;  
+
+  Content content;
 
   @observable
   int currentpage = 0;
@@ -55,6 +59,9 @@ abstract class _MeditationState with Store {
 
   @observable
   bool startedmeditation = false;
+
+  bool hasVideo = false;
+  bool hasAudio = false;
   
   @observable
   String state = 'initial';
@@ -82,27 +89,43 @@ abstract class _MeditationState with Store {
   @action
   void startMeditation(User u, DataBase d) {
     this.user = u;
+
     // PARA QUE QUEREMOS DATA!!
     this.data = d;
     this.currentsentence = null;
-   // finishMeditation();
-   //PODRIAMOS HACER QUE EL USUARIO PUEDA ELEGIR CUANDO CAMBIAR DE FRASE !!!
-    if(selmeditation != null){
-      timeChange = selmeditation.followalong != null ? (this.totalduration.inSeconds - 3) / selmeditation.followalong.length : 1;
+   
+    //PODRIAMOS HACER QUE EL USUARIO PUEDA ELEGIR CUANDO CAMBIAR DE FRASE !!!
+    if(selmeditation != null && selmeditation.followalong != null){
+      timeChange =  (this.totalduration.inSeconds - 3) / selmeditation.followalong.length;
     }
     startTimer();
   }
 
   @action 
+  //DEBERÍA DE HABER SOLO UN STARTMEDITATION !!!
   void selectMeditation(Meditation m){
     if(this.selmeditation == m){
       this.selmeditation = null;
       //this.duration = totalduration;
       state = 'free';
     }else{
+      // ESTO NO DEBERIA SER ASI
       this.selmeditation = m;
-      this.duration = m.duration;
-      this.totalduration = m.duration;
+      if(m.duration != null){
+        this.duration = m.duration;
+        this.totalduration = m.duration;
+      }else{
+
+        if(selmeditation.file != null){
+          if(isAudio(selmeditation.file)){
+            hasAudio = true;
+            assetsAudioPlayer.open(Audio.network(selmeditation.file));
+            this.duration = assetsAudioPlayer.current.value.audio.duration;
+          }else{
+            hasVideo = true;
+          }
+        }
+      }
       state = 'pre_guided';
     }
   }
@@ -117,8 +140,14 @@ abstract class _MeditationState with Store {
   void startTimer() {
     // The following line will enable the Android and iOS wakelock.
     Wakelock.enable();
+
+    
+    if(hasAudio){
+      assetsAudioPlayer.playOrPause();
+    }
+
+
     var oneSec = new Duration(seconds: 1);
-   
     
     if(!delaying){
       Future.delayed(Duration(seconds: 10), (){
@@ -212,7 +241,7 @@ abstract class _MeditationState with Store {
     if(selmeditation != null){
       selmeditation.duration = totalduration;
     }
-    
+    //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
     Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : selmeditation, user: user, d: data));
     selmeditation = null;
 

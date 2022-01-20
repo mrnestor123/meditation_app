@@ -66,7 +66,9 @@ abstract class UserRemoteDataSource {
 
   Future <List<User>> getTeachers();
 
-  Future sendMessage(User you, User to, Message m);
+  Future sendMessage(Message m);
+
+  Future updateMessage({Message message});
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -87,7 +89,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
   //  nodejs = 'https://public.digitalvalue.es:8002';
-      nodejs = 'http://192.168.4.187:8002';
+      nodejs = 'http://192.168.4.190:8002';
   //  nodejs = 'http://192.168.4.67:8002';
   }
 
@@ -95,16 +97,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   Future<UserModel> connect(String cod) async {
     try{
-    var url = Uri.parse('$nodejs/connect/$cod');
-    http.Response response = await http.get(url);
+      var url = Uri.parse('$nodejs/connect/$cod');
+      http.Response response = await http.get(url).timeout(
+        const Duration(seconds:15),
+        onTimeout: () {
+          // Time has run out, do what you wanted to do.
+          return http.Response('Error', 400); 
+        },
+      );
 
-    if(response.statusCode == 400){
-      return null;
-    }else{
-      //comprobar que funciona bien
-      UserModel u = UserModel.fromRawJson(response.body);
-      return u;
-    }
+      if(response.statusCode == 400 ){
+        return null;
+      }else{
+        //comprobar que funciona bien
+        UserModel u = UserModel.fromRawJson(response.body);
+        return u;
+      }
     }catch(e) {
       print({'EXCEPtion', e.toString()});
     }
@@ -416,7 +424,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
 
-  Future sendMessage(User u,  User to, Message m) async {
+  // PORQUE SE SIGUE PASANDO LOS USUARIOS !!!!
+  Future sendMessage(Message m) async {
     try{
       var url = Uri.parse('$nodejs/sendmessage');
       var response = await http.post(url,
@@ -456,6 +465,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
         return teachers;
     }catch(e) {
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future updateMessage({Message message}) async{
+    try {
+      QuerySnapshot msgref = await database.collection('messages').where('cod', isEqualTo: message.cod).get();
+      String documentId = msgref.docs[0].id;
+      
+
+      await database.collection("messages").doc(documentId).update(message.toJson());
+  
+
+
+    }catch(e){
       throw ServerException();
     }
   }

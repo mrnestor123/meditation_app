@@ -15,6 +15,38 @@ class Content {
     }
   }
 
+  bool isMeditation(){
+    return type == 'meditation-practice';
+  }
+
+  Map<String,dynamic> toJson(){
+    return {
+      'cod': cod,
+      'stagenumber':stagenumber,
+      'title':title,
+      'description':description,
+      'image':image,
+      'type':type,
+      'file':file,
+      'position':position,
+      'blocked':blocked
+    };
+  }
+
+  factory Content.fromJson(json){
+    return Content(
+      cod: json['cod'],
+      stagenumber: json['stagenumber'],
+      title: json['title'],
+      description: json['description'],
+      image: json['image'],
+      type: json['type'],
+      file: json['file'],
+      position: json['position'],
+      blocked: json['blocked']
+    );
+  }
+
   // funciones ?? 
   //takecontent ????
   // edit ????

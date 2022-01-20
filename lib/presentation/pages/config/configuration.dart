@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 class Configuration {
   static MediaQueryData _mediaQueryData;
-
   static double width;
   static double height;
   static double blockSizeHorizontal;
@@ -13,7 +12,6 @@ class Configuration {
   static double safeBlockHorizontal;
   static double safeBlockVertical;
   static double lessonratio;
-
   static bool nightmode = false;
 
   static Color maincolor2 = Colors.white;

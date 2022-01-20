@@ -40,7 +40,9 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> updateNotification(Notify n);
 
-  Future<Either<Failure,void>> sendMessage({User sender, User receiver, Message message});
+  Future<Either<Failure,void>> sendMessage({Message message});
+
+  Future<Either<Failure,void>> updateMessage({Message message});
 
 
 }

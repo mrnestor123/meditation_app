@@ -5,6 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
@@ -28,7 +29,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   User user;
-  bool uploading;
+  bool uploading = false;
   final ImagePicker _picker = ImagePicker();
   UserState _userstate;
 
@@ -36,34 +37,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool isMe = false;
 
   void _showPicker(context) {
-
-    _imgFromCamera() async {
-      XFile image = await _picker.pickImage(source: ImageSource.camera);
-      
-      if(image != null){
-      setState(() {
-        uploading =true;
-      });
-      await _userstate.changeImage(image);
-      
-      setState(() {
-        uploading = false;
-      });
-      }
-    }
-
-    _imgFromGallery() async {
-      XFile image = await _picker.pickImage(source: ImageSource.gallery);
-
-      if(image != null){
+    void changeUserImage(image) async{
+      if(image != null){          
         setState(() {
-          uploading =true;
+          uploading = true;
         });
+
         await _userstate.changeImage(image);
+        
         setState(() {
           uploading = false;
         });
       }
+    }
+
+    _imgFromCamera() async {
+      XFile image = await _picker.pickImage(source: ImageSource.camera);
+      changeUserImage(image);
+    }
+
+    _imgFromGallery() async {
+      XFile image = await _picker.pickImage(source: ImageSource.gallery);
+      changeUserImage(image);
     }
 
     showModalBottomSheet(
@@ -465,6 +460,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                   }
                 ),
+                uploading ? 
+                Align(
+                  alignment:Alignment.center,
+                  child: CircularProgress(
+                    color:Colors.white
+                  )
+                ): Container(width: 0),
+
                 isMe ?
                 Positioned(
                   right:0,

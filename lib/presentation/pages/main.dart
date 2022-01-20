@@ -27,6 +27,9 @@ import 'game_screen.dart';
 
 //final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+final navigatorKey = new GlobalKey<NavigatorState>();
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   /*
@@ -88,6 +91,7 @@ class MyApp extends StatelessWidget {
           Provider<RequestState>(create: (context) => sl<RequestState>())
         ],
         child: MaterialApp(
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
             routes: <String, WidgetBuilder>{

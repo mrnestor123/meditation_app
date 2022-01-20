@@ -7,11 +7,14 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
 import 'package:mobx/mobx.dart';
 
 part 'user_state.g.dart';
@@ -41,10 +44,12 @@ abstract class _UserState with Store {
   bool nightmode = false;
 
   @observable
-  bool loggedin;
+  bool loggedin  = false;
 
   @observable
   String errorMessage;
+
+  bool hasFailed = true;
 
   @observable 
   List<User> users =  new List.empty(growable: true);
@@ -72,37 +77,26 @@ abstract class _UserState with Store {
     }
   }
 
-   void _mapFailureToMessage(Failure failure) {
-    // Instead of a regular 'if (failure is ServerFailure)...'
-    switch (failure.runtimeType) {
-      case ServerFailure:
-        errorMessage='Server failure';
-        break;
-      case CacheFailure:
-        errorMessage = 'Cache failure';
-        break;
-      case LoginFailure: 
-        errorMessage = failure.error != null ? failure.error : 'User not found in the database';
-        break;
-      default:
-        errorMessage = 'Unexpected Error';
-        break;
-    }
-  }
 
-
+  // CREO QUE ESTO YA NO SE UTILIZA 
   @action 
   Future getTeachers() async {
     loading = true;
     Either<Failure,List<User>> userlist = await repository.getTeachers();
+/*    foldResult(
+      result: await repository.getTeachers(),
 
+
+    )*/
+
+    /*
     userlist.fold(
       (l) => _mapFailureToMessage(l), 
       (r) {
         loading = false;
         teachers = r;
       }
-    );
+    );*/
   }
 
   @action
@@ -111,6 +105,7 @@ abstract class _UserState with Store {
     _isUserCached.fold((Failure f) => loggedin = false, 
     (User u) {
       user = u;
+      // loggedin hace falta ???
       loggedin = true;
     });
   }
@@ -134,15 +129,10 @@ abstract class _UserState with Store {
   //We get all the necessary data for displaying the app from the database and the
   @action
   Future getData() async {
-    final result = await repository.getData();
-
-    result.fold(
-    (Failure f)  {
-       _mapFailureToMessage(f); 
-    },
-    (DataBase d) {
-      data = d;
-    });
+    foldResult(
+      result: await repository.getData(),  
+      onSuccess: (DataBase d) { data = d;}
+    );
   }
 
   //!!COMPROBAR ERRORES
@@ -177,23 +167,23 @@ abstract class _UserState with Store {
   //UTILIZAR UPLOADIMAGE EN ESTE!!
   @action 
   Future changeImage(dynamic image) async {
-    Either<Failure,String> imageupload = await repository.uploadFile(image:image, u: user);
-    //PASAR TODOS LOS  FOLD AL FINAL !!!
-    imageupload.fold((l) => errorMessage = 'error al subir imagen', (r) => user.image = r);
+    
+    String imgString = await uploadFile(image:image);
+   
+    user.setImage(imgString);
 
     return repository.updateUser(user: user);
   }
 
   @action 
   Future<String> uploadFile({dynamic image, FilePickerResult audio, XFile video}) async{
+    Either<Failure,String> fileupload = await repository.uploadFile(image:image,audio:audio,video: video, u:user);
 
-    Either<Failure,String> imageupload = await repository.uploadFile(image:image,audio:audio,video: video, u:user);
-   
-    //PASAR TODOS LOS FOLD AL FINAL !!!
     String imgstring;
-    imageupload.fold(
-      (l) => errorMessage = 'error al subir imagen', 
-      (r) {
+
+    foldResult(
+      result: fileupload,
+      onSuccess: (r){
         user.files.add(File.fromUri(Uri.file(r)));
         imgstring = r;
       }
@@ -211,29 +201,55 @@ abstract class _UserState with Store {
   }
 
 
+  @action 
+  Future connect() async {
+    var loggedresult = await repository.islogged();
+
+    loggedresult.fold((l) => hasFailed = false, (r) { user = r; loggedin = true;});
+    
+    if(user != null){
+      var dataresult = await repository.getData();
+      var teachersresult = await repository.getTeachers();
+
+      foldResult(
+        result: dataresult, 
+        onSuccess: (DataBase d)async {
+          data = d;
+          foldResult(
+            result: teachersresult,
+            onSuccess: (t)=> teachers = t
+          );
+          getUsers();
+          hasFailed= false;
+        }
+      );
+    }else{
+      hasFailed= false;
+    }
+  }
+
+
+  // ESTO SE PUEDE QUITAR???
   Future getUsers() async {
     loading = true;
     Either<Failure,List<User>> userlist = await repository.getUsers(user);
-
+/*
     userlist.fold(
       (l) => _mapFailureToMessage(l), 
       (r) {
         users = r;
         filteredusers = users;
       }
-    );
+    );*/
   }
 
 
   Future sendMessage(User to, String type, [String text]) async {
-      Message m = user.sendMessage(to,type, text);
-      Either<Failure,void> userlist = await repository.sendMessage(sender:user,receiver:to,message: m);
-      
-      userlist.fold(
-      (l) => _mapFailureToMessage(l), 
-      (r) {
-  
-      }
+    Message m = user.sendMessage(to,type, text);
+    Either<Failure,void> userlist = await repository.sendMessage(message: m);
+
+    foldResult(
+      result: userlist,
     );
   }
 
@@ -252,25 +268,25 @@ abstract class _UserState with Store {
   }
 
   Future deleteMessage(Message m){
+    m.deleted = true;
     user.messages.remove(m);
-
+    repository.updateMessage(message: m);
   }
-
-
 
   Future uploadContent({Content c}) async{
-    user.uploadContent(c);
-    
-
-   
+    user.uploadContent(c:c);
   }
-
 
 
   void seeMessages(){
+    List<Message> messagestoUpdate = new List.empty();
+
     if(user.messages.where((element) => !element.read).length>0){
       for(Message m in user.messages){
-        m.read = true;
+        if(!m.read){
+          repository.updateMessage(message: m);
+          m.read = true;
+        }
       }
     }
   }
@@ -278,13 +294,14 @@ abstract class _UserState with Store {
 
 
   //FROM LIST OF USER CODS WE GET THE USERS
+  // ESTO LO HACEMOS EN EL SERVER !!!
   Future <List<User>> getUsersList(List<dynamic> cods)async{
     loading = true;
     List<User> l = new List.empty(growable: true);
 
     for(var cod in cods){
       Either<Failure,User> u  = await repository.getUser(cod);
-      u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
+     // u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
     }
 
     dynamicusers = l;
@@ -300,3 +317,54 @@ abstract class _UserState with Store {
   }
 
 }
+
+
+
+
+
+
+void foldResult({Either<Failure,dynamic> result, dynamic onSuccess}){
+  String errorMessage;
+  String header;
+
+  String _mapFailureToMessage(Failure failure) {   
+    // Instead of a regular 'if (failure is ServerFailure)...'
+    switch (failure.runtimeType) {
+      case ServerFailure:
+        header ='Server failure';
+        errorMessage = 'An unexpected error has ocurred';
+        break;
+      case CacheFailure:
+        header = 'Cache failure';
+        errorMessage = 'An unexpected error has ocurred';
+        break;
+      case LoginFailure: 
+        errorMessage = failure.error != null ? failure.error : 'User not found in the database';
+        break;
+      case ConnectionFailure: 
+        errorMessage = 'You are not connected to the internet. Please, connect to it and restart the application';
+        header = 'Connection Failure';
+        break;
+      default:
+        errorMessage = 'Unexpected Error';
+        break;
+    }
+
+    return errorMessage;
+  }
+
+  result.fold(
+    (Failure l) { 
+      _mapFailureToMessage(l);
+      showErrorDialog(header: header, description: errorMessage);
+    }, 
+    (r) { if(onSuccess !=null) onSuccess(r); }
+  );
+
+
+
+}
+
+
+ 
+

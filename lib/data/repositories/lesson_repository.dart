@@ -22,6 +22,7 @@ class LessonRepositoryImpl implements LessonRepository {
       @required this.networkInfo});
 
   //Me llevo el missions de antes hasta aquí !! Esto no debería de ser así..
+  // ESTO SE UTILIZA ???
   @override
   Future<Either<Failure, void>> takeLesson({UserModel user}) async {
     if (await networkInfo.isConnected) {

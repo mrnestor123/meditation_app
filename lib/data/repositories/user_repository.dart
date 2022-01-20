@@ -35,7 +35,7 @@ class UserRepositoryImpl implements UserRepository {
       }
     } else {
       //Hay que arreglar este método
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     }
   }
 
@@ -47,10 +47,10 @@ class UserRepositoryImpl implements UserRepository {
         final user = await remoteDataSource.getUserData(cod);
         return Right(user);
       } on Exception {
-        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -64,7 +64,7 @@ class UserRepositoryImpl implements UserRepository {
         return Left(ServerFailure());
       }
     } else {
-        return Left(ServerFailure());
+        return Left(ConnectionFailure());
     }
   }
 
@@ -91,7 +91,7 @@ class UserRepositoryImpl implements UserRepository {
         final localUser = await localDataSource.getUser();
         return Right(localUser);
       } on ServerException {*/
-      return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      return Left(ConnectionFailure());
     }
   }
 
@@ -106,7 +106,7 @@ class UserRepositoryImpl implements UserRepository {
       }
     } else {
       //habrá que hacer algo cuando el usuario no tenga internet.. Mostrar un modal con PONTE INTERNET
-      return Left(ConnectionFailure(error: "User is not connected to the internet"));
+      return Left(ConnectionFailure());
     }
   }
 
@@ -115,61 +115,87 @@ class UserRepositoryImpl implements UserRepository {
     if(await networkInfo.isConnected){
 
     }**/
+    if (await networkInfo.isConnected) {
+      try {
+        final loggedout = await localDataSource.logout();
 
-    final loggedout = await localDataSource.logout();
-
-    if (loggedout) {
-      return Right(true);
-    } else {
-      return Left(ServerFailure());
+        if (loggedout) {
+          return Right(true);
+        } else {
+          return Left(ServerFailure());
+        }
+      }on Exception {
+        return Left(ServerFailure());
+      }
+    }else{
+      return Left(ConnectionFailure());
     }
   }
-
  
   @override
   Future<Either<Failure, String>> uploadFile({dynamic image,dynamic audio, dynamic video, User u}) async{
-    try{
-      var string = await remoteDataSource.uploadFile(image:image,audio:audio,video:video, u: u);
+    if (await networkInfo.isConnected) {
+      try{
+        var string = await remoteDataSource.uploadFile(image:image,audio:audio,video:video, u: u);
 
-      if(string != null) {
-        return Right(string);
-      }else{
-        return Left(ConnectionFailure(error: 'No se ha podido subir'));
+        if(string != null) {
+          return Right(string);
+        }else{
+          return Left(ServerFailure());
+        }
+      }catch(e){
+        return Left(ServerFailure());
       }
-    }catch(e){
-      return Left(ConnectionFailure(error: 'No se ha podido subir'));
+    }else{
+      return Left(ConnectionFailure());
     }
   }
 
 
   @override
   Future<Either<Failure,List<Request>>> getRequests() async{
-    List<Request> requests = await remoteDataSource.getRequests();
+    if (await networkInfo.isConnected) {
+      try{
+        List<Request> requests = await remoteDataSource.getRequests();
 
-    if(requests != null) {
-      return Right(requests);
+        if(requests != null) {
+          return Right(requests);
+        }else{
+          return Left(ServerFailure());
+        }
+      }on Exception {
+        return Left(ServerFailure());
+      }
     }else{
-      return Left(ConnectionFailure(error: 'We could not get the  requests'));
+      return Left(ConnectionFailure());
     }
   }
 
 
   @override
   Future<Either<Failure,void>> updateRequest(Request r, [Notify n]) async{
-    try{
-      await remoteDataSource.updateRequest(r,n);
-    }catch(e){
-      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+    if (await networkInfo.isConnected) {
+      try{
+        await remoteDataSource.updateRequest(r,n);
+      }on Exception{
+        return Left(ServerFailure());
+      }
+    }else{
+      return Left(ConnectionFailure());
     }
   }
 
   @override
   Future<Either<Failure, void>> uploadRequest(Request r) async{
-    try{
-      await remoteDataSource.uploadRequest(r);
-      return Right(null);
-    }catch(e){
-      return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+    if (await networkInfo.isConnected) {
+      try{
+        await remoteDataSource.uploadRequest(r);
+        return Right(null);
+      }on Exception{
+        return Left(ServerFailure());
+      } 
+    }else{
+      return Left(ConnectionFailure());
     }
   }
 
@@ -181,10 +207,10 @@ class UserRepositoryImpl implements UserRepository {
         final users = await remoteDataSource.getUsers(u);
         return Right(users);
       } on Exception {
-        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -195,10 +221,10 @@ class UserRepositoryImpl implements UserRepository {
         final user = await remoteDataSource.getUser(cod);
         return Right(user);
       } on Exception {
-        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -209,10 +235,10 @@ class UserRepositoryImpl implements UserRepository {
         final request = await remoteDataSource.getRequest(cod);
         return Right(request);
       } on Exception {
-        return Left(ConnectionFailure(error: "User is not connected to the internet"));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -222,10 +248,10 @@ class UserRepositoryImpl implements UserRepository {
       try{
         await remoteDataSource.updateNotification(n);
         }catch(e){
-        return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -236,24 +262,39 @@ class UserRepositoryImpl implements UserRepository {
           final teachers = await remoteDataSource.getTeachers();
           return Right(teachers);
         }catch(e){
-          return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+          return Left(ServerFailure());
         }
       }else{
-        return Left(ServerFailure());
+        return Left(ConnectionFailure());
       }
   }
 
   @override
-  Future<Either<Failure, void>> sendMessage({User sender, User receiver, Message message}) async{
+  Future<Either<Failure, void>> sendMessage({Message message}) async{
     if(await networkInfo.isConnected){
       try{
-        await remoteDataSource.sendMessage(sender, receiver, message);
+        await remoteDataSource.sendMessage(message);
         return Right(null);
       }catch(e){
-        return Left(ConnectionFailure(error: 'Ha ocurrido un error'));
+        return Left(ServerFailure());
       }
     }else{
-      return Left(ServerFailure());
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateMessage({Message message}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.updateMessage(message: message);
+        return Right(null);
+      } on LoginException {
+        return Left(ServerFailure(error: 'User does not exist in the database'));
+      }
+    } else {
+      //Hay que arreglar este método
+      return Left(ConnectionFailure());
     }
   }
 }

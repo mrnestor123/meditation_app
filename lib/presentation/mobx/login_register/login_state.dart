@@ -77,8 +77,8 @@ abstract class _LoginState with Store {
 
     if (!currentFocus.hasPrimaryFocus) {
       currentFocus.unfocus();
-    }
-
+    } 
+    //PASAR TODO ESTO AL SERVER !!!! :(
     try {
       if(type == 'mail'){
           startedmaillogin = true;
@@ -171,10 +171,9 @@ abstract class _LoginState with Store {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.floating,
-          margin: isTablet ? EdgeInsets.all(20.0) : EdgeInsets.all(0.0),
+          behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.fixed,
           content: Container(
-            padding: EdgeInsets.all(12.0),
+            padding: EdgeInsets.all(Configuration.tinpadding),
             child: Row(
               children: [
                 SizedBox(width: 10),

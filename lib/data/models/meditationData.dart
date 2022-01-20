@@ -8,7 +8,6 @@ class MeditationModel extends Meditation {
       {String cod,
       String title,
       Duration duration,
-      recording,
       day,
       String type,
       image,
@@ -16,6 +15,7 @@ class MeditationModel extends Meditation {
       String coduser,
       content,
       int position,
+      file,
       followalong
       })
       : super(
@@ -23,11 +23,11 @@ class MeditationModel extends Meditation {
             title: title,
             coduser: coduser,
             duration: duration,
-            recording: recording,
             content: content,
             day: day,
             type: type,
             image: image,
+            file: file,
             stagenumber: stagenumber,
             followalong: followalong,
             position: position);
@@ -40,17 +40,17 @@ class MeditationModel extends Meditation {
   factory MeditationModel.fromJson(Map<String, dynamic> json) =>
       MeditationModel(
           cod: json["cod"] == null ? null : json["cod"],
+          file: json['file'] == null ? null : json['file'],
           title: json["title"] == null ? null : json["title"],
           duration:json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']),
           day: json["day"] == null ? null : DateTime.parse(json["day"]),
-          recording: json["recording"] == null ? null : json["recording"],
           type: json["type"] == null ? null : json["type"],
           image: json["image"] == null ? null : json['image'],
           stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
           position: json['position'] == null ? null : json['position'],
           coduser: json['coduser'] == null ? null : json['coduser'],
           followalong: json['followalong'] == null ? null : json['followalong'],
-          content: json['content'] == null ? null: json['content']
+          content: json['content'] == null ? null: json['content'],
           //userId: json["userId"] == null ? null : json["userId"],
           );
 

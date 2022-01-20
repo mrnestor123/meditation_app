@@ -31,6 +31,7 @@ class LessonModel extends Lesson {
 
   String toRawJson() => json.encode(toJson());
 
+  @override
   factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
       cod: json["cod"] == null ? json['codlesson'] : json["cod"],
       position: json['position'] == null ? null : json['position'],
@@ -41,13 +42,15 @@ class LessonModel extends Lesson {
       type: json["type"] == null ? null : json["type"],
       stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]);
 
-  Map<String, dynamic> toJson() => {
-        "cod": cod == null ? null : cod,
-        "title": title == null ? null : title,
-        "slider": image == null ? null : image,
-        "description": description == null ? null : description,
-        "text": text == null ? null : text,
-        "type": type == null ? null : type,
-        "stagenumber": stagenumber == null ? null : stagenumber
-      };
+
+  @override
+  Map<String, dynamic> toJson() {
+    Map<String,dynamic> json = new Map();
+    json.addAll(super.toJson());
+
+    //FALTA AÑADIR LO QUE QUEDA DE LA LECCIÓN
+
+
+    return json;
+  }
 }

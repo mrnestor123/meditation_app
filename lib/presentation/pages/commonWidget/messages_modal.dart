@@ -23,14 +23,12 @@ class _MessagesIconState extends State<MessagesIcon> {
   UserState _userstate;
 
   void showMessages(context){
-  
     User user =  _userstate.user;
-    
     _userstate.seeMessages();
 
     StateSetter stateSetter;
 
-    // HACER DIFERENTES MENSAJES !!!
+    // HACER DIFERENTES TIPOS DE MENSAJE !!!
     Widget message(Message m){
       return ListTile(
         contentPadding: EdgeInsets.all(Configuration.tinpadding),
@@ -124,6 +122,7 @@ class _MessagesIconState extends State<MessagesIcon> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
+    List<Message> unreadMessages = _userstate.user.messages.where((element) => !element.read).toList();
 
     return Stack(
         children:[
@@ -135,7 +134,7 @@ class _MessagesIconState extends State<MessagesIcon> {
             color: widget.color != null ? widget.color : Colors.black,
             iconSize: Configuration.smicon
           ),
-            _userstate.user.messages.length > 0 ?
+          unreadMessages.length > 0 ?
           Positioned(
             top:0,
             right:0,
@@ -146,7 +145,7 @@ class _MessagesIconState extends State<MessagesIcon> {
                 shape: BoxShape.circle,
                 color: Colors.lightBlue
               ),
-              child:  Text(_userstate.user.messages.length.toString(), style: Configuration.text('tiny',Colors.white)),
+              child:  Text(unreadMessages.length.toString(), style: Configuration.text('tiny',Colors.white)),
             ) 
           ):  Container()
         ]

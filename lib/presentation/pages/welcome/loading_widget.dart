@@ -56,7 +56,7 @@ class _LoadingState extends State<Loading> {
     _timer = new Timer.periodic(Duration(seconds: 1), 
         (Timer timer) { 
           if (_duration.inSeconds == 0) {
-            if(finishedloading){
+            if(finishedloading && !_user.hasFailed){
               pushPage();
             }else{
               setState(() {});
@@ -99,15 +99,14 @@ class _LoadingState extends State<Loading> {
 
   void userisLogged(context) async {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
-    await _user.getData();
-    await _user.userisLogged();
-    await _user.getTeachers();
-    _user.getUsers();
+    // PARA CONECTAR A LA  BASE DE DATOS
+    await _user.connect();
 
+   
     finishedloading = true;
 
-    if(_duration.inSeconds <= 0){
-       pushPage();
+    if(_duration.inSeconds <= 0 && !_user.hasFailed){
+      pushPage();
     }
   }
 
