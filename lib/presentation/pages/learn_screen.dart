@@ -460,7 +460,7 @@ class _ContentViewState extends State<ContentView> {
   Widget vistaLeccion() {
     return CarouselSlider.builder(
         itemCount: widget.lesson.text.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index, page) {
           return Container(
             width: Configuration.width,
             color: Configuration.lightgrey,

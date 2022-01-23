@@ -128,8 +128,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    // ESTO PARA SACAR LOS USUARIOS, CADA VEZ !!! ???
     _userstate.getUsers();
-    _userstate.getUsersList(_userstate.user.following);
+   // _userstate.getUsersList(_userstate.user.following);
   }
 
   @override
@@ -249,7 +250,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         controller: _tabController,
                         children: [
                           createTable(_userstate.filteredusers, context,false),
-                          createTable(_userstate.dynamicusers, context, true),
+                          createTable(_userstate.user.following, context, true),
                         ])
                       );
                   }

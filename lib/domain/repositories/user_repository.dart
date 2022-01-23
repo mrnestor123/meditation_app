@@ -34,6 +34,7 @@ abstract class UserRepository {
 
   Future<Either<Failure, List<User>>> getTeachers();
 
+  // FUNCIÓN PARA SACAR EL USUARIO CON LECCIONES Y MEDITACIONES !!!!!
   Future<Either<Failure, User>> getUser(String cod);
 
   Future<Either<Failure,Request>>getRequest(String cod);

@@ -228,7 +228,6 @@ class __TimelineState extends State<_Timeline> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-    users = await _userstate.getUsersList(_userstate.user.following);
   }
 
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!

@@ -639,7 +639,7 @@ class _CountdownState extends State<Countdown> {
     return Stack(children: [
       CarouselSlider.builder(
           itemCount: _meditationstate.selmeditation.content.entries.length,
-          itemBuilder: (context, index) {
+          itemBuilder: (context, index,o) {
             return Container(
                 width: Configuration.width,
                 height: Configuration.height,

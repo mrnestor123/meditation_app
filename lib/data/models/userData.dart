@@ -61,12 +61,11 @@ class UserModel extends User {
         userStats: userStats
       );
 
-  factory UserModel.fromRawJson(String str) =>
-      UserModel.fromJson(json.decode(str));
+  factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str),true);
 
   String toRawJson() => json.encode(toJson());
 
-  factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =true]) {
+  factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =false]) {
     UserModel u = UserModel(
         coduser: json["coduser"],
         nombre: json['nombre'],
@@ -101,8 +100,11 @@ class UserModel extends User {
         }
         
         if(json['following']!=null){
-          u.following.addAll(json['following']);
+          for(var user in json['following']){
+            u.following.add(UserModel.fromJson(user));
+          }
         }
+
         if(json['followsyou'] != null){
           u.followers.addAll(json['followsyou']);
         }
@@ -160,7 +162,7 @@ class UserModel extends User {
         'location':location,
         'website': website,
         "settings": settings == null ? null: settings.toJson(),
-        "following": following.map((element) => element).toList(),
+        "following": following.map((element) => element.coduser).toList(),
         //MENSAJES Y ACTIONS MUCHO JSON !!!!
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "students": students.map((stud)=> stud.coduser).toList(),

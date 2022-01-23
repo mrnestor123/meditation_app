@@ -12,7 +12,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:mobx/mobx.dart';
-import 'package:wakelock/wakelock.dart';
+//import 'package:wakelock/wakelock.dart';
 
 part 'meditation_state.g.dart';
 
@@ -139,7 +139,7 @@ abstract class _MeditationState with Store {
   @action
   void startTimer() {
     // The following line will enable the Android and iOS wakelock.
-    Wakelock.enable();
+    //Wakelock.enable();
 
     
     if(hasAudio){
@@ -199,7 +199,7 @@ abstract class _MeditationState with Store {
   @action
   void cancel() {
     // The next line disables the wakelock again.
-    Wakelock.disable();
+    //Wakelock.disable();
     if(this.selmeditation != null ){
       state = 'pre_guided';
     }else{

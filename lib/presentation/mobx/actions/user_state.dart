@@ -233,19 +233,20 @@ abstract class _UserState with Store {
   Future getUsers() async {
     loading = true;
     Either<Failure,List<User>> userlist = await repository.getUsers(user);
-/*
-    userlist.fold(
-      (l) => _mapFailureToMessage(l), 
-      (r) {
+    foldResult(
+      result: userlist,
+      onSuccess: (r){
         users = r;
-        filteredusers = users;
+        filteredusers = r;
       }
-    );*/
+    );
+    loading = false;
   }
 
 
   Future sendMessage(User to, String type, [String text]) async {
     Message m = user.sendMessage(to,type, text);
+    to.messages.add(m);
     Either<Failure,void> userlist = await repository.sendMessage(message: m);
 
     foldResult(
@@ -291,7 +292,9 @@ abstract class _UserState with Store {
     }
   }
 
+  Future <List<User>> getFollowers(){
 
+  }
 
   //FROM LIST OF USER CODS WE GET THE USERS
   // ESTO LO HACEMOS EN EL SERVER !!!

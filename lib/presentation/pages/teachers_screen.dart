@@ -49,7 +49,6 @@ class _TeachersScreenState extends State<TeachersScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         leading: ButtonBack(color:Colors.white),
@@ -104,9 +103,6 @@ class _TeachersScreenState extends State<TeachersScreen> {
               color:Configuration.lightgrey,
               child: Observer(
                 builder: (context) {
-                  if(_userstate.loading){
-                    return Center(child: CircularProgress());
-                  }else{
                   return ListView.separated(
                     physics: ClampingScrollPhysics(),
                     itemBuilder: (context,int){
@@ -144,7 +140,6 @@ class _TeachersScreenState extends State<TeachersScreen> {
                     }, 
                     itemCount: _userstate.teachers.length
                   );
-                  }
                 }
               ),
             ),

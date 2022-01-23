@@ -10,7 +10,7 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock/wakelock.dart';
+//import 'package:wakelock/wakelock.dart';
 
 //ESTO ES VIEJO !!!
 //NO MIRAR!!
@@ -59,7 +59,7 @@ class _SetMeditationState extends State<SetMeditation> {
 
   Future<void> startTimer() async {
     const oneSec = const Duration(seconds: 1);
-    Wakelock.enable();
+   // Wakelock.enable();
 
     // await AndroidAlarmManager.initialize();
     // await AndroidAlarmManager.periodic(duration, 0, callback)
@@ -70,7 +70,7 @@ class _SetMeditationState extends State<SetMeditation> {
               print("el estado sigue cambiando");
               if (_duration.inSeconds < 2) {
                 state = 'finished';
-                Wakelock.disable();
+               // Wakelock.disable();
                 timer.cancel();
               } else {
                 _duration = _duration - oneSec;

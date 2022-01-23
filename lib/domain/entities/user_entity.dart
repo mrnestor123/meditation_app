@@ -47,7 +47,7 @@ class User {
   List<UserAction> lastactions = new ObservableList();
 
   //LISTA DE CÓDIGOS DE USUARIOS
-  List<dynamic> following = new List.empty(growable: true);
+  List<User> following = new List.empty(growable: true);
   List<dynamic> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
 
@@ -214,7 +214,7 @@ class User {
 
   Message sendMessage(User to, String type,[String msg]){
     var msgtypes= {
-      'classrequest': nombre +  ' wants to be your student', 
+      'classrequest': nombre + ' wants to be your student', 
       'text': msg,
       'broadcast':msg
     };
@@ -236,7 +236,7 @@ class User {
     if(!following.contains(u.coduser)){
       // QUE la accion de seguir solo notifique a los que les han seguido!!
       //setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.add(u.coduser);
+      following.add(u);
     }
 
     u.followers.add(this.coduser);
