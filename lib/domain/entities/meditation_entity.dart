@@ -31,12 +31,14 @@ class Meditation extends Content {
       title,
       file,
       position,
+      createdBy
       //this.userId
       })
       : super(cod: cod,
             description: description,
             image: image,
             title: title,
+            createdBy: createdBy,
             stagenumber: stagenumber,
             position: position,
             file:file,

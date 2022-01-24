@@ -233,6 +233,15 @@ abstract class _UserState with Store {
   Future getUsers() async {
     loading = true;
     Either<Failure,List<User>> userlist = await repository.getUsers(user);
+
+    foldResult(
+      result:userlist,
+      onSuccess: (r){
+        users = r;
+        filteredusers = r;
+      }
+    );  
+    
 /*
     userlist.fold(
       (l) => _mapFailureToMessage(l), 
@@ -274,7 +283,14 @@ abstract class _UserState with Store {
   }
 
   Future uploadContent({Content c}) async{
+    c.createdBy = user.coduser;
+    
     user.uploadContent(c:c);
+    Either<Failure,void> upload = await repository.uploadContent(c:c);
+
+    foldResult(
+      result: upload
+    );
   }
 
 
@@ -299,9 +315,10 @@ abstract class _UserState with Store {
     loading = true;
     List<User> l = new List.empty(growable: true);
 
+    // PASAR ESTO A LA BASE DE DATOS !!!!!!!
     for(var cod in cods){
       Either<Failure,User> u  = await repository.getUser(cod);
-     // u.fold((l) => _mapFailureToMessage(l), (u) => l.add(u));
+      u.fold((l) => null, (u) => l.add(u));
     }
 
     dynamicusers = l;

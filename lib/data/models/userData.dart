@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -122,6 +123,16 @@ class UserModel extends User {
         if(json['students']!= null){
           for(var user in json['students']){
             u.students.add(UserModel.fromJson(user,false));
+          }
+        }
+
+        if(json['addedcontent']!= null){
+          for(var content in json['addedcontent']){
+            if(content['type'] == 'meditation-practice'){
+              u.addedcontent.add(MeditationModel.fromJson(content));
+            }else{
+              u.addedcontent.add(LessonModel.fromJson(content));
+            }
           }
         }
 

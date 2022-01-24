@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -44,5 +45,6 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> updateMessage({Message message});
 
-
+  Future<Either<Failure,void>> uploadContent({Content c});
+  
 }

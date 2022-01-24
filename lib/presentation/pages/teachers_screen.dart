@@ -637,14 +637,10 @@ class _AddContentState extends State<AddContent> {
     {'label':'Meditation lesson', 'value':'meditation'}
   ];
 
-  var _userstate;
-
+  UserState _userstate;
   var currentStep = 0;
-
   Content toAdd = new Content(stagenumber: 1, type:'meditation-practice');
-
   File selectedFile;
-
 
   Widget basicInformation(){
       TextEditingController controller = new TextEditingController(text:toAdd.title);
@@ -740,6 +736,7 @@ class _AddContentState extends State<AddContent> {
         ),
         backgroundColor: Colors.white,
         elevation: 0.0,
+        centerTitle:true,
         leading: CloseButton(
           color: Colors.black,
         ),
@@ -773,7 +770,7 @@ class _AddContentState extends State<AddContent> {
                   if(toAdd.isMeditation()){
                     toAdd = new Meditation.fromContent(toAdd);
                   }else {
-
+                    //toAdd = new Lesson.fromContent();
                   }
                   _userstate.uploadContent(c:toAdd);
                   Navigator.pop(context);

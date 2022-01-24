@@ -114,19 +114,27 @@ abstract class _MeditationState with Store {
       if(m.duration != null){
         this.duration = m.duration;
         this.totalduration = m.duration;
-      }else{
+        state = 'pre_guided';
 
+      }else{
         if(selmeditation.file != null){
           if(isAudio(selmeditation.file)){
             hasAudio = true;
-            assetsAudioPlayer.open(Audio.network(selmeditation.file));
-            this.duration = assetsAudioPlayer.current.value.audio.duration;
+            assetsAudioPlayer.open(Audio.network(selmeditation.file)).then((value) {
+              this.totalduration = assetsAudioPlayer.current.value.audio.duration;
+              this.duration = assetsAudioPlayer.current.value.audio.duration;
+              assetsAudioPlayer.stop();
+              state = 'pre_guided';
+              }
+            );
+           // 
           }else{
+            state = 'pre_guided';
+            // SACAR LA DURACION TOTAL DEL VIDEO
             hasVideo = true;
           }
         }
       }
-      state = 'pre_guided';
     }
   }
 

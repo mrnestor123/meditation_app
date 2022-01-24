@@ -11,12 +11,14 @@ class MeditationModel extends Meditation {
       day,
       String type,
       image,
+      description,
       int stagenumber,
       String coduser,
       content,
       int position,
       file,
-      followalong
+      followalong,
+      createdBy
       })
       : super(
             cod: cod,
@@ -24,6 +26,8 @@ class MeditationModel extends Meditation {
             coduser: coduser,
             duration: duration,
             content: content,
+            description: description,
+            createdBy:createdBy,
             day: day,
             type: type,
             image: image,
@@ -42,6 +46,7 @@ class MeditationModel extends Meditation {
           cod: json["cod"] == null ? null : json["cod"],
           file: json['file'] == null ? null : json['file'],
           title: json["title"] == null ? null : json["title"],
+          description:json['description'] == null ? null : json['description'],
           duration:json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']),
           day: json["day"] == null ? null : DateTime.parse(json["day"]),
           type: json["type"] == null ? null : json["type"],
@@ -54,7 +59,16 @@ class MeditationModel extends Meditation {
           //userId: json["userId"] == null ? null : json["userId"],
           );
 
-  Map<String, dynamic> toJson() => { 
+  @override 
+  Map<String,dynamic> toJson(){
+    Map<String,dynamic> json = new Map();
+    json.addAll(super.toJson());
+    // FALTA AÑADIR CONTENIDO ESPECIAL DE LA MEDITACIÓN
+    return json;
+  } 
+
+
+  Map<String, dynamic> shortMeditation() => { 
        // "codmed": this.codmed == null ? null : this.codmed,
         "coduser":this.coduser == null ? null : this.coduser,
         //"title": this.title == null ? null : this.title,

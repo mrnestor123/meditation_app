@@ -11,6 +11,7 @@ import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -69,6 +70,9 @@ abstract class UserRemoteDataSource {
   Future sendMessage(Message m);
 
   Future updateMessage({Message message});
+
+  Future uploadContent({Content c});
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -88,9 +92,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-  //  nodejs = 'https://public.digitalvalue.es:8002';
-      nodejs = 'http://192.168.4.190:8002';
-  //  nodejs = 'http://192.168.4.67:8002';
+   // nodejs = 'https://public.digitalvalue.es:8002';
+  //    nodejs = 'http://192.168.4.190:8002';
+    nodejs = 'http://192.168.4.192:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -215,6 +219,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       for(DocumentSnapshot doc in nostageContent.docs){
         Map data = doc.data();
         if(data['type'] == 'meditation-practice'){
+          //PODRIA SER TODO LA MISMA LISTA !!!!!
           d.nostagemeditations.add(MeditationModel.fromJson(data));
         }else{
           d.nostagelessons.add(LessonModel.fromJson(data));
@@ -314,7 +319,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   
       //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
       if (type == 'meditate') {
-        await database.collection('meditations').add(toAdd[0].toJson());
+        await database.collection('meditations').add(toAdd[0].shortMeditation());
       }else if(type =='lesson'){
         //Añadirlo a las lessonss del usuario !!
       }
@@ -481,6 +486,15 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 
     }catch(e){
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future uploadContent({Content c}) async{
+    try{
+      await database.collection('content').add(c.toJson());
+    } catch(e){
       throw ServerException();
     }
   }

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class Content {
-  String cod, title, description, image, type,file;
+  String cod, title, description, image, type,file, createdBy;
   int stagenumber, position;
   bool blocked;
 
-  Content({cod, @required this.stagenumber, this.title, this.description, this.image, this.type, this.position, this.blocked, this.file}) {
+  Content({cod, @required this.stagenumber, this.title,this.createdBy, this.description, this.image, this.type, this.position, this.blocked, this.file}) {
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();
@@ -26,6 +26,7 @@ class Content {
       'title':title,
       'description':description,
       'image':image,
+      'createdBy':createdBy,
       'type':type,
       'file':file,
       'position':position,
@@ -39,6 +40,7 @@ class Content {
       stagenumber: json['stagenumber'],
       title: json['title'],
       description: json['description'],
+      createdBy: json['createdBy'],
       image: json['image'],
       type: json['type'],
       file: json['file'],

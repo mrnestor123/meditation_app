@@ -28,7 +28,7 @@ class _LoadingState extends State<Loading> {
   double opacity = 1;
   Duration animationDuration = Duration(milliseconds: 200);
   Timer _timer;
-  Duration _duration = Duration(seconds: 5);
+  Duration _duration = Duration(seconds: 6);
   bool started = false;
   VideoPlayerController _controller;
   bool isTablet = false;
@@ -56,6 +56,7 @@ class _LoadingState extends State<Loading> {
     _timer = new Timer.periodic(Duration(seconds: 1), 
         (Timer timer) { 
           if (_duration.inSeconds == 0) {
+            _timer.cancel();
             if(finishedloading && !_user.hasFailed){
               pushPage();
             }else{
@@ -101,7 +102,6 @@ class _LoadingState extends State<Loading> {
     //SACAMOS LA INFORMACIÓN DE LA BASE DE DATOS Y COMPROBAMOS SI EL USUARIO ESTÁ LOGUEADO
     // PARA CONECTAR A LA  BASE DE DATOS
     await _user.connect();
-
    
     finishedloading = true;
 

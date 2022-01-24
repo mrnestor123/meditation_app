@@ -6,6 +6,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -288,6 +289,21 @@ class UserRepositoryImpl implements UserRepository {
     if (await networkInfo.isConnected) {
       try {
         await remoteDataSource.updateMessage(message: message);
+        return Right(null);
+      } on LoginException {
+        return Left(ServerFailure(error: 'User does not exist in the database'));
+      }
+    } else {
+      //Hay que arreglar este método
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> uploadContent({Content c}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.uploadContent(c:c);
         return Right(null);
       } on LoginException {
         return Left(ServerFailure(error: 'User does not exist in the database'));
