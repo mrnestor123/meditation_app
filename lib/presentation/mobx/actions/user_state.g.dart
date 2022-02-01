@@ -246,6 +246,13 @@ mixin _$UserState on _UserState, Store {
     return _$updateStageAsyncAction.run(() => super.updateStage());
   }
 
+  final _$connectAsyncAction = AsyncAction('_UserState.connect');
+
+  @override
+  Future<dynamic> connect() {
+    return _$connectAsyncAction.run(() => super.connect());
+  }
+
   final _$_UserStateActionController = ActionController(name: '_UserState');
 
   @override

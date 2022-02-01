@@ -20,7 +20,7 @@ class Message{
   bool confirmed, read, deleted;
   UserModel user;
 
-  Message({this.cod,this.sender, this.date,this.receiver, this.username,
+  Message({this.cod,this.sender, this.date,this.receiver, this.username, this.user,
     this.type,this.text,this.read = false, this.deleted = false}){
     if (cod == null) {
       var uuid = Uuid();
@@ -55,8 +55,8 @@ class Message{
       type: json['type'],
       text: json['text'],
       deleted: json['deleted'],
-      read: json['read'] != null  ? json['read']: false
-      //user: json['user'] != null ? UserModel.fromJson(json['user']) : null
+      read: json['read'] != null  ? json['read']: false,
+      user: json['user'] != null ? UserModel.fromJson(json['user']) : null
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
+import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -13,6 +14,7 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/presentation/pages/main.dart';
 
 class UserRepositoryImpl implements UserRepository {
   UserRemoteDataSource remoteDataSource;
@@ -290,8 +292,8 @@ class UserRepositoryImpl implements UserRepository {
       try {
         await remoteDataSource.updateMessage(message: message);
         return Right(null);
-      } on LoginException {
-        return Left(ServerFailure(error: 'User does not exist in the database'));
+      } on Exception {
+        return Left(ServerFailure());
       }
     } else {
       //Hay que arreglar este método
@@ -305,8 +307,23 @@ class UserRepositoryImpl implements UserRepository {
       try {
         await remoteDataSource.uploadContent(c:c);
         return Right(null);
-      } on LoginException {
-        return Left(ServerFailure(error: 'User does not exist in the database'));
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      //Hay que arreglar este método
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> expandUser({User u}) async{
+    if (await networkInfo.isConnected) {
+      try {
+        UserModel user =await remoteDataSource.expandUser(u:u);
+        return Right(user);
+      } on Exception {
+        return Left(ServerFailure());
       }
     } else {
       //Hay que arreglar este método

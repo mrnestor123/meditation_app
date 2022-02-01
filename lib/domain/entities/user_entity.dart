@@ -18,7 +18,7 @@ import 'action_entity.dart';
 
 //MIRAR DE REFACTORIZAR ESTA CLASE !!!!!
 // HAY QUE CREAR SUBCLASES,
-//   TEACHER , ADMIN , MEDITATOR , BASEUSER = usuario del que no sacamos ninguna información
+// TEACHER , ADMIN , MEDITATOR , BASEUSER = usuario del que no sacamos ninguna información
 class User {
   String coduser, nombre, role, image, timemeditated, description, location, website, teachinghours;
   //USUARIO DE FIREBASE
@@ -47,8 +47,9 @@ class User {
   List<UserAction> lastactions = new ObservableList();
 
   //LISTA DE CÓDIGOS DE USUARIOS
-  List<dynamic> following = new List.empty(growable: true);
-  List<dynamic> followers = new List.empty(growable: true);
+  List<User> following = new List.empty(growable: true);
+  // CAMBIAR POR FOLLOWSYOU!!!!!!
+  List<User> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
 
   List<File> files = new List.empty(growable:true);
@@ -65,7 +66,7 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions,this.gameposition = 0, this.settings, this.version, 
+        this.answeredquestions,this.gameposition = 0, this.settings, this.version = 0, 
         this.website,this.teachinghours,this.location,this.description
         }) {
    
@@ -85,6 +86,14 @@ class User {
       this.coduser = uuid.v1();
     } else {
       this.coduser = coduser;
+    }
+
+    if(settings == null){
+      settings = UserSettings.empty();
+    }
+
+    if(userStats == null){
+      userStats = UserStats.empty();
     }
       
     // SE EJECUTA SIEMPRE
@@ -214,7 +223,7 @@ class User {
 
   Message sendMessage(User to, String type,[String msg]){
     var msgtypes= {
-      'classrequest': nombre +  ' wants to be your student', 
+      'classrequest': nombre + ' wants to be your student', 
       'text': msg,
       'broadcast':msg
     };
@@ -229,29 +238,29 @@ class User {
     );
   }
 
-  
+  //ACTUALIZAMOS EN LOS DOS SITIOS
   void follow(User u) {
     u.followed = true;
 
-    if(!following.contains(u.coduser)){
+    if(following.where((element) => element.coduser == u.coduser).length == 0){
       // QUE la accion de seguir solo notifique a los que les han seguido!!
       //setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.add(u.coduser);
+      following.add(u);
     }
 
-    u.followers.add(this.coduser);
+    u.followers.add(this);
   }
 
   void unfollow(User u) {   
     u.followed = false;
 
-    if(following.contains(u.coduser)){
+    if(following.where((element) => element.coduser == u.coduser).length > 0){
      // setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.remove(u.coduser);
+      following.remove(u);
     }
 
-    if(u.followers.contains(this.coduser)){
-      u.followers.remove(this.coduser);
+    if(u.followers.where((element) => element.coduser == u.coduser).length > 0){
+      u.followers.remove(this);
     }
   }
 
@@ -337,23 +346,30 @@ class User {
   }
 
 // EL NOMBRE NO ES DESCRIPTIVO !!! NO SE QUE ES
-  void changeRequest(Message m, confirm){
+  Message acceptStudent(Message m, confirm){
     this.messages.removeWhere((element) => element.sender == m.sender);
+    m.deleted = true;
 
     Message reply = new Message(
+      username: this.nombre,
       sender: this.coduser,
+      receiver: m.sender,
       date:DateTime.now(),
-      type:'classrequest',
+      type:'message',
     );
 
-    if(confirm){
-      this.students.add(m.user);
-      reply.text = 'Your class request has been accepted';
-      m.user.messages.add(reply);
-    }else{
-      reply.text = 'Your class request has been denied';
-      m.user.messages.add(reply);
+    if(m.user != null){
+      if(confirm){
+        this.students.add(m.user);
+        reply.text = 'Your class request has been accepted';
+        m.user.messages.add(reply);
+      }else{
+        reply.text = 'Your class request has been denied';
+        m.user.messages.add(reply);
+      }
     }
+
+    return reply;
   }
 
   void takeLesson(Lesson l, [DataBase d]) {

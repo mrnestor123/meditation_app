@@ -27,13 +27,13 @@ mixin _$MeditationState on _MeditationState, Store {
   final _$selmeditationAtom = Atom(name: '_MeditationState.selmeditation');
 
   @override
-  MeditationModel get selmeditation {
+  Meditation get selmeditation {
     _$selmeditationAtom.reportRead();
     return super.selmeditation;
   }
 
   @override
-  set selmeditation(MeditationModel value) {
+  set selmeditation(Meditation value) {
     _$selmeditationAtom.reportWrite(value, super.selmeditation, () {
       super.selmeditation = value;
     });

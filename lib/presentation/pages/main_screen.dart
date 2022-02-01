@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
@@ -37,7 +38,6 @@ class _MainScreenState extends State<MainScreen> {
   @override 
   void initState(){
     super.initState();
-   
   }
 
   @override 
@@ -47,8 +47,8 @@ class _MainScreenState extends State<MainScreen> {
   
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
-      
-      if(_userstate.user.version < _userstate.data.lastVersion.versionNumber && false){
+      // DE MOMENTO EL DIÁLOGO DE VERSIONES ES MEJORABLE !!! NO LO UTLIZAMOS
+      if(false && _userstate.user != null && _userstate.data != null && _userstate.user.version < _userstate.data.lastVersion.versionNumber ){
         _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
 
        showDialog(
@@ -138,29 +138,27 @@ class _MainScreenState extends State<MainScreen> {
       SizedBox(height: Configuration.verticalspacing*2),
       AspectRatio(
         aspectRatio: Configuration.buttonRatio,
-        child: Container(
-          width: Configuration.width,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2)),
-              primary: Colors.grey.withOpacity(0.6)
-            ),
-            onPressed: () { 
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context)=> Scaffold(
-                  appBar:AppBar(backgroundColor: Colors.white, leading: CloseButton(color:Colors.black), elevation:0),
-                  body:WebView(initialUrl:'https://www.amazon.de/-/en/John-Yates-Phd/dp/1781808201/ref=sr_1_1?adgrpid=82460957179&gclid=CjwKCAiAv_KMBhAzEiwAs-rX1Bo6Q8WImFMLs5t4p67OFcglUBMhHJkNp_cCg2N-GjbcYsLJ2UlynxoCYmoQAvD_BwE&hvadid=394592758731&hvdev=c&hvlocphy=20297&hvnetw=g&hvqmt=b&hvrand=2610658949964129015&hvtargid=kwd-488309045472&hydadcr=24491_1812059&keywords=the+mind+illuminated&qid=1637694427&sr=8-1' ,javascriptMode: JavascriptMode.unrestricted),
-                ))
-              ); 
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children:[
-                Text('Get The Mind Illuminated',style:Configuration.text('small',Colors.black)),
-                Image(image:AssetImage('assets/tenstages-book.png'),fit: BoxFit.cover)
-              ]
-            ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
+            shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2)),
+            primary: Colors.grey.withOpacity(0.6)
+          ),
+          onPressed: () { 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context)=> Scaffold(
+                appBar:AppBar(backgroundColor: Colors.white, leading: CloseButton(color:Colors.black), elevation:0),
+                body:WebView(initialUrl:'https://www.amazon.de/-/en/John-Yates-Phd/dp/1781808201/ref=sr_1_1?adgrpid=82460957179&gclid=CjwKCAiAv_KMBhAzEiwAs-rX1Bo6Q8WImFMLs5t4p67OFcglUBMhHJkNp_cCg2N-GjbcYsLJ2UlynxoCYmoQAvD_BwE&hvadid=394592758731&hvdev=c&hvlocphy=20297&hvnetw=g&hvqmt=b&hvrand=2610658949964129015&hvtargid=kwd-488309045472&hydadcr=24491_1812059&keywords=the+mind+illuminated&qid=1637694427&sr=8-1' ,javascriptMode: JavascriptMode.unrestricted),
+              ))
+            ); 
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children:[
+              Text('Get The Mind Illuminated',style:Configuration.text('small',Colors.white)),
+              Image(image:AssetImage('assets/tenstages-book.png'),fit: BoxFit.cover)
+            ]
           ),
         ),
       ),
@@ -172,10 +170,9 @@ class _MainScreenState extends State<MainScreen> {
             Navigator.pushNamed(context, '/teachers');
           },
           child: Row(
-            mainAxisAlignment:MainAxisAlignment.spaceAround,
+            mainAxisAlignment:MainAxisAlignment.spaceBetween,
             children: [
-              Text('Find a teacher', 
-                style:Configuration.text('small',Colors.white)
+              Text('Find a teacher',style:Configuration.text('small',Colors.white)
               ),
               Row(
                 children: [
@@ -193,6 +190,7 @@ class _MainScreenState extends State<MainScreen> {
             ],
           ),
           style:ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
             primary: Configuration.maincolor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2))
           )
@@ -221,6 +219,7 @@ class __TimelineState extends State<_Timeline> {
   List<User> users = new List.empty(growable: true);
   var states = ['Today','This week'];
   ScrollController _scrollController = new ScrollController();
+  ProfileState _profileState;
 
   @override
   void initState() {
@@ -231,7 +230,7 @@ class __TimelineState extends State<_Timeline> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-    users = await _userstate.getUsersList(_userstate.user.following);
+    _profileState = Provider.of<ProfileState>(context);
   }
 
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!

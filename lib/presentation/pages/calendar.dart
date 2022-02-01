@@ -186,10 +186,8 @@ class _CalendarState extends State<CalendarWidget> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              // prev month button
-              
               Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), 
                 style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('small', Colors.black)
                 ),
@@ -198,9 +196,14 @@ class _CalendarState extends State<CalendarWidget> {
                 label: Text(filteredmeditations.length.toString() + ' meditations', 
                 style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('verytiny', Colors.black))
               ),
-              _toggleBtn(false),
-              // next month button
-              _toggleBtn(true),
+              Row(
+                children: [
+                _toggleBtn(false),
+                SizedBox(width: Configuration.verticalspacing),
+                // next month button
+                _toggleBtn(true),
+                ],
+              )
             ],
           ),
           SizedBox(height: 10),

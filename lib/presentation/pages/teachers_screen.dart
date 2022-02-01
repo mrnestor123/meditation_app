@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/content_view.dart';
@@ -34,6 +35,7 @@ class TeachersScreen extends StatefulWidget {
 
 class _TeachersScreenState extends State<TeachersScreen> {
   UserState _userstate;
+  ProfileState _profilestate;
 
   @override
   void initState() {
@@ -44,12 +46,13 @@ class _TeachersScreenState extends State<TeachersScreen> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    _profilestate = Provider.of<ProfileState>(context);
+
     //_userstate.getTeachers();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         leading: ButtonBack(color:Colors.white),
@@ -104,18 +107,20 @@ class _TeachersScreenState extends State<TeachersScreen> {
               color:Configuration.lightgrey,
               child: Observer(
                 builder: (context) {
-                  if(_userstate.loading){
-                    return Center(child: CircularProgress());
-                  }else{
                   return ListView.separated(
                     physics: ClampingScrollPhysics(),
                     itemBuilder: (context,int){
                       User user = _userstate.teachers[int];
                       return TextButton(
                         onPressed:(){
-                          Navigator.push(context, MaterialPageRoute(builder: (context){
-                            return ProfileScreen(user:user);
-                          }));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProfileScreen(
+                                user: user,
+                              )
+                            ),
+                          );
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.all(0)
@@ -144,7 +149,6 @@ class _TeachersScreenState extends State<TeachersScreen> {
                     }, 
                     itemCount: _userstate.teachers.length
                   );
-                  }
                 }
               ),
             ),
@@ -474,7 +478,6 @@ class _FilesGridState extends State<FilesGrid> {
         });
       }
 
-         
       void viewVideo()async{
         VideoPlayerController controller =  VideoPlayerController.network(file.path);
         await controller.initialize();
@@ -526,8 +529,7 @@ class _FilesGridState extends State<FilesGrid> {
                               },
                               icon:Icon(Icons.close),
                               iconSize: Configuration.smicon,
-                              color:Colors.white,
-                              
+                              color:Colors.white
                             ),
                           ),
                         ],
@@ -633,8 +635,8 @@ class _AddContentState extends State<AddContent> {
 
   List<dynamic> types = [
     {'label':'Meditation practice','value':'meditation-practice'},
-    {'label':'lesson','value':'lesson'},
-    {'label':'Meditation lesson', 'value':'meditation'}
+    //{'label':'lesson','value':'lesson'},
+   // {'label':'Meditation lesson', 'value':'meditation'}
   ];
 
   UserState _userstate;

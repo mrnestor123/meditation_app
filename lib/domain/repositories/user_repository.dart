@@ -35,6 +35,7 @@ abstract class UserRepository {
 
   Future<Either<Failure, List<User>>> getTeachers();
 
+  // FUNCIÓN PARA SACAR EL USUARIO CON LECCIONES Y MEDITACIONES !!!!!
   Future<Either<Failure, User>> getUser(String cod);
 
   Future<Either<Failure,Request>>getRequest(String cod);
@@ -46,5 +47,8 @@ abstract class UserRepository {
   Future<Either<Failure,void>> updateMessage({Message message});
 
   Future<Either<Failure,void>> uploadContent({Content c});
-  
+
+  //DEVUELVE UN OBJETO CON MEDITATIONS, LESSONS, ETC
+  Future<Either<Failure, User>> expandUser({User u});
+
 }

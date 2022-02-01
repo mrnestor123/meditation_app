@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
@@ -86,6 +87,8 @@ class MyApp extends StatelessWidget {
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
           //METER  GAME DENTRO DE GAME NO EN EL GLOBAL
           Provider<GameState>(create: (context) => sl<GameState>()),
+          Provider<ProfileState>(create: (context) => sl<ProfileState>()),
+
           Provider<LoginState>(create: (context) => sl<LoginState>()),
           //METER REQUEST SOLO EN LA DE REQUESTS
           Provider<RequestState>(create: (context) => sl<RequestState>())

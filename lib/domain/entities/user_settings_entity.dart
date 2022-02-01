@@ -13,7 +13,8 @@ class UserSettings{
   MeditSettings meditSettings;
 
   String progression;
-  
+
+
   UserSettings({this.meditSettings,this.progression});
 
   void getSettings(){

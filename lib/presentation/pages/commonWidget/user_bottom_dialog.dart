@@ -3,17 +3,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 
 dynamic showUserProfile({User user,String usercod,context,followbutton, followaction, following}) {
-  if(user == null) {
 
-    
-  }
-
-
-
+  if(user != null){
    return showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
@@ -26,50 +22,24 @@ dynamic showUserProfile({User user,String usercod,context,followbutton, followac
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 15),
+                  SizedBox(height: Configuration.verticalspacing),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Flexible(
                         flex: 2,
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Center(
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(2.0),
-                                    decoration: BoxDecoration(
-                                      image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.contain) : null,
-                                      border: Border.all(color: Colors.white, width: 2.5),
-                                      shape: BoxShape.circle
-                                      ),
-                                    height: Configuration.width* 0.25,
-                                    width:  Configuration.width* 0.25,
-                                  ),
-                                  SizedBox(height: 4.0),
-                                  Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.white)),
-                                  SizedBox(height: 10.0),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Column(
-                                        children: [
-                                          Text('Following', style: Configuration.text('tiny', Colors.white)),
-                                          Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.white))   
-                                        ],
-                                      ),
-                                      Column(
-                                        children: [
-                                          Text('Followers', style: Configuration.text('tiny', Colors.white)),
-                                          Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.white))
-                                        ],
-                                      )
-                                  ]),
-                                ],
-                              ),
+                            ProfileCircle(
+                              width: Configuration.width*0.2,
+                              userImage: user.image,
+                              bordercolor: Colors.white,
+                              color: Colors.white,
                             ),
+                            SizedBox(height: Configuration.verticalspacing),
+                            Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.white))
                           ],
                         ),
                       ),
@@ -128,8 +98,8 @@ dynamic showUserProfile({User user,String usercod,context,followbutton, followac
                         children: [
                           OutlinedButton(
                             onPressed: () async{
-                              following = !following;
-                              await followaction();
+                              following = !following; 
+                              await followaction(following);
                               setState((){ });
                             }, 
                             child: Text(!following ? 
@@ -146,10 +116,13 @@ dynamic showUserProfile({User user,String usercod,context,followbutton, followac
                           side: BorderSide(color: Colors.white)
                         ),
                         onPressed: (){
-                          Navigator.push(context, 
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(
-                            builder: (context) => ProfileScreen(user:user)
-                            )
+                              builder: (context) => ProfileScreen(
+                                user: user,
+                              )
+                            ),
                           );
                         }, 
                         child: Text('View Profile', style: Configuration.text('small', Colors.white)))
@@ -163,4 +136,6 @@ dynamic showUserProfile({User user,String usercod,context,followbutton, followac
           );
         },
     );
+  
+  } 
   }

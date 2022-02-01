@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
@@ -79,6 +80,8 @@ class _MobileLayoutState extends State<MobileLayout> {
     
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
+    ProfileState _profilestate = Provider.of<ProfileState>(context);
+
     
     Widget chiporText(String text, bool chip, int page){
       Widget g;
@@ -203,16 +206,12 @@ class _MobileLayoutState extends State<MobileLayout> {
                   child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('small', Colors.white))
                 )) : Container()
             ],
-          ),/*
-          IconButton(
-              icon: Icon(Icons.ac_unit),
-              color: Colors.black,
-              onPressed: () => Navigator.pushNamed(context, '/selectusername')),*/
+          ),
           Container(
             margin:EdgeInsets.only(right: Configuration.width > 500 ? Configuration.tinpadding : 0),
             child: ProfileCircle(
               userImage: _userstate.user.image, 
-              onTap: ()=> Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
+              onTap: ()=>  Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
             ),
           ),
         ],

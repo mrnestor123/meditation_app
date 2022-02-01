@@ -30,9 +30,9 @@ class _SetUserDataState extends State<SetUserData> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Type your username', style: Configuration.text('small', Colors.white)),
+            Text('Type your username', style: Configuration.text('medium', Colors.white)),
             SizedBox(height: Configuration.verticalspacing),
-            TextField(controller: _nameController),
+            TextField(controller: _nameController, style: Configuration.text('small', Colors.white),),
             SizedBox(height: Configuration.verticalspacing * 2),
             BaseButton(
               text: 'Set',

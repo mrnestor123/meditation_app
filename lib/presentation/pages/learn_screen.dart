@@ -460,7 +460,8 @@ class _ContentViewState extends State<ContentView> {
   Widget vistaLeccion() {
     return CarouselSlider.builder(
         itemCount: widget.lesson.text.length,
-        itemBuilder: (context, index) {
+        itemBuilder: (context, index, page) {
+          var slide = widget.lesson.text[index];
           return Container(
             width: Configuration.width,
             color: Configuration.lightgrey,
@@ -472,9 +473,9 @@ class _ContentViewState extends State<ContentView> {
                 children: [
                   Align(
                     alignment: Alignment.topCenter,
-                    child: widget.lesson.text[index]["image"] != '' && widget.lesson.text[index]["image"] != null ? 
+                    child: slide["image"] != '' && slide["image"] != null ? 
                      Image.network(
-                      widget.lesson.text[index]["image"],
+                      slide["image"],
                       width: Configuration.width,
                     ) : Container(),
                   ),
@@ -492,57 +493,25 @@ class _ContentViewState extends State<ContentView> {
                               padding: EdgeInsets.all(Configuration.smpadding)
                             )
                           },
-                          data:widget.lesson.text[index]["text"],
+                          data:slide["text"],
                         )
                       ),
                   ),
                   Row(
-                      mainAxisAlignment: widget.lesson.type == 'meditation'
-                          ? MainAxisAlignment.spaceEvenly
-                          : MainAxisAlignment.center,
-                      children: [
-                         Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                    AnimatedOpacity(
-                                      opacity: reachedend ? 1.0 : 0.0, 
-                                      duration: Duration(seconds: 1),
-                                      child: BaseButton(
-                                        text:'Finish',
-                                        onPressed: () async{
-                                          //NOSE SI HABRA QUE ESPERAR
-                                          await _userstate.takeLesson(widget.lesson);
-                                          Navigator.pop(context, true);
-                                        },
-                                      ),
-                                    )
-                                  ])
-                            ,
-            
-                        /*GestureDetector(
-                          onTap: () async {
-                            await _userstate.takeLesson(widget.lesson);
-                            Navigator.pop(context, true);
-                          },
-                          child: AnimatedContainer(
-                            width: reachedend ? Configuration.width * 0.5 : 0,
-                            curve: Curves.easeIn,
-                            duration: Duration(seconds: 1),
-                            padding: EdgeInsets.all(Configuration.smpadding),
-                            decoration: BoxDecoration(
-                                color: Configuration.darkpurple,
-                                shape: BoxShape.circle),
-                            child: reachedend
-                                ? Center(
-                                    child: Text(
-                                      'Finish',
-                                      style: Configuration.text(
-                                          'medium', Colors.white),
-                                    ),
-                                  )
-                                : Container(),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                        AnimatedOpacity(
+                          opacity: reachedend ? 1.0 : 0.0, 
+                          duration: Duration(seconds: 1),
+                          child: BaseButton(
+                            text:'Finish',
+                            onPressed: () async{
+                              //NOSE SI HABRA QUE ESPERAR
+                              await _userstate.takeLesson(widget.lesson);
+                              Navigator.pop(context, true);
+                            },
                           ),
-                        ) : Container(),*/
+                        )
                       ])
                 ],
               ),

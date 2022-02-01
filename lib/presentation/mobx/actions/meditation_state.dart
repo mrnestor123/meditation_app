@@ -12,7 +12,8 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:mobx/mobx.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:video_player/video_player.dart';
+//import 'package:wakelock/wakelock.dart';
 
 part 'meditation_state.g.dart';
 
@@ -29,7 +30,7 @@ abstract class _MeditationState with Store {
   DataBase data;
 
   @observable
-  MeditationModel selmeditation;  
+  Meditation selmeditation;  
 
   Content content;
 
@@ -68,6 +69,9 @@ abstract class _MeditationState with Store {
 
   Timer timer;
   AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+
+  @observable
+  VideoPlayerController controller;
 
   _MeditationState({this.meditate});
 
@@ -123,14 +127,17 @@ abstract class _MeditationState with Store {
             assetsAudioPlayer.open(Audio.network(selmeditation.file)).then((value) {
               this.totalduration = assetsAudioPlayer.current.value.audio.duration;
               this.duration = assetsAudioPlayer.current.value.audio.duration;
-              assetsAudioPlayer.stop();
+              //assetsAudioPlayer.stop();
               state = 'pre_guided';
               }
             );
            // 
           }else{
-            state = 'pre_guided';
-            // SACAR LA DURACION TOTAL DEL VIDEO
+            controller = new VideoPlayerController.network(selmeditation.file)..initialize().then((value) {
+              this.totalduration = controller.value.duration;
+              this.duration = controller.value.duration;
+              state = 'pre_guided';
+            });
             hasVideo = true;
           }
         }
@@ -144,17 +151,22 @@ abstract class _MeditationState with Store {
     totalduration = new Duration(minutes: time);
   }
 
+
   @action
   void startTimer() {
     // The following line will enable the Android and iOS wakelock.
-    Wakelock.enable();
+    //Wakelock.enable();
 
     
     if(hasAudio){
       assetsAudioPlayer.playOrPause();
     }
 
+    if(hasVideo){
+      controller.play();
+    }
 
+   
     var oneSec = new Duration(seconds: 1);
     
     if(!delaying){
@@ -163,8 +175,7 @@ abstract class _MeditationState with Store {
         shadow=true;
       });
     }
-    
-    
+  
     
     if(timer != null){
       timer.cancel();
@@ -201,13 +212,22 @@ abstract class _MeditationState with Store {
   @action
   void pause() {
     this.state = 'paused';
+
+     if(hasVideo){
+      controller.pause();
+    }
+
+    if(hasAudio){
+      assetsAudioPlayer.pause();
+    }
+
     timer.cancel();
   }
 
   @action
   void cancel() {
     // The next line disables the wakelock again.
-    Wakelock.disable();
+    //Wakelock.disable();
     if(this.selmeditation != null ){
       state = 'pre_guided';
     }else{
@@ -238,22 +258,25 @@ abstract class _MeditationState with Store {
 
   @action
   Future finishMeditation() async {
-    int currentposition = user.position;
-    sentenceindex = 0;
-    
-    if(timer != null || timer.isActive){
-      timer.cancel();
-      duration = new Duration(minutes: totalduration.inMinutes);
-    }
+    if(selmeditation == null || selmeditation.file == null || selmeditation.file.isEmpty){
+      int currentposition = user.position;
+      sentenceindex = 0;
+      
+      if(timer != null || timer.isActive){
+        timer.cancel();
+        duration = new Duration(minutes: totalduration.inMinutes);
+      }
 
-    if(selmeditation != null){
-      selmeditation.duration = totalduration;
+      if(selmeditation != null){
+        selmeditation.duration = totalduration;
+      }
+      //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
+      Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : selmeditation, user: user, d: data));
+      selmeditation = null;
     }
-    //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
-    Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : selmeditation, user: user, d: data));
-    selmeditation = null;
 
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
     state = 'finished';
+
   }
 }

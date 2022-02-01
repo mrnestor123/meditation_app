@@ -639,7 +639,7 @@ class _CountdownState extends State<Countdown> {
     return Stack(children: [
       CarouselSlider.builder(
           itemCount: _meditationstate.selmeditation.content.entries.length,
-          itemBuilder: (context, index) {
+          itemBuilder: (context, index,o) {
             return Container(
                 width: Configuration.width,
                 height: Configuration.height,
@@ -871,7 +871,9 @@ class _CountdownState extends State<Countdown> {
   }
 
   dynamic exit(context,{nopop = false}){
-    bool pop = false;
+    bool pop = true;
+
+
     if(_meditationstate.state == 'started'){
       _meditationstate.pause();
     }
@@ -891,6 +893,10 @@ class _CountdownState extends State<Countdown> {
           }
         }
       );
+    }else{
+      if(!nopop){
+        Navigator.pop(context);
+      }
     }
 
     return pop;
@@ -900,7 +906,7 @@ class _CountdownState extends State<Countdown> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {  
-        return Future.value(exit(context));
+        return Future.value(exit(context,nopop: true));
       },
       child: Scaffold(
           appBar: AppBar(

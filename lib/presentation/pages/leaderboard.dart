@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -96,17 +97,14 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         iconSize: Configuration.smicon,
                         icon: Icon(following || u.followed != null && u.followed ? Icons.person : Icons.person_add), 
                         onPressed: () async { 
-                          bool following = _userstate.user.following.contains(u.coduser);
                           
-                          await showUserProfile(user:u,context:context, followbutton:true,
-                          followaction: 
-                          () async{
-                              following = !following;
+                          await showUserProfile(user:u,context:context, followbutton:true, 
+                          followaction: (following) async{
                               await _userstate.follow(u, following);
                               setState(() {
                                 
                               });
-                            }, following: following ); 
+                            }, following: following || (u.followed != null && u.followed)); 
                           
                           setState((){});}
                         ) :  Container(),
@@ -128,8 +126,10 @@ class _LeaderBoardState extends State<LeaderBoard> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
+    
+    // ESTO PARA SACAR LOS USUARIOS, CADA VEZ !!! ??? NO ES SEGURO AL 100%%%%
     _userstate.getUsers();
-    _userstate.getUsersList(_userstate.user.following);
+   // _userstate.getUsersList(_userstate.user.following);
   }
 
   @override
@@ -249,7 +249,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         controller: _tabController,
                         children: [
                           createTable(_userstate.filteredusers, context,false),
-                          createTable(_userstate.dynamicusers, context, true),
+                          createTable(_userstate.user.following, context, true),
                         ])
                       );
                   }
@@ -273,6 +273,7 @@ class UserProfile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var _profileState = Provider.of<ProfileState>(context);
     return GestureDetector(
       onTap: ()=> {
         showUserProfile(user:user, context:context)

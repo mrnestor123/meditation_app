@@ -62,12 +62,11 @@ class UserModel extends User {
         userStats: userStats
       );
 
-  factory UserModel.fromRawJson(String str) =>
-      UserModel.fromJson(json.decode(str));
+  factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str),true);
 
   String toRawJson() => json.encode(toJson());
 
-  factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =true]) {
+  factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =false]) {
     UserModel u = UserModel(
         coduser: json["coduser"],
         nombre: json['nombre'],
@@ -91,61 +90,74 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       ); 
 
-      if(expand){
-        if(json['meditations'] != null){
-            for(var med in json['meditations'] ){
-              u.totalMeditations.add(MeditationModel.fromJson(med));
-            }
-          
-          u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
-          u.userStats.total.meditations = u.totalMeditations.length;
-        }
+    if(expand){
+      if(json['meditations'] != null){
+          for(var med in json['meditations'] ){
+            u.totalMeditations.add(MeditationModel.fromJson(med));
+          }
         
-        if(json['following']!=null){
-          u.following.addAll(json['following']);
-        }
-        if(json['followsyou'] != null){
-          u.followers.addAll(json['followsyou']);
-        }
+        u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
+        u.userStats.total.meditations = u.totalMeditations.length;
+      }
 
-        if(json['notifications']!=null){
-          for(var not in json['notifications']){
-            u.notifications.add(Notify.fromJson(not));
-          }
-        }
-
-        if(json['messages']!=null){
-          for(var msg in json['messages']){
-            u.messages.add(Message.fromJson(msg));
-          }
-        }
-
+      // MIRAR SI UN PROFESOR QUIERE SEGUIR Y QUE LE SIGAN !!
+      if(u.isTeacher()){
         if(json['students']!= null){
           for(var user in json['students']){
             u.students.add(UserModel.fromJson(user,false));
           }
         }
-
-        if(json['addedcontent']!= null){
-          for(var content in json['addedcontent']){
-            if(content['type'] == 'meditation-practice'){
-              u.addedcontent.add(MeditationModel.fromJson(content));
-            }else{
-              u.addedcontent.add(LessonModel.fromJson(content));
-            }
+      }else{
+        if(json['following']!=null){
+          for(var user in json['following']){
+            //MEJORABLE !!
+            u.following.add(UserModel.fromJson(user));
           }
         }
 
-        if(json['files']!= null){
-          try{
-          for(var file in json['files']){
-            u.files.add(File.fromUri(Uri.file(file)));
-          }
-          }catch(e){
-            print(e);
+          
+        if(json['followsyou']!=null){
+          for(var user in json['followsyou']){
+            //MEJORABLE !!
+            u.followers.add(UserModel.fromJson(user));
           }
         }
       }
+
+      if(json['notifications']!=null){
+        for(var not in json['notifications']){
+          u.notifications.add(Notify.fromJson(not));
+        }
+      }
+
+      if(json['messages']!=null){
+        for(var msg in json['messages']){
+          u.messages.add(Message.fromJson(msg));
+        }
+      }
+
+      
+
+      if(json['addedcontent']!= null){
+        for(var content in json['addedcontent']){
+          if(content['type'] == 'meditation-practice'){
+            u.addedcontent.add(MeditationModel.fromJson(content));
+          }else{
+            u.addedcontent.add(LessonModel.fromJson(content));
+          }
+        }
+      }
+
+      if(json['files']!= null){
+        try{
+        for(var file in json['files']){
+          u.files.add(File.fromUri(Uri.file(file)));
+        }
+        }catch(e){
+          print(e);
+        }
+      }
+    }
 
 
     //  u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
@@ -171,7 +183,7 @@ class UserModel extends User {
         'location':location,
         'website': website,
         "settings": settings == null ? null: settings.toJson(),
-        "following": following.map((element) => element).toList(),
+        "following": following.map((element) => element.coduser).toList(),
         //MENSAJES Y ACTIONS MUCHO JSON !!!!
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "students": students.map((stud)=> stud.coduser).toList(),

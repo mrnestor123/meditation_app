@@ -75,7 +75,7 @@ class _SettingsState extends State<Settings> {
                   onPressed: () { 
                   _userstate.user=null;
                   _loginstate.logout();
-                  Navigator.pushReplacementNamed(context, '/welcome');
+                  Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
                 }, child: Text('LOG OUT',style: Configuration.text('small', Colors.white),)),
             ),
             SizedBox(height: Configuration.verticalspacing*2),

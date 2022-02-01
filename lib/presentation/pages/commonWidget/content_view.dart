@@ -4,6 +4,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
@@ -124,6 +125,18 @@ class _ContentShowState extends State<ContentShow> {
 
   Widget meditation(Content c){
     
+    Widget finishedScreen(){
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(child: Text('The meditation has ended', style: Configuration.text('small',Colors.black))),
+          SizedBox(height: Configuration.verticalspacing),
+          Text('Thank you for helping make this app better',style: Configuration.text('small',Colors.black))
+        ],
+      );
+    }
+
     List<Widget> mapToWidget(map){  
      List<Widget> l = new List.empty(growable: true);
      l.add(SizedBox(height: 30));
@@ -160,7 +173,6 @@ class _ContentShowState extends State<ContentShow> {
     return l;
     
   }
-
 
     Widget slider(){
       return Slider(
@@ -233,20 +245,34 @@ class _ContentShowState extends State<ContentShow> {
       );
     }
 
-    return Stack(
+    Widget video(){
+      return Container(
+          //height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
+         // width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
+         // ESTO ESTA BIEN ???
+          height: (Configuration.width *0.9) / _meditationstate.controller.value.aspectRatio,
+          width: (Configuration.height * 0.9) *  _meditationstate.controller.value.aspectRatio,
+          child: VideoPlayer(_meditationstate.controller)
+      );
+    }
+
+    Widget meditating(){
+      return Stack(
         children: [
           Align(
             alignment: Alignment.center,
-            child: AspectRatio(
-              aspectRatio:1,
-              child: Container(
-                margin:EdgeInsets.all(Configuration.smpadding),
-                width: Configuration.width*0.6,
-                decoration: BoxDecoration(
-                  borderRadius:BorderRadius.circular(Configuration.borderRadius),
-                  color:Colors.grey
+            child: _meditationstate.hasVideo && _meditationstate.controller.value.duration.inSeconds > 0 ? 
+              video() :
+              AspectRatio(
+                aspectRatio:1,
+                child: Container(
+                  margin:EdgeInsets.all(Configuration.smpadding),
+                  width: Configuration.width*0.6,
+                  decoration: BoxDecoration(
+                    borderRadius:BorderRadius.circular(Configuration.borderRadius),
+                    color:Colors.grey
+                  ),
                 ),
-              ),
             )
           ),
 
@@ -278,6 +304,13 @@ class _ContentShowState extends State<ContentShow> {
         */
 
       ]);
+
+
+    }
+
+    return Observer(builder: (context) { 
+      return _meditationstate.state == 'finished' ? finishedScreen() : meditating();
+    });
   }
 
 
@@ -291,16 +324,20 @@ class _ContentShowState extends State<ContentShow> {
         // ESTO HABRÁ QUE HACERLO PARA LOS DOS
         leading: CloseButton(
             color: Colors.black,
-            onPressed: () => showAlertDialog(
-              title: 'Are you sure you want to exit ?',
-              context: context,
-              text: text
-          )),
+            onPressed: () { 
+              if(_meditationstate.state != 'finished') {
+                showAlertDialog(
+                title: 'Are you sure you want to exit ?',
+                context: context,
+                text: text
+              );
+            }else{ Navigator.pop(context);
+            }}
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
       ),
-      body:
-        !started ? portada(c:widget.content): 
+      body:!started ? portada(c:widget.content): 
         widget.content.isMeditation() ? meditation(widget.content):
         Container()
     );

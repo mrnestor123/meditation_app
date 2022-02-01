@@ -73,6 +73,8 @@ abstract class UserRemoteDataSource {
 
   Future uploadContent({Content c});
 
+  Future expandUser({User u});
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -92,9 +94,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-   // nodejs = 'https://public.digitalvalue.es:8002';
-  //    nodejs = 'http://192.168.4.190:8002';
-    nodejs = 'http://192.168.4.192:8002';
+    nodejs = 'https://public.digitalvalue.es:8002';
+  //    nodejs = 'http://192.168.4.192:8002';
+      //nodejs = 'http://192.168.1.130:8002';
+
+  //  nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -118,7 +122,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         return u;
       }
     }catch(e) {
-      print({'EXCEPtion', e.toString()});
+      print({'Exception', e.toString()});
     }
   }
 
@@ -155,6 +159,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       StageModel one = StageModel.fromRawJson(response.body);
 
       //hay que pasar esto al nuevo setting con UserStats
+      // HAY QUE CREAR UN MODELO USERMODEL 
       UserModel user = new UserModel(
           coduser: usuario.uid,
           user: usuario,
@@ -200,10 +205,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<DataBase> getData([bool getStages]) async  {
     DataBase d = new DataBase();
-
-    //HAGO ESTO DEMASIADO
     var url = Uri.parse('$nodejs/stages');
-    print('getting data');
     try{
       http.Response response = await http.get(url);
       List<StageModel> stages = new List.empty(growable: true);
@@ -214,6 +216,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         d.stages.add(StageModel.fromJson(stage));      
       }
 
+      // esto también debería sacarlo en el servidor
       QuerySnapshot nostageContent = await database.collection('content').where('stagenumber', isEqualTo: 'none').get();
 
       for(DocumentSnapshot doc in nostageContent.docs){
@@ -226,6 +229,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         }
       }
 
+      // ESTO SE DEBERÍA SACAR CON LAS ETAPAS
       QuerySnapshot versions = await database.collection('versions').get();
 
       for(DocumentSnapshot doc in versions.docs){
@@ -248,6 +252,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       var usersUrl = Uri.parse('$nodejs/users/${loggeduser.coduser}');
       http.Response response = await http.get(usersUrl);
       var users = json.decode(response.body);
+
       for(var user in users){
         l.add(UserModel.fromJson(user,false));
       }
@@ -391,12 +396,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
 
-  //MIRAR DE COMO IMPLEMENTAR ESTO !!
-  Future <User> quickUser(dynamic coduser) async {
-
-    
-  }
-
 
   Future updateRequest(Request r, [Notify n]) async{
     try{
@@ -499,5 +498,22 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
+  @override
+  Future<User> expandUser({User u}) async{
+    try {
+     
+      var url  =  Uri.parse('$nodejs/expanduser/${u.coduser}');
+      http.Response response = await http.get(url); 
+      if(response.statusCode == 200){
+        UserModel newUser = UserModel.fromRawJson(response.body);
+        return newUser;
+      }else{ 
+        throw ServerException();
+      }
+    }catch(e){
+      print(e.toString());
+      throw ServerException();
+    }
+  }
   
 }

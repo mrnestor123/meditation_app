@@ -17,16 +17,12 @@ import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
 import 'package:mobx/mobx.dart';
 
+import 'error_helper.dart';
+
 part 'user_state.g.dart';
 
 class UserState extends _UserState with _$UserState {
-  UserState(
-      {
-      UserRepository userRepository
-      })
-      : super(
-        repository: userRepository
-      );
+  UserState({UserRepository userRepository}): super(repository: userRepository);
 }
 
 abstract class _UserState with Store {
@@ -77,26 +73,19 @@ abstract class _UserState with Store {
     }
   }
 
-
   // CREO QUE ESTO YA NO SE UTILIZA 
+  // HABRÁ QUE BORRAR ESTO !!!!
   @action 
   Future getTeachers() async {
     loading = true;
     Either<Failure,List<User>> userlist = await repository.getTeachers();
-/*    foldResult(
-      result: await repository.getTeachers(),
-
-
-    )*/
-
-    /*
-    userlist.fold(
-      (l) => _mapFailureToMessage(l), 
-      (r) {
-        loading = false;
+    foldResult(
+      result: userlist,
+      onSuccess: (r){
         teachers = r;
+        loading =false;
       }
-    );*/
+    );
   }
 
   @action
@@ -140,10 +129,8 @@ abstract class _UserState with Store {
   Future follow(User u, bool follow) async {
      if (follow) {
       user.follow(u);
-      dynamicusers.add(u);
     } else {
       user.unfollow(u);
-      dynamicusers.remove(u);
     } 
 
     // Updateamos también los datos del usuario val que se sigue
@@ -152,7 +139,6 @@ abstract class _UserState with Store {
   }
 
   
-
   @action
   Future changeName(String username) async {
     user.nombre = username;
@@ -242,19 +228,13 @@ abstract class _UserState with Store {
       }
     );  
     
-/*
-    userlist.fold(
-      (l) => _mapFailureToMessage(l), 
-      (r) {
-        users = r;
-        filteredusers = users;
-      }
-    );*/
+    loading = false;
   }
 
 
   Future sendMessage(User to, String type, [String text]) async {
     Message m = user.sendMessage(to,type, text);
+    to.messages.add(m);
     Either<Failure,void> userlist = await repository.sendMessage(message: m);
 
     foldResult(
@@ -263,16 +243,24 @@ abstract class _UserState with Store {
   }
 
 
-  void changeRequest(Message m, bool confirm){
-    user.changeRequest(m,confirm);
+  // ESTO ES PARA ACEPTAR STUDIANTES
+  void acceptStudent(Message m, bool confirm){
+    Message reply = user.acceptStudent(m,confirm);
     var messages ={
       'accept': 'Has accepted your request to join his courses',
       'deny': 'Has denied your request to join his courses'
     };
+
+    repository.sendMessage(message: reply);
+    repository.updateMessage(message: m);
+    repository.updateUser(user: user);
+
     //user.sendMessage(to, 'text', confirm ? messages['accept']: messages['deny']);
     // ESTO NO DEBERÍA SER ASI !!!!!
-    repository.updateUser(user: m.user);
-    repository.updateUser(user: user);
+    /*
+    if(m.user != null){
+      repository.updateUser(user: m.user);
+    }*/
 
   }
 
@@ -307,7 +295,9 @@ abstract class _UserState with Store {
     }
   }
 
+  Future <List<User>> getFollowers(){
 
+  }
 
   //FROM LIST OF USER CODS WE GET THE USERS
   // ESTO LO HACEMOS EN EL SERVER !!!
@@ -334,54 +324,3 @@ abstract class _UserState with Store {
   }
 
 }
-
-
-
-
-
-
-void foldResult({Either<Failure,dynamic> result, dynamic onSuccess}){
-  String errorMessage;
-  String header;
-
-  String _mapFailureToMessage(Failure failure) {   
-    // Instead of a regular 'if (failure is ServerFailure)...'
-    switch (failure.runtimeType) {
-      case ServerFailure:
-        header ='Server failure';
-        errorMessage = 'An unexpected error has ocurred';
-        break;
-      case CacheFailure:
-        header = 'Cache failure';
-        errorMessage = 'An unexpected error has ocurred';
-        break;
-      case LoginFailure: 
-        errorMessage = failure.error != null ? failure.error : 'User not found in the database';
-        break;
-      case ConnectionFailure: 
-        errorMessage = 'You are not connected to the internet. Please, connect to it and restart the application';
-        header = 'Connection Failure';
-        break;
-      default:
-        errorMessage = 'Unexpected Error';
-        break;
-    }
-
-    return errorMessage;
-  }
-
-  result.fold(
-    (Failure l) { 
-      _mapFailureToMessage(l);
-      showErrorDialog(header: header, description: errorMessage);
-    }, 
-    (r) { if(onSuccess !=null) onSuccess(r); }
-  );
-
-
-
-}
-
-
- 
-

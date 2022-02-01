@@ -42,13 +42,13 @@ class _MessagesIconState extends State<MessagesIcon> {
         ),
         //trailing: ,
         subtitle: Text(
-          m.date.toString().substring(0,17),style: Configuration.text('small',Colors.grey)),
+          m.date.toString().substring(0,16),style: Configuration.text('small',Colors.grey)),
         trailing:m.type == 'classrequest' ?
         Row(
           mainAxisSize:MainAxisSize.min,
           children: [
-            IconButton(onPressed: (){_userstate.changeRequest(m, true);  stateSetter((){});},color: Colors.green, icon: Icon(Icons.check_circle_outline),iconSize: Configuration.smicon),
-            IconButton(onPressed: (){_userstate.changeRequest(m, false); stateSetter((){});},color: Colors.red, icon: Icon(Icons.highlight_off),iconSize: Configuration.smicon)        
+            IconButton(onPressed: (){_userstate.acceptStudent(m, true);  stateSetter((){});},color: Colors.green, icon: Icon(Icons.check_circle_outline),iconSize: Configuration.smicon),
+            IconButton(onPressed: (){_userstate.acceptStudent(m, false); stateSetter((){});},color: Colors.red, icon: Icon(Icons.highlight_off),iconSize: Configuration.smicon)        
           ],
         ): IconButton(
           onPressed: (){

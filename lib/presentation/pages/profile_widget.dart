@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
@@ -32,10 +33,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool uploading = false;
   final ImagePicker _picker = ImagePicker();
   UserState _userstate;
+  ProfileState _profilestate;
 
   bool editingProfile = false;
   bool isMe = false;
 
+  //PASAR ESTO AL 
   void _showPicker(context) {
     void changeUserImage(image) async{
       if(image != null){          
@@ -164,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget teacherProfile(){
+  Widget teacherProfile(User user){
     Widget teacherView(){
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -216,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       elevation: 0,
                     ),
                     body: WebView(
-                      initialUrl:'https:' + _userstate.user.website,
+                      initialUrl:'https:' + user.website,
                       javascriptMode: JavascriptMode.unrestricted),
                   )
                   )
@@ -310,7 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget userProfile(){
+  Widget userProfile(User user){
     return  ListView(
       primary: false,
       physics: ClampingScrollPhysics(),
@@ -327,7 +330,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               MaterialPageRoute(
                   builder: (context) => 
                   ViewFollowers(
-                    cods:user.following,
+                    users:user.following,
                     title: 'Following',
               )),
           ), 
@@ -344,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 context,
                   MaterialPageRoute(
                       builder: (context) => ViewFollowers(
-                      cods: user.followers ,
+                      users: user.followers ,
                       title: 'Followers',
                   )
                 ),
@@ -404,17 +407,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ]
           ), 
         ): Container(),
-        CalendarWidget(meditations: widget.user != null ? widget.user.totalMeditations : _userstate.user.totalMeditations),
+        CalendarWidget(meditations: user.totalMeditations),
         SizedBox(height: Configuration.verticalspacing),
       ],
     );
   }
 
+
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _profilestate = Provider.of<ProfileState>(context);
+    _userstate = Provider.of<UserState>(context);
+    _profilestate.init(widget.user != null ? widget.user : _userstate.user, widget.user ==null);
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
-    user = widget.user != null ? widget.user : _userstate.user;
-    isMe =  user.coduser == _userstate.user.coduser;
+    user = _profilestate.selected;
+    isMe = _profilestate.isMe;
 
     return Scaffold(
       appBar: AppBar(
@@ -438,82 +449,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container()
           ],
       ),
-      body: Stack(children: <Widget>[
-        Container(
-            height: Configuration.height,
-            width: Configuration.width,
-            color: Configuration.maincolor),
-        Column(
-          children: <Widget>[
-            Stack(
-              fit:StackFit.passthrough,
-              alignment:AlignmentDirectional.center,
-              children: [
-                ProfileCircle(
-                  width:100,
-                  bordercolor: Colors.white,
-                  userImage: user.image,
-                  color:Colors.transparent,
-                  onTap:()=>{
-                    if(isMe){
-                      _showPicker(context)
-                    }
-                  }
-                ),
-                uploading ? 
-                Align(
-                  alignment:Alignment.center,
-                  child: CircularProgress(
-                    color:Colors.white
-                  )
-                ): Container(width: 0),
-
-                isMe ?
-                Positioned(
-                  right:0,
-                  top:0,
-                  child: GestureDetector(
-                    onTap: (){
-                      if(isMe){
-                        _showPicker(context);
+      body:Stack(children: <Widget>[
+            Container(
+                height: Configuration.height,
+                width: Configuration.width,
+                color: Configuration.maincolor),
+            Column(
+              children: <Widget>[
+                Stack(
+                  fit:StackFit.passthrough,
+                  alignment:AlignmentDirectional.center,
+                  children: [
+                    //PASAR UPLOAD A PROFILE WIDGET !! 
+                    ProfileCircle(
+                      width:100,
+                      bordercolor: Colors.white,
+                      userImage: user.image,
+                      color:Colors.transparent,
+                      onTap:()=>{
+                        if(isMe){
+                          _showPicker(context)
+                        }
                       }
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(Configuration.tinpadding),
-                      decoration:BoxDecoration(
-                        shape:BoxShape.circle,
-                        color:Colors.white
-                      ),
-                      child: Icon(Icons.edit_rounded,
-                      size: Configuration.tinicon, color:Colors.black
-                      ),
                     ),
+                    uploading ? 
+                    Align(
+                      alignment:Alignment.center,
+                      child: CircularProgress(
+                        color:Colors.white
+                      )
+                    ): Container(width: 0),
+                    isMe ? Positioned(
+                      right:0,
+                      top:0,
+                      child: GestureDetector(
+                        onTap: (){
+                          if(isMe){
+                            _showPicker(context);
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(Configuration.tinpadding),
+                          decoration:BoxDecoration(
+                            shape:BoxShape.circle,
+                            color:Colors.white
+                          ),
+                          child: Icon(Icons.edit_rounded,
+                          size: Configuration.tinicon, color:Colors.black
+                          ),
+                        ),
+                      ),
+                    ) :Container(),
+                  ],
+                ),
+                SizedBox(height: Configuration.verticalspacing),
+                Text(user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white)),
+                SizedBox(height: Configuration.verticalspacing),
+                identificationText(),
+                SizedBox(height:Configuration.verticalspacing*2),
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    width:Configuration.width,
+                    height:Configuration.height,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                    ),
+                    child: Observer(builder: (context){
+                     return _profilestate.loading ? 
+                      Row(
+                       mainAxisAlignment: MainAxisAlignment.center,
+                       children: [
+                         CircularProgress(),
+                       ],
+                      ):
+                      user.isTeacher() ? teacherProfile(_profilestate.selected): 
+                      userProfile(_profilestate.selected);
+                    })
                   ),
-                ) :Container(),
+                ),
               ],
             ),
-            SizedBox(height: Configuration.verticalspacing),
-            Text(user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white)),
-            SizedBox(height: Configuration.verticalspacing),
-            identificationText(),
-            SizedBox(height:Configuration.verticalspacing*2),
-            Expanded(
-              flex: 4,
-              child: Container(
-                width:Configuration.width,
-                height:Configuration.height,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-                ),
-                child: user.isTeacher() ? 
-                teacherProfile() 
-                : userProfile()
-              ),
-            ),
-          ],
-        ),
-      ]),
+      ])
     );
   }
 }
@@ -555,6 +573,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
   @override
   Widget build(BuildContext context) {
     final _userstate =Provider.of<UserState>(context);
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -613,11 +632,11 @@ class _ViewFollowersState extends State<ViewFollowers> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ProfileScreen(
-                                              user: u,
-                                        )
-                                      ),
-                                  );
+                                      builder: (context) => ProfileScreen(
+                                        user: u,
+                                      )
+                                    ),
+                                );
                               },
                               style: OutlinedButton.styleFrom(
                                 elevation: 0.0,
