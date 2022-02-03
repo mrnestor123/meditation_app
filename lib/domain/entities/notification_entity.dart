@@ -9,7 +9,7 @@ class Notify{
   Request r;
   bool seen;
 
-  Notify({this.cod,this.codrequest,this.message,this.type,this.date,this.r,this.coduser,this.usernamedoing,this.requesttitle, this.userimage,this.seen}){
+  Notify({this.cod,this.codrequest,this.message,this.type = 'comment',this.date,this.r,this.coduser,this.usernamedoing= '',this.requesttitle = '', this.userimage,this.seen}){
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();
@@ -36,10 +36,10 @@ class Notify{
     codrequest : json['codrequest'],
     coduser: json['coduser'],
     message :json['message'],
-    usernamedoing: json['usernamedoing'],
-    requesttitle: json['requesttitle'],
+    usernamedoing: json['usernamedoing'] != null ? json['usernamedoing']: '',
+    requesttitle: json['requesttitle'] != null ? json['requesttitle']: '',
     userimage: json['userimage'],
-    type: json['type'],
+    type: json['type'] != null ? json['type']: 'comment',
     seen: json['seen'] != null ? json['seen'] : false,
     r: json['request'] != null ? Request.fromJson(json['request']): null,
     date : json["date"] == null ? DateTime.now() : DateTime.parse(json["date"])

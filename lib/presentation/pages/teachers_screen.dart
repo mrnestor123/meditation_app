@@ -35,7 +35,6 @@ class TeachersScreen extends StatefulWidget {
 
 class _TeachersScreenState extends State<TeachersScreen> {
   UserState _userstate;
-  ProfileState _profilestate;
 
   @override
   void initState() {
@@ -46,8 +45,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-    _profilestate = Provider.of<ProfileState>(context);
-
+    if(_userstate.teachers.isEmpty){
+      _userstate.getTeachers();
+    }
     //_userstate.getTeachers();
   }
 

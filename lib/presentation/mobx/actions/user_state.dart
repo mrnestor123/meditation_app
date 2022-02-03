@@ -133,9 +133,11 @@ abstract class _UserState with Store {
       user.unfollow(u);
     } 
 
+    repository.follow(u: user, followed:u, follows: follow);
+
     // Updateamos también los datos del usuario val que se sigue
-    repository.updateUser(user: u);
-    repository.updateUser(user:user);
+   // repository.updateUser(user: u);
+   // repository.updateUser(user:user);
   }
 
   
@@ -190,21 +192,15 @@ abstract class _UserState with Store {
   @action 
   Future connect() async {
     var loggedresult = await repository.islogged();
-
     loggedresult.fold((l) => hasFailed = false, (r) { user = r; loggedin = true;});
     
     if(user != null){
       var dataresult = await repository.getData();
-      var teachersresult = await repository.getTeachers();
 
       foldResult(
         result: dataresult, 
-        onSuccess: (DataBase d)async {
+        onSuccess: (DataBase d) {
           data = d;
-          foldResult(
-            result: teachersresult,
-            onSuccess: (t)=> teachers = t
-          );
           getUsers();
           hasFailed= false;
         }

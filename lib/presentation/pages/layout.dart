@@ -74,9 +74,8 @@ class _MobileLayoutState extends State<MobileLayout> {
   Widget build(BuildContext context) {
     DateTime currentBackPressTime;
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp
-    ]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);

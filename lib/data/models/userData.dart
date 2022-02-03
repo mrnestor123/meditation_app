@@ -107,7 +107,28 @@ class UserModel extends User {
             u.students.add(UserModel.fromJson(user,false));
           }
         }
+
+        if(json['addedcontent']!= null){
+          for(var content in json['addedcontent']){
+            if(content['type'] == 'meditation-practice'){
+              u.addedcontent.add(MeditationModel.fromJson(content));
+            }else{
+              u.addedcontent.add(LessonModel.fromJson(content));
+            }
+          }
+        }
+
+        if(json['files']!= null){
+          try{
+            for(var file in json['files']){
+              u.files.add(File.fromUri(Uri.file(file)));
+            }
+          }catch(e){
+            print(e);
+          }
+        }
       }else{
+        // SE PUEDE SEGUIR A UN PROFESOR !!! YO DIRÍA QUE SIII
         if(json['following']!=null){
           for(var user in json['following']){
             //MEJORABLE !!
@@ -124,6 +145,7 @@ class UserModel extends User {
         }
       }
 
+      
       if(json['notifications']!=null){
         for(var not in json['notifications']){
           u.notifications.add(Notify.fromJson(not));
@@ -135,28 +157,7 @@ class UserModel extends User {
           u.messages.add(Message.fromJson(msg));
         }
       }
-
       
-
-      if(json['addedcontent']!= null){
-        for(var content in json['addedcontent']){
-          if(content['type'] == 'meditation-practice'){
-            u.addedcontent.add(MeditationModel.fromJson(content));
-          }else{
-            u.addedcontent.add(LessonModel.fromJson(content));
-          }
-        }
-      }
-
-      if(json['files']!= null){
-        try{
-        for(var file in json['files']){
-          u.files.add(File.fromUri(Uri.file(file)));
-        }
-        }catch(e){
-          print(e);
-        }
-      }
     }
 
 

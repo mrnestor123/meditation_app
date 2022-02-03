@@ -48,7 +48,7 @@ class User {
 
   //LISTA DE CÓDIGOS DE USUARIOS
   List<User> following = new List.empty(growable: true);
-  // CAMBIAR POR FOLLOWSYOU!!!!!!
+
   List<User> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
 
@@ -248,7 +248,7 @@ class User {
       following.add(u);
     }
 
-    u.followers.add(this);
+    //u.followers.add(this);
   }
 
   void unfollow(User u) {   
@@ -259,9 +259,9 @@ class User {
       following.remove(u);
     }
 
-    if(u.followers.where((element) => element.coduser == u.coduser).length > 0){
+    /*if(u.followers.where((element) => element.coduser == u.coduser).length > 0){
       u.followers.remove(this);
-    }
+    }*/
   }
 
   void updateStage(DataBase data) {
@@ -345,7 +345,6 @@ class User {
     }
   }
 
-// EL NOMBRE NO ES DESCRIPTIVO !!! NO SE QUE ES
   Message acceptStudent(Message m, confirm){
     this.messages.removeWhere((element) => element.sender == m.sender);
     m.deleted = true;

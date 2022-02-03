@@ -97,12 +97,11 @@ abstract class _LoginState with Store {
           //hay que desconectar !!
           //googleSignin.disconnect();
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
-
         if (googleSignInAccount != null) {
           GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
           AuthCredential credential = GoogleAuthProvider.credential(
-              idToken: googleSignInAuthentication.idToken,
-              accessToken: googleSignInAuthentication.accessToken);
+            idToken: googleSignInAuthentication.idToken,
+            accessToken: googleSignInAuthentication.accessToken);
           user = await auth.signInWithCredential(credential);
         }
       } else {
@@ -123,6 +122,7 @@ abstract class _LoginState with Store {
         }else{
           log = await repository.loginUser(usuario: user.user);
           log.fold(
+            // SI FALLA HAY QUE BORRARLO DE LA AUTENTICACIÓN
             (Failure f) => errormsg = _mapFailureToMessage(f), 
             (dynamic u) => loggeduser = u
           );
@@ -216,8 +216,12 @@ abstract class _LoginState with Store {
   @action
   Future logout() async {
     loggeduser = null;
-    googleSignin.disconnect();
-    auth.signOut();
+    if(await googleSignin.isSignedIn()){
+      googleSignin.disconnect();
+    }
+    if(auth.currentUser != null){
+      auth.signOut();
+    }
     await repository.logout();
   }
 

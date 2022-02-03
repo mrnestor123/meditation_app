@@ -51,4 +51,7 @@ abstract class UserRepository {
   //DEVUELVE UN OBJETO CON MEDITATIONS, LESSONS, ETC
   Future<Either<Failure, User>> expandUser({User u});
 
+  Future<Either<Failure, void>> follow({User u, User followed, bool follows});
+
+
 }

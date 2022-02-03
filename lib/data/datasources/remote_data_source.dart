@@ -75,6 +75,8 @@ abstract class UserRemoteDataSource {
 
   Future expandUser({User u});
 
+  Future follow({User user, User followed, bool follows});
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -95,10 +97,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
     nodejs = 'https://public.digitalvalue.es:8002';
-  //    nodejs = 'http://192.168.4.192:8002';
+   //  nodejs = 'http://192.168.4.195:8002';
       //nodejs = 'http://192.168.1.130:8002';
 
-  //  nodejs = 'http://192.168.4.67:8002';
+   // nodejs = 'http://192.168.4.67:8002';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -107,7 +109,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try{
       var url = Uri.parse('$nodejs/connect/$cod');
       http.Response response = await http.get(url).timeout(
-        const Duration(seconds:15),
+        const Duration(seconds: 20),
         onTimeout: () {
           // Time has run out, do what you wanted to do.
           return http.Response('Error', 400); 
@@ -479,10 +481,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       QuerySnapshot msgref = await database.collection('messages').where('cod', isEqualTo: message.cod).get();
       String documentId = msgref.docs[0].id;
       
-
       await database.collection("messages").doc(documentId).update(message.toJson());
-  
-
 
     }catch(e){
       throw ServerException();
@@ -501,7 +500,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<User> expandUser({User u}) async{
     try {
-     
       var url  =  Uri.parse('$nodejs/expanduser/${u.coduser}');
       http.Response response = await http.get(url); 
       if(response.statusCode == 200){
@@ -510,6 +508,30 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }else{ 
         throw ServerException();
       }
+    }catch(e){
+      print(e.toString());
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future follow({User user, User followed, bool follows}) async{
+
+    try {
+      var url  =  Uri.parse('$nodejs/follow/${followed.coduser}');
+      http.Response response = await http.post(url,
+        headers: {"Content-Type": "application/json"},
+        body: json.encode({'coduser':user.coduser, 'follows': follows})
+      ); 
+      
+      if(response.statusCode == 200){
+        //UserModel newUser = UserModel.fromRawJson(response.body);
+        //return newUser;
+      }else{ 
+        throw ServerException();
+      }
+
+
     }catch(e){
       print(e.toString());
       throw ServerException();

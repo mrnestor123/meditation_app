@@ -56,9 +56,6 @@ dependencies:
   connectivity_plus: ^2.2.0
   
 
-
-
-
   flutter:
     sdk: flutter
 

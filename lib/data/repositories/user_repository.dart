@@ -330,4 +330,27 @@ class UserRepositoryImpl implements UserRepository {
       return Left(ConnectionFailure());
     }
   }
+
+
+
+  @override
+  Future<Either<Failure, void>> follow({User u, User followed, bool follows}) async{
+    if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.follow(user:u, followed: followed, follows: follows);
+        return Right(null);
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      //Hay que arreglar este método
+      return Left(ConnectionFailure());
+    }
+  }
+
+
+
+
+
+
 }

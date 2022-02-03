@@ -258,6 +258,7 @@ class _RequestsState extends State<Requests> {
       ) :
      ListView.builder(
       physics:ClampingScrollPhysics(),
+      // ESTO eSTA HECHO MUY RARO !!!
       itemCount:request.length + 1,
       itemBuilder: (context,index) {
         if(index == 0){
@@ -751,7 +752,7 @@ class _RequestViewState extends State<RequestView> {
                     child: Text('There are no comments at the moment. You can add one at the bottom'),
                   ) 
               ),
-              SizedBox(height: Configuration.verticalspacing*2)
+              SizedBox(height: Configuration.verticalspacing*10)
             ],
           );
         }
