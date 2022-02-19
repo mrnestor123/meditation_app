@@ -83,7 +83,7 @@ abstract class _GameState with Store {
       user.answeredquestions[selectedgame.cod] = answeredquestions.length;
     } 
     
-    if(user.answeredquestions[selectedgame.cod] < answeredquestions.length){
+    if(user.answeredquestions[selectedgame.cod] <= answeredquestions.length){
       
       user.answeredquestions[selectedgame.cod] = answeredquestions.length;
       max = true;

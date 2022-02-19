@@ -97,7 +97,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
               children: [
                 Text('TMI TEACHERS', style:Configuration.text('big',Colors.white)),
                 SizedBox(height: Configuration.verticalspacing/2),
-                Text('In order to reach the latter stages. Asking for help is the best option', style:Configuration.text('small',Colors.white))
+                Text('In order to reach advanced stages and clearing your doubts. Asking for help is the best option', style:Configuration.text('small',Colors.white))
               ],
             )
           ),

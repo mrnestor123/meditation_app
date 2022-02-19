@@ -93,7 +93,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
   }
 
-
   Widget textIcon(IconData icon, String text, [onclick]){
     return GestureDetector(
       onTap: (){
@@ -416,11 +415,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void didChangeDependencies(){
     super.didChangeDependencies();
+
     _profilestate = Provider.of<ProfileState>(context);
     _userstate = Provider.of<UserState>(context);
-    _profilestate.init(widget.user != null ? widget.user : _userstate.user, widget.user ==null);
+    _profilestate.init(widget.user != null ? widget.user : _userstate.user, widget.user == null || widget.user.coduser == _userstate.user.coduser);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -559,10 +558,11 @@ class _ViewFollowersState extends State<ViewFollowers> {
   }
 
   @override
-  void didChangeDependencies()async {
+  void didChangeDependencies() async {
     super.didChangeDependencies();
     final _userstate = Provider.of<UserState>(context);
 
+    // A LO MEJOR ESTO ES LO QUE FALLA !!!
     if(widget.cods != null){
       users = await _userstate.getUsersList(widget.cods);  
     }else{
@@ -661,7 +661,6 @@ class _ViewFollowersState extends State<ViewFollowers> {
 }
 
 
-
 class Students extends StatefulWidget {
   const Students() : super();
 
@@ -681,8 +680,6 @@ class _StudentsState extends State<Students> {
     );
   }
 }
-
-
 
 
 

@@ -66,7 +66,7 @@ class User {
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions,this.gameposition = 0, this.settings, this.version = 0, 
+        this.answeredquestions ,this.gameposition = 0, this.settings, this.version = 0, 
         this.website,this.teachinghours,this.location,this.description
         }) {
    
@@ -86,6 +86,10 @@ class User {
       this.coduser = uuid.v1();
     } else {
       this.coduser = coduser;
+    }
+
+    if(answeredquestions == null){
+      answeredquestions = new Map();
     }
 
     if(settings == null){
@@ -374,9 +378,8 @@ class User {
   void takeLesson(Lesson l, [DataBase d]) {
     if(l.stagenumber ==this.stagenumber){
       if (this.position <= l.position 
-          && (
-            this.userStats.lastread.length == 0 
-          || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0
+          && (this.userStats.lastread == null 
+          || (this.userStats.lastread.length == 0 || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0)
           )
         ) {
         this.userStats.takeLesson();

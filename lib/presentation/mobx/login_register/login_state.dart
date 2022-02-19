@@ -199,6 +199,7 @@ abstract class _LoginState with Store {
       case 'account-exists-with-different-credential': return 'Account exists with different credential';
       case 'weak-password': return 'The password is too weak';
       case 'email-already-in-use': return 'The account already exists for that email';
+      case 'network_error': return 'You are not connected to the internet';
       default: return 'An error has ocurred';
     }
   }

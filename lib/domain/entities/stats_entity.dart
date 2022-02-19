@@ -23,6 +23,7 @@ class UserStats {
      total: TotalStats.empty() ,
      streak: 0,
      meditationtime:  new Map(),
+     lastread: new List.empty(growable: true),
     );
 
   factory UserStats.fromJson(Map<String, dynamic> json) =>
