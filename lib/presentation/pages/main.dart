@@ -15,6 +15,7 @@ import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:meditation_app/presentation/pages/teachers_screen.dart';
+import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
@@ -82,13 +83,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     //we pass the userstate class to all the classes
     return MultiProvider(
+        //UTILIZAR SOLO MULTIPROVIDER PARA ALGUNAS COSAS !!! 
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
           //METER  GAME DENTRO DE GAME NO EN EL GLOBAL
           Provider<GameState>(create: (context) => sl<GameState>()),
           Provider<ProfileState>(create: (context) => sl<ProfileState>()),
-
           Provider<LoginState>(create: (context) => sl<LoginState>()),
           //METER REQUEST SOLO EN LA DE REQUESTS
           Provider<RequestState>(create: (context) => sl<RequestState>())
@@ -113,6 +114,7 @@ class MyApp extends StatelessWidget {
               '/settings': (BuildContext context) => Settings(),
               '/gamestarted': (BuildContext context) => GameStarted(),
               '/teachers': (BuildContext context) => TeachersScreen(),
+              '/carrousel':(BuildContext context)=> CarrouselIntro(),
               '/addcontent':(BuildContext context)=> AddContent()
             }));
   }

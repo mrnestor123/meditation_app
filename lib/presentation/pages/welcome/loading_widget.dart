@@ -77,25 +77,27 @@ class _LoadingState extends State<Loading> {
     _controller.dispose();
   }
 
+//METER CAROUSEL AQUI ??????
   void pushPage(){
-    _user.user != null ?
-          _user.user.nombre == null|| _user.user.nombre.isEmpty ? 
-            Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => SetUserData()),
-            (Route<dynamic> route) => false,
-          ) :
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Layout()),
-            (Route<dynamic> route) => false,
-          ) 
-        : 
+    if(_user.user != null){
+      _user.user.nombre == null || _user.user.nombre.isEmpty ? 
+        Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => SetUserData()),
+        (Route<dynamic> route) => false,
+      ) : 
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => Layout()),
+        (Route<dynamic> route) => false,
+      );
+    }else {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => WelcomeWidget()),
         (Route<dynamic> route) => false,
       );
+    }
   }
 
   void userisLogged(context) async {

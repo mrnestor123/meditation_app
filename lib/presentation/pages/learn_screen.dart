@@ -228,7 +228,7 @@ class _StageViewState extends State<StageView> {
                         width: Configuration.width * 0.5,
                         child: Text(
                           content.title,
-                          style:Configuration.text("verytiny", _userstate.user.position < content.position &&
+                          style:Configuration.text("small", _userstate.user.position < content.position &&
                                   _userstate.user.stagenumber <= content.stagenumber ? Colors.grey : Colors.black, 
                                 ),
                         ),
@@ -335,7 +335,7 @@ class _StageViewState extends State<StageView> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text('Filter',
-                  style: Configuration.text('tiny', Colors.black),
+                  style: Configuration.text('small', Colors.black),
                 ),
                 OutlinedButton(
                   onPressed: () => setState(

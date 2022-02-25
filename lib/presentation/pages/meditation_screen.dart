@@ -76,11 +76,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   }
 
-  Widget guidedMeditation() {
+  Widget freeMeditation() {
     return layout(
       Column(
       children: [
-        SizedBox(height: 20),
+        SizedBox(height: Configuration.verticalspacing*2),
         buttonModal(
           CirclePicker(),
           'Duration', 
@@ -90,30 +90,25 @@ class _MeditationScreenState extends State<MeditationScreen> {
               }
             )
         ),
-        SizedBox(height: 25),
+        SizedBox(height: Configuration.verticalspacing*2),
         buttonModal(
-          MeditationList(), 
-          'Guided Meditations', 
-          Observer(
-              builder: (context) {
-                if(_meditationstate.selmeditation != null){
-                  return Image(image: NetworkImage(_meditationstate.selmeditation.image), fit: BoxFit.cover);
-                }else{
-                  return Text('Press to select one',style: Configuration.text('small',Configuration.maincolor));
-                }
-              }
-            ),
-            true
-          ),
+          Container(), 
+          "Ambient Sound"
+          
+          , Observer(builder: (context){
+            return Text('nothingselected',style: Configuration.text('small', Colors.black));
+          }))
+
       ]), 
       () => {
         Navigator.pushNamed(context, '/countdown').then(
+          //ESTO ES MUY COMPLEJO
           (value) => setState(()=>{
             _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null
           })
         ), 
       }, _meditationstate.duration.inMinutes > 0,
-            'Set the timer for a guided or a free meditation' 
+        'Set the timer for a free meditation' 
       );
   }
 
@@ -221,9 +216,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        SizedBox(height: 35),
+        SizedBox(height: Configuration.verticalspacing*2.5),
         title != null ? Center(child: Text(title,style: Configuration.text('smallmedium', Colors.black),textAlign: TextAlign.center)): Container(),
-        SizedBox(height: 10), 
+        SizedBox(height: Configuration.verticalspacing), 
         Expanded(child: 
           child,
         ),
@@ -234,6 +229,20 @@ class _MeditationScreenState extends State<MeditationScreen> {
       ],
     );
   }
+
+
+  Widget guidedMeditations(){
+
+    return ListView(
+        children:[
+          SizedBox(height: Configuration.verticalspacing*2.5),
+          MeditationList()
+        ]
+    );
+  }
+
+
+
 
   @override 
   void initState(){
@@ -266,7 +275,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           _meditationstate.switchpage(newPage, true);
         });
       },
-      children: [guidedMeditation(), games()],
+      children: [freeMeditation(), guidedMeditations(), games()],
     );
   }
 }
@@ -285,7 +294,9 @@ class _MeditationListState extends State<MeditationList> {
   MeditationState _meditationstate;
   UserState _userstate;
   List<int> stages = [1,2,3,4,5,6,7,8,9,10];
-  
+  List <Meditation> stageMeditations = new List.empty(growable:true);
+  List<Meditation> optionalMeditations = new List.empty(growable: true);
+
   /*
   Widget meditation(meditation,_blocked){
 
@@ -350,72 +361,112 @@ class _MeditationListState extends State<MeditationList> {
   }
   */
 
-  List<Widget> meditations() { 
-    List<Widget> meditcontent = new List.empty(growable: true);
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+
+    _meditationstate = Provider.of<MeditationState>(context);
+    _userstate = Provider.of<UserState>(context);
 
     for(Stage s in _userstate.data.stages){
       for(Meditation m in s.meditpath){
-        var _blocked = _userstate.user.isBlocked(m);
-        bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
+        stageMeditations.add(m);
+      }
+    }
 
-        meditcontent.add(
+
+    optionalMeditations = _userstate.data.nostagemeditations;
+
+    print(optionalMeditations.length);
+    print(stageMeditations.length);
+
+  }
+
+  List<Widget> meditations(meditations, optional) { 
+    List<Widget> meditcontent = new List.empty(growable: true);
+
+    for(Meditation m in meditations){
+      var _blocked = !optional && _userstate.user.isBlocked(m);
+      //bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
+
+      meditcontent.add(
         ClickableSquare(
           blockedtext: 'Unlocked at stage '+ m.stagenumber.toString(),
           blocked: _blocked,
           text: m.title,
-          selected: isSelected,
+          selected: false,
           image: m.image,
           onTap:(){
-            _meditationstate.selectMeditation(m);
-            setState(() {
-            });
+            showModalBottomSheet(
+              context: context, 
+              builder: (context){
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+                  child: Column(mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(height: Configuration.verticalspacing*3),
+                      Row(
+                        children: [
+                          Flexible(
+                            flex:2,
+                            child: Image(image: NetworkImage(m.image))
+                          ),
+                          SizedBox(width: Configuration.verticalspacing),
+                          Flexible(
+                            flex:4,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(m.title, style:Configuration.text('medium', Colors.black)),
+                                Text( m.description.isNotEmpty ? m.description : ' ',style:Configuration.text('small',Colors.grey))
+                              ],
+                            )
+                          )
+                        ],
+                      ),
+                      SizedBox(height: Configuration.verticalspacing),
+                      BaseButton(
+                        text: 'Start',
+                        onPressed: (){
+                          _meditationstate.selectMeditation(m);
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/countdown').then(
+                            //ESTO ES MUY COMPLEJO
+                            (value) => setState(()=>{
+                              _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null
+                            })
+                          );
+                        },
+                      ),
+                      SizedBox(height: Configuration.verticalspacing*3)
+                    ],
+                  ),
+                );
+              });
+          
           }    
         )
       );
-        //meditcontent.add(meditation(med,_blocked));
-      }
+      //meditcontent.add(meditation(med,_blocked));
     }
       
     return meditcontent;
   }
 
-  List<Widget> optionalmeditations(){
-    List<Widget> meditcontent = new List.empty(growable: true);
-
-    for(Meditation m in _userstate.data.nostagemeditations){
-      bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
-
-      meditcontent.add(
-        ClickableSquare(
-          blocked: false,
-          text: m.title,
-          selected: isSelected,
-          image: m.image,
-          onTap:(){
-            _meditationstate.selectMeditation(m);
-            setState(() {
-            });
-          }    
-        )
-      );
-    }
-
-    return meditcontent;
-  }
 
   @override
   Widget build(BuildContext context) {
-    _meditationstate = Provider.of<MeditationState>(context);
-    _userstate = Provider.of<UserState>(context);
-
+  
     return Container(
-      padding:EdgeInsets.all(12.0),
+      padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children:[ 
-            SizedBox(height: 10),
             Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
             GridView(
               shrinkWrap: true,
@@ -424,7 +475,7 @@ class _MeditationListState extends State<MeditationList> {
                 crossAxisCount: Configuration.crossAxisCount,
                 crossAxisSpacing: 10
               ),
-              children: meditations()
+              children: meditations(stageMeditations,false)
             ),
             Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
             GridView(
@@ -434,7 +485,7 @@ class _MeditationListState extends State<MeditationList> {
                 crossAxisCount: Configuration.crossAxisCount,
                 crossAxisSpacing: 10
               ),
-              children: optionalmeditations()
+              children: meditations(optionalMeditations,true)
             ),
           ]
         ),
@@ -872,7 +923,6 @@ class _CountdownState extends State<Countdown> {
 
   dynamic exit(context,{nopop = false}){
     bool pop = true;
-
 
     if(_meditationstate.state == 'started'){
       _meditationstate.pause();

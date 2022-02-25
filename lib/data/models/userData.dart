@@ -38,6 +38,7 @@ class UserModel extends User {
       location,
       website,
       int version,
+      seenIntroCarousel,
       stats})
       : super(
         coduser: coduser,
@@ -59,7 +60,8 @@ class UserModel extends User {
         followed:followed,
         classic: classic,
         answeredquestions: answeredquestions,
-        userStats: userStats
+        userStats: userStats,
+        seenIntroCarousel: seenIntroCarousel
       );
 
   factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str),true);
@@ -70,6 +72,7 @@ class UserModel extends User {
     UserModel u = UserModel(
         coduser: json["coduser"],
         nombre: json['nombre'],
+        seenIntroCarousel: json["seenIntroCarousel"] == null ? false : json['seenIntroCarousel'],
         position: json['position'] == null ? 0 : json['position'],
         gameposition: json['gameposition'] == null ? 0 : json['gameposition'],
         meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
@@ -182,6 +185,7 @@ class UserModel extends User {
         'description': description,
         'teachinghours':teachinghours, 
         'location':location,
+        "seenIntroCarousel":seenIntroCarousel,
         'website': website,
         "settings": settings == null ? null: settings.toJson(),
         "following": following.map((element) => element.coduser).toList(),

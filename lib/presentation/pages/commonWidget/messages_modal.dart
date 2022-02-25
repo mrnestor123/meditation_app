@@ -125,6 +125,7 @@ class _MessagesIconState extends State<MessagesIcon> {
     List<Message> unreadMessages = _userstate.user.messages.where((element) => !element.read).toList();
 
     return Stack(
+       alignment:Alignment.center,
         children:[
           IconButton(
             onPressed:(){

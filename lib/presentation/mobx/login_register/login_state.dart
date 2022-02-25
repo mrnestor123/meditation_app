@@ -11,6 +11,7 @@ import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:mobx/mobx.dart';
 
@@ -152,16 +153,24 @@ abstract class _LoginState with Store {
     if (loggeduser != null && user != null) {
       if(loggeduser.nombre == null){
         Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => SetUserData()),
-        (Route<dynamic> route) => false
-        );
-      }else{
-        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => Layout()),
-          (Route<dynamic> route) => false,
-        );
+          MaterialPageRoute(builder: (context) => SetUserData()),
+          (Route<dynamic> route) => false
+          );
+      }else{
+        if(!loggeduser.seenIntroCarousel){
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => CarrouselIntro()),
+            (Route<dynamic> route) => false,
+          );
+        }else{
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Layout()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } 
     } else if(errormsg != null && errormsg != ''){
       if(type == 'google' && user != null){

@@ -6,6 +6,7 @@ import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
+import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:provider/provider.dart';
 
 class SetUserData extends StatefulWidget {
@@ -45,9 +46,9 @@ class _SetUserDataState extends State<SetUserData> {
                         _userstate.setUser(_loginstate.loggeduser);
                       }
                       _userstate.changeName(_nameController.text);
-                       Navigator.pushAndRemoveUntil(
+                      Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => Layout()),
+                        MaterialPageRoute(builder: (context) => CarrouselIntro()),
                         (Route<dynamic> route) => false,
                       );
                     }

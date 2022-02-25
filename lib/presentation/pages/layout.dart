@@ -81,7 +81,7 @@ class _MobileLayoutState extends State<MobileLayout> {
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     ProfileState _profilestate = Provider.of<ProfileState>(context);
 
-    
+
     Widget chiporText(String text, bool chip, int page){
       Widget g;
 
@@ -91,7 +91,7 @@ class _MobileLayoutState extends State<MobileLayout> {
         g = Chip(
           padding: EdgeInsets.all(Configuration.tinpadding),
           label: Text(text, style: Configuration.text('tiny', Colors.black))
-          );
+        );
       } else {
         g =Chip(
           label: Text(text, style: Configuration.text('tiny', Colors.black)), 
@@ -149,11 +149,17 @@ class _MobileLayoutState extends State<MobileLayout> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // HACEN FALTA 3 OBSERVERS ???
                       Observer(builder: (BuildContext context) {  
-                        return chiporText('Meditate', _meditationstate.currentpage == 0, 0);
+                        return chiporText('Free', _meditationstate.currentpage == 0, 0);
                       }),
+
                       Observer(builder: (BuildContext context) {  
-                        return chiporText('Games', _meditationstate.currentpage == 1, 1);
+                        return chiporText('Guided', _meditationstate.currentpage == 1, 1);
+                      }),
+
+                      Observer(builder: (BuildContext context) {  
+                        return chiporText('Games', _meditationstate.currentpage == 2, 2);
                       }),
                     ],
                   ),

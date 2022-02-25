@@ -26,7 +26,7 @@ class User {
   int stagenumber, position, meditposition, gameposition, percentage, version;
   Stage stage;
   //follows es cuando un usuario TE SIGUE!!
-  bool classic, followed, stageupdated;
+  bool classic, followed, stageupdated, seenIntroCarousel;
 
   //para el modal de progreso
   Progress progress;
@@ -67,7 +67,7 @@ class User {
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
         this.answeredquestions ,this.gameposition = 0, this.settings, this.version = 0, 
-        this.website,this.teachinghours,this.location,this.description
+        this.website,this.teachinghours,this.location,this.description, this.seenIntroCarousel = false
         }) {
    
     if(userStats != null){

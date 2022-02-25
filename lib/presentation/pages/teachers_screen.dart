@@ -126,9 +126,13 @@ class _TeachersScreenState extends State<TeachersScreen> {
                           padding: EdgeInsets.all(0)
                         ),
                         child: ListTile(
-                          subtitle: Text('subtitle', 
-                            style:Configuration.text('tiny',Colors.grey)
-                          ),
+                          subtitle: user.description != null && user.description.isNotEmpty ? Container(
+                            height: Configuration.verticalspacing*1.5,
+                            child: Text(user.description, 
+                              overflow: TextOverflow.ellipsis,
+                              style:Configuration.text('tiny',Colors.grey)
+                            ),
+                          ): Container(),
                           leading: ProfileCircle(
                             width:30,
                             userImage: user.image,
