@@ -8,8 +8,6 @@ import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
 
-
-
 class MessagesIcon extends StatefulWidget {
   Color color;
   MessagesIcon({this.color}) : super();
@@ -74,7 +72,7 @@ class _MessagesIconState extends State<MessagesIcon> {
                 width: Configuration.height*0.5,
                 decoration: BoxDecoration(
                   color:Colors.white,
-                  borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                  borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
                 ),
                 child: Column(
                   children: [
@@ -83,7 +81,7 @@ class _MessagesIconState extends State<MessagesIcon> {
                       padding: EdgeInsets.all(Configuration.smpadding),
                       decoration: BoxDecoration(
                         color:Configuration.maincolor,
-                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius))
+                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius/3))
                       ),
                       child: Center(
                         child: Text('Messages',
@@ -106,7 +104,7 @@ class _MessagesIconState extends State<MessagesIcon> {
                       Center(
                           child: Padding(
                             padding:  EdgeInsets.all(Configuration.smpadding),
-                            child: Text('There are no messages at the moment', style:Configuration.text('small',Colors.black)),
+                            child: Text('There are no messages at the moment', style:Configuration.text('small',Colors.grey)),
                           )
                         )
                     )

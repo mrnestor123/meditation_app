@@ -40,14 +40,14 @@ class WelcomeWidget extends StatelessWidget {
                   ),
                   Spacer(),
                   BaseButton(
-                    text: 'LOGIN',
+                    text: 'LOG IN',
                     onPressed: (){
                       Navigator.pushNamed(context, '/login');
                     },
                   ),
                   SizedBox(height: Configuration.verticalspacing*2),
                   BaseButton(
-                    text: 'REGISTER',
+                    text: 'SIGN UP',
                     onPressed: (){
                       Navigator.pushNamed(context, '/register');
                     },

@@ -40,7 +40,7 @@ class PathScreen extends StatelessWidget {
         style: OutlinedButton.styleFrom(
             side: BorderSide(
             width: 3.0,
-            color: Configuration.maincolor,
+            color: Colors.grey,
             style: BorderStyle.solid,
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -130,7 +130,7 @@ class PathScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _userstate.user.passedObjectives[key] == true ? 
-            Icon(Icons.check_circle, size: Configuration.medpadding, color: Configuration.maincolor):
+            Icon(Icons.check_circle, size: Configuration.medpadding, color: Colors.green):
             Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
             SizedBox(height: Configuration.blockSizeVertical * 0.2),
             Container(

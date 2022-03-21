@@ -30,7 +30,7 @@ class Configuration {
   static Color lightgrey = Color.fromARGB(255, 242, 242, 242);
 
   //lighter purple
-  static Color secondarycolor = Color.fromRGBO(165, 149, 248, 1.0);
+  static Color secondarycolor = Color.fromRGBO(3, 169, 244, 1);
   //pink
   static Color accentcolor = Color.fromRGBO(241, 212, 240, 1.0);
 

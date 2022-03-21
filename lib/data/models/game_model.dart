@@ -29,6 +29,8 @@ class GameModel extends Game {
 
   String toRawJson() => json.encode(toJson());
 
+
+  // hay que hacer aqui lo del content tambien;;;
   factory GameModel.fromJson(Map<String, dynamic> json) { 
     
     GameModel g = GameModel(

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:uuid/uuid.dart';
 
 class Content {
-  String cod, title, description, image, type,file, createdBy;
+  String cod, title, description, image, type,file;
+  User createdBy;
   int stagenumber, position;
   bool blocked;
 
-  Content({cod, @required this.stagenumber, this.title,this.createdBy, this.description, this.image, this.type, this.position, this.blocked, this.file}) {
+  Content({cod, @required this.stagenumber, this.title,this.createdBy, this.description, this.image, this.type, this.position, this.blocked, this.file = ''}) {
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();
@@ -26,7 +30,7 @@ class Content {
       'title':title,
       'description':description,
       'image':image,
-      'createdBy':createdBy,
+      'createdBy':createdBy.coduser,
       'type':type,
       'file':file,
       'position':position,
@@ -34,19 +38,24 @@ class Content {
     };
   }
 
-  factory Content.fromJson(json){
-    return Content(
-      cod: json['cod'],
-      stagenumber: json['stagenumber'],
-      title: json['title'],
-      description: json['description'],
-      createdBy: json['createdBy'],
-      image: json['image'],
-      type: json['type'],
-      file: json['file'],
-      position: json['position'],
-      blocked: json['blocked']
-    );
+
+
+
+  IconData getIcon(){
+    if(this.file.isNotEmpty){
+      return isAudio(this.file) ? Icons.audiotrack : Icons.browse_gallery;
+    }else {
+      return Icons.abc;
+    }
+  }
+
+
+  String getText(){
+    if(this.file.isNotEmpty){
+      return isAudio(this.file) ? 'Audio' : 'Video';
+    }else {
+      return 'Text';
+    }
   }
 
   // funciones ?? 

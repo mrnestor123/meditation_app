@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
+import '../../domain/entities/content_entity.dart';
+import 'helpers.dart';
+
 class MeditationModel extends Meditation {
 
   MeditationModel(
@@ -37,27 +40,31 @@ class MeditationModel extends Meditation {
             position: position);
 
   factory MeditationModel.fromRawJson(String str) =>
-      MeditationModel.fromJson(json.decode(str));
+      MeditationModel.fromJson(json.decode(str), false);
 
   String toRawJson() => json.encode(toJson());
 
-  factory MeditationModel.fromJson(Map<String, dynamic> json) =>
-      MeditationModel(
-          cod: json["cod"] == null ? null : json["cod"],
-          file: json['file'] == null ? null : json['file'],
-          title: json["title"] == null ? null : json["title"],
-          description:json['description'] == null ? null : json['description'],
-          duration:json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']),
-          day: json["day"] == null ? null : DateTime.parse(json["day"]),
-          type: json["type"] == null ? null : json["type"],
-          image: json["image"] == null ? null : json['image'],
-          stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
-          position: json['position'] == null ? null : json['position'],
-          coduser: json['coduser'] == null ? null : json['coduser'],
-          followalong: json['followalong'] == null ? null : json['followalong'],
-          content: json['content'] == null ? null: json['content'],
-          //userId: json["userId"] == null ? null : json["userId"],
-          );
+  @override
+  factory MeditationModel.fromJson(Map<String, dynamic> json, [isShort = false]) {
+      // LAS MEDITACIONES HECHAS POR EL USUARIO SOLO TIENEN CÓDIGO Y 
+      MeditationModel model = medorLessfromJson(json, true);
+      
+      if(!isShort){ 
+        model.content =  json['content'] == null ? null: json['content'];
+        model.followalong = json['followalong'] == null ? null : json['followalong'];
+      }else{
+        model = new MeditationModel();
+
+     }
+
+     model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']);
+
+      model.day = json["day"] == null ? null : DateTime.parse(json["day"]);
+
+      model.coduser = json['coduser'] == null ? null : json['coduser'];
+
+      return model;
+  }
 
   @override 
   Map<String,dynamic> toJson(){

@@ -13,16 +13,20 @@ class Lesson extends Content {
       stagenumber,
       type,
       position,
+      createdBy,
       file,
+      blocked,
       @required description,
       @required this.text})
       : super(
           cod: cod,
           title: title,
+          blocked:blocked,
           type: type,
           image: image,
           stagenumber: stagenumber,
           description: description,
+          createdBy:createdBy,
           position: position,
           file: file);
 

@@ -94,7 +94,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                           crossAxisAlignment:CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('LOGIN WITH MAIL',
+                            Text('LOG IN WITH MAIL',
                               style: Configuration.text('smallmedium', Colors.white),
                             ),
                             Icon(Icons.mail,size: Configuration.smicon)

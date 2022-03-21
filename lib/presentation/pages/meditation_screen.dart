@@ -11,6 +11,7 @@ import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:provider/provider.dart';
 
@@ -52,7 +53,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
             isScrollControlled: scroll,
             barrierColor: Colors.black.withOpacity(0.5),
              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
             ),
             context: context, 
             builder: (context){
@@ -92,13 +93,19 @@ class _MeditationScreenState extends State<MeditationScreen> {
         ),
         SizedBox(height: Configuration.verticalspacing*2),
         buttonModal(
-          Container(), 
-          "Ambient Sound"
-          
-          , Observer(builder: (context){
-            return Text('nothingselected',style: Configuration.text('small', Colors.black));
-          }))
-
+          Container(
+            height: Configuration.height*0.4,
+            padding: EdgeInsets.all(Configuration.smpadding),
+            child: Center(
+              child: Text(
+                'We are working on recording some great ambient sounds for the app. Any help is appreciated!!', 
+                style: Configuration.text('small', Colors.black),
+              ),
+            ),
+          ), 
+          "Ambient Sound", 
+          Text('Coming soon',style: Configuration.text('small', Colors.black))
+        )
       ]), 
       () => {
         Navigator.pushNamed(context, '/countdown').then(
@@ -127,6 +134,10 @@ class _MeditationScreenState extends State<MeditationScreen> {
           var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
 
           return ClickableSquare(
+            /*
+            rightlabel: Chip(
+              _userstate.user.answeredquestions[game.cod] ? 
+            ),*/
             text: game.title,
             image: game.image,
             onTap: (){
@@ -232,16 +243,14 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
 
   Widget guidedMeditations(){
-
     return ListView(
+        physics: ClampingScrollPhysics(),
         children:[
           SizedBox(height: Configuration.verticalspacing*2.5),
           MeditationList()
         ]
     );
   }
-
-
 
 
   @override 
@@ -388,14 +397,29 @@ class _MeditationListState extends State<MeditationList> {
 
     for(Meditation m in meditations){
       var _blocked = !optional && _userstate.user.isBlocked(m);
-      //bool isSelected = _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == m.cod ;
+      String blockedText = _blocked ?  'Unlocked ' + (_userstate.user.stagenumber == m.stagenumber ? 'after ' + meditations[m.position-1].title : 'at stage '+ m.stagenumber.toString()) : '';
+      
 
       meditcontent.add(
         ClickableSquare(
-          blockedtext: 'Unlocked at stage '+ m.stagenumber.toString(),
+          rightlabel: _blocked ? null : 
+         
+          Container(
+            padding: EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Configuration.borderRadius),
+              color: Colors.lightBlue,
+            ),
+            child: Icon(
+              m.getIcon(),
+              size: Configuration.smicon,
+              color: Colors.white,
+            ),
+          ),
+          blockedtext:blockedText,
           blocked: _blocked,
           text: m.title,
-          selected: false,
+          selected: true,
           image: m.image,
           onTap:(){
             showModalBottomSheet(
@@ -421,7 +445,21 @@ class _MeditationListState extends State<MeditationList> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(m.title, style:Configuration.text('medium', Colors.black)),
-                                Text( m.description.isNotEmpty ? m.description : ' ',style:Configuration.text('small',Colors.grey))
+                                SizedBox(height: Configuration.verticalspacing/2),
+                                Text( m.description.isNotEmpty ? m.description : ' ',style:Configuration.text('small',Colors.grey)),
+                                SizedBox(height: Configuration.verticalspacing/2),
+                                Row(
+                                  children: [
+                                    Icon(Icons.timer, size:  Configuration.smicon, color: Colors.lightBlue),
+                                    SizedBox(width: Configuration.verticalspacing),
+                                    Text(m.duration.inMinutes.toString() + ' min ', style: Configuration.text('small',Colors.black.withOpacity(0.8))),
+                                    SizedBox(width: Configuration.verticalspacing*2),
+                                    Chip(
+                                      avatar: Icon(m.getIcon(), size: Configuration.smicon, color: Colors.lightBlue),
+                                      label:Text(m.getText(),style: Configuration.text('small',Colors.black)),
+                                    )
+                                  ],
+                                )
                               ],
                             )
                           )
@@ -431,6 +469,7 @@ class _MeditationListState extends State<MeditationList> {
                       BaseButton(
                         text: 'Start',
                         onPressed: (){
+                          _meditationstate.setDuration(m.duration.inMinutes);
                           _meditationstate.selectMeditation(m);
                           Navigator.pop(context);
                           Navigator.pushNamed(context, '/countdown').then(
@@ -450,7 +489,6 @@ class _MeditationListState extends State<MeditationList> {
           }    
         )
       );
-      //meditcontent.add(meditation(med,_blocked));
     }
       
     return meditcontent;
@@ -468,22 +506,27 @@ class _MeditationListState extends State<MeditationList> {
           mainAxisSize: MainAxisSize.min,
           children:[ 
             Text('Stage meditations',style:Configuration.text('smallmedium',Colors.black)),
+            SizedBox(height: Configuration.verticalspacing),
             GridView(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: Configuration.crossAxisCount,
-                crossAxisSpacing: 10
+                crossAxisSpacing: Configuration.verticalspacing,
+                mainAxisSpacing: Configuration.verticalspacing
               ),
               children: meditations(stageMeditations,false)
             ),
+            SizedBox(height: Configuration.verticalspacing),
             Text('Optional meditations',style:Configuration.text('smallmedium',Colors.black)),
+            SizedBox(height: Configuration.verticalspacing),
             GridView(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: Configuration.crossAxisCount,
-                crossAxisSpacing: 10
+                crossAxisSpacing: Configuration.verticalspacing,
+                mainAxisSpacing: Configuration.verticalspacing
               ),
               children: meditations(optionalMeditations,true)
             ),
@@ -500,8 +543,9 @@ class ClickableSquare extends StatelessWidget {
   bool selected; 
   dynamic onTap;
   bool blocked;
+  Widget rightlabel;
 
-  ClickableSquare({this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text}) : super();
+  ClickableSquare({this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text, this.rightlabel}) : super();
 
 
   @override
@@ -539,7 +583,7 @@ class ClickableSquare extends StatelessWidget {
                     children: [
                       Icon(Icons.lock, size:Configuration.smicon,color: Colors.white),
                       SizedBox(height: 4),
-                      Text(blockedtext, style: Configuration.text('verytiny', Colors.white), textAlign: TextAlign.center,)
+                      Text(blockedtext, style: Configuration.text('tiny', Colors.white), textAlign: TextAlign.center,)
                     ],
                   ), 
                 ),
@@ -559,12 +603,21 @@ class ClickableSquare extends StatelessWidget {
                 child: Center(
                   child: Text(
                     text,
-                    style: Configuration.text('tiny', Colors.white),
+                    style: Configuration.text('small', Colors.white),
                     textAlign: TextAlign.center,
                   ),
                 )
               )
             ),
+
+            rightlabel != null ?
+              Align(
+                alignment: Alignment.topRight,
+                child: Container(
+                  padding: EdgeInsets.only(right:4, top:4),
+                  child: rightlabel,
+                ),
+              ): Container(),
           ],
         ),
       )
@@ -603,6 +656,7 @@ class _CountdownState extends State<Countdown> {
   Widget finish(context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           height: Configuration.height,
@@ -612,15 +666,15 @@ class _CountdownState extends State<Countdown> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               WeekList(),
-              SizedBox(height: Configuration.height * 0.05),
+              SizedBox(height: Configuration.verticalspacing*3),
               Text('Total meditations: ' + (_userstate.user.totalMeditations.length).toString(),
-                  style: Configuration.text('medium', Colors.white)),
-              SizedBox(height: Configuration.height * 0.05),
-              Text('Current streak: ' + (_userstate.user.userStats.streak).toString() + ' days',
-                  style: Configuration.text('medium', Colors.white)),
-              SizedBox(height: Configuration.height*0.05),
+                style: Configuration.text('medium', Colors.white)),
+              SizedBox(height: Configuration.verticalspacing*3),
+              Text('Current streak: ' + (_userstate.user.userStats.streak).toString() + ' day' + (_userstate.user.userStats.streak > 1 ? 's':''),
+                style: Configuration.text('medium', Colors.white)),
+              SizedBox(height: Configuration.verticalspacing*3),
               Text('Total time meditated: ' + _userstate.user.timemeditated,
-                  style: Configuration.text('medium', Colors.white)),
+                style: Configuration.text('medium', Colors.white)),
               /*
               Text('Total meditations: ' +
                       (_userstate.user.totalMeditations.length).toString(),
@@ -633,7 +687,7 @@ class _CountdownState extends State<Countdown> {
     );
   }
 
-  Widget guided(context) {
+  Widget preguided(context) {
     List<Widget> getBalls() {
       List<Widget> res = new List.empty(growable: true);
       _meditationstate.selmeditation.content.forEach((key, value) {
@@ -814,54 +868,45 @@ class _CountdownState extends State<Countdown> {
       );           
     }
 
-    Widget freeMeditation(){
-      return Center(
-        child: Container(
-          height: Configuration.blockSizeHorizontal * 60,
-          width: Configuration.blockSizeHorizontal * 60,
-          decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
-          child: Center(
-            child:GestureDetector(
-              onDoubleTap: (){ _meditationstate.finishMeditation();}, 
-              child:Text('free meditation', style:Configuration.text('smallmedium', Colors.white))
-            )
-          ),
+    Widget squareHeader(Meditation meditation){
+     
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+           Container(
+              height: Configuration.height*0.35,
+              width: Configuration.height*0.35,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+                child: meditation != null ? Image(image: NetworkImage(meditation.image)) : Container(),
+              ),
+            ),
+            SizedBox(height: Configuration.verticalspacing*2),
+            GestureDetector(
+              onDoubleTap: (){
+                _meditationstate.finishMeditation();
+              }, 
+              child: Text(
+                meditation != null ? 
+                meditation.title : "Enjoy meditating",style: Configuration.text('smallmedium',Colors.white))
+          )
+          
+        ],
+      );
+    }
+
+    Widget showSentence(){
+      return Container(
+        padding: EdgeInsets.all(Configuration.smpadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: mapToWidget(_meditationstate.currentsentence)
         ),
       );
     }
 
-    Widget guidedMeditation(){
-      return Align(
-        alignment:Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.all(Configuration.smpadding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: 
-               _meditationstate.currentsentence != null ?  
-                mapToWidget(_meditationstate.currentsentence)
-                : 
-               [
-                 ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image(image: NetworkImage(_meditationstate.selmeditation.image),
-                    height: Configuration.height*0.35,
-                    width: Configuration.height*0.35
-                    ),
-                  ),
-                SizedBox(height: Configuration.blockSizeVertical*3),
-                GestureDetector(
-                  onDoubleTap: (){
-                    _meditationstate.finishMeditation();
-                  }, 
-                  child: Text(_meditationstate.selmeditation.title,style: Configuration.text('smallmedium',Colors.white))
-                )
-              ],
-          ),
-        ),
-      );
-    }
+
 
     return Stack(
         children: [
@@ -876,6 +921,8 @@ class _CountdownState extends State<Countdown> {
             slider()
           ]),
         ),
+        
+        // mejorar esto !!DE MOMENTO QUITAMOS EL SHADOW, QUEDA EXTRAÑO !!
         _meditationstate.shadow ? 
         Positioned.fill(
           child: GestureDetector(
@@ -888,9 +935,12 @@ class _CountdownState extends State<Countdown> {
           ),
         ): Container(), 
 
-        _meditationstate.selmeditation != null ? guidedMeditation(): freeMeditation()
-
-
+        _meditationstate.currentsentence != null ? 
+        showSentence():
+        Align(
+          alignment: Alignment.center,
+          child: squareHeader(_meditationstate.selmeditation) ,
+        )
       ]);
   }
 
@@ -899,6 +949,7 @@ class _CountdownState extends State<Countdown> {
     // TODO: implement initState
     super.initState();
   }
+  
 
   @override
   void didChangeDependencies() {
@@ -972,6 +1023,8 @@ class _CountdownState extends State<Countdown> {
         ),
         extendBodyBehindAppBar: true,
         body: Container(
+          height:Configuration.height,
+          width: Configuration.width,
           decoration:  BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
@@ -984,8 +1037,9 @@ class _CountdownState extends State<Countdown> {
             ),
           child: Observer(
                 builder: (BuildContext context) {
+                  //MIRAR DE CAMBIAR ESTOS ESTADOS POR UN ENUM
                   if (_meditationstate.state == 'pre_guided') {
-                    return guided(context);
+                    return preguided(context);
                   } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused'  ) {
                     return countdown(context);
                   } else if(_meditationstate.state == 'finished') {
@@ -1135,33 +1189,26 @@ class _CirclePickerState extends State<CirclePicker> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _meditationstate.selmeditation != null ?
-        Text(
-          'Duration must be more than ${_meditationstate.selmeditation.duration.inMinutes.toString()} min for ${_meditationstate.selmeditation.title} meditation',
-          style: Configuration.text('small',Colors.black),
-         ):Container(),
         SingleCircularSlider(
-                95,
-                _meditationstate.duration.inMinutes,
-                baseColor: Colors.grey.withOpacity(0.6),
-                handlerColor: Colors.transparent,
-                handlerOutterRadius: 10,
-                onSelectionChange: (a, b, c) {
-                  setState(() {
-                    if(_meditationstate.selmeditation ==null || _meditationstate.selmeditation.duration.inMinutes < b){
-                      _meditationstate.setDuration(b);
-                    }
-                  });
-                },
-                height: Configuration.width > 600 ? Configuration.width*0.7 : Configuration.width*0.9,
-                width: Configuration.width > 600 ? Configuration.width*0.7: Configuration.width*0.9,
-                selectionColor: Configuration.maincolor,
-                sliderStrokeWidth: Configuration.width > 600 ? 80:  40,
-                child: Center(
-                    child: Text(
-                    _meditationstate.duration.inMinutes.toString() + ' min',
-                  style: Configuration.text('smallmedium', Colors.black),
-                )),
+          95,
+          _meditationstate.duration.inMinutes,
+          baseColor: Colors.grey.withOpacity(0.6),
+          handlerColor: Colors.transparent,
+          handlerOutterRadius: 10,
+          onSelectionChange: (a, b, c) {
+            setState(() {
+              _meditationstate.setDuration(b);
+            });
+          },
+          height: Configuration.width > 600 ? Configuration.width*0.7 : Configuration.width*0.9,
+          width: Configuration.width > 600 ? Configuration.width*0.7: Configuration.width*0.9,
+          selectionColor: Colors.lightBlue,
+          sliderStrokeWidth: Configuration.width > 600 ? 80:  40,
+          child: Center(
+              child: Text(
+              _meditationstate.duration.inMinutes.toString() + ' min',
+            style: Configuration.text('smallmedium', Colors.black),
+          )),
           ),
       ],
     );

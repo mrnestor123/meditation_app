@@ -172,7 +172,7 @@ class _GameStartedState extends State<GameStarted> {
           child: OutlinedButton(
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.all(12.0),
-              shape: RoundedRectangleBorder(),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
               primary: _gamestate.state =='answer' && _gamestate.selectedanswer == index ? _gamestate.success ? Colors.green : Colors.red : Colors.white,
               elevation: 0.0
             ),

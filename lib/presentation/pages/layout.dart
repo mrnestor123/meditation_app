@@ -183,7 +183,6 @@ class _MobileLayoutState extends State<MobileLayout> {
             this._c.jumpToPage(0);
           },
           child: Container(
-            
             child: Image.asset('assets/logo-no-text.png')
           ),
         ),
@@ -213,7 +212,11 @@ class _MobileLayoutState extends State<MobileLayout> {
             ],
           ),
           Container(
-            margin:EdgeInsets.only(right: Configuration.width > 500 ? Configuration.tinpadding : 0),
+            margin:EdgeInsets.only(
+              right: Configuration.width > 500 ? Configuration.tinpadding : 0,
+              top: 2,
+              bottom: 2
+            ),
             child: ProfileCircle(
               userImage: _userstate.user.image, 
               onTap: ()=>  Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))

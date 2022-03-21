@@ -7,6 +7,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/local_notifications.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
@@ -46,7 +47,6 @@ abstract class _MeditationState with Store {
   @observable
   int sentenceindex = 0;
 
-
   bool finished = false;
 
   var selectedstage = 1;
@@ -71,7 +71,7 @@ abstract class _MeditationState with Store {
   AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
 
   @observable
-  VideoPlayerController controller;
+  VideoPlayerController videocontroller;
 
   _MeditationState({this.meditate});
 
@@ -90,8 +90,10 @@ abstract class _MeditationState with Store {
     }
   }
 
+
   @action
   void startMeditation(User u, DataBase d) {
+    //PORQUE HACE FALTA El USUARIO AQUI ????
     this.user = u;
 
     // PARA QUE QUEREMOS DATA!!
@@ -102,47 +104,59 @@ abstract class _MeditationState with Store {
     if(selmeditation != null && selmeditation.followalong != null){
       timeChange =  (this.totalduration.inSeconds - 3) / selmeditation.followalong.length;
     }
+
+    LocalNotifications.showMessage(
+      id:010,
+      duration: this.totalduration,
+      title: "Congratulations!",
+      body: 'You finished your meditation',
+      onFinished: this.finishMeditation
+    );
+
     startTimer();
   }
 
   @action 
-  //DEBERÍA DE HABER SOLO UN STARTMEDITATION !!!
   void selectMeditation(Meditation m){
-    if(this.selmeditation == m){
-      this.selmeditation = null;
-      //this.duration = totalduration;
-      state = 'free';
-    }else{
-      // ESTO NO DEBERIA SER ASI
-      this.selmeditation = m;
-      if(m.duration != null){
-        this.duration = m.duration;
-        this.totalduration = m.duration;
-        state = 'pre_guided';
-
-      }else{
-        if(selmeditation.file != null){
-          if(isAudio(selmeditation.file)){
-            hasAudio = true;
-            assetsAudioPlayer.open(Audio.network(selmeditation.file)).then((value) {
-              this.totalduration = assetsAudioPlayer.current.value.audio.duration;
-              this.duration = assetsAudioPlayer.current.value.audio.duration;
-              //assetsAudioPlayer.stop();
-              state = 'pre_guided';
-              }
-            );
-           // 
-          }else{
-            controller = new VideoPlayerController.network(selmeditation.file)..initialize().then((value) {
-              this.totalduration = controller.value.duration;
-              this.duration = controller.value.duration;
-              state = 'pre_guided';
-            });
-            hasVideo = true;
-          }
-        }
-      }
+    // ESTO NO DEBERIA SER ASI
+    this.selmeditation = m;
+    if(m.duration != null){
+      this.duration = m.duration;
+      this.totalduration = m.duration;
+      
     }
+
+    if(selmeditation.file != null){
+    //PARA EL TEMA DE LOS ARCHIVOS !!
+      if(isAudio(selmeditation.file)){
+        hasAudio = true;
+        hasVideo = false;
+        assetsAudioPlayer.open(Audio.network(selmeditation.file)).then((value) {
+          this.totalduration = assetsAudioPlayer.current.value.audio.duration;
+          this.duration = assetsAudioPlayer.current.value.audio.duration;
+          assetsAudioPlayer.stop();
+          }
+        );
+        // 
+      }else{
+        videocontroller = new VideoPlayerController.network(selmeditation.file)..initialize().then((value) {
+          this.totalduration = videocontroller.value.duration;
+          this.duration = videocontroller.value.duration;
+        });
+        hasVideo = true;
+        hasAudio = false;
+      }
+    }else {
+      hasAudio = false;
+      hasVideo = false;
+    }
+
+    if(selmeditation.content != null){
+      state = 'pre_guided';
+    }else {
+      state = 'started';
+    }
+
   }
 
   @action 
@@ -151,21 +165,17 @@ abstract class _MeditationState with Store {
     totalduration = new Duration(minutes: time);
   }
 
-
   @action
   void startTimer() {
     // The following line will enable the Android and iOS wakelock.
     //Wakelock.enable();
-
-    
     if(hasAudio){
       assetsAudioPlayer.playOrPause();
     }
 
     if(hasVideo){
-      controller.play();
+      videocontroller.play();
     }
-
    
     var oneSec = new Duration(seconds: 1);
     
@@ -175,7 +185,6 @@ abstract class _MeditationState with Store {
         shadow=true;
       });
     }
-  
     
     if(timer != null){
       timer.cancel();
@@ -214,7 +223,7 @@ abstract class _MeditationState with Store {
     this.state = 'paused';
 
      if(hasVideo){
-      controller.pause();
+      videocontroller.pause();
     }
 
     if(hasAudio){
@@ -234,11 +243,23 @@ abstract class _MeditationState with Store {
       state = 'free';
     }
 
+    LocalNotifications.cancelNotification(id:010);
+
     duration = new Duration(minutes: totalduration.inMinutes);
      
     if(timer != null ){
       timer.cancel();
     }
+
+    if(hasAudio){
+      assetsAudioPlayer.stop();
+      hasAudio = false;
+    }
+
+    if(hasVideo){
+
+    }
+
     sentenceindex = 0;
   }
 
@@ -255,25 +276,31 @@ abstract class _MeditationState with Store {
     }
   }
 
-
   @action
   Future finishMeditation() async {
-    if(selmeditation == null || selmeditation.file == null || selmeditation.file.isEmpty){
-      int currentposition = user.position;
-      sentenceindex = 0;
-      
-      if(timer != null || timer.isActive){
-        timer.cancel();
-        duration = new Duration(minutes: totalduration.inMinutes);
-      }
+    int currentposition = user.position;
+    sentenceindex = 0;
 
-      if(selmeditation != null){
-        selmeditation.duration = totalduration;
-      }
-      //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
-      Either<Failure, User> meditation = await meditate.call(Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : selmeditation, user: user, d: data));
-      selmeditation = null;
+    print('finishing meditation');
+    
+    if(timer != null || timer.isActive){
+      timer.cancel();
+      duration = new Duration(minutes: totalduration.inMinutes);
     }
+
+    // ESTO PARA QUE ES !!!!! QUITAR !!!
+    if(selmeditation != null){
+      selmeditation.duration = totalduration;
+    }
+
+    //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
+    Either<Failure, User> meditation = await meditate.call(
+      Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : 
+      selmeditation, user: user, d: data)
+    );
+    
+    selmeditation = null;
+    
 
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
     state = 'finished';

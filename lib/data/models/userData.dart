@@ -94,11 +94,13 @@ class UserModel extends User {
       ); 
 
     if(expand){
-      if(json['meditations'] != null){
-          for(var med in json['meditations'] ){
-            u.totalMeditations.add(MeditationModel.fromJson(med));
-          }
+      if(json['meditations'] != null) {
         
+        for(var med in json['meditations'] ){
+          u.totalMeditations.add(MeditationModel.fromJson(med,true));
+        }
+
+        //esto porque lo hacemos aquii!!!
         u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
         u.userStats.total.meditations = u.totalMeditations.length;
       }
@@ -193,7 +195,7 @@ class UserModel extends User {
         "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "students": students.map((stud)=> stud.coduser).toList(),
      //   'messages': messages.map((msg)=> msg.toJson()).toList(), 
-        "followsyou": followers.map((user) => user).toList(),
+        "followsyou": followers.map((user) => user.coduser).toList(),
         "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
         "answeredquestions": answeredquestions,
         "version": version

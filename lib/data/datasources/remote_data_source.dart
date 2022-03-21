@@ -320,9 +320,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try{
       QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
       String documentId = userreference.docs[0].id;
-      
 
-      await database.collection("users").doc(documentId).update(user.toJson());
+      Map<String,dynamic> res = user.toJson();  
+
+      await database.collection("users").doc(documentId).update(res);
   
       //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
       if (type == 'meditate') {
@@ -332,7 +333,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
 
       var url = Uri.parse('$nodejs/action/${user.coduser}');
-
 
       //esto se ejecutará antes que el clear ??
       //esto desde cuando se ejecuta ??

@@ -6,6 +6,9 @@ import 'dart:convert';
 
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 
+import '../../domain/entities/content_entity.dart';
+import 'helpers.dart';
+
 class LessonModel extends Lesson {
   LessonModel(
       {String title,
@@ -15,14 +18,20 @@ class LessonModel extends Lesson {
       text,
       type,
       int stagenumber,
+      createdBy,
+      file,
+      blocked,
       int position})
       : super(
             title: title,
             cod: cod,
+            createdBy:createdBy,
             image: image,
             description: description,
             type: type,
             text: text,
+            file:file,
+            blocked:blocked,
             stagenumber: stagenumber,
             position: position);
 
@@ -32,15 +41,11 @@ class LessonModel extends Lesson {
   String toRawJson() => json.encode(toJson());
 
   @override
-  factory LessonModel.fromJson(Map<String, dynamic> json) => LessonModel(
-      cod: json["cod"] == null ? json['codlesson'] : json["cod"],
-      position: json['position'] == null ? null : json['position'],
-      title: json["title"] == null ? null : json["title"],
-      image: json["image"] == null ? null : json["image"],
-      description: json["description"] == null ? null : json["description"],
-      text: json["text"] == null ? null : json["text"],
-      type: json["type"] == null ? null : json["type"],
-      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"]);
+  factory LessonModel.fromJson(Map<String, dynamic> json) {
+    LessonModel model =  medorLessfromJson(json, false);
+    model.text = json['text'] == null ? null : json['text'];
+    return model;
+  }
 
 
   @override

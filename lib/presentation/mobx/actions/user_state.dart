@@ -267,7 +267,7 @@ abstract class _UserState with Store {
   }
 
   Future uploadContent({Content c}) async{
-    c.createdBy = user.coduser;
+    c.createdBy = user;
     
     user.uploadContent(c:c);
     Either<Failure,void> upload = await repository.uploadContent(c:c);

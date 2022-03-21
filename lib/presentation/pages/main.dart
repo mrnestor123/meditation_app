@@ -1,4 +1,6 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
@@ -34,30 +36,7 @@ final navigatorKey = new GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /*
-  var initializationSettingsAndroid = AndroidInitializationSettings('ic_launcher');
-
-  var initializationSettingsIOS = IOSInitializationSettings(
-    requestAlertPermission: true,
-    requestBadgePermission: true,
-    requestSoundPermission: true,
-    onDidReceiveLocalNotification: (int id,String title, String body,String payload) async{}
-  );
-
-  var initializationSettings = InitializationSettings(
-   android: initializationSettingsAndroid,iOS:initializationSettingsIOS);
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-    onSelectNotification: (String payload) async{
-      if(payload != null){
-        debugPrint(payload);
-      }
-    }
-  );
- // FirebaseMessaging messaging = FirebaseMessaging.instance;
-  //NotificationSettings settings = await messaging.requestPermission();
-*/
-
+  await di.init();
   
   PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
       String appName = packageInfo.appName;
@@ -73,7 +52,6 @@ void main() async {
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
-  await di.init();
   runApp(MyApp());
 }
 

@@ -11,6 +11,7 @@ class Meditation extends Content {
   Duration duration;
   DateTime day;
 
+  //PORQUE SE LLAMA CONTENT MAL NOMBRE !!!
   Map<dynamic, dynamic> content;
   Map<dynamic,dynamic> followalong;
 
@@ -29,7 +30,7 @@ class Meditation extends Content {
       description,
       image,
       title,
-      file,
+      file = '',
       position,
       createdBy
       //this.userId
@@ -53,10 +54,7 @@ class Meditation extends Content {
     Duration d;
     if(c.file != null){
       if(isAudio(c.file)){
-        // HAY QUE   MIRAR LA DURACIÓN
-  //    AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
-
-//      d = assetsAudioPlayer.current.value.audio.duration;
+  
       }
     }
 

@@ -16,6 +16,8 @@ class SetUserData extends StatefulWidget {
 
 class _SetUserDataState extends State<SetUserData> {
   final TextEditingController _nameController = new TextEditingController();
+  var focusNode = FocusNode();
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,10 @@ class _SetUserDataState extends State<SetUserData> {
           children: [
             Text('Type your username', style: Configuration.text('medium', Colors.white)),
             SizedBox(height: Configuration.verticalspacing),
-            TextField(controller: _nameController, style: Configuration.text('small', Colors.white),),
+            TextField(
+              controller: _nameController, 
+              style: Configuration.text('small', Colors.white)
+            ),
             SizedBox(height: Configuration.verticalspacing * 2),
             BaseButton(
               text: 'Set',

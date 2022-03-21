@@ -121,7 +121,7 @@ class RegisterWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'REGISTER WITH MAIL',
+                              'SIGN UP WITH MAIL',
                               style: Configuration.text('smallmedium', Colors.white),
                             ),
                             Icon(
@@ -182,7 +182,7 @@ class FacebookButton extends StatelessWidget {
              return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text((register ? 'REGISTER' :'LOGIN') + ' WITH FACEBOOK',  style: Configuration.text('smallmedium', Colors.white)),
+                  Text((register ? 'SIGN UP' :'LOG IN') + ' WITH FACEBOOK',  style: Configuration.text('smallmedium', Colors.white)),
                   Icon(FontAwesomeIcons.facebookF, color: Colors.white, size: Configuration.smicon),
                 ],
               ); 
@@ -245,7 +245,7 @@ class GoogleButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text((register ? 'REGISTER' :'LOGIN') + ' WITH GOOGLE', style: Configuration.text('smallmedium', Colors.white)),
+              Text((register ? 'SIGN UP' :'LOG IN') + ' WITH GOOGLE', style: Configuration.text('smallmedium', Colors.white)),
               Icon(FontAwesomeIcons.google,
               color: Colors.white,
               size: Configuration.smicon,

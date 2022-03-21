@@ -1,10 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/repositories/meditation_repository.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
+import 'package:meditation_app/domain/entities/local_notifications.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
@@ -24,6 +28,9 @@ final sl = GetIt.instance;
 
 Future<void> init() async {
   await Firebase.initializeApp();
+
+  LocalNotifications.init();
+
   //Mobx
   sl.registerFactory(
     () => LoginState(repository: sl()),

@@ -64,19 +64,22 @@ class _SettingsState extends State<Settings> {
               width: Configuration.width*0.5,
             ),
             Spacer(),
-            Container(
-              width: Configuration.width,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
-                    shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-                    padding: EdgeInsets.all(12)
-                  ),
-                  onPressed: () { 
-                  _userstate.user=null;
-                  _loginstate.logout();
-                  Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
-                }, child: Text('LOG OUT',style: Configuration.text('small', Colors.white),)),
+            AspectRatio(
+              aspectRatio: Configuration.buttonRatio,
+              child: Container(
+                width: Configuration.width,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+                      padding: EdgeInsets.all(12)
+                    ),
+                    onPressed: () { 
+                    _userstate.user=null;
+                    _loginstate.logout();
+                    Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+                  }, child: Text('LOG OUT',style: Configuration.text('small', Colors.white),)),
+              ),
             ),
             SizedBox(height: Configuration.verticalspacing*2),
           ],

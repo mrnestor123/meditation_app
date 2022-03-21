@@ -250,9 +250,9 @@ class _ContentShowState extends State<ContentShow> {
           //height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
          // width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
          // ESTO ESTA BIEN ???
-          height: (Configuration.width *0.9) / _meditationstate.controller.value.aspectRatio,
-          width: (Configuration.height * 0.9) *  _meditationstate.controller.value.aspectRatio,
-          child: VideoPlayer(_meditationstate.controller)
+          height: (Configuration.width *0.9) / _meditationstate.videocontroller.value.aspectRatio,
+          width: (Configuration.height * 0.9) *  _meditationstate.videocontroller.value.aspectRatio,
+          child: VideoPlayer(_meditationstate.videocontroller)
       );
     }
 
@@ -261,7 +261,7 @@ class _ContentShowState extends State<ContentShow> {
         children: [
           Align(
             alignment: Alignment.center,
-            child: _meditationstate.hasVideo && _meditationstate.controller.value.duration.inSeconds > 0 ? 
+            child: _meditationstate.hasVideo && _meditationstate.videocontroller.value.duration.inSeconds > 0 ? 
               video() :
               AspectRatio(
                 aspectRatio:1,

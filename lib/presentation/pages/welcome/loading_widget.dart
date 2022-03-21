@@ -5,6 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:mobx/mobx.dart';
@@ -35,6 +36,8 @@ class _LoadingState extends State<Loading> {
   bool newversion = true;
   bool finishedloading = false;
 
+  bool hasPushed = false;
+
   String appcastURL ='https://raw.githubusercontent.com/mrnestor123/meditation_app/master/appcast.xml';
   AppcastConfiguration cfg;
 
@@ -55,11 +58,11 @@ class _LoadingState extends State<Loading> {
     super.didChangeDependencies();
     _timer = new Timer.periodic(Duration(seconds: 1), 
         (Timer timer) { 
-          if (_duration.inSeconds == 0) {
+          if (_duration.inSeconds == 0 ) {
             _timer.cancel();
-            if(finishedloading && !_user.hasFailed){
+            if(finishedloading && !_user.hasFailed && !hasPushed){
               pushPage();
-            }else{
+            }else if(!hasPushed){
               setState(() {});
             }
             _timer.cancel();
@@ -77,8 +80,9 @@ class _LoadingState extends State<Loading> {
     _controller.dispose();
   }
 
-//METER CAROUSEL AQUI ??????
+  //METER CAROUSEL AQUI ??????
   void pushPage(){
+    hasPushed = true;
     if(_user.user != null){
       _user.user.nombre == null || _user.user.nombre.isEmpty ? 
         Navigator.pushAndRemoveUntil(
@@ -86,6 +90,12 @@ class _LoadingState extends State<Loading> {
         MaterialPageRoute(builder: (context) => SetUserData()),
         (Route<dynamic> route) => false,
       ) : 
+      _user.user.seenIntroCarousel == null || _user.user.seenIntroCarousel == false ? 
+        Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => CarrouselIntro()),
+        (Route<dynamic> route) => false,
+      ) :
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => Layout()),

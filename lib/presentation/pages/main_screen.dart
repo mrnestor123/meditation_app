@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
       // DE MOMENTO EL DIÁLOGO DE VERSIONES ES MEJORABLE !!! NO LO UTLIZAMOS
-      if(false && _userstate.user != null && _userstate.data != null && _userstate.user.version < _userstate.data.lastVersion.versionNumber ){
+      if(false && _userstate.user.version < _userstate.data.lastVersion.versionNumber){
         _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
 
        showDialog(
@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
              content: Container(
                decoration: BoxDecoration(
                  color:Colors.white,
-                 borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                 borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
                ),
                child: Column(
                  mainAxisSize: MainAxisSize.min,
@@ -67,7 +67,7 @@ class _MainScreenState extends State<MainScreen> {
                      width:Configuration.width,
                      decoration: BoxDecoration(
                         color:Configuration.maincolor,
-                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius)) 
+                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius/2)) 
                     ),
                      padding: EdgeInsets.all(Configuration.smpadding),
                      child: Center(
@@ -351,7 +351,7 @@ class __TimelineState extends State<_Timeline> {
                 ),
                 RawMaterialButton(
                       elevation: 3.0,
-                      fillColor: Configuration.maincolor,
+                      fillColor: Colors.lightBlue,
                       child: Container(
                         child: Row(
                           children: [

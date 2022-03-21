@@ -11,7 +11,7 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.4+12
+version: 1.0.4+14
 
 environment:
   sdk: '>=2.3.3 <3.0.0'
@@ -45,7 +45,6 @@ dependencies:
   image_picker: ^0.8.4
   video_player: ^2.2.7
   file_picker: ^4.3.0
-
   firebase_storage: ^10.2.4
   
   # PARA CALENDARIOStable_calendar: ^3.0.0
@@ -54,10 +53,14 @@ dependencies:
   wheel_chooser: ^1.0.0
   font_awesome_flutter: ^9.2.0
   connectivity_plus: ^2.2.0
+  flutter_native_timezone: ^2.0.0
+
   
 
   flutter:
     sdk: flutter
+  firebase_messaging: ^11.2.10
+  flutter_local_notifications: ^9.4.0
 
 
 

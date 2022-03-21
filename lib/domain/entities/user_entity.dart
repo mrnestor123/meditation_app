@@ -71,14 +71,7 @@ class User {
         }) {
    
     if(userStats != null){
-      var time = this.userStats.total.timemeditated;
-      if (time > 1440) {
-        timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
-      } else if (time > 60) {
-        timemeditated = (time / 60).toStringAsFixed(0) + ' h';
-      } else {
-        timemeditated = time.toString() + ' m';
-      }
+      getTimeMeditatedString();
     }
         
     if (coduser == null) {
@@ -408,10 +401,20 @@ class User {
 
   }
 
+  void getTimeMeditatedString(){
+    var time = this.userStats.total.timemeditated;
+    if (time > 1440) {
+      timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
+    } else if (time > 60) {
+      timemeditated = (time / 60).toStringAsFixed(0) + ' h';
+    } else {
+      timemeditated = time.toString() + ' m';
+    }
+  }
+
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
-    this.totalMeditations.add(m);
 
     if(m.stagenumber != null && m.stagenumber == this.stagenumber){
     //comprobamos la racha
@@ -429,15 +432,20 @@ class User {
       
       this.userStats.meditate(m);
 
+      getTimeMeditatedString();
+      
       this.setPercentage();
 
       if (this.percentage >= 100) {
         this.updateStage(d);
       }
+
       if (m.title == null) {
+          this.totalMeditations.add(m);
           if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
             this.userStats.stage.timemeditations++;
             this.progress = Progress(
+              stage: this.stage,
               done: this.userStats.stage.timemeditations,
               total: this.stage.stobjectives.meditationcount, 
               what: this.stage.stobjectives.freemeditationlabel
@@ -450,12 +458,16 @@ class User {
             this.meditposition++;
             totalMeditations.add(m);
             progress = Progress(
+              stage: this.stage,
               done: this.userStats.stage.guidedmeditations,
               total: this.stage.stobjectives.meditguiadas, 
               what: ' guided meditations');
           }
         }
     }
+
+   // this.totalMeditations.add(m);
+
     // si la meditación es free no tiene título !!
     
     if(m.title == null ){
