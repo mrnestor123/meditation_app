@@ -1,6 +1,7 @@
 
 //CARD CON LA STAGE 
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
@@ -36,7 +37,7 @@ class StageCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.0),
               child: Image(
                 width: Configuration.width,
-                image: stage.shortimage  != null ? NetworkImage(stage.shortimage) : AssetImage('assets/stage 1/stage 1.png'),
+                image: stage.shortimage  != null ? CachedNetworkImageProvider(stage.shortimage) : AssetImage('assets/stage 1/stage 1.png'),
                 fit: BoxFit.cover
                 ),
             ),

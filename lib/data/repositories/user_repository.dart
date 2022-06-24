@@ -7,8 +7,10 @@ import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
@@ -176,10 +178,10 @@ class UserRepositoryImpl implements UserRepository {
 
 
   @override
-  Future<Either<Failure,void>> updateRequest(Request r, [Notify n]) async{
+  Future<Either<Failure,void>> updateRequest(Request r, [List<Notify> n, Comment c]) async{
     if (await networkInfo.isConnected) {
       try{
-        await remoteDataSource.updateRequest(r,n);
+        await remoteDataSource.updateRequest(r,n,c);
       }on Exception{
         return Left(ServerFailure());
       }
@@ -348,7 +350,91 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> takeLesson({User u, Lesson l}) async{
+     if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.takeLesson(user:u, l:l);
+        return Right(null);
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      //Hay que arreglar este método
+      return Left(ConnectionFailure());
+    }
 
+  }
+
+
+
+  @override
+  Future<Either<Failure, void>> addAction({UserAction a}) async{
+     if (await networkInfo.isConnected) {
+      try {
+        await remoteDataSource.addAction(a:a);
+        return Right(null);
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Chat>>> getMessages({User user}) async {
+    if (await networkInfo.isConnected) {
+      try {
+        return Right(await remoteDataSource.getChats(user:user));
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Chat>> getChat({User sender, String receiver}) async{
+    if (await networkInfo.isConnected) {
+      try {
+        return Right(await remoteDataSource.getChat(sender:sender,receiver:receiver));
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+
+  @override
+  Future<Either<Failure, Stream<List<Message>>>> startConversation({User sender, String receiver}) async{
+    if (await networkInfo.isConnected) {
+      try {
+        return Right(await remoteDataSource.startConversation(sender:sender,receiver:receiver));
+      } on Exception {
+        return Left(ServerFailure());
+      }
+    } else {
+      return Left(ConnectionFailure());
+    }
+  }
+
+
+
+  Future<Either<Failure,void>> updateUserProfile({User u, String image}) async{
+    if(await networkInfo.isConnected){
+      try{
+        await remoteDataSource.updatePhoto(u:u, image:image);
+      } on Exception{
+        return Left(ServerFailure());
+      }
+    }else{
+      return Left(ConnectionFailure());
+    } 
+  }
 
 
 

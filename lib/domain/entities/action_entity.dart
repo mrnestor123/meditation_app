@@ -1,5 +1,6 @@
 
 // Para las acciones que hace el usuario
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -59,7 +60,7 @@ class UserAction {
       day = localdate.day.toString() + '-' + localdate.month.toString();
     }
 
-    if(user != null){
+    if(user != null && userimage == null){
       this.userimage = user.image;
     } 
 
@@ -78,7 +79,7 @@ class UserAction {
 
   //un pateo crear otra clase para estos dos
   Map<String, dynamic> toJson() => {
-      "time": time == null ? null : time.toIso8601String(),
+      "time": time == null ? null : time.millisecondsSinceEpoch,
       "type": type == null ? null: type,
       "username": username == null ? null : username,
       "action": action == null ? null : action,
@@ -87,7 +88,7 @@ class UserAction {
   };
 
   factory UserAction.fromJson(Map<String, dynamic> json) => UserAction(
-      time: json["time"] == null ? null : DateTime.parse(json["time"]),
+      time: json["time"] == null ? null : DateTime.fromMillisecondsSinceEpoch(json["time"]),
       user: json['user'] == null ? null : UserModel.fromJson(json['user']),
       message: json['message'] == null ? null : json['message'],
       userimage: json['userimage'] == null ? null : json['userimage'],

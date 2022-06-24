@@ -9,6 +9,7 @@ import 'meditation_entity.dart';
 class Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext, longdescription;
+  // ESTO SERIA SOLO LESSONS
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
@@ -73,7 +74,6 @@ class Stage {
         addMeditation(meditation);
       }
     }
-
   }
 
   void setLessons(List<dynamic> lessons){
@@ -166,4 +166,18 @@ class StageObjectives {
       return value.toString() +'/' + labels[objective].toString();
     }
   }
+}
+
+
+
+// DE MOMENTO LO DEJAMOS POR HACER !!!!
+
+// HABRÁ QUE PODER AÑADIRLE UNA IMAGEN Y UN TÍTULO
+class Phase {
+  String title, description;
+    
+  List<Content> content = new List.empty(growable: true);
+
+  Phase({this.title,this.description});
+
 }

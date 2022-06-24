@@ -1,9 +1,10 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 
-void  stageDialog(context,stage){
+void stageDialog(context,stage){
   showGeneralDialog(
         context: context,
         barrierLabel: 'dismiss',
@@ -17,7 +18,7 @@ void  stageDialog(context,stage){
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image(image: NetworkImage(stage.shortimage)),
+                  Image(image: CachedNetworkImageProvider(stage.shortimage)),
                   Html(data: stage.shorttext)
                 ],
               ),

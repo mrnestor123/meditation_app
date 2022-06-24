@@ -13,19 +13,21 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 
-
+// HABRÁ QUE CREAR OTRO CANAL PARA LAS NOTIFICACIONES DE FIREBASE !!!!
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
-  'high_importance_channel', // id
-  'TenStages Notifications  ', // title
-  description: 'Important notifications from my server.', // description
-  importance: Importance.high,
+  'meditation_channel', // id
+  'Meditation Notifications  ', // title
+  description: 'Notifications when meditation has ended',
+  sound: RawResourceAndroidNotificationSound('gong'),
+  playSound: true, // description
+  importance: Importance.max,
+  enableVibration: true,
 );
 
 
 // PARA LAS NOTIFICACIONES EN BACKGROUND DE IOS !!!
 void onDidReceiveLocalNotification(int id, String title, String body, String payload) async {
   print({'title':title, 'what is going on': 'whaat'});
-
 
   // display a dialog with the notification details, tap ok to go to another page
   showDialog(
@@ -62,15 +64,11 @@ class LocalNotifications {
 
   static bool hasFunction;
 
-
-
   static Future init() async {
-
-    
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation(await FlutterNativeTimezone.getLocalTimezone()));
 
-    var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsAndroid = AndroidInitializationSettings('ic_launcher');
 
     var initializationSettingsIOS = IOSInitializationSettings(
       requestAlertPermission: true,
@@ -80,12 +78,13 @@ class LocalNotifications {
     );
 
     var initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,iOS:initializationSettingsIOS);
+      android: initializationSettingsAndroid,iOS:initializationSettingsIOS);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: (String payload) async{
         print({'selected notification', function != null});
         if(function != null){
+          print('we have a dynamic function');
           function();
           function = null;
         }
@@ -94,30 +93,55 @@ class LocalNotifications {
         }
       },
     );
+    
+    // HECHO PARA ANDROID Y NO IOS PORQUE ????
+    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
 
     
+    //INICIALIZACIÓN DE FIREBASE MESSAGING
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
 
+    //TO DO : COMPROBAR SI EL USUARIO TIENE PERMISOS PARA RECIBIR NOTIFICACIONES
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    // TODO: handle the received notifications
+    } else {
+      print('User declined or has not accepted permission');
+    }
+
+    
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // HECHO PARA ANDROID Y NO IOS
-    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
-  
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+
+    await messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    //showMessage(duration: Duration(seconds: 10));
+   // showMessage(duration: Duration(seconds: 10), playSound: true);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async{ 
+      print('Got a message whilst in the foreground!');
+      print('Message data: ${message.data}');
+
       RemoteNotification notification = message.notification;
       showMessage(
-        id:notification.hashCode,
+        id: notification.hashCode,
         title: notification.title,
         body: notification.body
       );
-  });
+    });
   }
 
 
@@ -128,8 +152,8 @@ class LocalNotifications {
   static Future<void>  _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     // If you're going to use other Firebase services in the background, such as Firestore,
     // make sure you call `initializeApp` before using other Firebase services.
-    await Firebase.initializeApp();
-    print('Handling a background message ${message.messageId}');  
+   // await Firebase.initializeApp();
+  //  print('Handling a background message ${message.messageId}');  
     showMessage(title: message.notification.title,body: message.notification.body, id: 12345);
 
   }
@@ -140,21 +164,28 @@ class LocalNotifications {
 
 
   }
-  
 
 
-  static showMessage({String title = 'test', String body = 'prueba',int id = 1, Duration duration, dynamic onFinished}) async{
+  static showMessage({String title = 'test', String body = 'prueba',bool playSound = false,  int id = 1, Duration duration, dynamic onFinished}) async{
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channel.id, channel.name,
       importance: Importance.max,
       priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound("gong"),
+      playSound: playSound,
+      fullScreenIntent: true,
+      visibility: NotificationVisibility.public,
       icon: '@mipmap/ic_launcher'
     );
 
-    var iOSChannelSpecifics = IOSNotificationDetails();
+    var iOSChannelSpecifics = IOSNotificationDetails(
+      sound: 'gong.aiff',
+      presentSound: playSound
+    );
     
     var platformChannelSpecifics = NotificationDetails(
-      android:androidPlatformChannelSpecifics, iOS:iOSChannelSpecifics
+      android:androidPlatformChannelSpecifics, 
+      iOS:iOSChannelSpecifics
     );
 
 
@@ -181,8 +212,9 @@ class LocalNotifications {
     }
   }
 
-
-
+  static cancelAll(){
+    flutterLocalNotificationsPlugin.cancelAll();
+  }
 
   static cancelNotification({int id}){
     flutterLocalNotificationsPlugin.cancel(id);

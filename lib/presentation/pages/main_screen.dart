@@ -1,4 +1,5 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -34,7 +35,6 @@ class _MainScreenState extends State<MainScreen> {
         (c.blue * f).round());
   }
 
-
   @override 
   void initState(){
     super.initState();
@@ -47,8 +47,7 @@ class _MainScreenState extends State<MainScreen> {
   
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
-      // DE MOMENTO EL DIÁLOGO DE VERSIONES ES MEJORABLE !!! NO LO UTLIZAMOS
-      if(false && _userstate.user.version < _userstate.data.lastVersion.versionNumber){
+      if(_userstate.user.version == null || _userstate.user.version < _userstate.data.lastVersion.versionNumber){
         _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
 
        showDialog(
@@ -72,17 +71,20 @@ class _MainScreenState extends State<MainScreen> {
                      padding: EdgeInsets.all(Configuration.smpadding),
                      child: Center(
                        child: Text('Version ' + _userstate.data.lastVersion.versionNumber.toString(),  
-                       style:Configuration.text('smallmedium',Colors.white)),
+                       style:Configuration.text('medium',Colors.white)),
                      )
                    ),
                    SizedBox(height:Configuration.verticalspacing),
-                   Text(_userstate.data.lastVersion.description, style:Configuration.text('small',Colors.black)),
+                   Padding(
+                     padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                     child: Text(_userstate.data.lastVersion.description, style:Configuration.text('smallmedium',Colors.black), textAlign:TextAlign.center),
+                   ),
                    SizedBox(height:Configuration.verticalspacing),
                    Container(
                      width:Configuration.width,
                      color: Configuration.maincolor,
                      padding: EdgeInsets.all(Configuration.smpadding),
-                     child: Text('Functionalities',style:Configuration.text('small',Colors.white))
+                     child: Text('Functionalities',style:Configuration.text('smallmedium',Colors.white))
                    ),
                    SizedBox(height:Configuration.verticalspacing/2),
                    Container(
@@ -92,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
                       children: 
                       _userstate.data.lastVersion.content.map((e) {
                        return Container(
-                         margin: EdgeInsets.only(top:Configuration.verticalspacing/2),
+                         margin: EdgeInsets.only(top:Configuration.verticalspacing),
                          child: Row(children: [
                            Container(
                              height: Configuration.verticalspacing,
@@ -104,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
                            ),
                            SizedBox(width: Configuration.verticalspacing),
                            Expanded(child: 
-                            Text(e['text'],style:Configuration.text('tiny',Colors.black))
+                            Text(e['text'],style:Configuration.text('small',Colors.black))
                            )
                          ]),
                        );
@@ -112,6 +114,12 @@ class _MainScreenState extends State<MainScreen> {
                      ),
                    ),
                    SizedBox(height:Configuration.verticalspacing*2)
+                    /*
+                   Container(
+                     padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                     child: Text('Make sure you have downloaded the last version from the store', style: Configuration.text('small',Colors.grey))
+                    ),*/
+                   //SizedBox(height:Configuration.verticalspacing),
                  ],
                ),
              )
@@ -249,7 +257,7 @@ class __TimelineState extends State<_Timeline> {
             GestureDetector(
               onTap: ()=> {
                 if(action.user != null){
-                  showUserProfile(user:action.user,context:context)
+                  showUserProfile(user:action.user)
                 }
               },
               child: Container(
@@ -262,7 +270,9 @@ class __TimelineState extends State<_Timeline> {
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            image: action.user != null && action.user.image != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) :  action.userimage != null ? DecorationImage(image: NetworkImage(action.userimage), fit: BoxFit.fitWidth) : null,
+                            image: action.userimage != null ? 
+                              DecorationImage(image: CachedNetworkImageProvider(action.userimage), fit: BoxFit.fitWidth) : 
+                              null,
                             color: action.userimage == null ? Configuration.maincolor : null,
                             shape: BoxShape.circle
                           ),
@@ -381,6 +391,7 @@ class __TimelineState extends State<_Timeline> {
             padding: EdgeInsets.symmetric(horizontal: 5),
             height:Configuration.height*0.4,
             child: ListView(
+              physics: ClampingScrollPhysics(),
               controller: _scrollController,
               children: getMessages()))
         ]));

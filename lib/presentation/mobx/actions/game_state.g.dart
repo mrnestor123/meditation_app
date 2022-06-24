@@ -42,13 +42,13 @@ mixin _$GameState on _GameState, Store {
   final _$stateAtom = Atom(name: '_GameState.state');
 
   @override
-  String get state {
+  int get state {
     _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
-  set state(String value) {
+  set state(int value) {
     _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
     });

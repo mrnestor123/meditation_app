@@ -134,7 +134,7 @@ class PathScreen extends StatelessWidget {
             Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
             SizedBox(height: Configuration.blockSizeVertical * 0.2),
             Container(
-              width: 100,
+              width: Configuration.width*0.3,
               child: Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
               )
           ])
@@ -172,6 +172,8 @@ class PathScreen extends StatelessWidget {
       child:Column(
         children: [
             Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
+            SizedBox(height: Configuration.verticalspacing/2),
+
             Text(_userstate.user.stage.description, style:Configuration.text('small',Colors.grey)),
             //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
             SizedBox(height: Configuration.verticalspacing),

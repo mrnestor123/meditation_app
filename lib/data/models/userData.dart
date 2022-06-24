@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
+import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
@@ -25,7 +26,6 @@ class UserModel extends User {
       Stage stage,
       String role,
       int position,
-      bool classic,
       int meditposition,
       int gameposition,
       String userimage,
@@ -37,7 +37,9 @@ class UserModel extends User {
       teachinghours,
       location,
       website,
+      int stagelessonsnumber,
       int version,
+      unreadmessages,
       seenIntroCarousel,
       stats})
       : super(
@@ -46,6 +48,7 @@ class UserModel extends User {
         gameposition: gameposition,
         image: image,
         version:version,
+        unreadmessages: unreadmessages,
         settings: settings,
         description:description,
         teachinghours: teachinghours,
@@ -58,10 +61,10 @@ class UserModel extends User {
         meditposition: meditposition,
         stage: stage,
         followed:followed,
-        classic: classic,
         answeredquestions: answeredquestions,
         userStats: userStats,
-        seenIntroCarousel: seenIntroCarousel
+        seenIntroCarousel: seenIntroCarousel,
+        stagelessonsnumber: stagelessonsnumber
       );
 
   factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str),true);
@@ -81,11 +84,12 @@ class UserModel extends User {
         settings: json['settings'] == null ? UserSettings.empty() : UserSettings.fromJson(json['settings']),
         //ESTO HACE FALTA??
         followed: json['followed'],
+        stagelessonsnumber: json['stagelessonsnumber'] == null ? json['stagenumber'] == null ? 1 : json['stagenumber'] : json['stagelessonsnumber'],
         stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
         stagenumber: json["stagenumber"] == null ? 1 : json["stagenumber"],
         role: json["role"] == null ? null : json["role"],
-        classic: json["classic"] == null ? true : json["classic"],
         description: json['description'],
+        unreadmessages:json['unreadmessages'] == null ? new List.empty(growable:true) : json['unreadmessages'].cast<String>(),
         teachinghours:json['teachinghours'],
         location: json['location'],
         website: json['website'],
@@ -93,7 +97,19 @@ class UserModel extends User {
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       ); 
 
+
+      
     if(expand){
+      if(json['readlessons'] != null && json['readlessons'].length > 0){
+        u.setReadLessons(json['readlessons']);
+      }
+
+      if(json['presets']!= null){
+        for(var preset in json['presets'] ){
+          u.presets.add(MeditationPreset.fromJson(preset));
+        }
+      }
+
       if(json['meditations'] != null) {
         
         for(var med in json['meditations'] ){
@@ -156,7 +172,7 @@ class UserModel extends User {
           u.notifications.add(Notify.fromJson(not));
         }
       }
-
+    
       if(json['messages']!=null){
         for(var msg in json['messages']){
           u.messages.add(Message.fromJson(msg));
@@ -181,23 +197,44 @@ class UserModel extends User {
         "meditposition": meditposition == null ? 0 : meditposition,
         "gameposition": gameposition == null ? 0 : gameposition,
         "nombre": nombre == null ? null : nombre,
-        "classic": classic == null ? false : classic,
         'stats': userStats == null ? null : userStats.toJson(),
-        'image': image == null ? null : image,
+        'image': image == null ? '' : image,
+        "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
         'description': description,
         'teachinghours':teachinghours, 
         'location':location,
         "seenIntroCarousel":seenIntroCarousel,
         'website': website,
         "settings": settings == null ? null: settings.toJson(),
-        "following": following.map((element) => element.coduser).toList(),
+        "following": following.map((user) => user.coduser).toList(),
+        "unreadmessages":unreadmessages.map((e)=> e).toList(),
         //MENSAJES Y ACTIONS MUCHO JSON !!!!
-        "todayactions": todayactions.map((action) => action.toJson()).toList(),
         "students": students.map((stud)=> stud.coduser).toList(),
      //   'messages': messages.map((msg)=> msg.toJson()).toList(), 
         "followsyou": followers.map((user) => user.coduser).toList(),
-        "thisweekactions": thisweekactions.map((action) => action.toJson()).toList(), 
         "answeredquestions": answeredquestions,
         "version": version
       };
+
+
+  Map<String, dynamic> updateFields() => {
+    "stagenumber": stagenumber == null ? 1 : stagenumber,
+    "position": position == null ? 0 : position,
+    "meditposition": meditposition == null ? 0 : meditposition,
+    "gameposition": gameposition == null ? 0 : gameposition,
+    "nombre": nombre == null ? null : nombre,
+    'stats': userStats == null ? null : userStats.toJson(),
+    'image': image == null ? '' : image,
+    "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
+    'description': description,
+    'teachinghours':teachinghours, 
+    'location':location,
+    "seenIntroCarousel":seenIntroCarousel,
+    "students": students.map((stud)=> stud.coduser).toList(),
+    'website': website,
+    "settings": settings == null ? null : settings.toJson(),
+    "presets": presets == null ? null : presets.map((e) => e.toJson()).toList(),
+    "answeredquestions": answeredquestions,
+    "version": version
+  };
 }

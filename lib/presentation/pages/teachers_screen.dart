@@ -14,16 +14,17 @@ import 'package:meditation_app/presentation/pages/commonWidget/circular_progress
 import 'package:meditation_app/presentation/pages/commonWidget/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../mobx/actions/messages_state.dart';
 import 'config/configuration.dart';
 
 class TeachersScreen extends StatefulWidget {
@@ -172,6 +173,7 @@ class TeachersManagement extends StatefulWidget {
 
 class _TeachersManagementState extends State<TeachersManagement> {
   UserState _userstate;
+  MessagesState _messageState;
   TabController _tabController;
 
   int selectedstage = 1;
@@ -208,7 +210,7 @@ class _TeachersManagementState extends State<TeachersManagement> {
             User user  = _userstate.user.students[index];
             return ListTile(
               onTap:(){
-                sendMessage(state:_userstate, to: user,context:context);
+                sendMessage(state:_messageState, to: user, from: _userstate.user, context:context);
               },
               leading: ProfileCircle(
                 width:30,
@@ -227,7 +229,7 @@ class _TeachersManagementState extends State<TeachersManagement> {
             alignment: Alignment.bottomRight,
             child: ElevatedButton(
               onPressed: (){
-                sendMessage(state:_userstate,context: context);
+                sendMessage(state:_messageState, from:_userstate.user,context: context);
               }, 
               style: ElevatedButton.styleFrom(
                 primary:Colors.lightBlue
@@ -351,6 +353,8 @@ class _TeachersManagementState extends State<TeachersManagement> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
+    _messageState = Provider.of<MessagesState>(context);
+
 
     return DefaultTabController(
       length: 3,

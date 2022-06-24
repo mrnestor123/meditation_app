@@ -14,36 +14,39 @@ void main() {
   Stage one = new Stage(
     stagenumber: 1, image: 'stage1', 
     stobjectives: StageObjectives(
-      totaltime: 240,
+      totaltime: 100,
       meditationfreetime: 20,
       meditguiadas: 0,
       meditationcount: 2,
-      lecciones: 8, 
-      streak: 6
+      lecciones: 0, 
+      streak: 3
     ),
   );
 
-  for (int i = 0; i < 7; i++) {
+  for (int i = 0; i < 6; i++) {
     one.addLesson(new Lesson(title: 'Lesson ' + i.toString(), description: 'test', text: [], position: i,stagenumber: 1));
-    one.addMeditation(new Meditation(duration: Duration(hours: 15), title: 'Guided meditation '+ i.toString(),position: i,stagenumber: 1));
+    one.addMeditation(new Meditation(duration: Duration(minutes: 5), title: 'Guided meditation '+ i.toString(),position: i,stagenumber: 1));
   }
 
   User user = new User(
-      nombre: "ernest", 
-      stagenumber: 1, 
-      meditposition: 0,
-      position: 1,
-      stage: one, 
-      userStats: UserStats.empty()
+    nombre: "ernest", 
+    stagenumber: 1, 
+    meditposition: 0,
+    position: 1,
+    stage: one, 
+    userStats: UserStats.empty()
   );
 
   DataBase d = new DataBase();
   
   d.stages.add(one);
+  d.stages.add(one);
+
 
   Meditation m = Meditation(duration: Duration(minutes: 240));
 
   //a lo mejor hay que checkear mas casos
+  /*
   test('meditations ', () {
     Meditation m0 = new Meditation(duration: Duration(minutes: 15), day: DateTime.now());
     user.takeMeditation(m0);
@@ -63,7 +66,7 @@ void main() {
     Meditation m1 = new Meditation(duration: Duration(minutes:20),day:DateTime.now().add(Duration(days:2)));
     user.takeMeditation(m1);  
 
-    Meditation m3 = new Meditation(duration: Duration(minutes:20),day:DateTime.now().add(Duration(days:2)), title:"Guided meditation");
+    Meditation m3 = new Meditation(duration: Duration(minutes:20),day:DateTime.now().add(Duration(days:2)), title:"Guided meditation", stagenumber: 1);
     user.takeMeditation(m3);  
 
     expect(user.userStats.stage.guidedmeditations, 1);
@@ -90,20 +93,54 @@ void main() {
     expect(user.userStats.stage.timemeditated, 155 );
 
   });
+  */
 
+  // HACER TESTS PARA COMPROBAR SI SE SUBE DE ETAPA !!!
   test('update stage', () {
+  
+    print({'GOT LESSON',user.passedObjectives});
+    
+    for(Meditation m in one.meditpath.sublist(0,one.meditpath.length-1)){
+      user.takeMeditation(m,d);
+    }
+
+    
+    print(user.passedObjectives);
+
+
+    expect(user.userStats.stage.guidedmeditations, 5);  
+
+    Meditation m1 = new Meditation(duration: Duration(minutes:5),day:DateTime.now().add(Duration(days:1)));
+    Meditation m2 = new Meditation(duration: Duration(minutes:5),day:DateTime.now().add(Duration(days:2)));
+    Meditation m3 = new Meditation(duration: Duration(minutes:5),day:DateTime.now().add(Duration(days:1)));
+
+    
+    user.takeMeditation(m1);
+    user.takeMeditation(m2);
+    user.takeMeditation(m3);
+
+    print(user.passedObjectives);
+
+    user.takeMeditation(one.meditpath[one.meditpath.length-1],d);
+
+    print(user.passedObjectives);
+
+
     for(Lesson l in one.path){
       //HAY QUE ELIMINAR D DE TAKE LESSON
       user.takeLesson(l, d); 
     } 
 
-    print(user.passedObjectives);
-    
-    for(Meditation m in one.meditpath){
-      user.takeMeditation(m,d);
-    }
+
+    Meditation m4 = new Meditation(duration: Duration(minutes:60),day:DateTime.now().add(Duration(days:2)));
+
+    user.takeMeditation(m4, d);
 
     print(user.passedObjectives);
+
+
+    expect(user.stagenumber == 2, true);
+    
 
 
   });

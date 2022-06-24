@@ -42,7 +42,7 @@ mixin _$ProfileState on _ProfileState, Store {
   final _$initAsyncAction = AsyncAction('_ProfileState.init');
 
   @override
-  Future<dynamic> init(User u, bool me) {
+  Future<dynamic> init(User u, User me) {
     return _$initAsyncAction.run(() => super.init(u, me));
   }
 

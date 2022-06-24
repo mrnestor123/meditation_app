@@ -17,6 +17,7 @@ class Content {
     } else {
       this.cod = cod;
     }
+
   }
 
   bool isMeditation(){
@@ -38,9 +39,6 @@ class Content {
     };
   }
 
-
-
-
   IconData getIcon(){
     if(this.file.isNotEmpty){
       return isAudio(this.file) ? Icons.audiotrack : Icons.browse_gallery;
@@ -48,7 +46,6 @@ class Content {
       return Icons.abc;
     }
   }
-
 
   String getText(){
     if(this.file.isNotEmpty){
@@ -58,9 +55,6 @@ class Content {
     }
   }
 
-  // funciones ?? 
-  //takecontent ????
-  // edit ????
 
 
 

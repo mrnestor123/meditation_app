@@ -164,8 +164,8 @@ class _GameStartedState extends State<GameStarted> {
 
       l.add(SizedBox(height: Configuration.verticalspacing));
       
-      for(var option in _gamestate.selectedquestion.options){
-        int index =  _gamestate.selectedquestion.options.indexOf(option);
+      for(int i = 0; i < _gamestate.selectedquestion.options.length;i++){
+        dynamic option = _gamestate.selectedquestion.options[i];
         l.add(Container(
           margin: EdgeInsets.all(6.0),
           width: Configuration.width*0.9,
@@ -173,17 +173,15 @@ class _GameStartedState extends State<GameStarted> {
             style: ElevatedButton.styleFrom(
               padding: EdgeInsets.all(12.0),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-              primary: _gamestate.state =='answer' && _gamestate.selectedanswer == index ? _gamestate.success ? Colors.green : Colors.red : Colors.white,
+              primary: _gamestate.state ==_gamestate.question_answered && _gamestate.selectedanswer == i ? _gamestate.success ? Colors.green : Colors.red : Colors.white,
               elevation: 0.0
             ),
             onPressed: () => {
+              _gamestate.state != _gamestate.question_answered ? _gamestate.userAnswer(i,_userstate.user) : null,
               setState(()=> {
-                _gamestate.state != 'answer' ? 
-              _gamestate.userAnswer(index,_userstate.user) : 
-              null
               })
             },
-            child: Text(option,style: Configuration.text('small', _gamestate.state =='answer' && _gamestate.selectedanswer == index  ? Colors.white : Colors.black)),  
+            child: Text(option,style: Configuration.text('small', _gamestate.state == _gamestate.question_answered && _gamestate.selectedanswer == i  ? Colors.white : Colors.black)),  
           ),
         ));
       }
@@ -200,9 +198,8 @@ class _GameStartedState extends State<GameStarted> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('Questions right', style: Configuration.text('small', Colors.black)),
-                Text(
-                  _gamestate.answeredquestions.length.toString()  + '/'+  _gamestate.selectedgame.questions.length.toString(),
+                Text('Questions right', style: Configuration.text('smallmedium', Colors.black)),
+                Text(_gamestate.answeredquestions.length.toString()  + '/'+  _gamestate.selectedgame.questions.length.toString(),
                   style: Configuration.text('medium',Colors.black),
                 )
               ],
@@ -257,11 +254,15 @@ class _GameStartedState extends State<GameStarted> {
                 Navigator.pop(context); 
               }, color: Colors.black),
           ),
-          body: _gamestate.state == 'question' ? 
-              questionAsk()
-            :  _gamestate.state == 'answer' ? 
-            questionSolved():
-            showingVideo()
+          body: Observer(
+            builder: (context) {
+              return  _gamestate.state == _gamestate.question_ask || _gamestate.state == _gamestate.question_answered 
+                ? questionAsk()
+                : _gamestate.state == _gamestate.finished 
+                ? questionSolved():
+                showingVideo();
+            }
+          )
     );
   }
 }

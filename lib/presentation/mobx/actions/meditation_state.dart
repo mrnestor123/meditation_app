@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
@@ -14,6 +15,7 @@ import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:mobx/mobx.dart';
 import 'package:video_player/video_player.dart';
+import 'package:wakelock/wakelock.dart';
 //import 'package:wakelock/wakelock.dart';
 
 part 'meditation_state.g.dart';
@@ -21,6 +23,9 @@ part 'meditation_state.g.dart';
 class MeditationState extends _MeditationState with _$MeditationState {
   MeditationState({MeditateUseCase meditate}) : super(meditate: meditate);
 }
+
+// CAMBIAR LAS STRINGS DE LOS ESTADOS AQUI TAMBIEN !!!!
+
 
 abstract class _MeditationState with Store {
   MeditateUseCase meditate;
@@ -42,12 +47,12 @@ abstract class _MeditationState with Store {
 
   @observable
   Map<String,dynamic> currentsentence;
+
   @observable
   bool newsentence = false;
+  
   @observable
   int sentenceindex = 0;
-
-  bool finished = false;
 
   var selectedstage = 1;
   var selectedtype = 'Meditation';
@@ -61,11 +66,38 @@ abstract class _MeditationState with Store {
   @observable
   bool startedmeditation = false;
 
+
+  @observable 
+  double warmuptime = 0.0;
+
+  Map<String,dynamic> intervalBells = {
+    'No interval Bell':'',
+    'Every Minute': '1 min',
+    'Every 2 Minutes':'2 min',
+    'Every 5 Minutes': '5 min',
+    'Every 10 Minutes': '10 min',
+    'Every 20 Minutes': '20 min',
+    'Halfway':'Halfway'
+  };
+  
+  @observable
+  String selectedIntervalBell = '';
+
+  int intervalBell;
+
+
+  int selectingmeditation = 0;
+  int premeditation = 1;
+  int meditating = 2;
+  int finished = 3;
+  int paused = 4;
+  int warmup = 5;
+
   bool hasVideo = false;
   bool hasAudio = false;
   
   @observable
-  String state = 'initial';
+  int state;
 
   Timer timer;
   AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
@@ -73,13 +105,19 @@ abstract class _MeditationState with Store {
   @observable
   VideoPlayerController videocontroller;
 
-  _MeditationState({this.meditate});
+  _MeditationState({this.meditate}){
+    state = selectingmeditation;
+  }
 
   @observable 
   bool shadow = false;
   bool delaying = false;
 
   var timeChange; 
+
+  Timer bellTimer;
+
+  Timer warmupTimer;
 
 
   @action 
@@ -91,6 +129,39 @@ abstract class _MeditationState with Store {
   }
 
 
+  @action
+  void selectBell(String interval){
+    selectedIntervalBell = interval;
+  }
+
+  void setUpIntervalBell(){
+
+    void playBell(){
+      if(duration.inMinutes >= 1){
+        assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+      }
+    }
+
+    int time;
+    // ESTO NO HACEFALTA
+    if(selectedIntervalBell != 'Halfway'){
+      time = int.parse(selectedIntervalBell.substring(0,2));
+      bellTimer = new Timer.periodic(Duration(minutes: time), (t) async {
+        bellTimer = t;
+        playBell();
+      });
+    }else {
+      time = totalduration.inMinutes ~/ 2;
+      bellTimer = new Timer(Duration(minutes: time), () async {
+        
+        playBell();
+      });
+    }
+
+  }
+
+
+  // esto es cuando la meditación es free y va con tiempo 
   @action
   void startMeditation(User u, DataBase d) {
     //PORQUE HACE FALTA El USUARIO AQUI ????
@@ -106,13 +177,14 @@ abstract class _MeditationState with Store {
     }
 
     LocalNotifications.showMessage(
+      playSound: true,
       id:010,
       duration: this.totalduration,
       title: "Congratulations!",
       body: 'You finished your meditation',
       onFinished: this.finishMeditation
     );
-
+  
     startTimer();
   }
 
@@ -123,10 +195,9 @@ abstract class _MeditationState with Store {
     if(m.duration != null){
       this.duration = m.duration;
       this.totalduration = m.duration;
-      
     }
 
-    if(selmeditation.file != null){
+    if(selmeditation.file != null && selmeditation.file.isNotEmpty){
     //PARA EL TEMA DE LOS ARCHIVOS !!
       if(isAudio(selmeditation.file)){
         hasAudio = true;
@@ -152,23 +223,66 @@ abstract class _MeditationState with Store {
     }
 
     if(selmeditation.content != null){
-      state = 'pre_guided';
+      state = premeditation;
     }else {
-      state = 'started';
+      state = meditating;
     }
 
   }
 
   @action 
   void setDuration(int time){
+    if(selectedIntervalBell != null && selectedIntervalBell != 'Halfway' && selectedIntervalBell != ''){
+      int intervaltime = int.parse(selectedIntervalBell.substring(0,2));
+      if(intervaltime > time){
+        selectedIntervalBell = '';
+      }
+    }
+
     duration = new Duration(minutes: time);
     totalduration = new Duration(minutes: time);
   }
 
+  @action   
+  void startWarmup(){
+    warmupTimer =  Timer.periodic(Duration(seconds: 1), (t) { 
+      if(warmuptime > 0){
+        warmuptime = warmuptime - 1;
+      }else {
+        // un sonido de que empieza la meditación
+        assetsAudioPlayer.open(Audio("assets/bowl-sound.mp3"));
+        t.cancel();
+        warmupTimer.cancel();
+        startTimer();
+        state = meditating;
+      }
+    });
+  }
+
   @action
   void startTimer() {
+    shadow=false;
+
+    // HAY QUE SALIR DE ESTE MODO UNA VEZ SE ACABA !!!!!!!
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
+    if(selectedIntervalBell != ''){
+      setUpIntervalBell();
+    }
+
+    if(state == paused){
+      LocalNotifications.showMessage(
+        playSound: true,
+        id:010,
+        duration: this.duration,
+        title: "Congratulations!",
+        body: 'You finished your meditation',
+        onFinished: this.finishMeditation
+      );
+    }
+
     // The following line will enable the Android and iOS wakelock.
-    //Wakelock.enable();
+    Wakelock.enable();
     if(hasAudio){
       assetsAudioPlayer.playOrPause();
     }
@@ -191,14 +305,15 @@ abstract class _MeditationState with Store {
     }
 
 
-    this.state = 'started';
+    this.state = meditating;
 
     timer = new Timer.periodic(oneSec, (timer) {
       if (this.duration.inSeconds < 2 ) {
         finishMeditation();
-        state = 'finished';
+        state = finished;
         timer.cancel();
       } else {
+        // COMPROBAR CADA SEGUNDO NO ES EFICIENTE !!!
         if(selmeditation != null){
           if(selmeditation.type !='free' && selmeditation.followalong != null){
             if((this.totalduration.inSeconds - this.duration.inSeconds) > (timeChange * sentenceindex) + 3){
@@ -212,17 +327,17 @@ abstract class _MeditationState with Store {
             }
           }
         }
+
         this.duration = this.duration - oneSec;
       }
     });
   }
 
-
   @action
   void pause() {
-    this.state = 'paused';
+    this.state = paused;
 
-     if(hasVideo){
+    if(hasVideo){
       videocontroller.pause();
     }
 
@@ -231,19 +346,35 @@ abstract class _MeditationState with Store {
     }
 
     timer.cancel();
+
+    LocalNotifications.cancelAll();
   }
 
-  @action
-  void cancel() {
-    // The next line disables the wakelock again.
-    //Wakelock.disable();
-    if(this.selmeditation != null ){
-      state = 'pre_guided';
-    }else{
-      state = 'free';
+
+  @action 
+  void selectPreset(MeditationPreset p){
+    Duration d = new Duration(minutes: p.duration);
+    this.duration = d;
+    this.totalduration = d;
+
+    if(p.intervalBell != null && p.intervalBell.isNotEmpty){
+      this.selectedIntervalBell = p.intervalBell;
     }
 
-    LocalNotifications.cancelNotification(id:010);
+    if(p.warmuptime != null && p.warmuptime != 0){
+      this.warmuptime = p.warmuptime;
+    }
+  }
+
+
+  @action
+  void cancel({bool hasFinishedMeditation = false}) {
+    Wakelock.disable();
+
+    if(!hasFinishedMeditation){
+      LocalNotifications.cancelNotification(id:010);
+      state = selectingmeditation;  
+    }
 
     duration = new Duration(minutes: totalduration.inMinutes);
      
@@ -260,6 +391,18 @@ abstract class _MeditationState with Store {
 
     }
 
+    if(bellTimer != null && bellTimer.isActive){
+      bellTimer.cancel();
+    }
+
+    if(warmupTimer != null && warmupTimer.isActive){
+      warmupTimer.cancel();
+    }
+
+    if(selmeditation != null){
+      selmeditation = null;
+    }
+
     sentenceindex = 0;
   }
 
@@ -271,39 +414,38 @@ abstract class _MeditationState with Store {
       delaying = true;
       Future.delayed(Duration(seconds: 10), (){
         delaying = false;
-        shadow=true;
+        shadow = true;
       });
     }
   }
 
   @action
   Future finishMeditation() async {
+    Wakelock.disable();
+
     int currentposition = user.position;
     sentenceindex = 0;
 
-    print('finishing meditation');
-    
-    if(timer != null || timer.isActive){
-      timer.cancel();
-      duration = new Duration(minutes: totalduration.inMinutes);
-    }
+    shadow = false;
 
-    // ESTO PARA QUE ES !!!!! QUITAR !!!
-    if(selmeditation != null){
-      selmeditation.duration = totalduration;
-    }
-
-    //ESTO DEBERIA DE ESTAR EN  USER_STATE ???
     Either<Failure, User> meditation = await meditate.call(
-      Params(meditation: selmeditation == null ? new MeditationModel(duration: totalduration) : 
-      selmeditation, user: user, d: data)
+      Params(
+        meditation:  selmeditation == null 
+        ? new MeditationModel(duration: totalduration) 
+        : selmeditation, 
+        user: user, d: data
+      )
     );
     
     selmeditation = null;
     
-
+    // SOLO ESTO SI NO FUNCIONA LO OTRO !
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
-    state = 'finished';
+    // NO ESTA CLARO ESTO !!!
+    //assetsAudioPlayer.dispose();
+    state = finished;
+
+    cancel(hasFinishedMeditation:true);
 
   }
 }

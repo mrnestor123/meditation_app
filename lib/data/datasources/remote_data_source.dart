@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -22,6 +23,9 @@ import 'package:http/http.dart' as http;
 import 'package:meditation_app/domain/entities/version_entity.dart';
 
 
+import '../../domain/entities/action_entity.dart';
+import '../../domain/entities/lesson_entity.dart';
+import '../../domain/entities/stage_entity.dart';
 import '../models/lesson_model.dart';
 
 typedef CollectionReference CollectionGet(String path);
@@ -53,7 +57,7 @@ abstract class UserRemoteDataSource {
 
   Future <List<Request>> getRequests();
 
-  Future updateRequest(Request r, [Notify n]);
+  Future updateRequest(Request r, [List<Notify> n, Comment c]);
 
   Future updateNotification(Notify n);
 
@@ -77,6 +81,18 @@ abstract class UserRemoteDataSource {
 
   Future follow({User user, User followed, bool follows});
 
+  Future takeLesson({User user, Lesson l});
+
+  Future addAction({UserAction a});
+
+  // ESTO TENDRÍA QUE SER MENSAJES
+  Future<List<Chat>> getChats({User user});
+
+  Future<Stream<List<Message>>> startConversation({User sender,String receiver});
+
+  Future<Chat> getChat({User sender,String receiver});
+
+  Future updatePhoto({User u, String image});
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -89,18 +105,18 @@ class MyHttpOverrides extends HttpOverrides{
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
+  FirebaseFirestore database;
 
-  var database;
+  StreamController<List<Message>> _chatController = StreamController<List<Message>>.broadcast();
   var nodejs ;
 
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    nodejs = 'https://public.digitalvalue.es:8002';
-   //  nodejs = 'http://192.168.4.195:8002';
-      //nodejs = 'http://192.168.1.130:8002';
-
-   // nodejs = 'http://192.168.4.67:8002';
+    // nodejs = 'http://localhost:5001/app';
+    // nodejs = 'https://public.digitalvalue.es:8002';
+  //  nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
+    nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -108,6 +124,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<UserModel> connect(String cod) async {
     try{
       var url = Uri.parse('$nodejs/connect/$cod');
+      
       http.Response response = await http.get(url).timeout(
         const Duration(seconds: 20),
         onTimeout: () {
@@ -163,18 +180,17 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       //hay que pasar esto al nuevo setting con UserStats
       // HAY QUE CREAR UN MODELO USERMODEL 
       UserModel user = new UserModel(
-          coduser: usuario.uid,
-          user: usuario,
-          stagenumber: 1,
-          meditposition: 0,
-          gameposition: 0,
-          role: "meditator",
-          classic: true,
-          position: 0,
-          stage: one,
-          userStats: UserStats.empty()
-        );
-
+        coduser: usuario.uid,
+        user: usuario,
+        stagenumber: 1,
+        meditposition: 0,
+        gameposition: 0,
+        role: "meditator",
+        position: 0,
+        stage: one,
+        stagelessonsnumber: 1,
+        userStats: UserStats.empty()
+      );
 
       //añadimos al usuario en la base de datos de usuarios
       await database.collection('users').add(user.toJson());
@@ -190,8 +206,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     var url = Uri.parse('$nodejs/live/${u.coduser}');
     try{
       var response = await http.get(url);
-      var actions = json.decode(response.body);
 
+      print(response.body);
+
+      var actions = json.decode(response.body);
+      
       if(actions['today'] != null && actions['today'].length > u.todayactions.length){
         u.setActions(actions['today'], true);
       }
@@ -200,7 +219,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         u.setActions(actions['thisweek'], false);
       }
     }catch(e){
-      print(e);
+      print({'GETACTIONS',e});
     }
   }
 
@@ -231,7 +250,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         }
       }
 
-      // ESTO SE DEBERÍA SACAR CON LAS ETAPAS
       QuerySnapshot versions = await database.collection('versions').get();
 
       for(DocumentSnapshot doc in versions.docs){
@@ -239,6 +257,25 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       }
 
       d.getLastVersion();
+
+
+      List<Phase> phases = [
+        Phase(title: ' The novice meditator',description: 'Continuous attention to the meditation object'),
+        Phase(title: 'The skilled meditator', description: 'Sustained exclusive focus of attention and purifying of mental hindrances'),
+        Phase(title: 'The adept meditator', description: 'Persistence of the mental qualities of an adept')
+      ];
+      
+      for(StageModel s in d.stages){
+        if(s.stagenumber <= 3){
+          phases[0].content.addAll(s.path);
+        }else if(s.stagenumber <=7){
+          phases[1].content.addAll(s.path);
+        }else{
+          phases[2].content.addAll(s.path);
+        }
+      }
+      
+      d.phases = phases;
 
       return d;
     }catch(e){
@@ -263,7 +300,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
       return l;
     } catch(e){
-      print({'exception',e.toString()});
+      print({'exception',e});
     }
 
     throw Exception();
@@ -315,45 +352,42 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     return requests;
   }
 
+
   @override
+  // ESTO HAY QUE PASARLO AL SERVER !!!!!
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
     try{
       QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
       String documentId = userreference.docs[0].id;
-
-      Map<String,dynamic> res = user.toJson();  
-
-      await database.collection("users").doc(documentId).update(res);
   
+      await database.collection("users").doc(documentId).set(
+        user.updateFields(),
+        SetOptions(
+          merge: true
+        )
+      );
+
       //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
       if (type == 'meditate') {
         await database.collection('meditations').add(toAdd[0].shortMeditation());
       }else if(type =='lesson'){
         //Añadirlo a las lessonss del usuario !!
       }
-
-      var url = Uri.parse('$nodejs/action/${user.coduser}');
-
-      //esto se ejecutará antes que el clear ??
-      //esto desde cuando se ejecuta ??
-      user.lastactions.forEach((element) async{
-        try{
-        var body = json.encode(element.toJson());
-        
-        var response = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: body
-        );
-        }catch(e){
-          print(e);
-        }
-      });
-
-      user.lastactions.clear();
     }catch(e){  
       print(e.toString());
       throw ServerException();
     }
+  }
+
+  @override
+  Future addAction({UserAction a}){
+    var url = Uri.parse('$nodejs/action/${a.coduser}');
+    var body = json.encode(a.toJson());
+
+    return http.post(url,
+      headers: {"Content-Type": "application/json"},
+      body: body
+    );
   }
 
   /*
@@ -365,7 +399,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       UserModel u = await connect(coduser);
 
       if(u !=null){
-        getActions(u);
+        Future.delayed(Duration(seconds: 5),(){
+          getActions(u);
+        });
 
         /*
         ESTO NO LO VAMOS A HACER ASI. CADA VEZ QUE ENTRE A MAINSCREEN SACAMOS ACTIONS
@@ -392,21 +428,31 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       throw Exception();
     }else{
       //comprobar que funciona bien
-      UserModel u = UserModel.fromRawJson(response.body);
+      UserModel u = UserModel.fromJson(json.decode(response.body),false);
       return u;
     }
   }
 
-
-
-  Future updateRequest(Request r, [Notify n]) async{
+  Future updateRequest(Request r, [List<Notify> n, Comment c]) async{
     try{
       QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
       String docID = query.docs[0].id; 
+
       // UPDATE REQUEST DEBERÍA DE  SER UNA TRANSACCIÓN !!!!!
       await database.collection("requests").doc(docID).update(r.toJson());
-      if(n != null){
-        await database.collection('notifications').add(n.toJson());
+
+      if(c != null){
+        await database.collection("comments").add(c.toJson());
+
+
+        await database.collection('requests').doc(docID).collection('comments').add(c.toJson());
+      }
+
+      if(n != null && n.length > 0){
+
+        for(var not in n){
+          await database.collection('notifications').add(not.toJson());
+        }
       }
     }catch(e) {
       throw ServerException();
@@ -433,7 +479,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   // PORQUE SE SIGUE PASANDO LOS USUARIOS !!!!
   Future sendMessage(Message m) async {
     try{
-      var url = Uri.parse('$nodejs/sendmessage');
+      var url = Uri.parse('$nodejs/sendmessage/new');
       var response = await http.post(url,
           headers: {"Content-Type": "application/json"},
           body: json.encode(m.toJson())
@@ -443,13 +489,12 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
-
   @override
   Future<Request> getRequest(String cod) async{
     try{
       var url = Uri.parse('$nodejs/request/$cod');
       http.Response response = await http.get(url);
-      Request request =  new Request.fromJson(json.decode(response.body));
+      Request request = new Request.fromJson(json.decode(response.body));
       return request;
     }catch(e) {
       throw ServerException();
@@ -500,9 +545,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   @override
   Future<User> expandUser({User u}) async{
     try {
-      var url  =  Uri.parse('$nodejs/expanduser/${u.coduser}');
+      var url =  Uri.parse('$nodejs/expanduser/${u.coduser}');
       http.Response response = await http.get(url); 
       if(response.statusCode == 200){
+        // PORQUE NO LO HACEMOS DESDE NORMAL
         UserModel newUser = UserModel.fromRawJson(response.body);
         return newUser;
       }else{ 
@@ -516,7 +562,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   Future follow({User user, User followed, bool follows}) async{
-
     try {
       var url  =  Uri.parse('$nodejs/follow/${followed.coduser}');
       http.Response response = await http.post(url,
@@ -533,9 +578,152 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
 
     }catch(e){
-      print(e.toString());
+      print({'FOLLOW',e});
       throw ServerException();
     }
   }
-  
+
+  @override
+  Future takeLesson({User user, Lesson l}) async{
+
+    try {
+      QuerySnapshot query = await database.collection('readlessons').where('coduser', isEqualTo: user.coduser).get();
+
+      if(query.docs.length > 0){
+        bool contains = false;
+
+        Map<String,dynamic> docs = query.docs[0].data();
+
+        if(docs['readlessons'] != null && !docs['readlessons'].contains(l.cod)){
+          database.collection('readlessons').doc(query.docs[0].id).update({
+            'readlessons': FieldValue.arrayUnion([l.cod])
+          });
+        }
+      }else {
+        database.collection('readlessons').add({
+          'coduser': user.coduser,
+          'readlessons':[l.cod]
+        });
+      }
+
+    } catch(e){
+      print({'TAKELESSON',e});
+      throw ServerException();
+    }
+
+  }
+
+  @override
+  Future<List<Chat>> getChats({User user}) async {
+
+    try{
+      var url = Uri.parse('$nodejs/messages/${user.coduser}/new');
+      
+      http.Response response = await http.get(url).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          // debería throwear una exception
+          // Time has run out, do what you wanted to do.
+          return http.Response('Error', 400); 
+        },
+      );
+
+      if(response.statusCode == 200){
+        List<Chat> chats = new  List.empty(growable:true);
+        List<dynamic> jsonResponse = json.decode(response.body);
+        
+        
+        jsonResponse.forEach((chat){
+          chats.add(Chat.fromJson(chat, user));
+        });
+
+        return chats;       
+      }
+
+      throw ServerException();
+    }catch(e) {
+      print({'Exception', e.toString()});
+      throw ServerException();
+    }
+  }
+
+
+  // AQUÍ DEBERÍAMOS DEVOLVER UN CHAT ????
+  @override
+  Future<Stream<List<Message>>> startConversation({User sender,String receiver}) async {
+    try{
+      //ESTO DEPURARLO
+      QuerySnapshot query = await database.collection('chats').where('shortusers.${sender.coduser}',isEqualTo:true)
+      .where('shortusers.$receiver',isEqualTo:true).get();
+
+
+      if(query.docs.length > 0){
+        String documentId = query.docs[0].id;
+        // habra que añadir solo los mensajes que no sean enviados por mi no??
+        database.collection('chats').doc(documentId).collection('messages').snapshots().listen((snapshot) {
+          if(snapshot.docs.isNotEmpty){
+            var messages = snapshot.docs;
+            List<Message> m = new List.empty(growable: true);
+            for(var message in messages){
+              m.add(Message.fromJson(message.data()));
+            }
+            _chatController.add(m);
+          }
+        });
+
+        return _chatController.stream;
+      }
+
+      throw ServerException();
+    }catch(e) {
+      print({'Exception', e.toString()});
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<Chat> getChat({User sender, String receiver}) async{
+    var url = Uri.parse('$nodejs/messages/${sender.coduser}/$receiver/new');
+    http.Response response = await http.get(url).timeout(
+      const Duration(seconds: 20),
+      onTimeout: () {
+        // debería throwear una exception
+        // Time has run out, do what you wanted to do.
+        return http.Response('Error', 400); 
+      },
+    );
+
+
+    if(response.statusCode == 200){
+      return Chat.fromJson(json.decode(response.body), sender);    
+    }
+
+    // TODO: implement getChat
+    throw ServerException();
+  }
+
+  @override
+  Future updatePhoto({User u, String image}) async{
+     try{
+      var url = Uri.parse('$nodejs/updatephoto/${u.coduser}');
+      
+      http.Response response = await http.post(url,body: image).timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          // debería throwear una exception
+          // Time has run out, do what you wanted to do.
+          return http.Response('Error', 400); 
+        },
+      );
+
+      if(response.statusCode == 200){
+        return true;     
+      }
+
+      throw ServerException();
+    }catch(e) {
+      print({'Exception', e.toString()});
+      throw ServerException();
+    }
+  }
 }

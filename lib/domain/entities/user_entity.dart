@@ -23,19 +23,23 @@ class User {
   String coduser, nombre, role, image, timemeditated, description, location, website, teachinghours;
   //USUARIO DE FIREBASE
   var user;
-  int stagenumber, position, meditposition, gameposition, percentage, version;
+  int stagenumber, stagelessonsnumber, position, meditposition, gameposition, percentage, version;
   Stage stage;
+
   //follows es cuando un usuario TE SIGUE!!
-  bool classic, followed, stageupdated, seenIntroCarousel;
+  bool  followed, stageupdated, seenIntroCarousel;
 
   //para el modal de progreso
   Progress progress;
   UserSettings settings;
+
   //estadísticas
   UserStats userStats;
 
   List<User> students = new List.empty(growable: true);
   List<Content> addedcontent =  new List.empty(growable:true);
+
+  List<dynamic> unreadmessages = new List.empty(growable: true);
   List<Message> messages = new List.empty(growable:true);
 
   //passed objectives también deberia estar en stats
@@ -52,6 +56,8 @@ class User {
   List<User> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
 
+  List<MeditationPreset> presets = new List.empty(growable:true);
+
   List<File> files = new List.empty(growable:true);
 
   //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
@@ -59,19 +65,24 @@ class User {
   //hacemos week meditations??? 
 
   //List with the lessons that the user has learned
-  final ObservableList<Lesson> lessonslearned = new ObservableList();
+  final ObservableList<dynamic> readlessons = new ObservableList();
   //HACE FALTA ESTO ???
   Map<dynamic,dynamic> answeredquestions = new Map();
 
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
-        this.role,this.classic = false,this.meditposition= 0,this.userStats, this.followed,
-        this.answeredquestions ,this.gameposition = 0, this.settings, this.version = 0, 
+        this.role,this.meditposition= 0,this.userStats, this.followed,
+        this.answeredquestions ,this.gameposition = 0, this.settings, this.version = 0,
+        this.stagelessonsnumber = 1, this.unreadmessages,
         this.website,this.teachinghours,this.location,this.description, this.seenIntroCarousel = false
         }) {
-   
+          
     if(userStats != null){
       getTimeMeditatedString();
+    }
+
+    if(unreadmessages == null){
+      this.unreadmessages = new List.empty(growable: true);
     }
         
     if (coduser == null) {
@@ -97,17 +108,27 @@ class User {
     inituser();
   }
 
-  //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
-  void inituser() {
-    if(this.userStats != null && this.userStats.streak > 0) {
+  void checkStreak(){
+     if(this.userStats != null && this.userStats.streak > 0 && this.userStats.lastmeditated != null){
+      print('CHECKING streak');
       var lastmeditated = DateTime.parse(this.userStats.lastmeditated);
-      if(lastmeditated.day != DateTime.now().day && lastmeditated.day != DateTime.now().subtract(Duration(days: 1)).day){
-        //userStats.streak = 0;
+      var today = DateTime.now();
+      print(lastmeditated.toIso8601String());
+      if(lastmeditated.month != today.month || lastmeditated.day != today.day || lastmeditated.day != today.subtract(Duration(days: 1)).day){
+        print('CHANGING STREAK');
+        this.userStats.streak = 0;
       }
     } 
+  }
 
+
+  //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
+  void inituser() {
+   
+    // SOLO LA COMPROBAMOS SI ERES EL USUARIO DE LA APP
     if(this.stage != null){
       setPercentage();
+      checkStreak();
     }
   }
 
@@ -116,7 +137,7 @@ class User {
   */
 
   //HAY QUE QUITAR COSAS DE AQUÍII!!!!!
-  ObservableList<Lesson> getLessonsLearned() => lessonslearned;
+  ObservableList<Lesson> getLessonsLearned() => readlessons;
   int getStageNumber() => this.stagenumber;
 
   //checks if user answered the question
@@ -127,11 +148,11 @@ class User {
   //En el futuro sería  si contains la lista de lessons
   //returns if user has read a lesson
   bool readLesson(Content  c){
-    return c.position < this.position  && c.stagenumber == this.stagenumber ||  c.stagenumber < this.stagenumber || this.userStats.lastread != null && this.userStats.lastread.where((d) => d['cod'] == c.cod).length > 0;
+    return this.readlessons.contains(c.cod);
   }
 
   bool isBlocked(Meditation meditation){
-    return !this.settings.unlocksMeditation() && (this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber);
+    return !this.settings.unlocksMeditation() && (meditation.position != null &&  this.meditposition < meditation.position &&  this.stagenumber == meditation.stagenumber || this.stagenumber < meditation.stagenumber);
   }
 
   bool isNormalProgression(){
@@ -143,13 +164,12 @@ class User {
   }
 
   bool isLessonBlocked(Lesson l){
-    return !settings.unlocksLesson() && (this.position < l.position && this.stagenumber <= l.stagenumber );
+    return !settings.unlocksLesson() && (this.position < l.position && this.stagelessonsnumber <= l.stagenumber );
   }
 
   bool isStageBlocked(Stage s){
-    return !settings.unlocksLesson() && this.stagenumber < s.stagenumber;
+    return !settings.unlocksLesson() && this.stagelessonsnumber < s.stagenumber;
   }
-
 
   bool isAdmin(){
     return this.role == 'admin';
@@ -159,44 +179,25 @@ class User {
     return this.role =='teacher';
   }
 
-
-  //how much up to 6 the user has passed the lessons
-  int lessonsPercentage(){
-    if(this.userStats == 0){
-      return 0;
-    }else{
-      return ((this.userStats.stage.lessons / this.stage.stobjectives.lecciones)*6).round();
-    }
-  }
-
-
   void setVersion(int version) => this.version = version;
   void setImage(String image) => this.image = image;
 
+  void setReadLessons(List<dynamic> lessons) {
+    this.readlessons.clear();
+    this.readlessons.addAll(lessons);
+  }
 
   //ESTOS METODOS SON BUENOS ?????
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
-
-    //MIRAR QUE TYPES SON LOS QUE SE RECUPERAN FOLLOW Y UNFOLLOW ?
-    /*if(this.todayactions.length > 0 && type != 'meditation' && type != 'lesson' && type != 'updatestage' &&  type !='guided_meditation'){
-      for(UserAction a in this.todayactions) {
-        if(a.time.difference(DateTime.now()).inMinutes < 30 && type == a.type){
-          a.setAction(attribute);
-          a.userimage = this.image;
-          a.time = DateTime.now().toLocal();
-          return;
-        }
-      }
-      this.todayactions.add(a);
-    }else{*/
-      this.todayactions.add(a);
-    /*}*/
-    
+    a.user = this;
+    this.todayactions.add(a);
     this.lastactions.add(a);
 
-    //this.thisweekactions.add(a);
+
+    // YO HARÍA ALGO AQUÍ !!!!!!
+    //SUBIRÍA LAS ACTIONS AQUI
   }
   
   void setActions(json, isToday) {
@@ -204,7 +205,8 @@ class User {
       if(action['userimage'] == null){
         action['userimage'] = this.image;
       }
-      //action['userimage'] = this.image;
+
+
       if(isToday) {
         todayactions.add(UserAction.fromJson(action));
       }else{
@@ -213,12 +215,11 @@ class User {
     }
   }
 
-
   void uploadContent({Content c}){
     this.addedcontent.add(c);
   }
 
-  Message sendMessage(User to, String type,[String msg]){
+  Message sendMessage(String to, String type,[String msg]){
     var msgtypes= {
       'classrequest': nombre + ' wants to be your student', 
       'text': msg,
@@ -227,7 +228,7 @@ class User {
 
     return Message(
       sender: this.coduser,
-      receiver: to == null ? this.students : to.coduser,
+      receiver: to == null ? this.students : to,
       date: DateTime.now(),
       username: nombre, 
       text: msgtypes[type],
@@ -245,20 +246,24 @@ class User {
       following.add(u);
     }
 
-    //u.followers.add(this);
+    u.followers.add(this);
   }
 
   void unfollow(User u) {   
     u.followed = false;
 
-    if(following.where((element) => element.coduser == u.coduser).length > 0){
+    int index =  this.following.indexWhere((element) => element.coduser == u.coduser);
+
+    if(index != -1){
      // setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.remove(u);
+      this.following.removeAt(index);
     }
 
-    /*if(u.followers.where((element) => element.coduser == u.coduser).length > 0){
-      u.followers.remove(this);
-    }*/
+    int index2 =  u.followers.indexWhere((element) => element.coduser == this.coduser);
+
+    if(index2 != -1){
+      u.followers.removeAt(index2);
+    }
   }
 
   void updateStage(DataBase data) {
@@ -271,15 +276,27 @@ class User {
     });
 
     this.percentage = 0;
-    this.position = 0;
+    if(this.stagenumber  > this.stagelessonsnumber){
+      this.position = 0;
+    }
+    
     this.meditposition = 0;
     userStats.reset();
+
+    if(this.readlessons != null && this.readlessons.length > 0){
+      this.stage.path.where((l)=> l.stagenumber == this.stagenumber).toList().forEach((element) {
+        if (this.readlessons.contains(element.cod)) {
+          this.userStats.stage.lessons++;
+        }
+      });
+    }
+
     this.stageupdated = true;
 
-     this.progress = Progress(
-        done: this.stagenumber,
-        what: 'stage',
-        stage: this.stage
+    this.progress = Progress(
+      done: this.stagenumber,
+      what: 'stage',
+      stage: this.stage
     );
 
     setPercentage();
@@ -369,13 +386,10 @@ class User {
   }
 
   void takeLesson(Lesson l, [DataBase d]) {
-    if(l.stagenumber ==this.stagenumber){
-      if (this.position <= l.position 
-          && (this.userStats.lastread == null 
-          || (this.userStats.lastread.length == 0 || this.userStats.lastread.where((c) => c['cod'] == l.cod).length == 0)
-          )
-        ) {
-        this.userStats.takeLesson();
+    if(this.readlessons.where((element)=> l.cod == element).isEmpty){
+      // EMPEZAR A UTILIZAR 
+      if(l.stagenumber == this.stagenumber){
+        this.userStats.stage.lessons++;
         this.progress = Progress(
           done: this.userStats.stage.lessons,
           total: this.stage.stobjectives.lecciones, 
@@ -383,22 +397,41 @@ class User {
         );
 
         setPercentage();
+       
+        if (this.percentage >= 100) {
+          this.updateStage(d);
+        }
+      }
 
-        if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
-          this.position += 1;
-          this.userStats.lastread.clear();
-        } else {
-          this.userStats.lastread.add({'cod': l.cod});
+      // VAMOS A QUITAR ESTO !!!!!!!!!!
+      // REVISAR QUE VA UNO DETRAS DE OTRO !!!
+      if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
+        this.position += 1;
+        this.userStats.lastread.clear();
+      } else {
+        this.userStats.lastread.add({'cod': l.cod});
+      }
+
+      this.readlessons.add(l.cod);
+
+
+      bool updatestage = true;
+     
+      for(Lesson l in d.stages[l.stagenumber -1].path){
+        if(!this.readlessons.contains(l.cod)){
+          updatestage = false;
         }
       }
       
-      if (this.percentage >= 100) {
-        this.updateStage(d);
+      if(updatestage){
+        this.stagelessonsnumber++;
+        this.position = 0;
       }
+
+      this.userStats.takeLesson();
     }
-
+  
     setAction('lesson', attribute: l.title);
-
   }
 
   void getTimeMeditatedString(){
@@ -416,60 +449,58 @@ class User {
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
 
-    if(m.stagenumber != null && m.stagenumber == this.stagenumber){
-    //comprobamos la racha
-      if (this.userStats.streak > 0) {
-        DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
-        //si meditamos ayer
-        if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
-          this.userStats.streakUp();
-        } else if (lastmeditation.day != m.day.day) {
-          this.userStats.streak = 1;
-        }
-      } else {
-        this.userStats.streakUp();
-      }
-      
-      this.userStats.meditate(m);
-
-      getTimeMeditatedString();
-      
-      this.setPercentage();
-
-      if (this.percentage >= 100) {
-        this.updateStage(d);
-      }
-
-      if (m.title == null) {
-          this.totalMeditations.add(m);
-          if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes) {
-            this.userStats.stage.timemeditations++;
-            this.progress = Progress(
-              stage: this.stage,
-              done: this.userStats.stage.timemeditations,
-              total: this.stage.stobjectives.meditationcount, 
-              what: this.stage.stobjectives.freemeditationlabel
-            ); 
-          }
-        } else {
-          //no se si esto funcionará bien
-          if (!totalMeditations.contains(m)) {
-            this.userStats.stage.guidedmeditations++;
-            this.meditposition++;
-            totalMeditations.add(m);
-            progress = Progress(
-              stage: this.stage,
-              done: this.userStats.stage.guidedmeditations,
-              total: this.stage.stobjectives.meditguiadas, 
-              what: ' guided meditations');
-          }
-        }
+    // HAY QUE QUITAR ESTO DE AQUI !!!
+    if(m.day == null){
+      m.day = DateTime.now();
     }
 
-   // this.totalMeditations.add(m);
+    if (m.title == null) {
+      this.totalMeditations.add(m);
+      if (
+        this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes &&
+        this.userStats.stage.timemeditations <   this.stage.stobjectives.meditationcount
+        ) {
+        this.userStats.stage.timemeditations++;
+        this.progress = Progress(
+          stage: this.stage,
+          done: this.userStats.stage.timemeditations,
+          total: this.stage.stobjectives.meditationcount, 
+          what: this.stage.stobjectives.freemeditationlabel
+        ); 
+      }
+    } else if (m.stagenumber != null && m.stagenumber == this.stagenumber && !totalMeditations.contains(m)) {
+      this.userStats.stage.guidedmeditations++;
+      this.meditposition++;
+      totalMeditations.add(m);
+      progress = Progress(
+        stage: this.stage,
+        done: this.userStats.stage.guidedmeditations,
+        total: this.stage.stobjectives.meditguiadas, 
+        what: ' guided meditations');
+    }
 
-    // si la meditación es free no tiene título !!
-    
+    if (this.userStats.streak > 0 && this.userStats.lastmeditated != null) {
+      DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
+      //si meditamos ayer
+      if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
+        this.userStats.streakUp();
+      } else if (lastmeditation.day != m.day.day) {
+        this.userStats.streak = 1;
+      }
+    } else {
+      this.userStats.streakUp();
+    }
+
+    this.userStats.meditate(m);
+
+    getTimeMeditatedString();
+  
+    this.setPercentage();
+
+    if (this.percentage >= 100) {
+      this.updateStage(d);
+    }
+
     if(m.title == null ){
       setAction('meditation', attribute: [m.duration.inMinutes]);
     }else{
@@ -482,4 +513,24 @@ class User {
     //minutesMeditated += m.duration.inMinutes;
     //setTimeMeditated();
   }
+}
+
+
+// WE NEED TO CREATE DIFFERENT CLASSES
+class Teacher extends User {
+  List<User> students = new List.empty(growable: true);
+  List<Content> addedcontent =  new List.empty(growable:true);
+
+}
+
+// THE NORMAL USER
+class Meditator extends User{
+
+}
+
+
+class Admin extends User {
+
+
+
 }

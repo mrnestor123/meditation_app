@@ -25,8 +25,16 @@ abstract class _GameState with Store {
   @observable 
   bool success;
 
+
+  int before_video = 4;
+  int finished = 3;
+  int showing_video = 0;
+  int question_ask = 1;
+  int question_answered = 2;
+
+
   @observable
-  String state = 'before';
+  int state;
 
   @observable
   User user;
@@ -42,6 +50,9 @@ abstract class _GameState with Store {
 
   @observable 
   bool unlockednext = false;
+
+
+
 
   int selectedanswer;
 
@@ -59,6 +70,8 @@ abstract class _GameState with Store {
       started = false;
       selectedgame = g;
     }
+
+    state = before_video;
   }
 
   
@@ -66,19 +79,18 @@ abstract class _GameState with Store {
   void startgame(){
     answeredquestions.clear();
     max = false;
-    state = 'video';
+    state = showing_video;
   }
 
   //TODO: based on users answers we get a question
   @action
   void finishvideo(){
-    state = 'question';
+    state = question_ask;
     started = false;
     selectedquestion = selectedgame.questions[0];
   }
 
   void getMaxAnswered(User user){
-    
     if(user.answeredquestions[selectedgame.cod] == null){
       user.answeredquestions[selectedgame.cod] = answeredquestions.length;
     } 
@@ -100,20 +112,37 @@ abstract class _GameState with Store {
   void userAnswer(int answer, User u) {
     selectedanswer = answer;
     success = selectedquestion.isValid(answer);
-  
+    state = question_answered;
+
     if(success){
       answeredquestions.add(true);
       if(answeredquestions.length  == selectedgame.questions.length){
         getMaxAnswered(u);
-
-        state = 'answer';
+        Future.delayed(
+          Duration(seconds: 2),
+          (){
+            state = finished;
+          }
+        );
       }else{
         var index = selectedgame.questions.indexOf(selectedquestion);
-        selectedquestion = selectedgame.questions[++index];
+
+        Future.delayed(
+          Duration(seconds: 2),
+          (){
+            state = question_ask;
+            selectedquestion = selectedgame.questions[++index];
+          }
+        );
       }
     }else{
       getMaxAnswered(u);
-      state = 'answer';
+      Future.delayed(
+        Duration(seconds: 2),
+        (){
+          state = finished;
+        }
+      );
     }
   }
   //todo. ask question ??

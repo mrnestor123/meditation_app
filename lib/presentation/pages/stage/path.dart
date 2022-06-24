@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
@@ -47,7 +48,7 @@ class ImagePath extends StatelessWidget {
         children: <Widget>[
           SingleChildScrollView(
             child: Image(
-              image: NetworkImage(stage != null? stage.longimage : _userstate.user.stage.longimage) ,
+              image: CachedNetworkImageProvider(stage != null ? stage.longimage : _userstate.user.stage.longimage) ,
               width: Configuration.width,
               height: Configuration.height,
             ),
@@ -82,7 +83,7 @@ class TabletImagePath extends StatelessWidget {
               width: Configuration.width,
               height: Configuration.height,
               child: Image(
-                image: NetworkImage(_userstate.user.stage.longimage) ,
+                image: CachedNetworkImageProvider(_userstate.user.stage.longimage) ,
                 width: Configuration.width,
                 height: Configuration.height,
               ),

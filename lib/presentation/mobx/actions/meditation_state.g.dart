@@ -145,18 +145,65 @@ mixin _$MeditationState on _MeditationState, Store {
     });
   }
 
+  final _$warmuptimeAtom = Atom(name: '_MeditationState.warmuptime');
+
+  @override
+  double get warmuptime {
+    _$warmuptimeAtom.reportRead();
+    return super.warmuptime;
+  }
+
+  @override
+  set warmuptime(double value) {
+    _$warmuptimeAtom.reportWrite(value, super.warmuptime, () {
+      super.warmuptime = value;
+    });
+  }
+
+  final _$selectedIntervalBellAtom =
+      Atom(name: '_MeditationState.selectedIntervalBell');
+
+  @override
+  String get selectedIntervalBell {
+    _$selectedIntervalBellAtom.reportRead();
+    return super.selectedIntervalBell;
+  }
+
+  @override
+  set selectedIntervalBell(String value) {
+    _$selectedIntervalBellAtom.reportWrite(value, super.selectedIntervalBell,
+        () {
+      super.selectedIntervalBell = value;
+    });
+  }
+
   final _$stateAtom = Atom(name: '_MeditationState.state');
 
   @override
-  String get state {
+  int get state {
     _$stateAtom.reportRead();
     return super.state;
   }
 
   @override
-  set state(String value) {
+  set state(int value) {
     _$stateAtom.reportWrite(value, super.state, () {
       super.state = value;
+    });
+  }
+
+  final _$videocontrollerAtom = Atom(name: '_MeditationState.videocontroller');
+
+  @override
+  VideoPlayerController get videocontroller {
+    _$videocontrollerAtom.reportRead();
+    return super.videocontroller;
+  }
+
+  @override
+  set videocontroller(VideoPlayerController value) {
+    _$videocontrollerAtom.reportWrite(value, super.videocontroller, () {
+      super.videocontroller = value;
     });
   }
 
@@ -198,6 +245,17 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
+  void selectBell(String interval) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.selectBell');
+    try {
+      return super.selectBell(interval);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void startMeditation(User u, DataBase d) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startMeditation');
@@ -231,6 +289,17 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
+  void startWarmup() {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.startWarmup');
+    try {
+      return super.startWarmup();
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void startTimer() {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.startTimer');
@@ -253,11 +322,22 @@ mixin _$MeditationState on _MeditationState, Store {
   }
 
   @override
-  void cancel() {
+  void selectPreset(MeditationPreset p) {
+    final _$actionInfo = _$_MeditationStateActionController.startAction(
+        name: '_MeditationState.selectPreset');
+    try {
+      return super.selectPreset(p);
+    } finally {
+      _$_MeditationStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void cancel({bool hasFinishedMeditation = false}) {
     final _$actionInfo = _$_MeditationStateActionController.startAction(
         name: '_MeditationState.cancel');
     try {
-      return super.cancel();
+      return super.cancel(hasFinishedMeditation: hasFinishedMeditation);
     } finally {
       _$_MeditationStateActionController.endAction(_$actionInfo);
     }
@@ -286,7 +366,10 @@ sentenceindex: ${sentenceindex},
 duration: ${duration},
 totalduration: ${totalduration},
 startedmeditation: ${startedmeditation},
+warmuptime: ${warmuptime},
+selectedIntervalBell: ${selectedIntervalBell},
 state: ${state},
+videocontroller: ${videocontroller},
 shadow: ${shadow}
     ''';
   }

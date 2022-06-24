@@ -70,7 +70,7 @@ class Configuration {
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
     HACER EL TEXTO RESIZABLE PARA TODOS
   */
-  static TextStyle text(String size, Color color,{String style, double spacing, String font}) {
+  static TextStyle text(String size, Color color,{String style, double spacing, String font, height}) {
     var px;
     var weight = FontWeight.normal;
     double letterspacing = 0;
@@ -150,6 +150,7 @@ class Configuration {
         fontSize: px,
         color: color,
         fontWeight: weight,
+        height: height != null ? height : 1.2,
         letterSpacing: letterspacing);
   }
 

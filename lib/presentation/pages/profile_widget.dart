@@ -4,18 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
+import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../domain/entities/content_entity.dart';
+import 'commonWidget/image_upload_modal.dart';
 import 'commonWidget/start_button.dart';
 
 
@@ -31,67 +35,12 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User user;
   bool uploading = false;
-  final ImagePicker _picker = ImagePicker();
   UserState _userstate;
+  MessagesState _messagesState;
   ProfileState _profilestate;
 
   bool editingProfile = false;
   bool isMe = false;
-
-  //PASAR ESTO AL 
-  void _showPicker(context) {
-    void changeUserImage(image) async{
-      if(image != null){          
-        setState(() {
-          uploading = true;
-        });
-
-        await _userstate.changeImage(image);
-        
-        setState(() {
-          uploading = false;
-        });
-      }
-    }
-
-    _imgFromCamera() async {
-      XFile image = await _picker.pickImage(source: ImageSource.camera);
-      changeUserImage(image);
-    }
-
-    _imgFromGallery() async {
-      XFile image = await _picker.pickImage(source: ImageSource.gallery);
-      changeUserImage(image);
-    }
-
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
-                    onTap: () {
-                      _imgFromCamera();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
 
   Widget textIcon(IconData icon, String text, [onclick]){
     return GestureDetector(
@@ -104,8 +53,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(icon,size: Configuration.smicon, color:Colors.black),
           SizedBox(width:Configuration.verticalspacing),
-          Text(text, 
-            style:Configuration.text('small',Colors.black)
+          Flexible(
+            child: Text(text, 
+              style:Configuration.text('small',onclick != null ? Colors.lightBlue : Colors.black)
+            ),
           ),
           
           /*onclick !=null ? 
@@ -168,6 +119,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget teacherProfile(User user){
     Widget teacherView(){
+      Widget content(){
+
+
+      }
+
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,9 +146,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ) : Container(),
+
           SizedBox(height:Configuration.verticalspacing*2),
           Text(user.description != null ? user.description : 'The description goes here',
-            style:Configuration.text('small',Colors.black, font:'Helvetica')
+            style:Configuration.text('small',Colors.black, height:1.4, font:'Helvetica')
           ),
           SizedBox(height: Configuration.verticalspacing*1.5),
           textIcon(Icons.group, user.students.length.toString() + ' students', (){
@@ -229,17 +187,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(height: Configuration.verticalspacing*1.5),
           textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
           SizedBox(height: Configuration.verticalspacing*1.5),
+
+          user.addedcontent.length > 0 ? 
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Added content',style:Configuration.text('medium',Colors.black)),
+              SizedBox(height: Configuration.verticalspacing * 1.5),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: Configuration.crossAxisCount + 1,
+                  childAspectRatio: 1.0,
+                  crossAxisSpacing: Configuration.verticalspacing,
+                  mainAxisSpacing: Configuration.verticalspacing,
+                ),
+                itemCount: user.addedcontent.length,
+                itemBuilder: (BuildContext context, int index) { 
+                  Content c = user.addedcontent[index];
+                  return ClickableSquare(
+                    border: true,
+                    onTap:()=>{
+                      meditationModal(c)
+                    },
+                    blocked: _userstate.user.isBlocked(c),
+                    text: c.title,
+                    selected: true,
+                    image: c.image,
+                  );
+                 },
+              
+              ),
+            ],
+          ): Container(),
+
           Spacer(),
+          /*
           !isMe && user.messages.where((element) => element.sender == _userstate.user.coduser).length == 0 ? 
           BaseButton(
             margin:true,
             onPressed:(){
-              _userstate.sendMessage(user,'classrequest');
-              setState(() {});
+              sendMessage(
+                state:_messagesState,
+                to: user,
+                from: _userstate.user,
+                then:(){
+                }  
+              );
+
+             // _userstate.sendMessage(user,'classrequest');
+             // setState(() {});
             },
             color:Configuration.maincolor,
-            text: 'Send a class request'
-          ) : Container(),
+            text: 'Send a Message '
+          ) : Container(),*/
           
           SizedBox(height:Configuration.verticalspacing*2)
       ]);
@@ -306,6 +309,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
       child: !editingProfile ? teacherView() : teacherEdit()
@@ -336,6 +341,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
               children: [
                 Text('Following', style: Configuration.text('tiny', Colors.black)),
+                SizedBox(height:2),
                 Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
               ],
             ),
@@ -354,6 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
               children: [
                 Text('Followers', style: Configuration.text('tiny', Colors.black)),
+                SizedBox(height:2),
                 Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.black))
               ],
             ),
@@ -412,13 +419,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-
   void didChangeDependencies(){
     super.didChangeDependencies();
 
     _profilestate = Provider.of<ProfileState>(context);
     _userstate = Provider.of<UserState>(context);
-    _profilestate.init(widget.user != null ? widget.user : _userstate.user, widget.user == null || widget.user.coduser == _userstate.user.coduser);
+    _messagesState = Provider.of<MessagesState>(context);
+
+    _profilestate.init(
+      widget.user != null ? widget.user : _userstate.user, 
+      _userstate.user
+    );
   }
 
   @override
@@ -445,7 +456,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ]: 
             [
-              Container()
+              Container(
+                margin:EdgeInsets.only(right:Configuration.verticalspacing),
+                child: PopupMenuButton<String>(
+                  padding: EdgeInsets.all(0.0),
+                  itemBuilder: (BuildContext context) {  
+                    
+                    return [
+                      PopupMenuItem(
+                        onTap:(){
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _messagesState.selectChat(user, _userstate.user);
+                            Navigator.pushNamed(context, '/chat');
+                        
+                          });
+                         // 
+                          print('QUE PASA QUE NO PUSHEA');
+                        },
+                        value: 'tap',
+                        child: Text('Send a message',style: Configuration.text('small',Colors.black, font: 'Helvetica')),
+                      ),
+                      PopupMenuItem(
+                        value: 'fol',
+                        onTap:(){
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            bool following = _userstate.user.following.where((u)=> u.coduser == user.coduser).length > 0;
+
+                            _userstate.follow(user, !following);
+                            setState((){});
+                          });
+                          setState((){});
+                        },
+                        child: Text(
+                          _userstate.user.following.where((u)=> u.coduser == user.coduser).length > 0 ? 'Unfollow' : 'Follow', 
+                          style: Configuration.text('small',Colors.black, font: 'Helvetica')
+                        ),
+                      )
+                    ];
+                  },
+                  child: Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                    size: Configuration.medicon,
+                  ),
+                ),
+              ),
           ],
       ),
       body:Stack(children: <Widget>[
@@ -467,7 +522,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color:Colors.transparent,
                       onTap:()=>{
                         if(isMe){
-                          _showPicker(context)
+                          showPicker(onSelectImage: (image) async{
+                            if(image != null){          
+                              setState(() {
+                                uploading = true;
+                              });
+
+                              await _userstate.changeImage(image);
+                              
+                              setState(() {
+                                uploading = false;
+                              });
+                            }
+                          })
                         }
                       }
                     ),
@@ -481,21 +548,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     isMe ? Positioned(
                       right:0,
                       top:0,
-                      child: GestureDetector(
-                        onTap: (){
-                          if(isMe){
-                            _showPicker(context);
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(Configuration.tinpadding),
-                          decoration:BoxDecoration(
-                            shape:BoxShape.circle,
-                            color:Colors.white
-                          ),
-                          child: Icon(Icons.edit_rounded,
-                          size: Configuration.tinicon, color:Colors.black
-                          ),
+                      child: Container(
+                        padding: EdgeInsets.all(Configuration.tinpadding),
+                        decoration:BoxDecoration(
+                          shape:BoxShape.circle,
+                          color:Colors.white
+                        ),
+                        child: Icon(Icons.edit_rounded,
+                        size: Configuration.tinicon, color:Colors.black
                         ),
                       ),
                     ) :Container(),
@@ -627,6 +687,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
                               ],
                             ),
                           ),
+
                           OutlinedButton(
                               onPressed: () {
                                 Navigator.push(

@@ -13,6 +13,7 @@ import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/domain/usecases/user/answer_question.dart';
+import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
@@ -55,6 +56,10 @@ Future<void> init() async {
 
   sl.registerFactory(
     () => RequestState(repository: sl()),
+  );
+
+  sl.registerFactory(
+    () => MessagesState(repository: sl()),
   );
 
   //Use cases

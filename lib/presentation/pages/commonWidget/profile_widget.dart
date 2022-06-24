@@ -1,7 +1,9 @@
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+
 
 class ProfileCircle extends StatelessWidget {
  
@@ -12,7 +14,6 @@ class ProfileCircle extends StatelessWidget {
   final double marginRight;
   final VoidCallback onTap; // Notice the variable type
 
-
   ProfileCircle({
     this.userImage,
     this.width = 60,
@@ -20,8 +21,9 @@ class ProfileCircle extends StatelessWidget {
     this.bordercolor,
     this.marginLeft,
     this.marginRight,
-    this.onTap
-  });
+    this.onTap,
+    Key key
+  }): super(key:  key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +42,12 @@ class ProfileCircle extends StatelessWidget {
             ),
             child: CircleAvatar(
               radius: width/2,
-              backgroundColor: userImage == null
+              backgroundColor: userImage == null || userImage.isEmpty
                   ? color != null ? color : Configuration.maincolor
                   : Colors.transparent,
-              backgroundImage: userImage == null
+              backgroundImage: userImage == null || userImage.isEmpty
                   ? null
-                  : NetworkImage(userImage) ,
+                  : CachedNetworkImageProvider(userImage) ,
                   //: FileImage(File(_userstate.user.image)),
             )),
       ),

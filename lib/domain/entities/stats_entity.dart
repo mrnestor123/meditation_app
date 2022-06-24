@@ -13,6 +13,7 @@ class UserStats {
   TotalStats total;
   List<dynamic> lastread = new List.empty(growable: true);
   int streak;
+  // ESTO DEBERIA DE SER UNA FECHA !!!!!!
   String lastmeditated;
   Map<String,dynamic> meditationtime;
 
@@ -46,7 +47,6 @@ class UserStats {
   };
 
   void takeLesson(){
-    this.stage.lessons++;
     this.total.lessons++;
   }
 
@@ -62,8 +62,7 @@ class UserStats {
   }
 
   void meditate(Meditation m){
-    //debería de ser una string ????
-    this.lastmeditated = m.day != null ? m.day.toIso8601String() : DateTime.now().toIso8601String();    
+    this.lastmeditated = DateTime.now().toIso8601String();    
     this.stage.timemeditated += m.duration.inMinutes;
     this.total.timemeditated += m.duration.inMinutes;
     this.total.meditations++;

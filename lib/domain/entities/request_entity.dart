@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:uuid/uuid.dart';
 
@@ -13,8 +14,10 @@ class Request {
 
   DateTime date;
   List<Comment> comments = new List.empty(growable: true);
-  int points;
+  int points, comentaries;
   Map<String,dynamic> votes = new Map();
+
+  List<dynamic> shortcomments = new List.empty(growable: true);
 
   Request(
       {this.cod,
@@ -27,6 +30,7 @@ class Request {
       this.points = 0,
       this.image,
       this.userimage,
+      this.comentaries = 0,
       this.title}){
 
     if (cod == null) {
@@ -42,6 +46,7 @@ class Request {
     
   }
 
+  // AQUÍ HAY QUE MIRAR SI SE EXPANDEN O QUE !!!
   Request.fromJson(Map<String, dynamic> json) {
     this.cod = json['cod'];
     this.username = json['username'];
@@ -54,10 +59,18 @@ class Request {
     this.date = json['date'] == null ? DateTime.now().subtract(Duration(days: 30))  : DateTime.parse(json["date"]).toLocal();
     //ESTO SE PUEDE HACER EN OTROS SITIOS
     if (json['comments'] != null) {
+     
       json['comments'].forEach((v) {
-        this.comments.add(new Comment.fromJson(v));
+        if(v['username'] != null){
+          this.comments.add(new Comment.fromJson(v));
+        }else {
+        }
       });
     }
+
+    this.shortcomments = json['shortComments'] != null ? json['shortComments']: [];
+
+    comentaries = json['comments'] != null ? json['comments'].length : json['shortComments'] != null ? json['shortComments'].length : 0;
     this.points = json['points'];
     this.votes = json['votes'] != null ? json['votes'] : new Map<String,dynamic>();
   
@@ -73,18 +86,26 @@ class Request {
     data['state'] = this.state;
     data['image'] = this.image;
     data['date'] = this.date.toIso8601String();
+    
     if (this.comments != null) {
-      data['comments'] = this.comments.map((v) => v.toJson()).toList();
+      data['shortComments'] = this.comments.map((v) => v.cod).toList();
     }else{
-      data['comments'] = [];
+      data['shortComments'] = [];
     }
+    
+    data['commentaries'] = this.comentaries;
+
     data['points'] = this.points;
     if (this.votes != null) {
       data['votes'] = this.votes;
     }else{
       data['votes'] = {};
     }
+
+    
     data['title'] = this.title;
+    data['userimage'] = this.userimage;
+    
     return data;
   }
 
@@ -107,7 +128,7 @@ class Request {
       return Colors.red;
     }
   }
-
+  
   Color nextStateColor(){
     if(this.state =='open'){
       return Colors.yellow;
@@ -118,7 +139,6 @@ class Request {
     }
   }
 
-
   String nextState(){
     if(this.state =='open'){
       return 'in progress';
@@ -128,7 +148,6 @@ class Request {
       return 'open';
     }
   }
-
 
   void changeState(User u){
      if(this.state =='open'){
@@ -155,7 +174,6 @@ class Request {
     } 
   }
   
-
   void dislike(String cod){
     if(votes[cod] == -1){
       this.points++;
@@ -177,13 +195,16 @@ class Request {
     }
   }
 
-
   void comment(Comment c){
     if(this.comments == null){
       this.comments = new List.empty(growable: true);
     }
 
     this.comments.add(c);
+
+    this.shortcomments.add(c.cod);
+    
+   // this.comentaries++;
   }
 }
 
@@ -191,21 +212,36 @@ class Comment{
   String comment;
   String username;
   String coduser;
+  String userimage, cod, codrequest;
+  User user;
 
-  Comment({this.comment, this.username, this.coduser});
+  Comment({this.cod,this.comment, this.username, this.coduser, this.userimage, this.user,this.codrequest}){
+    if (cod == null) {
+      this.cod = Uuid().v1();
+    } else {
+      this.cod = cod;
+    }
+  }
 
 
   Comment.fromJson(Map<String, dynamic> json) {
+    this.cod = json['cod'];
     this.comment = json['comment'];
     this.username = json['username'];
     this.coduser = json['coduser'];
+    this.userimage = json['userimage'];
+    this.codrequest = json['codrequest'];
+    this.user = json['user'] != null ? UserModel.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['comment'] = this.comment;
     data['username'] = this.username;
+    data['userimage'] = this.userimage;
+    data['codrequest'] = this.codrequest;
     data['coduser'] = this.coduser;
+    data['cod'] = this.cod;
     return data;
   }
 }

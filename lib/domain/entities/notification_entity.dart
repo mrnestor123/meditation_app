@@ -1,5 +1,6 @@
 
 
+import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,6 +31,16 @@ class Notify{
   void view(){
     this.seen = true;
   }
+
+
+  IconData getIcon(){
+    if(type == 'comment'){
+      return Icons.comment;
+    }else{
+      return Icons.check_circle;
+    }
+  }
+
 
   factory Notify.fromJson(Map<String, dynamic> json) => Notify(    
     cod : json['cod'],

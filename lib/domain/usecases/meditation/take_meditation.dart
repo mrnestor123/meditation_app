@@ -7,6 +7,8 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
+import '../../entities/action_entity.dart';
+
 class MeditateUseCase extends UseCase<User, Params> {
   MeditationRepository repository;
   UserRepository userRepository;
@@ -17,6 +19,10 @@ class MeditateUseCase extends UseCase<User, Params> {
   Future<Either<Failure, User>> call(Params params) async {
    int stagenumber = params.user.stagenumber;
    params.user.takeMeditation(params.meditation, params.d);
+
+   uploadActions(params.user, userRepository);
+
+
    return await userRepository.updateUser(user:params.user, d: params.d, toAdd: [params.meditation], type: 'meditate');
   }
 }
@@ -31,3 +37,14 @@ class Params {
   List<Object> get props => [meditation, user];
 }
  
+
+
+void uploadActions(User user, UserRepository repository){
+  if(user.lastactions.length > 0 ){
+    for(UserAction a in user.lastactions){
+      repository.addAction(a:a);
+    }
+
+    user.lastactions.clear();
+  }
+}

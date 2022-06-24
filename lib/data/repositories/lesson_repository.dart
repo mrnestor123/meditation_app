@@ -16,8 +16,7 @@ class LessonRepositoryImpl implements LessonRepository {
   UserLocalDataSource localDataSource;
   NetworkInfo networkInfo;
 
-  LessonRepositoryImpl(
-      {@required this.remoteDataSource,
+  LessonRepositoryImpl( {@required this.remoteDataSource,
       @required this.localDataSource,
       @required this.networkInfo});
 

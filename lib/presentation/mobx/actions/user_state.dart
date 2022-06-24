@@ -14,6 +14,7 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
+import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
 import 'package:mobx/mobx.dart';
 
@@ -103,8 +104,12 @@ abstract class _UserState with Store {
   Future<bool> takeLesson(LessonModel l) async {
     user.progress = null;
     int currentposition = user.stagenumber;
+
     user.takeLesson(l, data);
-    repository.updateUser(user: user,  type: 'lesson');
+    repository.updateUser(user:user);
+    repository.takeLesson(u: user, l: l);
+    uploadActions(user, repository);
+
 
     // SI HA SUBIDO DE ETAPA !!!! 
     //CHECKEAR EL UPLOADSTAGE !!!
@@ -156,11 +161,14 @@ abstract class _UserState with Store {
   @action 
   Future changeImage(dynamic image) async {
     
+    /// ESTO HABRA QUE DEVOLVER ERROR
     String imgString = await uploadFile(image:image);
    
     user.setImage(imgString);
 
-    return repository.updateUser(user: user);
+    foldResult(result: await repository.updateUserProfile(u:user, image: imgString));
+
+    
   }
 
   @action 
@@ -192,22 +200,29 @@ abstract class _UserState with Store {
   @action 
   Future connect() async {
     var loggedresult = await repository.islogged();
-    loggedresult.fold((l) => hasFailed = false, (r) { user = r; loggedin = true;});
+    var dataresult = await repository.getData();
     
-    if(user != null){
-      var dataresult = await repository.getData();
+    // MUY COMPLEJO LO DEL HASFAILED
+    loggedresult.fold(
+      (l) => hasFailed = false, 
+      (r) { 
+        user = r; 
+        loggedin = true;
+    });
 
-      foldResult(
-        result: dataresult, 
-        onSuccess: (DataBase d) {
-          data = d;
+    foldResult(
+      result: dataresult, 
+      onSuccess: (DataBase d) {
+        data = d;
+        if(user != null){
           getUsers();
           hasFailed= false;
         }
-      );
-    }else{
-      hasFailed= false;
-    }
+      }
+    );
+
+    return;
+    
   }
 
 
@@ -227,45 +242,6 @@ abstract class _UserState with Store {
     loading = false;
   }
 
-
-  Future sendMessage(User to, String type, [String text]) async {
-    Message m = user.sendMessage(to,type, text);
-    to.messages.add(m);
-    Either<Failure,void> userlist = await repository.sendMessage(message: m);
-
-    foldResult(
-      result: userlist,
-    );
-  }
-
-
-  // ESTO ES PARA ACEPTAR STUDIANTES
-  void acceptStudent(Message m, bool confirm){
-    Message reply = user.acceptStudent(m,confirm);
-    var messages ={
-      'accept': 'Has accepted your request to join his courses',
-      'deny': 'Has denied your request to join his courses'
-    };
-
-    repository.sendMessage(message: reply);
-    repository.updateMessage(message: m);
-    repository.updateUser(user: user);
-
-    //user.sendMessage(to, 'text', confirm ? messages['accept']: messages['deny']);
-    // ESTO NO DEBERÍA SER ASI !!!!!
-    /*
-    if(m.user != null){
-      repository.updateUser(user: m.user);
-    }*/
-
-  }
-
-  Future deleteMessage(Message m){
-    m.deleted = true;
-    user.messages.remove(m);
-    repository.updateMessage(message: m);
-  }
-
   Future uploadContent({Content c}) async{
     c.createdBy = user;
     
@@ -277,7 +253,7 @@ abstract class _UserState with Store {
     );
   }
 
-
+  // PASAR A MESSAGES_STATE
   void seeMessages(){
     List<Message> messagestoUpdate = new List.empty();
 
@@ -291,8 +267,22 @@ abstract class _UserState with Store {
     }
   }
 
-  Future <List<User>> getFollowers(){
 
+
+  Future <User> getUser({String cod})async{
+
+    Either<Failure,User> res = await repository.getUser(cod);
+    User user;
+
+    foldResult(
+      result: res,
+      onSuccess: (r){
+        user = r;
+        return r;
+      }
+    );
+
+    return user;
   }
 
   //FROM LIST OF USER CODS WE GET THE USERS

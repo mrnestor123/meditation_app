@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -11,10 +13,15 @@ import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/carousel_balls.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:provider/provider.dart';
 
+import '../../domain/entities/local_notifications.dart';
+import 'commonWidget/horizontal_picker.dart';
 import 'commonWidget/progress_dialog.dart';
 import 'config/configuration.dart';
 
@@ -29,6 +36,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   MeditationState _meditationstate;
   GameState _gamestate;
   int seltime = 5;  
+  String presetName = '';
 
   //podriamos utilizar meditationstate de arriba
   var meditationtype = 'free';
@@ -58,7 +66,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
             context: context, 
             builder: (context){
               return Container(
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(Configuration.smpadding),
                 child: child
               );
             }).then((value) => 
@@ -78,18 +86,226 @@ class _MeditationScreenState extends State<MeditationScreen> {
   }
 
   Widget freeMeditation() {
+
+    Widget presets(){
+
+      Widget myPresets(){
+        return Container(
+          decoration: BoxDecoration(
+            color: Configuration.lightgrey,
+            borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
+          ),
+          child: ListView.separated(
+            shrinkWrap:true,
+            itemBuilder: (BuildContext context, int index) {  
+              MeditationPreset p = _userstate.user.presets[index]; 
+              
+              return ListTile(
+                onTap:(){
+                  _meditationstate.selectPreset(p);
+                  Navigator.pop(context);
+                  setState(() {});
+                },
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.timer,size: Configuration.tinicon),
+                    Text('${p.duration} min', style: Configuration.text('tiny', Colors.black)),
+                    
+                    SizedBox(width: Configuration.verticalspacing),
+                    p.intervalBell.isNotEmpty ?
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.notifications,size: Configuration.tinicon),
+                        Text('${p.intervalBell}', style: Configuration.text('tiny', Colors.black)),
+                      ],
+                    ): Container(),
+                  
+                   SizedBox(width: Configuration.verticalspacing),
+                    p.warmuptime > 0 ?  
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('${p.warmuptime.floor().toString()} s', style: Configuration.text('tiny', Colors.black)),
+                      ],
+                    )
+                    :Container()
+                  ],
+                ),
+                title: Text(p.name, style: Configuration.text('small', Colors.black)),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {  
+              return Divider();
+            },
+            itemCount: _userstate.user.presets.length
+          ),
+        );
+      }
+
+      return AbstractDialog(
+        content: Container(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          width: Configuration.width*0.5,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('My sessions', style: Configuration.text('smallmedium',Colors.black)),
+              SizedBox(height: Configuration.verticalspacing),
+              _userstate.user.presets.length > 0 ?
+              myPresets(): 
+              Text('You have not created any preset', style: Configuration.text('small', Colors.grey,font: 'Helvetica'),),
+              SizedBox(height: Configuration.verticalspacing)
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget savePreset(){
+
+      Widget item(left, right){
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(left, style: Configuration.text('small', Colors.black)),
+            Text(right, style: Configuration.text('small', Colors.black, font: 'Helvetica')),
+          ],
+        );
+
+      }
+
+      return StatefulBuilder(
+        builder: (context,setState) {
+          return AbstractDialog(
+            content: Container(
+              padding: EdgeInsets.all(Configuration.smpadding),
+              width: Configuration.width*0.5,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Save session', style: Configuration.text('smallmedium',Colors.black)),
+                SizedBox(height: Configuration.verticalspacing),
+                Container(
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  decoration: BoxDecoration(
+                    color: Configuration.lightgrey,
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
+                  ),
+                  child: Column(
+                    children: [
+                        SizedBox(height: Configuration.verticalspacing),
+                        Container(
+                          height: Configuration.verticalspacing*4,
+                          child: TextField(
+                          onChanged:(e){ setState((){presetName = e;});},
+                          minLines: null,
+                          maxLines: null,
+                          expands: true,
+                            scrollPadding: EdgeInsets.all(Configuration.smpadding),
+                            style: Configuration.text('small', Colors.black),
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                              hintText: 'Session name',
+                              labelStyle:Configuration.text('small', Colors.black),
+                              hintStyle: Configuration.text('small', Colors.grey),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+                                borderSide: BorderSide(color: Colors.grey)
+                              )
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: Configuration.verticalspacing),
+                        item('Duration', _meditationstate.duration.inMinutes.toString() + ' min'),
+                        SizedBox(height: Configuration.verticalspacing),
+                        item('Warm up time', _meditationstate.warmuptime.floor().toString() + ' s'),
+                        SizedBox(height: Configuration.verticalspacing),
+                        item('Interval', _meditationstate.selectedIntervalBell.isNotEmpty ? _meditationstate.selectedIntervalBell: 'No interval'),
+                        SizedBox(height: Configuration.verticalspacing*2),
+                        Container(
+                          width: Configuration.width*0.7,
+                          child: BaseButton(
+                            onPressed:presetName.isNotEmpty ? (){
+                              MeditationPreset p = new MeditationPreset(
+                                name: presetName,
+                                duration: _meditationstate.duration.inMinutes,
+                                warmuptime: _meditationstate.warmuptime,
+                                intervalBell: _meditationstate.selectedIntervalBell
+                              );
+
+                              _userstate.user.presets.add(p);
+                              _userstate.updateUser();
+                              Navigator.pop(context);
+                            } : null,
+                            color: Colors.lightBlue,
+                            text: 'Save',
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+              
+              ],
+            )
+            )
+          );
+        }
+      );
+    }
+
     return layout(
       Column(
       children: [
+        
         SizedBox(height: Configuration.verticalspacing*2),
         buttonModal(
-          CirclePicker(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CirclePicker(),
+              SizedBox(height: Configuration.verticalspacing*1.5),
+              Text('Warm up', style: Configuration.text('small',Colors.black)),
+              SizedBox(height: Configuration.verticalspacing),
+              HorizontalPicker(
+                minValue: 0,
+                maxValue: 90,
+                divisions: 18,
+                selectedValue: _meditationstate.warmuptime,
+                onChanged:(value){
+                  _meditationstate.warmuptime = value;
+                },
+                suffix: " s",
+                initialPosition: InitialPosition.start,
+                showCursor: false,
+                backgroundColor: Colors.grey.withOpacity(0.6),
+                activeItemTextColor: Colors.lightBlue,
+                passiveItemsTextColor: Colors.black.withOpacity(0.8),
+                height: Configuration.verticalspacing*6,
+              ),
+              SizedBox(height: Configuration.verticalspacing*2),
+            ],
+          ),
           'Duration', 
           Observer(
               builder: (context) {
                 return Text(_meditationstate.totalduration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black));
               }
-            )
+            ),
+            true
         ),
         SizedBox(height: Configuration.verticalspacing*2),
         buttonModal(
@@ -104,16 +320,128 @@ class _MeditationScreenState extends State<MeditationScreen> {
             ),
           ), 
           "Ambient Sound", 
-          Text('Coming soon',style: Configuration.text('small', Colors.black))
-        )
+          Text('Coming soon',style: Configuration.text('small', Colors.black)),
+          true
+        ),
+        SizedBox(height: Configuration.verticalspacing*2),
+        buttonModal(
+          Column(
+            mainAxisSize:MainAxisSize.min,
+            children: [
+              ListView.separated(
+                physics: ClampingScrollPhysics(),
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  MapEntry<String, dynamic> entry = _meditationstate.intervalBells.entries.elementAt(index);
+                  bool disabled = entry.value != '' && entry.value !='Halfway' && int.parse(entry.value.substring(0,2)) >= _meditationstate.totalduration.inMinutes;
+
+                  return ListTile(
+                    enabled: !disabled,
+                    trailing: Container(
+                      height: Configuration.verticalspacing * 2,
+                      width: Configuration.verticalspacing * 2,
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: disabled ? Colors.grey.withOpacity(0.5) : Colors.grey, width: 1),
+                      ),
+                      child: Observer(
+                        builder: (context) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _meditationstate.selectedIntervalBell == entry.value ?
+                                Colors.lightBlue :  Colors.white,
+                            ),
+                          );
+                        }
+                      ) ,
+                    ),
+                    title: Text(
+                      entry.key,
+                      style: Configuration.text('small', disabled ? Colors.grey.withOpacity(0.5) : Colors.black),
+                    ),
+                    onTap: () {
+                      _meditationstate.selectBell(entry.value);
+                      
+                      Navigator.pop(context);
+                      
+                    },
+                  );
+                },
+                separatorBuilder: (context, index) => Divider(color: Colors.black),
+                itemCount: _meditationstate.intervalBells.length
+              ),
+            
+              SizedBox(height: Configuration.verticalspacing)
+            ],
+          ), 
+          "Interval Bell", 
+          // NO HACE FALTA OBSERVER
+          Observer(
+            builder: (context) {
+              return Text(
+                _meditationstate.selectedIntervalBell,
+                style: Configuration.text('small', Colors.black)
+              );
+            }
+          ),
+          true
+        ),
+
+        SizedBox(height: Configuration.verticalspacing*2),
+      
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            
+
+          OutlinedButton(
+            onPressed:(){
+              showDialog(context: context, builder: (context){
+                return savePreset();
+              });
+            },
+            child:Text('Save this session', style: Configuration.text('small', Colors.lightBlue)),
+            style: OutlinedButton.styleFrom(
+              side:BorderSide(color: Colors.lightBlue, width: 1),
+              primary: Colors.lightBlue,
+              elevation: 0
+            ),
+          ),
+
+          OutlinedButton(
+              onPressed:(){
+                showDialog(context: context, builder: (context){
+                  return presets();
+                });
+              },
+              child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue)),
+              style: OutlinedButton.styleFrom(
+                side:BorderSide(color: Colors.lightBlue, width: 1),
+                primary: Colors.lightBlue,
+                elevation:0,
+
+              ),
+            ),
+
+
+          ],
+        ),
+      
       ]), 
-      () => {
+      () {
+        // METER ESTO DENTRO !!!
+        if(_meditationstate.warmuptime > 0){
+          _meditationstate.state = _meditationstate.warmup;
+        }
         Navigator.pushNamed(context, '/countdown').then(
           //ESTO ES MUY COMPLEJO
           (value) => setState(()=>{
-            _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null
+            _userstate.user.progress != null ? autocloseDialog(_userstate.user) : null
           })
-        ), 
+        ); 
       }, _meditationstate.duration.inMinutes > 0,
         'Set the timer for a free meditation' 
       );
@@ -241,7 +569,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
     );
   }
 
-
   Widget guidedMeditations(){
     return ListView(
         physics: ClampingScrollPhysics(),
@@ -251,7 +578,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
         ]
     );
   }
-
 
   @override 
   void initState(){
@@ -372,6 +698,11 @@ class _MeditationListState extends State<MeditationList> {
 
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
 
@@ -403,7 +734,6 @@ class _MeditationListState extends State<MeditationList> {
       meditcontent.add(
         ClickableSquare(
           rightlabel: _blocked ? null : 
-         
           Container(
             padding: EdgeInsets.all(2),
             decoration: BoxDecoration(
@@ -422,69 +752,8 @@ class _MeditationListState extends State<MeditationList> {
           selected: true,
           image: m.image,
           onTap:(){
-            showModalBottomSheet(
-              context: context, 
-              builder: (context){
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-                  child: Column(mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: Configuration.verticalspacing*3),
-                      Row(
-                        children: [
-                          Flexible(
-                            flex:2,
-                            child: Image(image: NetworkImage(m.image))
-                          ),
-                          SizedBox(width: Configuration.verticalspacing),
-                          Flexible(
-                            flex:4,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(m.title, style:Configuration.text('medium', Colors.black)),
-                                SizedBox(height: Configuration.verticalspacing/2),
-                                Text( m.description.isNotEmpty ? m.description : ' ',style:Configuration.text('small',Colors.grey)),
-                                SizedBox(height: Configuration.verticalspacing/2),
-                                Row(
-                                  children: [
-                                    Icon(Icons.timer, size:  Configuration.smicon, color: Colors.lightBlue),
-                                    SizedBox(width: Configuration.verticalspacing),
-                                    Text(m.duration.inMinutes.toString() + ' min ', style: Configuration.text('small',Colors.black.withOpacity(0.8))),
-                                    SizedBox(width: Configuration.verticalspacing*2),
-                                    Chip(
-                                      avatar: Icon(m.getIcon(), size: Configuration.smicon, color: Colors.lightBlue),
-                                      label:Text(m.getText(),style: Configuration.text('small',Colors.black)),
-                                    )
-                                  ],
-                                )
-                              ],
-                            )
-                          )
-                        ],
-                      ),
-                      SizedBox(height: Configuration.verticalspacing),
-                      BaseButton(
-                        text: 'Start',
-                        onPressed: (){
-                          _meditationstate.setDuration(m.duration.inMinutes);
-                          _meditationstate.selectMeditation(m);
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/countdown').then(
-                            //ESTO ES MUY COMPLEJO
-                            (value) => setState(()=>{
-                              _userstate.user.progress != null ? autocloseDialog(context, _userstate.user) : null
-                            })
-                          );
-                        },
-                      ),
-                      SizedBox(height: Configuration.verticalspacing*3)
-                    ],
-                  ),
-                );
-              });
+            // ESTO HAY QUE PASARLO A UNA FUNCIÓN COMÚN
+            meditationModal(m);
           
           }    
         )
@@ -494,10 +763,10 @@ class _MeditationListState extends State<MeditationList> {
     return meditcontent;
   }
 
+  
 
   @override
   Widget build(BuildContext context) {
-  
     return Container(
       padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
       child: SingleChildScrollView(
@@ -542,23 +811,25 @@ class ClickableSquare extends StatelessWidget {
   String blockedtext, image,text;
   bool selected; 
   dynamic onTap;
-  bool blocked;
+  bool blocked, border;
   Widget rightlabel;
 
-  ClickableSquare({this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text, this.rightlabel}) : super();
+
+  ClickableSquare({this.border = false, this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text, this.rightlabel}) : super();
 
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if(!blocked){
+        if(!blocked || onTap){
           onTap();
         }
       },
       child: Container(
         padding: EdgeInsets.all(selected ? 0 : Configuration.tinpadding),
         decoration: BoxDecoration(
+          border: border ? Border.all(color: Colors.grey, width: 1) : null,
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: Stack(
@@ -567,7 +838,7 @@ class ClickableSquare extends StatelessWidget {
               child:ClipRRect(
                   borderRadius: BorderRadius.circular(12.0),
                   child: image != null && image != '' ? 
-                  Image(image: NetworkImage(image)) : Container(),
+                  Image(image: CachedNetworkImageProvider(image)) : Container(),
               ),
             ),
             blocked ? 
@@ -621,8 +892,7 @@ class ClickableSquare extends StatelessWidget {
           ],
         ),
       )
-      );
-     
+    );
   }
 }
 
@@ -656,33 +926,17 @@ class _CountdownState extends State<Countdown> {
   Widget finish(context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: Configuration.height,
-          width: Configuration.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              WeekList(),
-              SizedBox(height: Configuration.verticalspacing*3),
-              Text('Total meditations: ' + (_userstate.user.totalMeditations.length).toString(),
-                style: Configuration.text('medium', Colors.white)),
-              SizedBox(height: Configuration.verticalspacing*3),
-              Text('Current streak: ' + (_userstate.user.userStats.streak).toString() + ' day' + (_userstate.user.userStats.streak > 1 ? 's':''),
-                style: Configuration.text('medium', Colors.white)),
-              SizedBox(height: Configuration.verticalspacing*3),
-              Text('Total time meditated: ' + _userstate.user.timemeditated,
-                style: Configuration.text('medium', Colors.white)),
-              /*
-              Text('Total meditations: ' +
-                      (_userstate.user.totalMeditations.length).toString(),
-                  style: Configuration.text('medium', Colors.white)
-              )*/
-            ],
-          ),
-        )
+        WeekList(),
+        SizedBox(height: Configuration.verticalspacing*3),
+        Text('Total meditations: ' + (_userstate.user.totalMeditations.length).toString(),
+          style: Configuration.text('medium', Colors.white)),
+        SizedBox(height: Configuration.verticalspacing*3),
+        Text('Current streak: ' + (_userstate.user.userStats.streak).toString() + ' day' + (_userstate.user.userStats.streak > 1 ? 's':''),
+          style: Configuration.text('medium', Colors.white)),
+        SizedBox(height: Configuration.verticalspacing*3),
+        Text('Total time meditated: ' + _userstate.user.timemeditated,
+          style: Configuration.text('medium', Colors.white))
       ],
     );
   }
@@ -716,6 +970,7 @@ class _CountdownState extends State<Countdown> {
           margin:true,
           text:'Start Meditation',
           onPressed: () {
+            // SE PODRÍA HACER EL START CUANDO SE ABRE LA VENTANA DE COUNTDOWN
             _meditationstate.startMeditation(_userstate.user, _userstate.data);
           },
         ));
@@ -751,7 +1006,8 @@ class _CountdownState extends State<Countdown> {
                 padding: EdgeInsets.all(Configuration.medpadding),
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: getContent(index)));
+                    children: getContent(index))
+                );
           },
           options: CarouselOptions(
             scrollPhysics: ClampingScrollPhysics(),
@@ -772,38 +1028,17 @@ class _CountdownState extends State<Countdown> {
         alignment: Alignment.bottomCenter,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            /*
-            finished && _index ==_meditationstate.selmeditation.content.length -1 ? 
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Choose meditation duration', style: Configuration.text('small',Colors.white)),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        durationButton('5'),
-                        durationButton('10'),
-                        durationButton('15'),
-                        durationButton('30')
-                      ],
-                    ),
-                    SizedBox(height: 15)
-                  ],
-                )
-            : Container(),*/
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: getBalls(),
-            ),
+            CarouselBalls(
+              activecolor: Colors.white,
+              items: _meditationstate.selmeditation.content.entries.toList(),
+              index: _index,
+              key:Key(_index.toString())
 
-            SizedBox(height: 20),
+              ),
           ],
         ),
-      ),
+        )
     ]);
   }
 
@@ -813,7 +1048,7 @@ class _CountdownState extends State<Countdown> {
       
       if (map['title'] != null) {
         l.add(Center(
-          child: Text(map['title'],style: Configuration.text('medium', Colors.white)),
+          child: Text(map['title'],style: Configuration.text('big', Colors.white)),
         ));
         l.add(SizedBox(height:15));
       }
@@ -821,23 +1056,18 @@ class _CountdownState extends State<Countdown> {
       if (map['image'] != null) {
         l.add(ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
-          child: Image(image: NetworkImage( map['image']), width: Configuration.width*0.6)));
+          child: Image(image: CachedNetworkImageProvider( map['image']), width: Configuration.width*0.6)));
       }
 
       if (map['text'] != null) {
         l.add(SizedBox(height:15));
         l.add(Text(map['text'],
-            style: Configuration.text('small', Colors.white,font:'Helvetica')));
+          style: Configuration.text('smallmedium', Colors.white,font:'Helvetica')));
       }
 
       if(map['html'] != null){
         l.add(SizedBox(height: 15));
-        l.add(Center(child: Html(data: map['html'],
-        style: {
-          "body": Style(color: Colors.white,fontSize: FontSize(18)),
-          "li": Style(margin: EdgeInsets.symmetric(vertical: 10.0)),
-          "h2":Style(textAlign: TextAlign.center)
-        })));
+        l.add(Center(child: htmlToWidget(map['html'], color: Colors.white)));
       }
 
     return l;
@@ -848,28 +1078,27 @@ class _CountdownState extends State<Countdown> {
    
     Widget slider(){
       return Slider(
-                  activeColor: Configuration.maincolor,
-                  inactiveColor: Colors.white,
-                  min: 0.0,
-                  max: _meditationstate.totalduration.inSeconds.toDouble(),
-                  onChanged: (a)=> null, 
-                  value: _meditationstate.totalduration.inSeconds - _meditationstate.duration.inSeconds.toDouble() ,
-                  label:  _meditationstate.duration.inHours > 0
-                        ? _meditationstate.duration.toString().substring(0, 7)
-                        : _meditationstate.duration.toString().substring(2, 7)
+        activeColor: Configuration.maincolor,
+        inactiveColor: Colors.white,
+        min: 0.0,
+        max: _meditationstate.totalduration.inSeconds.toDouble(),
+        onChanged: (a)=> null, 
+        value: _meditationstate.totalduration.inSeconds - _meditationstate.duration.inSeconds.toDouble() ,
+        label:  _meditationstate.duration.inHours > 0
+              ? _meditationstate.duration.toString().substring(0, 7)
+              : _meditationstate.duration.toString().substring(2, 7)
       );
     }
 
     Widget pauseButton(){
       return  FloatingActionButton(
       backgroundColor: Colors.white,
-      onPressed: () => setState(()=> _meditationstate.state == 'started' ? _meditationstate.pause() :  _meditationstate.startTimer()),
-      child: Icon(_meditationstate.state == 'started' ?  Icons.pause  : Icons.play_arrow, color: Colors.black)
+      onPressed: () => setState(()=> _meditationstate.state == _meditationstate.meditating ? _meditationstate.pause() :  _meditationstate.startTimer()),
+      child: Icon(_meditationstate.state == _meditationstate.meditating ?  Icons.pause  : Icons.play_arrow, color: Colors.black)
       );           
     }
 
     Widget squareHeader(Meditation meditation){
-     
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -878,7 +1107,7 @@ class _CountdownState extends State<Countdown> {
               width: Configuration.height*0.35,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
-                child: meditation != null ? Image(image: NetworkImage(meditation.image)) : Container(),
+                child: meditation != null ? Image(image: CachedNetworkImageProvider(meditation.image)) : Container(),
               ),
             ),
             SizedBox(height: Configuration.verticalspacing*2),
@@ -888,7 +1117,8 @@ class _CountdownState extends State<Countdown> {
               }, 
               child: Text(
                 meditation != null ? 
-                meditation.title : "Enjoy meditating",style: Configuration.text('smallmedium',Colors.white))
+                meditation.title : 
+                "Enjoy meditating",style: Configuration.text('smallmedium',Colors.white))
           )
           
         ],
@@ -906,9 +1136,8 @@ class _CountdownState extends State<Countdown> {
       );
     }
 
-
-
     return Stack(
+        fit: StackFit.expand,
         children: [
         Positioned(
           bottom: 20,
@@ -921,6 +1150,12 @@ class _CountdownState extends State<Countdown> {
             slider()
           ]),
         ),
+        
+        _meditationstate.currentsentence == null ?
+        Align(
+          alignment: Alignment.center,
+          child: squareHeader(_meditationstate.selmeditation) ,
+        ): Container(),
         
         // mejorar esto !!DE MOMENTO QUITAMOS EL SHADOW, QUEDA EXTRAÑO !!
         _meditationstate.shadow ? 
@@ -936,13 +1171,34 @@ class _CountdownState extends State<Countdown> {
         ): Container(), 
 
         _meditationstate.currentsentence != null ? 
-        showSentence():
-        Align(
-          alignment: Alignment.center,
-          child: squareHeader(_meditationstate.selmeditation) ,
-        )
+        showSentence(): Container(),
+       
       ]);
   }
+
+  // el warmup será algo rollo get ready ???
+  Widget warmup(context){
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Observer(
+          builder: (context) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(_meditationstate.warmuptime.floor().toString() + ' s',
+                  style: Configuration.text('big', Colors.white)),
+              ],
+            );
+          }
+        ),
+        SizedBox(height: Configuration.verticalspacing),
+        Text('Get ready for the meditation', style: Configuration.text('small',Colors.white))
+      ],
+    );
+  }
+
 
   @override
   void initState() {
@@ -950,17 +1206,19 @@ class _CountdownState extends State<Countdown> {
     super.initState();
   }
   
-
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     _meditationstate = Provider.of<MeditationState>(context);
     _userstate = Provider.of<UserState>(context);
 
-    if(_meditationstate.state != 'pre_guided'){
+
+    if(_meditationstate.state == _meditationstate.warmup){
+      _meditationstate.startWarmup();
+    }else if(_meditationstate.state != _meditationstate.premeditation){
       _meditationstate.startMeditation(_userstate.user, _userstate.data);
     }else{
+      // guardamos las imágenes en cache !!!
         if (_meditationstate.selmeditation != null && _meditationstate.selmeditation.followalong != null){
           var configuration = createLocalImageConfiguration(context);
           _meditationstate.selmeditation.followalong.values.forEach((value) {
@@ -975,10 +1233,10 @@ class _CountdownState extends State<Countdown> {
   dynamic exit(context,{nopop = false}){
     bool pop = true;
 
-    if(_meditationstate.state == 'started'){
+    if(_meditationstate.state == _meditationstate.meditating){
       _meditationstate.pause();
     }
-    if(_meditationstate.state != 'finished'){
+    if(_meditationstate.state != _meditationstate.finished){
       showAlertDialog(
         context:context,
         title: 'Are you sure you want to exit?',
@@ -988,7 +1246,7 @@ class _CountdownState extends State<Countdown> {
           pop = true;
         },
         onNo:(){
-          if(_meditationstate.state == 'started'){
+          if(_meditationstate.state == _meditationstate.meditating || _meditationstate.state == _meditationstate.paused){
             _meditationstate.startTimer();
             pop = false;
           }
@@ -1005,6 +1263,8 @@ class _CountdownState extends State<Countdown> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
     return WillPopScope(
       onWillPop: () {  
         return Future.value(exit(context,nopop: true));
@@ -1013,18 +1273,20 @@ class _CountdownState extends State<Countdown> {
           appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-              icon: Icon(Icons.close),
-              color: Colors.white,
-              onPressed: () {
-                exit(context);
-              },
-            ),
+          leading: Observer(
+            builder: (context) {
+              return IconButton(
+                  icon: Icon(Icons.close),
+                  color: _meditationstate.shadow ? Colors.black : Colors.white,
+                  onPressed: () {
+                    exit(context);
+                  },
+                );
+            }
+          ),
         ),
         extendBodyBehindAppBar: true,
         body: Container(
-          height:Configuration.height,
-          width: Configuration.width,
           decoration:  BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
@@ -1038,11 +1300,13 @@ class _CountdownState extends State<Countdown> {
           child: Observer(
                 builder: (BuildContext context) {
                   //MIRAR DE CAMBIAR ESTOS ESTADOS POR UN ENUM
-                  if (_meditationstate.state == 'pre_guided') {
+                  if (_meditationstate.state == _meditationstate.premeditation) {
                     return preguided(context);
-                  } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused'  ) {
+                  } else if (_meditationstate.state == _meditationstate.meditating || _meditationstate.state == _meditationstate.paused ) {
                     return countdown(context);
-                  } else if(_meditationstate.state == 'finished') {
+                  }else if(_meditationstate.state == _meditationstate.warmup){
+                    return warmup(context);
+                  }else if(_meditationstate.state == _meditationstate.finished) {
                     return finish(context);
                   }else{
                     return Container();
@@ -1079,23 +1343,28 @@ class _WeekListState extends State<WeekList> {
     var dayOfWeek = 1;
     DateTime today = DateTime.now();
     var weekday = today.weekday;
-    var monday = today.subtract(Duration(days: today.weekday - dayOfWeek)).weekday;
+    DateTime monday = today.subtract(Duration(days: today.weekday - dayOfWeek));
     var meditationstreak = _userstate.user.userStats.streak;
-
-   //List<Meditation> meditations = _userstate.user.totalMeditations;
-
-
-  /*    while(monday != today){
-      if(_userstate.user.stats['meditationtime'][monday.day.toString() + '-' + monday.month.toString()]){
-        weekDays
-      }
+    List<Meditation> filteredmeditations = _userstate.user.totalMeditations.where((meditation)=>
+      meditation.day.isAfter(monday)&&
+      meditation.day.isBefore(today)
+    ).toList();
 
 
+     for (var item in weekDays) {
+      bool hasMeditated = filteredmeditations.where((meditation)=>
+        meditation.day.weekday == item['index']
+      ).isNotEmpty;
 
-    }*/
+      result.add(WeekItem(
+          day: item['day'],
+          meditated: hasMeditated,
+          animate: today.weekday == item['index'])
+      );
+    }
 
-    print(meditationstreak);
-  
+
+    /*
     if (meditationstreak == 1) {
       weekDays[--weekday]['meditated'] = true;
     } else {
@@ -1111,23 +1380,16 @@ class _WeekListState extends State<WeekList> {
           day: e['day'],
           meditated: e['meditated'],
           animate: today.weekday == e['index']));
-    }
+    }*/
     return result;
   }
 
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    return Container(
-      width: Configuration.width * 0.9,
-      child: Column(
-        children: <Widget>[
-          Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: getDays()),
-          SizedBox(height: Configuration.height * 0.05),
-        ],
-      ),
+    return  Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: getDays()
     );
   }
 }

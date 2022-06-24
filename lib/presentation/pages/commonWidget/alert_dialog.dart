@@ -28,6 +28,7 @@ void showAlertDialog({String title,String text, onYes, context, onNo}){
                 text != null ? 
                 Text(text,style: Configuration.text('tiny',Colors.grey)): Container(),
                 SizedBox(height: Configuration.verticalspacing),
+                
                 BaseButton(
                   noelevation: true,
                   text: 'No',

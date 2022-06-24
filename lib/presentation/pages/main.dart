@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
@@ -12,6 +13,7 @@ import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
@@ -39,18 +41,12 @@ void main() async {
   await di.init();
   
   PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
-      String appName = packageInfo.appName;
-      String packageName = packageInfo.packageName;
-      String version = packageInfo.version;
-      String buildNumber = packageInfo.buildNumber;
-
-      print({appName,packageName,version,buildNumber});
+    String appName = packageInfo.appName;
+    String packageName = packageInfo.packageName;
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
+    print({appName,packageName,version,buildNumber});
   });
-
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-      overlays: [SystemUiOverlay.bottom]);
-  SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   runApp(MyApp());
 }
@@ -59,6 +55,8 @@ class MyApp extends StatelessWidget {
 // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);    
     //we pass the userstate class to all the classes
     return MultiProvider(
         //UTILIZAR SOLO MULTIPROVIDER PARA ALGUNAS COSAS !!! 
@@ -70,7 +68,8 @@ class MyApp extends StatelessWidget {
           Provider<ProfileState>(create: (context) => sl<ProfileState>()),
           Provider<LoginState>(create: (context) => sl<LoginState>()),
           //METER REQUEST SOLO EN LA DE REQUESTS
-          Provider<RequestState>(create: (context) => sl<RequestState>())
+          Provider<RequestState>(create: (context) => sl<RequestState>()),
+          Provider<MessagesState>(create: (context) => sl<MessagesState>())
         ],
         child: MaterialApp(
             navigatorKey: navigatorKey,
@@ -93,7 +92,12 @@ class MyApp extends StatelessWidget {
               '/gamestarted': (BuildContext context) => GameStarted(),
               '/teachers': (BuildContext context) => TeachersScreen(),
               '/carrousel':(BuildContext context)=> CarrouselIntro(),
-              '/addcontent':(BuildContext context)=> AddContent()
-            }));
+              '/addcontent':(BuildContext context)=> AddContent(),
+              '/messages':(BuildContext context) => MessagesScreen(),
+              '/chat':(BuildContext context) => ChatScreen(),
+              '/requestview': (BuildContext context) => RequestView(),
+              '/messageusers': (BuildContext context) => NewMessageScreen()
+          })
+        );
   }
 }

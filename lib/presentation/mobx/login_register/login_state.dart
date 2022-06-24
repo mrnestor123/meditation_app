@@ -123,7 +123,6 @@ abstract class _LoginState with Store {
         }else{
           log = await repository.loginUser(usuario: user.user);
           log.fold(
-            // SI FALLA HAY QUE BORRARLO DE LA AUTENTICACIÓN
             (Failure f) => errormsg = _mapFailureToMessage(f), 
             (dynamic u) => loggeduser = u
           );

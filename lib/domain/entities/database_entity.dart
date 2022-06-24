@@ -16,7 +16,11 @@ class DataBase {
   ObservableList<User> users = new ObservableList();
   ObservableList<Request> requests = new ObservableList();
   ObservableList<Meditation> nostagemeditations = new ObservableList();
-  ObservableList<Lesson>  nostagelessons = new ObservableList();
+  ObservableList<Lesson> nostagelessons = new ObservableList();
+
+  //ALGO MOMENTÁNEO PARA HACER 
+  List<Phase> phases = new List.empty(growable: true);
+
 
   List<Version> versions = new List.empty(growable: true);
   Version lastVersion;

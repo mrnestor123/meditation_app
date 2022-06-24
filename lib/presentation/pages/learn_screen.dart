@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
@@ -12,10 +14,12 @@ import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
+import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'commonWidget/progress_dialog.dart';
@@ -28,92 +32,217 @@ class LearnScreen extends StatefulWidget {
 }
 
 class _LearnScreenState extends State<LearnScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final _userstate = Provider.of<UserState>(context);
-    return GridView.builder(
-        physics: ClampingScrollPhysics() ,
-        shrinkWrap: true,
-        itemCount: _userstate.data.stages.length,
-        gridDelegate: 
-          SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisSpacing: 10,
-            crossAxisCount: Configuration.width > 500 ? 3 : 2,
-        ),
-        itemBuilder: (context, index) {
-          var flex = _userstate.user.stage.stobjectives.lecciones  == 0 ? 0: ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
-          var _blocked = _userstate.user.isStageBlocked(_userstate.data.stages[index]);
 
-          return Container(
-            margin: EdgeInsets.only(top: 10),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16.0)),
-            child: ElevatedButton(
-              onPressed: 
-                  !_blocked ?  () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => StageView(
+  UserState _userstate;
+
+  Widget oldLearnScreen(){
+    return GridView.builder(
+          padding: EdgeInsets.symmetric(vertical:10),
+            physics:ClampingScrollPhysics(), 
+            shrinkWrap: true,
+            itemCount: _userstate.data.stages.length,
+            gridDelegate: 
+              SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisSpacing: Configuration.verticalspacing,
+                mainAxisSpacing: Configuration.verticalspacing,
+                crossAxisCount: Configuration.width > 500 ? 3 : 2,
+            ),
+            itemBuilder: (context, index) {
+              
+              var flex = _userstate.user.stage.stobjectives.lecciones == 0 ? 0 : ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones)*6).round();
+              var _blocked = _userstate.user.isStageBlocked(_userstate.data.stages[index]);
+              return Container(
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+                child: ElevatedButton(
+                  onPressed:() {
+                    if(_blocked){
+                      showDialog(
+                        context: context,
+                        builder: (_) => AbstractDialog(
+                          content: Container(
+                            padding: EdgeInsets.all(Configuration.smpadding),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.info, size: Configuration.smicon, color: Colors.blue),
+                                SizedBox(height: Configuration.verticalspacing),
+                                Text("You need to read stage " + 
+                              (_userstate.data.stages[index].stagenumber -1).toString() +
+                              ' to unlock this stage', style: Configuration.text('small',Colors.black, font: 'Helvetica'))
+                              ],
+                            )
+                          )
+                        )              
+                      );
+                    }else{
+                     Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => StageView(
                                 stage:_userstate.data.stages[index],
                               )),
-                    ).then((value) => setState(() {}))
-                  : null,
-              child: 
-              Stack(
-                children: [
-                  Center(
-                    child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
-                      style: Configuration.text("smallmedium", !_blocked ? Colors.white : Colors.grey),
-                    ),
-                  ),
-                  !_blocked &&  _userstate.user.isNormalProgression() ? 
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: AspectRatio(
-                     aspectRatio: 9/1,
-                     child: Container(  
-                       decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
-                          borderRadius: BorderRadius.circular(16.0),
-                          border: Border.all(color:Colors.grey), 
-                          color: Colors.white
-                        ) : BoxDecoration(color: Colors.transparent), 
-                       child: Row(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                         children: [
-                         flex < 6 && _userstate.user.stagenumber == (index +1) ? 
-                           Flexible(
-                             flex: flex,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.green, 
-                                  borderRadius: BorderRadius.circular(16.0)
-                                ),
-                              ) ,
-                           ) : Padding(
-                             padding: const EdgeInsets.only(bottom:16.0),
-                             child: Icon(Icons.check_circle,color: Colors.green),
+                        ).then((value) => setState(() {})
+                      );
+                    }
+                  },
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Text('Stage ' +  _userstate.data.stages[index].stagenumber.toString(),
+                          style: Configuration.text("smallmedium", !_blocked ? Colors.white : Colors.grey),
+                        ),
+                      ),
+                      false && !_blocked && _userstate.user.stagenumber == index+1 &&  _userstate.user.isNormalProgression() ? 
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: AspectRatio(
+                         aspectRatio: 9/1,
+                         child: Container(  
+                           decoration: flex < 6 && _userstate.user.stagenumber == (index +1) ? BoxDecoration(
+                              borderRadius: BorderRadius.circular(16.0),
+                              border: Border.all(color:Colors.grey), 
+                              color: Colors.white
+                            ) : BoxDecoration(color: Colors.transparent), 
+                           child: Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                             flex < 6 && _userstate.user.stagenumber == (index +1) ? 
+                               Flexible(
+                                 flex: flex,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.green, 
+                                      borderRadius: BorderRadius.circular(16.0)
+                                    ),
+                                  ) ,
+                               ) : Padding(
+                                 padding: const EdgeInsets.only(bottom:16.0),
+                                 child: Icon(Icons.check_circle,color: Colors.green),
+                               ),
+                              flex < 6 && _userstate.user.stagenumber == (index +1) ?
+                               Flexible(
+                                 child: Container(),
+                                 flex:6-flex
+                                ) : Container()
+                           ])
                            ),
-                          flex < 6 && _userstate.user.stagenumber == (index +1) ?
-                           Flexible(
-                             child: Container(),
-                             flex:6-flex
-                            ) : Container()
-                       ])
-                       ),
-                     )
-                    ) : Container()
-                ]
-              ) ,
-              style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(16.0)),
-                  primary: Configuration.maincolor,
-                  onPrimary: Colors.white,
-                  padding: EdgeInsets.all(Configuration.smpadding),
-                  minimumSize:Size(double.infinity, double.infinity),
-                  animationDuration: Duration(milliseconds: 50)        
+                         )
+                        ) : Container()
+                    ]
+                  ) ,
+                  style: ElevatedButton.styleFrom(
+                      elevation:  _blocked ? 0 : 4,
+                      shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(16.0)),
+                      primary: _blocked ? Colors.grey.withOpacity(0.4) : Configuration.maincolor,
+                      onPrimary: Colors.white,
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      minimumSize:Size(double.infinity, double.infinity),
+                      animationDuration: Duration(milliseconds: 50)        
+                    ),
                 ),
+              );
+    });
+  }
+
+  Widget newLearnScreen(){
+
+    Widget listbutton({Phase phase}){
+      return Expanded(
+        flex: 1,
+        child: ElevatedButton(
+          onPressed: (){
+            Navigator.push(context,  
+              MaterialPageRoute(builder: (context) => PhaseView(phase:phase))
+            );
+          }, 
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(phase.title,style: Configuration.text('smallmedium', Colors.white)),
+              SizedBox(height: Configuration.verticalspacing),
+              Row(  
+                children: [
+                  Icon(Icons.checklist, size: Configuration.smicon),
+                  SizedBox(width: Configuration.verticalspacing),
+                  Flexible(child: Text(phase.description,
+                    style: Configuration.text('small',Colors.white,font: 'Helvetica'))
+                  )
+                ],
+              ),
+            ],
+          ),
+          style: ElevatedButton.styleFrom(
+            minimumSize:Size(double.infinity, double.infinity),
+            primary: Configuration.maincolor
+          ),
+          
+        ),
+      );
+    }
+
+
+    List<Widget> listOfPhases(){
+      List<Widget> l = new List.empty(growable: true);
+
+      for(Phase p in _userstate.data.phases){
+        l.add(listbutton(phase: p));
+        l.add(SizedBox(height: Configuration.verticalspacing));
+      }
+      
+      return l;
+    }
+
+    return Column(
+      children: [
+        SizedBox(height: Configuration.verticalspacing),
+        Container(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                height: Configuration.height*0.2,
+                child: ClipRRect(
+                 borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+                 child:Image.asset('assets/tenstages-book.png')
+                ),
+              ),
+              SizedBox(height: Configuration.verticalspacing),
+              Text('The Mind illuminated',style: Configuration.text('medium',Colors.black))
+            ],
+          ),
+        ),
+        Expanded(
+          child: Container(
+            padding:EdgeInsets.all(Configuration.smpadding),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+              color: Colors.white
             ),
-          );
-        });
+            child: Column(
+              children: listOfPhases(),
+            ),
+          ),
+        ),
+        SizedBox(height: Configuration.verticalspacing)
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+
+    return newLearnScreen();
   }
 }
 
@@ -134,7 +263,7 @@ class _StageViewState extends State<StageView> {
   FutureOr onGoBack(dynamic value) {
     setState(() {
       if(_userstate.user.progress != null) 
-        autocloseDialog(context, _userstate.user);
+        autocloseDialog( _userstate.user);
       });
   }
 
@@ -153,24 +282,15 @@ class _StageViewState extends State<StageView> {
       var image;
       var _blocked = _userstate.user.isLessonBlocked(content);
 
-      if (content.image != null) {
-        var configuration = createLocalImageConfiguration(context);
-        image = new NetworkImage(content.image)..resolve(configuration);
-      }
-
       if (filter.contains(content.type) || filter.contains('all')) {
         lessons.add(AspectRatio(
             aspectRatio: Configuration.lessonratio,
             child: Container(
             margin: EdgeInsets.all(Configuration.verticalspacing),
-            decoration: BoxDecoration(
-              color: Configuration.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
+           
             child: ElevatedButton(
               onPressed: () {
-                if (_userstate.user.position >= content.position ||
-                    _userstate.user.stagenumber > content.stagenumber) {
+                if (!_blocked) {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -185,6 +305,9 @@ class _StageViewState extends State<StageView> {
                   padding: EdgeInsets.all(0),
                   primary: Colors.white,
                   onPrimary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+                  ),
                   minimumSize: Size(double.infinity, double.infinity)),
               child: Stack(
                 children: [
@@ -194,7 +317,17 @@ class _StageViewState extends State<StageView> {
                     child: Hero(tag: content.cod ,
                     child: AspectRatio(
                       aspectRatio: 0.9,
-                      child: Image.network(content.image, fit: BoxFit.fitWidth))
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.horizontal(right: Radius.circular(Configuration.borderRadius/3)),
+                        child: CachedNetworkImage(
+                          imageUrl: content.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white,
+                          ),
+                          errorWidget: (context, url, error) => Icon(Icons.error),
+                        ),
+                        ))
                     ),
                   ) : Container(),
                   Positioned(
@@ -228,8 +361,7 @@ class _StageViewState extends State<StageView> {
                         width: Configuration.width * 0.5,
                         child: Text(
                           content.title,
-                          style:Configuration.text("small", _userstate.user.position < content.position &&
-                                  _userstate.user.stagenumber <= content.stagenumber ? Colors.grey : Colors.black, 
+                          style:Configuration.text("small", _blocked ? Colors.grey : Colors.black, 
                                 ),
                         ),
                       )),
@@ -243,19 +375,21 @@ class _StageViewState extends State<StageView> {
                       key: Key(content.cod),
                       duration: Duration(seconds: 2),
                       child: _blocked?
-                              Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.lock, size: Configuration.smicon),
-                                    SizedBox(height: 10),
-                                    Text('Unlocked after reading ' + widget.stage.path[content.position == 0? content.position :content.position-1].title , style: Configuration.text('verytiny', Colors.white), ),
-                                  ],
-                                )
-                              ) :Container(),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock, size: Configuration.smicon),
+                              SizedBox(height: 10),
+                              Text('Unlocked after reading ' + widget.stage.path[content.position == 0 ? content.position :content.position-1].title , style: Configuration.text('tiny', Colors.white),textAlign: TextAlign.center ),
+                            ],
+                          )
+                        ) :Container(),
                       decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
                           color: _blocked
-                              ? Colors.grey.withOpacity(0.6)
+                              ? Colors.grey.withOpacity(0.8)
                               : Colors.transparent),
                       curve: Curves.fastOutSlowIn,
                     ),
@@ -308,8 +442,7 @@ class _StageViewState extends State<StageView> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Html(data: widget.stage.longdescription
-                            )
+                            htmlToWidget(widget.stage.longdescription, color: Colors.black, fontsize: 12.0)
                           ],
                         ),
                       ),
@@ -414,11 +547,16 @@ class _ContentViewState extends State<ContentView> {
 
   Widget portada() {
     return Column(children: [
-      widget.slider.url.isNotEmpty ?
+      widget.content.image.isNotEmpty ?
       Hero(
         tag: widget.content.cod, 
-        child: Image(
-          image: widget.slider,
+        child: CachedNetworkImage(
+          imageUrl: widget.content.image,
+          placeholder: (context, url) => Container(
+            height: Configuration.height * 0.4,
+            width: Configuration.width,
+            color: Colors.grey.withOpacity(0.5),
+          ),
           width: Configuration.width,
           height: Configuration.height*0.6,
           fit: BoxFit.cover,
@@ -435,10 +573,10 @@ class _ContentViewState extends State<ContentView> {
                   padding: EdgeInsets.only(
                       left: Configuration.smpadding,
                       right: Configuration.smpadding,
-                      top: Configuration.smpadding),
+                      top: Configuration.medpadding),
                   child: Text(widget.content.title,
                       textAlign: TextAlign.center,
-                      style: Configuration.text('smallmedium', Colors.black)),
+                      style: Configuration.text('big', Colors.black)),
                 ),
               ),
               Center(
@@ -483,17 +621,8 @@ class _ContentViewState extends State<ContentView> {
                     child: Container(
                         width: Configuration.width,
                         padding: EdgeInsets.all(Configuration.smpadding),
-                        child: Html(
-                          style:{
-                            "table":Style(
-                              border:Border.all(color:Colors.grey,width:1)
-                            ),
-                            "td":Style(
-                              border:Border(top: BorderSide(color:Colors.grey, width:1)),
-                              padding: EdgeInsets.all(Configuration.smpadding)
-                            )
-                          },
-                          data:slide["text"],
+                        child: htmlToWidget(
+                          slide["text"],
                         )
                       ),
                   ),
@@ -559,6 +688,7 @@ class _ContentViewState extends State<ContentView> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
+  
     return Scaffold(
         extendBody: true,
         appBar: AppBar(
@@ -613,7 +743,6 @@ class _ContentViewState extends State<ContentView> {
 }
 
 
-
 class Portada extends StatelessWidget {
   const Portada() : super();
 
@@ -624,6 +753,442 @@ class Portada extends StatelessWidget {
     );
   }
 }
+
+class PhaseView extends StatefulWidget {
+  Phase phase;
+  
+  PhaseView({ Key key, this.phase }) : super(key: key);
+
+  @override
+  _PhaseViewState createState() => _PhaseViewState();
+}
+
+class _PhaseViewState extends State<PhaseView> with TickerProviderStateMixin {
+  UserState _userstate;
+
+  TabController tabController;
+  int selectedIndex = 0;
+  var image;
+
+  List<Content> mindContent = new List.empty(growable: true);
+  List<Content> lessons = new List.empty(growable: true);
+  List<Content> meditations = new List.empty(growable: true);
+
+  FutureOr onGoBack(dynamic value) {
+    setState(() {
+      if(_userstate.user.progress != null) 
+        autocloseDialog( _userstate.user);
+      });
+  }
+
+  @override
+  void initState() {
+    tabController = TabController(length: 3, vsync: this);
+
+    tabController.addListener(() {
+      setState(() {});
+    });
+
+    mindContent = widget.phase.content.where((element) => element.type == 'mind').toList();
+    lessons = widget.phase.content.where((element) => element.type == 'lesson').toList();
+    meditations = widget.phase.content.where((element) => element.type == 'meditation').toList();
+
+    super.initState();
+  }
+  /*
+  List<Widget> lessons(){
+    List<Widget> lessons = new List.empty(growable: true);
+
+    widget.phase.content.forEach((content) {
+      var image;
+      var _blocked = _userstate.user.isLessonBlocked(content);
+
+      if (true) {
+        lessons.add(AspectRatio(
+            aspectRatio: Configuration.lessonratio,
+            child: Container(
+            margin: EdgeInsets.all(Configuration.verticalspacing),
+           
+            child: ElevatedButton(
+              onPressed: () {
+                if (!_blocked) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContentView(
+                      lesson: content,
+                      content: content,
+                      slider: image
+                      )
+                    )
+                  ).then(onGoBack);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(0),
+                  primary: Colors.white,
+                  onPrimary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+                  ),
+                  minimumSize: Size(double.infinity, double.infinity)),
+              child: Stack(
+                children: [
+                  content.image != null && content.image.isNotEmpty ?
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Hero(tag: content.cod ,
+                    child: AspectRatio(
+                      aspectRatio: 0.9,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.horizontal(right: Radius.circular(Configuration.borderRadius/3)),
+                        child: CachedNetworkImage(
+                          imageUrl: content.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white,
+                          ),
+                          errorWidget: (context, url, error) => Icon(Icons.error),
+                        ),
+                        ))
+                    ),
+                  ) : Container(),
+                  Positioned(
+                      top: 15,
+                      left: 15,
+                      child: Row(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(right: Configuration.blockSizeHorizontal *2),
+                            width: Configuration.safeBlockHorizontal * 5,
+                            height: Configuration.safeBlockHorizontal * 5,
+                            child: Icon(
+                                content.type == 'meditation'
+                                    ? Icons.self_improvement
+                                    : Icons.book,
+                                color: Colors.grey),
+                          ),
+                          _userstate.user.readLesson(content)
+                            ?  
+                            Container(
+                              width: Configuration.safeBlockHorizontal * 5,
+                              height: Configuration.safeBlockHorizontal * 5,
+                              child: Icon(Icons.visibility,color: Colors.lightBlue),
+                            ): Container(),
+                        ],
+                      )),
+                  Positioned(
+                      left: 15,
+                      bottom: 15,
+                      child: Container(
+                        width: Configuration.width * 0.5,
+                        child: Text(
+                          content.title,
+                          style:Configuration.text("small", _blocked ? Colors.grey : Colors.black, 
+                                ),
+                        ),
+                      )),
+                  Positioned(
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    top: 0,
+                    child: AnimatedContainer(
+                      padding: EdgeInsets.all(0),
+                      key: Key(content.cod),
+                      duration: Duration(seconds: 2),
+                      child: _blocked?
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock, size: Configuration.smicon),
+                              SizedBox(height: 10),
+                             // Text('Unlocked after reading ' + widget.stage.path[content.position == 0 ? content.position :content.position-1].title , style: Configuration.text('tiny', Colors.white),textAlign: TextAlign.center ),
+                            ],
+                          )
+                        ) :Container(),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+                          color: _blocked
+                              ? Colors.grey.withOpacity(0.8)
+                              : Colors.transparent),
+                      curve: Curves.fastOutSlowIn,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
+      }
+    });
+
+    return lessons;
+  }
+  */
+
+  Widget contentView({Content content, blocked = false}){
+    return AspectRatio(
+            aspectRatio: Configuration.lessonratio,
+            child: Container(
+            margin: EdgeInsets.all(Configuration.verticalspacing),
+            child: ElevatedButton(
+              onPressed: () {
+                if (!blocked) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ContentView(
+                      lesson: content,
+                      content: content,
+                      slider: image
+                      )
+                    )
+                  ).then(onGoBack);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.all(0),
+                  primary: Colors.white,
+                  onPrimary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+                  ),
+                  minimumSize: Size(double.infinity, double.infinity)),
+              child: Stack(
+                children: [
+                  content.image != null && content.image.isNotEmpty ?
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Hero(tag: content.cod ,
+                    child: AspectRatio(
+                      aspectRatio: 0.9,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.horizontal(right: Radius.circular(Configuration.borderRadius/3)),
+                        child: CachedNetworkImage(
+                          imageUrl: content.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white,
+                          ),
+                          errorWidget: (context, url, error) => Icon(Icons.error),
+                        ),
+                        ))
+                    ),
+                  ) : Container(),
+                  
+                  Align(
+                  alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: Configuration.width * 0.5,
+                        child: Text(
+                          content.title,
+                          style:Configuration.text("small", blocked ? Colors.grey : Colors.black),
+                          textAlign:TextAlign.center
+                        ),
+                      )),
+                  Positioned(
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    top: 0,
+                    child: AnimatedContainer(
+                      padding: EdgeInsets.all(0),
+                      key: Key(content.cod),
+                      duration: Duration(seconds: 2),
+                      child: blocked ?
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock, size: Configuration.smicon),
+                              SizedBox(height: 10),
+                             // Text('Unlocked after reading ' + widget.stage.path[content.position == 0 ? content.position :content.position-1].title , style: Configuration.text('tiny', Colors.white),textAlign: TextAlign.center ),
+                            ],
+                          )
+                        ) :Container(),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+                          color: blocked
+                              ? Colors.grey.withOpacity(0.8)
+                              : Colors.transparent),
+                      curve: Curves.fastOutSlowIn,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      );
+  }
+  // contenedor
+  Widget containerIcon({IconData icon, Color color, child}){
+
+    return  Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
+          ),
+          child:child
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(Configuration.borderRadius/2),
+                bottomRight: Radius.circular(Configuration.borderRadius/2)
+              )
+            ),
+            child: Icon(icon,size: Configuration.tinicon),
+          ),
+        ), 
+      ]
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        elevation:0,
+        bottom: PreferredSize(child:  
+          Container(
+            color: Colors.grey,
+            height: 1.0,
+          ),preferredSize: Size.fromHeight(2)
+        ),
+        backgroundColor: Colors.transparent,
+        leading: ButtonBack(),
+        title: Text(
+          widget.phase.title, 
+          style: Configuration.text('small',Colors.black)
+        ),
+      ),
+      body:Container(
+            padding: EdgeInsets.all(Configuration.smpadding),
+            child: ListView(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              children: [
+                containerIcon(
+                  icon: Icons.check,
+                  color:Configuration.maincolor,
+                  child:Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('The objective of this phase is to achieve', style: Configuration.text('small', Colors.white,font:'Helvetica')),
+                      SizedBox(height: Configuration.verticalspacing),
+                      Text(widget.phase.description,style: Configuration.text('small',Colors.white),textAlign:TextAlign.center)
+                    ]
+                  ) 
+                ),
+                
+                SizedBox(height: Configuration.verticalspacing),
+
+                containerIcon(
+                  color: Configuration.lightgrey,
+                  icon: FontAwesomeIcons.brain,
+                  child: Column(
+                    children: [
+                      Text('The map of the mind',style: Configuration.text('small',Colors.black),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: Configuration.verticalspacing),
+                      ListView.builder(
+                        padding: EdgeInsets.all(0),
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap:true,
+                        itemCount: mindContent.length,
+                        itemBuilder: (BuildContext context, int index) {  
+                          Content c = mindContent[index];
+                          return contentView(content: c);
+                        },
+                      )
+                    ],
+                  )
+                ),
+
+                SizedBox(height: Configuration.verticalspacing),
+
+                containerIcon(
+                  icon: Icons.self_improvement,
+                  color:Colors.lightBlue,
+                  child:Column(
+                    children: [
+                      Text('You will encounter this problems meditating',style: Configuration.text('small',Colors.black),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: Configuration.verticalspacing),
+                      ListView.builder(
+                        padding: EdgeInsets.all(0),
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap:true,
+                        itemCount: meditations.length,
+                        itemBuilder: (BuildContext context, int index) {  
+                          Content c = meditations[index];
+                          return contentView(content: c);
+                        },
+                      ),
+                    ],
+                  )
+                ),
+
+                SizedBox(height: Configuration.verticalspacing),
+
+                containerIcon(
+                  icon: Icons.book,
+                  color:Colors.lightBlue,
+                  child:Column(
+                    children: [
+                      Text('Meditation information you should know',style: Configuration.text('small',Colors.black),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: Configuration.verticalspacing),
+                      ListView.builder(
+                        padding: EdgeInsets.all(0),
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap:true,
+                        itemCount: lessons.length,
+                        itemBuilder: (BuildContext context, int index) {  
+                          Content c = lessons[index];
+                          return contentView(content: c);
+                        },
+                      ),
+                    ],
+                  )
+                ),
+
+                SizedBox(height: Configuration.verticalspacing),
+
+
+
+
+
+              ],
+            ),
+          ),
+
+
+    );
+  }
+}
+
+
+
+
 
 
 

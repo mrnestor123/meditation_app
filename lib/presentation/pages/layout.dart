@@ -7,18 +7,17 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/messages_modal.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
+import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:meditation_app/presentation/pages/teachers_screen.dart';
 
 import 'package:provider/provider.dart';
 
 import 'commonWidget/profile_widget.dart';
-import 'commonWidget/radial_progress.dart';
 
 class Layout extends StatelessWidget {
   Layout();
@@ -74,13 +73,11 @@ class _MobileLayoutState extends State<MobileLayout> {
   Widget build(BuildContext context) {
     DateTime currentBackPressTime;
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     ProfileState _profilestate = Provider.of<ProfileState>(context);
-
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);    
 
     Widget chiporText(String text, bool chip, int page){
       Widget g;
@@ -94,10 +91,10 @@ class _MobileLayoutState extends State<MobileLayout> {
         );
       } else {
         g =Chip(
+          padding: EdgeInsets.all(Configuration.tinpadding),
           label: Text(text, style: Configuration.text('tiny', Colors.black)), 
           backgroundColor: Colors.white, 
-          elevation: 0.0,
-          side: BorderSide.none
+          elevation: 0.0
         );
       }
 
@@ -132,11 +129,11 @@ class _MobileLayoutState extends State<MobileLayout> {
           label: 'Path',
         )
       ];
-
     }
 
-
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         elevation: 0.0,
         toolbarHeight: Configuration.width > 500 ? 80 : 50,
@@ -189,6 +186,7 @@ class _MobileLayoutState extends State<MobileLayout> {
         automaticallyImplyLeading: false,
         actions: [
           MessagesIcon(),
+          SizedBox(width: Configuration.verticalspacing),
           Stack(
             alignment:Alignment.center,
             children: [
@@ -211,6 +209,9 @@ class _MobileLayoutState extends State<MobileLayout> {
                 )) : Container()
             ],
           ),
+          
+          SizedBox(width: Configuration.verticalspacing),
+        
           Container(
             margin:EdgeInsets.only(
               right: Configuration.width > 500 ? Configuration.tinpadding : 0,
@@ -224,27 +225,33 @@ class _MobileLayoutState extends State<MobileLayout> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        elevation: 2.0,
-        selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
-        unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
-        unselectedItemColor: Colors.black,
-        type: BottomNavigationBarType.fixed,
-        items: 
-        _userstate.user.isTeacher() ? 
-          bottomItems() + [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school,size: Configuration.smicon),
-            label: 'Teacher',
-          )] : bottomItems()
-        ,
-        currentIndex: currentindex,
-        selectedItemColor: Configuration.maincolor,
-        onTap: (int index) {
-          {
-            this._c.jumpToPage(index);
-          }
-        },
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Colors.grey, width: 0.5))
+        ),
+        child: BottomNavigationBar(
+          elevation: 2.0,
+          selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
+          unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
+          unselectedItemColor: Colors.black,
+          type: BottomNavigationBarType.fixed,
+          items: 
+          _userstate.user.isTeacher() ? 
+            bottomItems() + [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school,size: Configuration.smicon),
+              label: 'Teacher',
+            )] : bottomItems()
+          ,
+          currentIndex: currentindex,
+          selectedItemColor: Configuration.maincolor,
+          onTap: (int index) {
+            {
+              this._c.jumpToPage(index);
+            }
+          },
+        ),
       ),
       body: WillPopScope(
         onWillPop:(){

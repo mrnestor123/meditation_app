@@ -11,8 +11,9 @@ class BaseButton extends StatelessWidget {
   Color color;
   Color textcolor;
   bool noelevation, border;
+  double aspectRatio;
 
-  BaseButton({this.onPressed, this.text, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
+  BaseButton({this.onPressed, this.text,this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
   
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class BaseButton extends StatelessWidget {
       width: Configuration.width*0.9,
       margin: EdgeInsets.only(bottom: margin ? Configuration.verticalspacing * 1.5 : 0),
       child: AspectRatio(
-        aspectRatio:Configuration.buttonRatio,
+        aspectRatio:aspectRatio != null ? aspectRatio: Configuration.buttonRatio,
         child: ElevatedButton(
         onPressed: onPressed != null ? () async {
           if(!justpressed){

@@ -36,26 +36,27 @@ abstract class _ProfileState with Store {
 
   _ProfileState({this.repository});
 
-
   @action 
-  Future init(User u, bool me) async{
-    selected = u;
-    isMe = me;
+  Future init(User u, User me) async{
+    isMe = me.coduser == u.coduser;
     loading = true;
 
     if(!isMe){
+      selected = u;
+
       foldResult(
         result: await repository.expandUser(u:selected),
         onSuccess: (r){
           selected = r;
+          selected.checkStreak();
           loading = false;
         }
       );
     }else{
       loading = false;
+      selected = me;
     }
   }
-
 
 }
  

@@ -5,13 +5,8 @@ import 'package:meditation_app/presentation/pages/commonWidget/login_register_bu
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/oldwidgets/button.dart';
-import 'package:upgrader/upgrader.dart';
 
 class WelcomeWidget extends StatelessWidget {
-  AppcastConfiguration cfg= AppcastConfiguration(
-    url: 'https://raw.githubusercontent.com/mrnestor123/meditation_app/master/appcast.xml', 
-    supportedOS: ['android']
-  );
 
   @override
   Widget build(BuildContext context) {

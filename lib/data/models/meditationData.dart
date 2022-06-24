@@ -46,24 +46,23 @@ class MeditationModel extends Meditation {
 
   @override
   factory MeditationModel.fromJson(Map<String, dynamic> json, [isShort = false]) {
-      // LAS MEDITACIONES HECHAS POR EL USUARIO SOLO TIENEN CÓDIGO Y 
-      MeditationModel model = medorLessfromJson(json, true);
+    // LAS MEDITACIONES HECHAS POR EL USUARIO SOLO TIENEN CÓDIGO Y 
+    MeditationModel model = medorLessfromJson(json, true);
       
-      if(!isShort){ 
-        model.content =  json['content'] == null ? null: json['content'];
-        model.followalong = json['followalong'] == null ? null : json['followalong'];
-      }else{
-        model = new MeditationModel();
+    if(!isShort){ 
+      model.content =  json['content'] == null ? null: json['content'];
+      model.followalong = json['followalong'] == null ? null : json['followalong'];
+    }else{
+      model = new MeditationModel();
+    }
 
-     }
+    model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']);
 
-     model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']);
+    model.day = json["day"] == null ? null : DateTime.parse(json["day"]);
 
-      model.day = json["day"] == null ? null : DateTime.parse(json["day"]);
+    model.coduser = json['coduser'] == null ? null : json['coduser'];
 
-      model.coduser = json['coduser'] == null ? null : json['coduser'];
-
-      return model;
+    return model;
   }
 
   @override 

@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
@@ -32,7 +34,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
   dynamic condition = true;
   bool searching = false;
 
-  Widget createTable(List<User> list, context, following) {
+  Widget createTable(List<User> list, context, bool following) {
     var count = 0;
 
     Widget texticon(IconData icon, String text) {
@@ -44,20 +46,27 @@ class _LeaderBoardState extends State<LeaderBoard> {
       ]);
     }
 
-    return ListView(
+    if(list.length == 0){
+      return Center(
+        child: Text('You are not following any users',
+          style: Configuration.text('small', Colors.black),
+        ),
+      );
+    }else {
+      return ListView(
       physics:ClampingScrollPhysics(),
       children: [
           Container(
             child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: {
-              0:FractionColumnWidth(0.1),
+              0:FractionColumnWidth(0.12),
               1:FractionColumnWidth(0.15),
               2:FractionColumnWidth(0.4),
               3:FractionColumnWidth(0.2),
-              4:FractionColumnWidth(0.15)
+              4:FractionColumnWidth(0.13)
             },
-            children: list.map((u) => 
+            children:   list.map((u) => 
             TableRow(
               children: [
                 Container(
@@ -70,11 +79,11 @@ class _LeaderBoardState extends State<LeaderBoard> {
                   textAlign: TextAlign.center,
                 ),
                 ),
-                CircleAvatar(
-                  radius: Configuration.strokewidth*3,
-                  backgroundColor: u.image != null ? Colors.transparent : Configuration.maincolor,
-                  backgroundImage: u.image != null ? NetworkImage(u.image) : null,
-                  child: u.image == null ? null : null,
+
+                ProfileCircle(
+                  key:Key(u.coduser),
+                  width: 30,
+                  userImage: u.image,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,16 +106,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         iconSize: Configuration.smicon,
                         icon: Icon(following || u.followed != null && u.followed ? Icons.person : Icons.person_add), 
                         onPressed: () async { 
-                          
-                          await showUserProfile(user:u,context:context, followbutton:true, 
-                          followaction: (following) async{
-                              await _userstate.follow(u, following);
-                              setState(() {
-                                
-                              });
-                            }, following: following || (u.followed != null && u.followed)); 
-                          
-                          setState((){});}
+                           showUserProfile(
+                              user:u, 
+                              followaction:()=>{setState(()=>{})},
+                              followbutton:true, 
+                            );
+                              
+                          },
                         ) :  Container(),
                     ],
                   )
@@ -115,6 +121,8 @@ class _LeaderBoardState extends State<LeaderBoard> {
           ),
         )] 
       );
+  
+    }
   }
 
   @override
@@ -203,6 +211,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                             ),
                       )
                       : TabBar(
+                         // labelPadding:   EdgeInsets.all(Configuration.width > 500 ? Configuration.smpadding : 2),
                           controller: _tabController,
                           indicatorSize: TabBarIndicatorSize.label,
                           indicatorWeight: Configuration.width > 500 ? 5 : 2.5 ,
@@ -276,7 +285,7 @@ class UserProfile extends StatelessWidget {
     var _profileState = Provider.of<ProfileState>(context);
     return GestureDetector(
       onTap: ()=> {
-        showUserProfile(user:user, context:context)
+        showUserProfile(user:user)
       },
       child: Column(
         children: [
@@ -285,7 +294,7 @@ class UserProfile extends StatelessWidget {
               Container(
               padding: EdgeInsets.all(2.0),
               decoration: BoxDecoration(
-                image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+                image: user.image != null && user.image.isNotEmpty ? DecorationImage(image: CachedNetworkImageProvider(user.image), fit: BoxFit.fitWidth) : null,
                 border: Border.all(color: Colors.white, width: 2.5),
                 shape: BoxShape.circle
                 ),
@@ -335,7 +344,7 @@ class TabletUserProfile extends StatelessWidget {
             Container(
             padding: EdgeInsets.all(2.0),
             decoration: BoxDecoration(
-              image: user.image != null ? DecorationImage(image: NetworkImage(user.image), fit: BoxFit.fitWidth) : null,
+              image: user.image != null && user.image.isNotEmpty ? DecorationImage(image: CachedNetworkImageProvider(user.image), fit: BoxFit.fitWidth) : null,
               border: Border.all(color: Colors.white, width: 2.5),
               shape: BoxShape.circle
               ),

@@ -80,3 +80,43 @@ class GuidedMeditation extends Meditation{
 
 
 }
+
+/// CREAR CLaSE INTERVALBELL??
+class IntervalBell {
+
+}
+
+class MeditationPreset {
+  int duration;
+  double warmuptime;
+  String name,cod, intervalBell;
+
+  MeditationPreset({this.intervalBell, this.name, this.cod, this.duration,this.warmuptime}){
+    if(cod == null){
+      this.cod = Uuid().v1();
+    }else {
+      this.cod = cod;
+    }
+  }
+
+  Map<String,dynamic> toJson(){
+    return {
+      'cod':cod,
+      'name':name,
+      'duration':duration,
+      'intervalBell':intervalBell,
+      'warmuptime':warmuptime
+    };
+  }
+
+  factory MeditationPreset.fromJson(Map<String,dynamic> json){
+    return MeditationPreset(
+      cod: json['cod'],
+      name: json['name'],
+      duration: json['duration'],
+      intervalBell: json['intervalBell'],
+      warmuptime: json['warmuptime'] != null ? json['warmuptime'].toDouble() : null
+    );
+  }
+
+}

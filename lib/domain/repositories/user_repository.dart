@@ -3,11 +3,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+
+import '../entities/action_entity.dart';
 
 abstract class UserRepository {
   //Use Case for login users
@@ -27,7 +30,7 @@ abstract class UserRepository {
 
   Future<Either<Failure,List<Request>>> getRequests();
 
-  Future<Either<Failure,void>> updateRequest(Request r,[Notify n]);
+  Future<Either<Failure,void>> updateRequest(Request r,[List<Notify> n, Comment c]);
 
   Future<Either<Failure,void>> uploadRequest(Request r);
 
@@ -53,5 +56,19 @@ abstract class UserRepository {
 
   Future<Either<Failure, void>> follow({User u, User followed, bool follows});
 
+  Future<Either<Failure, void>> takeLesson({User u, Lesson l});
 
+  Future<Either<Failure, void>> addAction({UserAction a});
+
+  // PARA FUTURO !!!
+ // Future<Either<Failure, void>> viewMessages({List<Message> messages});
+
+  Future<Either<Failure, List<Chat>>> getMessages({User user});
+
+
+  Future<Either<Failure, Chat>> getChat({User sender, String receiver});
+
+  Future<Either<Failure,Stream<List<Message>>>> startConversation({User sender, String receiver});
+
+  Future<Either<Failure,void>> updateUserProfile({User u, String image});
 }

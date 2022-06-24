@@ -24,7 +24,6 @@ const CACHED_USER = 'CACHED_USER';
 //puede ser que guarde demasiadas cosas en la cachee !!
 class UserLocalDataSourceImpl implements UserLocalDataSource {
   final SharedPreferences sharedPreferences;
-
   Stage cachedStage;
 
   UserLocalDataSourceImpl({@required this.sharedPreferences});

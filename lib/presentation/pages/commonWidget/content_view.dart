@@ -2,6 +2,7 @@
 // WIDGET COMÚN DE VISTA DE CONTENIDO
 // SE PODRÁN VER LECCIONES Y MEDITACIONES, Y EDITAR 
 import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -151,7 +152,7 @@ class _ContentShowState extends State<ContentShow> {
       if (map['image'] != null) {
         l.add(ClipRRect(
           borderRadius: BorderRadius.circular(8.0),
-          child: Image(image: NetworkImage( map['image']), width: Configuration.width*0.6)));
+          child: Image(image: CachedNetworkImageProvider( map['image']), width: Configuration.width*0.6)));
       }
 
       if (map['text'] != null) {
@@ -227,7 +228,7 @@ class _ContentShowState extends State<ContentShow> {
                [
                  ClipRRect(
                     borderRadius: BorderRadius.circular(12.0),
-                    child: Image(image: NetworkImage(_meditationstate.selmeditation.image),
+                    child: Image(image: CachedNetworkImageProvider(_meditationstate.selmeditation.image),
                     height: Configuration.height*0.35,
                     width: Configuration.height*0.35
                     ),
