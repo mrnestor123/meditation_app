@@ -260,6 +260,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text(text, style:Configuration.text('small',Colors.black)),
             TextField(
+              maxLines: 4,
+              minLines: 1,
               controller: controller,
               onChanged:onchange 
             )
@@ -308,7 +310,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ]
       );
     }
-
 
 
     return Container(

@@ -87,6 +87,8 @@ class UserRepositoryImpl implements UserRepository {
         return Right(newUser);
       } on ServerException {
         return Left(ServerFailure());
+      }on UserException {
+        return Left(UserExistsFailure());
       }
     } else {
       /*try {

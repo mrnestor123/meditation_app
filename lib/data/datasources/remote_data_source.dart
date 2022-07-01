@@ -168,36 +168,43 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<UserModel> registerUser({var usuario}) async {
     //Sacamos la primera etapa
     //Esto se debería de sacar del getStage
-    var url = Uri.parse('$nodejs/stage/1');
-    http.Response response = await http.get(url);
 
-    if(response.statusCode != 400 && response.statusCode != 404){
-      //comprobar que funciona bien
-      //ESTO QUE ES !!!
-      //UserModel u = UserModel.fromRawJson(response.body);
-      StageModel one = StageModel.fromRawJson(response.body);
+    dynamic user = await getUser(usuario.uid);
 
-      //hay que pasar esto al nuevo setting con UserStats
-      // HAY QUE CREAR UN MODELO USERMODEL 
-      UserModel user = new UserModel(
-        coduser: usuario.uid,
-        user: usuario,
-        stagenumber: 1,
-        meditposition: 0,
-        gameposition: 0,
-        role: "meditator",
-        position: 0,
-        stage: one,
-        stagelessonsnumber: 1,
-        userStats: UserStats.empty()
-      );
+    if(user == null){
+      var url = Uri.parse('$nodejs/stage/1');
+      http.Response response = await http.get(url);
 
-      //añadimos al usuario en la base de datos de usuarios
-      await database.collection('users').add(user.toJson());
+      if(response.statusCode != 400 && response.statusCode != 404){
+        //comprobar que funciona bien
+        //ESTO QUE ES !!!
+        //UserModel u = UserModel.fromRawJson(response.body);
+        StageModel one = StageModel.fromRawJson(response.body);
 
-      return user;
-    }else{
-      throw ServerException();
+        //hay que pasar esto al nuevo setting con UserStats
+        // HAY QUE CREAR UN MODELO USERMODEL 
+        UserModel user = new UserModel(
+          coduser: usuario.uid,
+          user: usuario,
+          stagenumber: 1,
+          meditposition: 0,
+          gameposition: 0,
+          role: "meditator",
+          position: 0,
+          stage: one,
+          stagelessonsnumber: 1,
+          userStats: UserStats.empty()
+        );
+
+        //añadimos al usuario en la base de datos de usuarios
+        await database.collection('users').add(user.toJson());
+
+        return user;
+      }else{
+        throw ServerException();
+      }
+    }else {
+      throw UserException();
     }
   }
 

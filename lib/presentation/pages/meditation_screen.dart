@@ -822,7 +822,7 @@ class ClickableSquare extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if(!blocked || onTap){
+        if(!blocked && onTap is Function){
           onTap();
         }
       },

@@ -7,6 +7,7 @@ import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 
@@ -268,17 +269,10 @@ class __TimelineState extends State<_Timeline> {
                 children: [
                   Stack(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            image: action.userimage != null ? 
-                              DecorationImage(image: CachedNetworkImageProvider(action.userimage), fit: BoxFit.fitWidth) : 
-                              null,
-                            color: action.userimage == null ? Configuration.maincolor : null,
-                            shape: BoxShape.circle
-                          ),
-                          width: Configuration.width*0.1,
-                          height: Configuration.width*0.1
-                          ),
+                        ProfileCircle(
+                          userImage: action.userimage,
+                          width: 40,
+                        ),
                         Positioned(
                           bottom: 0,
                           right: 0,

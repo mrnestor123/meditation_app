@@ -68,6 +68,7 @@ class User {
   final ObservableList<dynamic> readlessons = new ObservableList();
   //HACE FALTA ESTO ???
   Map<dynamic,dynamic> answeredquestions = new Map();
+  
 
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
@@ -312,6 +313,8 @@ class User {
     return false;
   }
 
+
+  //CAMBIAR LOS MAPS A CLASES !!!!
   void setPercentage() {
     Stage s = this.stage;
 
@@ -332,23 +335,24 @@ class User {
       'Guided meditations': () => userStats.stage.guidedmeditations / s.stobjectives.meditguiadas
     };
 
-    var objectives =  s.stobjectives.getObjectives();
+    var objectives = s.stobjectives.getObjectives();
+    
     if(objectives.length > 0){
       passedObjectives = new Map();
 
       // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
       objectives.forEach((key,value) { 
-          passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
+        passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
       });
 
       double passedcount = 0;
 
       passedObjectives.forEach((key, value) { 
-        if(value == true) {
+        if(value ==  1 ) {
           passedcount += 1;
         } else {
           var passed = percentageCheck[key]();
-          passedcount += passed < 1 ?  passed : 0;
+          passedcount += passed < 1 ? passed : 0;
         }
       });
     
@@ -388,7 +392,7 @@ class User {
   void takeLesson(Lesson l, [DataBase d]) {
     if(this.readlessons.where((element)=> l.cod == element).isEmpty){
       // EMPEZAR A UTILIZAR 
-      if(l.stagenumber == this.stagenumber){
+      if(l.stagenumber == this.stagenumber && this.userStats.stage.lessons < this.stage.stobjectives.lecciones){
         this.userStats.stage.lessons++;
         this.progress = Progress(
           done: this.userStats.stage.lessons,
@@ -436,12 +440,28 @@ class User {
 
   void getTimeMeditatedString(){
     var time = this.userStats.total.timemeditated;
-    if (time > 1440) {
-      timemeditated = (time / (60 * 24)).toStringAsFixed(1) + ' d';
-    } else if (time > 60) {
-      timemeditated = (time / 60).toStringAsFixed(0) + ' h';
-    } else {
-      timemeditated = time.toString() + ' m';
+
+    int hours = time ~/ 60;
+
+    if(hours > 24){
+      int days = hours ~/ 24;
+      int remaininghours = hours % 24;
+
+      if(days > 7){
+        int weeks = days ~/ 7;
+        int remainingdays = days%7;
+        
+        timemeditated = weeks.toString() + 'w ' +  remainingdays.toString() + 'd';
+      }else{
+        timemeditated = days.toString() + 'd ' + remaininghours.toString() + 'h';
+      }
+    }else{
+      if(hours > 1){
+        timemeditated = hours.toString() + 'h';
+      }else{
+        int minutes = time % 60;
+        timemeditated = minutes.toString() + 'm';
+      }
     }
   }
 
@@ -514,6 +534,8 @@ class User {
     //setTimeMeditated();
   }
 }
+
+
 
 
 // WE NEED TO CREATE DIFFERENT CLASSES

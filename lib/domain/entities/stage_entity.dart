@@ -97,14 +97,14 @@ class StageObjectives {
       totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
       streak: json['streak'] == null ? 0 : json['streak'],
       meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'] == null ? 0 : json['meditation']['count'],
-      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null ? null : json['meditation']['time'].toString() + ' min meditations ',
+      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null || json['meditation']['time'] == 0   ? null : json['meditation']['time'].toString() + ' min meditations ',
       meditationfreetime: json['meditation'] == null   ? 0 :  json['meditation']['time']  == null ? 0 :json['meditation']['time'],
       meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
       lecciones: json['lessons'] == null ? 0 : json['lessons']
     );  
   
   factory StageObjectives.empty() => 
-  StageObjectives(
+    StageObjectives(
       totaltime: 0 ,
       streak: 0 ,
       meditationcount:  0,
@@ -122,6 +122,9 @@ class StageObjectives {
     "lecciones": lecciones == null ? [] : lecciones
   };
 
+
+  //HAY QUE AÑADIR EL STREAK !!!
+  
   Map<String,dynamic> getObjectives() {
     Map<String,dynamic> objectives = {};
 
@@ -151,6 +154,45 @@ class StageObjectives {
   }
 
 
+  List<Map<String,IconData>> printObjectives() {
+    
+    List<Map<String,IconData>> l = new  List.empty(growable: true);
+
+    print(this);
+    
+    if(freemeditationlabel != null ) {
+      l.add({freemeditationlabel : Icons.self_improvement});
+    }
+
+    if(totaltime != null  && totaltime != 0) {
+      l.add({'Total time' : Icons.timer});
+
+    }
+
+    if(streak != null && streak != 0){
+      l.add({'Streak' : Icons.calendar_month});
+
+    }
+
+    if(lecciones != null && lecciones != 0){
+      l.add({'Lessons' : Icons.book});
+    }
+
+    if(meditguiadas != null && meditguiadas != 0){
+      l.add({'Guided meditations' : Icons.timer});
+    }
+
+    return l;
+  }
+
+
+
+
+
+
+
+
+  // HAY QUE DEVOLVER EL PORCENTAJE EN 1
   dynamic checkPassedObjective(int value, String objective){
      var labels = {
       'totaltime':totaltime,
@@ -161,11 +203,42 @@ class StageObjectives {
     };
 
     if(value >= labels[objective]){
-      return true;
+      return 1;
     }else{
       return value.toString() +'/' + labels[objective].toString();
     }
+    
+    //  ESTO ES PARA SACAR EL PORCENTAJE !!!
+    //return value >= labels[objective] ? 1 :  value /labels[objective];
+
   }
+}
+
+// un objetivo tiene un icono, un  label, un bool de pasado o no, un porcentaje
+// INTENTO DE REFACTORIZAR. DE MOMENTO MUY COMPLICADO PARA REFACTORIZAR !!!
+class Objective {
+  IconData icon;
+  String label,name;
+  bool passed;
+  int percentage,value;
+
+  Objective({this.icon,this.label,this.passed,this.name, this.percentage,this.value});
+
+
+  factory Objective.fromJson(Map<String, dynamic> json) {
+      
+    Objective o  = Objective(
+      name: json.keys.first,
+      value: json[json.keys.first],
+   
+   
+
+    );  
+
+
+    return o;
+  }
+
 }
 
 

@@ -1,9 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:provider/provider.dart';
+
+import '../../domain/entities/stage_entity.dart';
+import '../../domain/entities/user_entity.dart';
 
 class PathScreen extends StatelessWidget {
   PathScreen();
@@ -38,8 +43,9 @@ class PathScreen extends StatelessWidget {
     Widget iconButton(String text, IconData icon, modaltext){
       return OutlinedButton(
         style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.all(Configuration.smpadding),
             side: BorderSide(
-            width: 3.0,
+            width: 1.0,
             color: Colors.grey,
             style: BorderStyle.solid,
           ),
@@ -51,8 +57,12 @@ class PathScreen extends StatelessWidget {
               transitionBuilder: (context, a1, a2, widget) {
                 return AbstractDialog(
                   content: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: Configuration.height *0.5,
+                      minHeight: Configuration.height*0.3,
+                      minWidth: 100, maxWidth: 200
+                      ),
                     padding:EdgeInsets.all(Configuration.smpadding),
-                    height: Configuration.height*0.3,
                     width: Configuration.width*0.9,
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -61,10 +71,11 @@ class PathScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(text, style: Configuration.text('smallmedium', Colors.black)),
                         SizedBox(height: Configuration.verticalspacing),
-                        Text(modaltext, style:Configuration.text('small', Colors.black, font: 'Helvetica'), textAlign: TextAlign.center,),
+                        htmlToWidget(modaltext,fontsize: 12),
                       ],
                     )) ,
                 );
@@ -76,28 +87,24 @@ class PathScreen extends StatelessWidget {
               pageBuilder: (context, animation1, animation2) {})
         },
         child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+            Text(text,style: Configuration.text('tiny', Colors.black)),
             Icon(icon, color: Configuration.maincolor,size: Configuration.medicon),
-           // Text(text,style: Configuration.text('tiny', Colors.black)),
+
           ]),
         ),
       );
     }
 
-    return GridView(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4, 
-            crossAxisSpacing: 10
-          ),
-          children: [
-            iconButton('Goals', Icons.checklist, _userstate.user.stage.goals),
-            iconButton('Obstacles', Icons.warning, _userstate.user.stage.obstacles),
-            iconButton('Skills', Icons.handyman, _userstate.user.stage.skills),
-            iconButton('Mastery', Icons.check_box, _userstate.user.stage.mastery)
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize:MainAxisSize.min,
+        children: [
+          iconButton('Goals of this stage', Icons.checklist, _userstate.user.stage.longdescription),
+          SizedBox(height: Configuration.verticalspacing*2),
+          iconButton('Obstacles', Icons.warning, _userstate.user.stage.obstacles),
         ]);
   }
 
@@ -121,26 +128,129 @@ class PathScreen extends StatelessWidget {
     );
   }
 
-  Widget labels(){
+  Widget labels(context){
     int addedcount = 0;
     List<Widget> l = new List.empty(growable: true);
 
     for(var key in _userstate.user.passedObjectives.keys) {
       l.add(Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _userstate.user.passedObjectives[key] == true ? 
-            Icon(Icons.check_circle, size: Configuration.medpadding, color: Colors.green):
-            Text(_userstate.user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
-            SizedBox(height: Configuration.blockSizeVertical * 0.2),
-            Container(
-              width: Configuration.width*0.3,
-              child: Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
-              )
-          ])
-        );
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _userstate.user.passedObjectives[key] == 1 ? 
+          Icon(Icons.check_circle, size: Configuration.medpadding, color: Colors.green):
+          Text(
+            _userstate.user.passedObjectives[key].toString(), 
+            style:Configuration.text('medium',Configuration.maincolor)),
+          SizedBox(height: Configuration.blockSizeVertical * 0.2),
+          Container(
+            width: Configuration.width*0.3,
+            child: Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
+          )
+        ])
+      );
     }
 
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children:  [
+        Text('You must complete this objectives in order to pass to the next stage', style: Configuration.text('small', Colors.black),textAlign: TextAlign.center),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children:[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: l.sublist(0,l.length >= 3 ? 3 : l.length),
+            ),
+          l.length > 3 ? 
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: l.sublist(3),
+          ): Container(height: 0),
+        ]),
+
+        goals(context)
+
+      ] 
+    );
+  }
+  
+  Widget oldPathScreen(context){
+    return Column(
+    //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
+      children: [
+        SizedBox(height: Configuration.verticalspacing),
+        
+        Column(
+          children: [
+              Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
+              SizedBox(height: Configuration.verticalspacing/2),
+
+              Text(_userstate.user.stage.description, style:Configuration.text('small',Colors.grey)),
+              //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
+              SizedBox(height: Configuration.verticalspacing),
+              porcentaje()
+          ]
+        ),
+
+        Expanded( 
+          child:labels(context)
+        )
+      ],
+      );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    
+    return oldPathScreen(context);
+
+      /*
+    return ListView.builder(
+      itemCount: _userstate.data.stages.length,
+      itemBuilder: (context,index){
+        return Path(
+          user: _userstate.user,
+          s: _userstate.data.stages[index], 
+          key: Key(index.toString())
+        );
+      }
+    );*/
+  }
+}
+
+class Path extends StatelessWidget {
+  Path({
+    Key key,
+    @required this.s,
+    @required this.user
+  }) : super(key: key);
+
+  final Stage s;
+  final User user;
+  List<Map<String,IconData>> stageObjectives  = new List.empty();
+
+
+  Widget labels(){
+    int addedcount = 0;
+    List<Widget> l = new List.empty(growable: true);
+
+    for(var key in user.passedObjectives.keys) {
+      l.add(Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          user.passedObjectives[key] == true ? 
+          Icon(Icons.check_circle, size: Configuration.medpadding, color: Colors.green):
+          Text(user.passedObjectives[key], style:Configuration.text('medium',Configuration.maincolor)),
+          SizedBox(height: Configuration.blockSizeVertical * 0.2),
+          Container(
+            width: Configuration.width*0.3,
+            child: Text(key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
+            )
+        ])
+      );
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -156,185 +266,129 @@ class PathScreen extends StatelessWidget {
           children: l.sublist(3),
         ): Container(),
       ] 
-      );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
-    return Column(
-    //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
-    children: [
-      SizedBox(height: Configuration.verticalspacing),
-      
-      Flexible(
-      flex: 3,
-      child:Column(
-        children: [
-            Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
-            SizedBox(height: Configuration.verticalspacing/2),
-
-            Text(_userstate.user.stage.description, style:Configuration.text('small',Colors.grey)),
-            //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
-            SizedBox(height: Configuration.verticalspacing),
-            porcentaje()
-          ]
-        )
-      ),
-
-      Flexible(
-        flex: 3, 
-        child:labels()
-      ),
-
-      Flexible( 
-        flex:2,
-        child: goals(context)
-      )
-    ],
     );
   }
-}
+  
 
-class TabletPathScreen extends StatelessWidget {
-  TabletPathScreen();
+  Widget showStageObjectives({bool blocked}){
+    
+    if(stageObjectives.length == 0){
+      //NO DEBERÍA DE HABER UN MÉTODO REFACTORIZAR 
+      stageObjectives = s.stobjectives.printObjectives();
+    }
 
-  UserState _userstate;
+    List<Widget> l = new List.empty(growable: true);
 
-  Widget porcentaje() {
-    return RadialProgress(
-      goalCompleted: 100.0,
-      progressColor: Colors.transparent,
-      progressBackgroundColor: Colors.grey,
-      child: Container(
-        padding: EdgeInsets.all(Configuration.blockSizeHorizontal * 1),
-        child: RadialProgress(
-          goalCompleted: _userstate.user.percentage/100,
-          progressColor: Configuration.maincolor,
-          progressBackgroundColor: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.all(80.0),
-            child: Text(
-              _userstate.user.percentage.toString() + '%',
-              style: Configuration.tabletText('small', Colors.black),
+    for(Map<String,IconData> objective in stageObjectives) {
+      l.add(
+        Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(Configuration.smpadding),
+            width: Configuration.width*0.2,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.grey)
+            ),
+            child: Icon(
+              objective.values.first
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget goals() {
-    return Container(
-      width: Configuration.width *0.45,
-      padding: EdgeInsets.all(32.0),
-      decoration: BoxDecoration(
-          color: Configuration.maincolor,
-          borderRadius: BorderRadius.circular(16)),
-      child: Table(
-        columnWidths: {0: FractionColumnWidth(0.3)},
-        children: [
-          TableRow(children:
-          [
-            Text('Goals ',
-              style: Configuration.tabletText('tiny', Colors.black),
-            ),
-            Text(_userstate.user.stage.goals,
-                style: Configuration.tabletText('tiny', Colors.white, font: 'Helvetica'))
-          ]),
-          TableRow(children: [
-            Text('Obstacles ',
-                style: Configuration.tabletText('tiny', Colors.black)),
-            Text(_userstate.user.stage.obstacles,
-                  style: Configuration.tabletText('tiny', Colors.white, font: 'Helvetica'))
-          ]),
-          TableRow(children: [
-            Text('Skills ',
-                style: Configuration.tabletText('tiny', Colors.black)),
-            Text(_userstate.user.stage.skills,
-            style: Configuration.tabletText('tiny', Colors.white, font: 'Helvetica'))
-          ]),
-          TableRow(children: [
-            Text('Mastery ',
-                style: Configuration.tabletText('tiny', Colors.black)),
-            Text(_userstate.user.stage.mastery,
-            style: Configuration.tabletText('tiny', Colors.white, font: 'Helvetica'),
-            overflow: TextOverflow.visible)
-          ]),
-        ],
-      ),
-    );
-  }
-
-  Widget data(dynamic value, dynamic valuestage, String text) {
-    return Column(
-      children: [
-        value >= valuestage
-            ? Icon(Icons.check_circle,
-                size: Configuration.medpadding, color: Configuration.maincolor)
-            : Text(
-                (value).toString() + '/' + (valuestage).toString(),
-                style: Configuration.text('tiny', Configuration.maincolor),
-              ),
-        SizedBox(height: Configuration.blockSizeVertical * 0.2),
-        Text(
-          text,
-          style: Configuration.text('tiny', Colors.black),
-          textAlign: TextAlign.center,
-        )
-      ],
-    );
-  }
-
-  Widget labels(){
-    return GridView.count(
-      crossAxisSpacing: 1,
-      crossAxisCount: 3,
-      physics: NeverScrollableScrollPhysics(),
-      children: _userstate.user.passedObjectives.keys.map((key) => 
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _userstate.user.passedObjectives[key] == true ? 
-            Icon(Icons.check_circle, size: Configuration.tinpadding, color: Configuration.maincolor):
-            Text(_userstate.user.passedObjectives[key], style:Configuration.tabletText('tiny',Configuration.maincolor)),
-            SizedBox(height: Configuration.blockSizeVertical * 0.1),
-            Text( key, style: Configuration.tabletText('tiny',Colors.black), textAlign: TextAlign.center)
-          ],)
-      ).toList()
+          SizedBox(height: Configuration.verticalspacing /2),
+          
+          Text(objective.keys.first,style: Configuration.text('small',blocked ? Colors.grey : Colors.black))
+        ])
       );
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children:  [
+        SizedBox(height: Configuration.verticalspacing),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: l.sublist(0,l.length >= 2 ? 2 : l.length),
+        ),
+        l.length > 3 ? 
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: l.sublist(3),
+        ): Container(),
+      ] 
+    );
+    
   }
 
   @override
   Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
-    return Container(
-      height: Configuration.height,
-      width: Configuration.width,
-      color: Configuration.lightgrey,
-      padding: EdgeInsets.all(32.0),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: Configuration.verticalspacing),
+          Container(
+          width: Configuration.width*0.6,
+          child: AspectRatio(
+            aspectRatio: 2/1,
+            child: Stack(
               children: [
-                Row(children: [
-                  Text('You are currently on ',style: Configuration.tabletText('tiny', Colors.black)),
-                  Text('Stage ' + _userstate.user.stagenumber.toString(),style: Configuration.tabletText('tiny', Configuration.maincolor))
-                ]),
-                Text(_userstate.user.stage.description, style: Configuration.tabletText('tiny',Colors.black), textAlign: TextAlign.center),
-                SizedBox(height: Configuration.height*0.05),
-                porcentaje(),
-                SizedBox(height: Configuration.height*0.1),
-                Container(height: Configuration.height*0.42,width: Configuration.width*0.35,  child:labels())
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: Configuration.width*0.5,
+                    height: Configuration.width*0.25,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+                    ),
+                  ),
+                ),
+
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(          
+                    height: Configuration.width*0.35,
+                    width: Configuration.width*0.4,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          height: 50,
+                          width: 100,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl: s.shortimage,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: Configuration.verticalspacing),
+                        Text('Stage ' + s.stagenumber.toString(),style: Configuration.text('smallmedium',Colors.black)),
+                        SizedBox(height: Configuration.verticalspacing),
+                        Text(s.description, style: Configuration.text('small',Colors.grey, font: 'Helvetica'),)
+                      ],
+                    ),
+                  ),
+                ),
+
+
+              
+
+              
               ],
             ),
-            goals()
-          ],
-        ),
+          ),
+        )
+        ,
+
+
+        showStageObjectives(
+          blocked: user.stagenumber < s.stagenumber  
+        )
+
+      ]
     );
   }
 }
-
 

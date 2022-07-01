@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/core/usecases/usecase.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/domain/usecases/user/log_out.dart';
-import 'package:meditation_app/domain/usecases/user/loginUser.dart';
 import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
@@ -308,6 +305,8 @@ abstract class _LoginState with Store {
   String _mapFailureToMessage(Failure failure) {
     // Instead of a regular 'if (failure is ServerFailure)...'
     switch (failure.runtimeType) {
+      case UserExistsFailure:
+        return 'User already exists';
       case ServerFailure:
         return 'Server failure';
       case CacheFailure:

@@ -195,6 +195,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                 icon: Icon(Icons.bug_report,  size: Configuration.smicon),
                 onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
               ),
+              /*
               _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
               Positioned(
                 top: 5,
@@ -207,6 +208,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                   ),
                   child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('small', Colors.white))
                 )) : Container()
+              */
             ],
           ),
           

@@ -8,6 +8,7 @@ import '../config/configuration.dart';
 
 Widget htmlToWidget(data, {color = Colors.black, double fontsize = 15.0}){
 
+  //  HAY QUE METERLE ESTILO AL TEXTO
   return Html(
     data: data,
     style: {

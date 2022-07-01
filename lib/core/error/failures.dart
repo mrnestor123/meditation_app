@@ -38,4 +38,8 @@ class ConnectionFailure extends Failure {
   ConnectionFailure({String error}): super(error:error);
 }
 
+class UserExistsFailure extends Failure {
+  UserExistsFailure({String error}): super(error:error);
+}
+
 

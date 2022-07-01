@@ -96,7 +96,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start, 
                   children: [
-                    texticon(Icons.timer, u.timemeditated)
+                    texticon(Icons.timer, u.timemeditated.isNotEmpty ? u.timemeditated : '0')
                   ]),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -252,8 +252,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           child: CircularProgress(),
                         ),
                       ) :
-                      Expanded(child: 
-                        TabBarView(
+                      Expanded(child: TabBarView(
                         physics: NeverScrollableScrollPhysics(),
                         controller: _tabController,
                         children: [
