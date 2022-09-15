@@ -7,28 +7,28 @@ import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
-void showAlertDialog({String title,String text, onYes, context, onNo}){
+void showAlertDialog({String title,String text, onYes, context, onNo, noPop = false}){
 
   showDialog(
     context: context, 
     builder: (_){
         return AbstractDialog(
           content: Container(
-            padding:EdgeInsets.all(Configuration.smpadding),
+            padding:EdgeInsets.all(Configuration.medpadding),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(Configuration.borderRadius),
               color:Colors.white
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 title != null ? 
-                Text(title,style: Configuration.text('small',Colors.black)) : Container(),
+                Text(title,style: Configuration.text('smallmedium',Colors.black)) : Container(),
                 SizedBox(height: Configuration.verticalspacing,),
                 text != null ? 
-                Text(text,style: Configuration.text('tiny',Colors.grey)): Container(),
+                Text(text,style: Configuration.text('small',Colors.grey,font:'Helvetica')): Container(),
                 SizedBox(height: Configuration.verticalspacing),
-                
                 BaseButton(
                   noelevation: true,
                   text: 'No',
@@ -49,7 +49,10 @@ void showAlertDialog({String title,String text, onYes, context, onNo}){
                     if(onYes != null){
                       onYes();
                     }
-                    Navigator.pop(context);Navigator.pop(context); 
+                    Navigator.pop(context);
+                    if(!noPop){
+                      Navigator.pop(context); 
+                    }
                   }, 
                   text: 'Yes'
                 )

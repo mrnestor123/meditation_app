@@ -8,12 +8,9 @@ dynamic stagesettings = [
 
 
 class UserSettings{
-
   List<String> allsettings = new List.empty(growable: true);
   MeditSettings meditSettings;
-
   String progression;
-
 
   UserSettings({this.meditSettings,this.progression});
 

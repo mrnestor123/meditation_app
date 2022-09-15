@@ -45,10 +45,16 @@ abstract class _ProfileState with Store {
       selected = u;
 
       foldResult(
+        //PORQUE NO LO COGEMOS YA EXPANDIDO ????????
         result: await repository.expandUser(u:selected),
         onSuccess: (r){
           selected = r;
           selected.checkStreak();
+
+          if(selected.isTeacher()){
+            selected.addedcontent.sort((a,b)=> a.stagenumber  - b.stagenumber);
+          }
+
           loading = false;
         }
       );

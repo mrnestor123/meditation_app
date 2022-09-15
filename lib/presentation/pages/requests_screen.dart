@@ -351,6 +351,8 @@ class _RequestsState extends State<Requests> {
   
   Widget notifications(){
     List<Notify> n = _userState.user.notifications;
+
+    n.sort((a,b)=> b.date.compareTo(a.date));
     for(Notify n in _userState.user.notifications){
       if(!n.seen){
         _requestState.viewNotification(n);
@@ -362,7 +364,7 @@ class _RequestsState extends State<Requests> {
         height: Configuration.height*0.5,
         width: Configuration.width,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(Configuration.borderRadius),
+          borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
           color: Colors.white,
         ),
         child: Column(
@@ -374,13 +376,13 @@ class _RequestsState extends State<Requests> {
               child: Container(
                 decoration:BoxDecoration(
                   color:Configuration.lightgrey,
-                  borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                  borderRadius: BorderRadius.circular(Configuration.borderRadius/4)
                 ),
                 child: ListView.separated(
+                  physics: ClampingScrollPhysics(),
                   itemBuilder: (context,index){
-                    return TextButton(
-                      onPressed: () {  
-                       /// _requestState.viewNotification(n[index]);
+                    return ListTile(
+                      onTap: () {  
                         _requestState.setRequest(cod:n[index].codrequest);
                         Navigator.push(context, 
                           MaterialPageRoute(builder: (context){
@@ -388,16 +390,10 @@ class _RequestsState extends State<Requests> {
                           })
                         );
                       },
-                      child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        child: Row(
-                          children: [
-                            Icon(n[index].getIcon(), size: Configuration.smicon, color: Colors.lightBlue),
-                            SizedBox(width:Configuration.verticalspacing),
-                            Expanded(child: Text(n[index].message,style: Configuration.text('small',Colors.black),))
-                          ],
-                        ),
-                      ),
+                      leading:Icon(n[index].getIcon(), size: Configuration.smicon, color: Colors.lightBlue),
+                      title: Text(n[index].message,style: Configuration.text('small',Colors.black,font:'Helvetica')),
+                      subtitle: Text(datetoString(n[index].date),style: Configuration.text('small',Colors.grey,font:'Helvetica')),
+                      
                     );
                   }, 
                   separatorBuilder: (context,index){
@@ -420,7 +416,6 @@ class _RequestsState extends State<Requests> {
       appBar: AppBar(
         leading: ButtonBack(),
         actions: [
-          /*
           Stack(
             children:[
               IconButton(
@@ -451,7 +446,7 @@ class _RequestsState extends State<Requests> {
                 )
               ) : Container()
             ]
-          )*/
+          )
         ],
         backgroundColor: Colors.transparent,
         elevation: 0.0,
@@ -581,18 +576,17 @@ class _RequestViewState extends State<RequestView> {
             onTap: (){
               showUserProfile(usercod: comment.coduser);
             },
-            child: Row(
-              children: [
-                ProfileCircle(
-                  userImage: comment.userimage, 
-                  width: 25
-                ),
-                SizedBox(width:Configuration.verticalspacing),
-                Expanded(child: Text(comment.username != null ? comment.username : 'Guest',style: Configuration.text('small',Colors.black),))
-              ],
-            ),
+            child: ListTile(
+              contentPadding: EdgeInsets.all(0),
+              leading: ProfileCircle(
+                userImage: comment.userimage, 
+                width: 25
+              ),
+              minLeadingWidth: 25,
+              title: Text(comment.username != null ? comment.username : 'Guest',style: Configuration.text('small',Colors.black)),
+              subtitle: Text(comment.date != null ? datetoString(comment.date): '',style: Configuration.text('small',Colors.grey,font: 'Helvetica')),
+             ),
           ),
-          SizedBox(height: 10),
           Text(comment.comment != null ? comment.comment :'xx'),
         ],
       ),
@@ -652,8 +646,7 @@ class _RequestViewState extends State<RequestView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Center(child: CircularProgressIndicator(color: Configuration.maincolor,)),
-              ],
-            );
+              ]);
           }else return ListView(
             physics:ClampingScrollPhysics(),
             children: [

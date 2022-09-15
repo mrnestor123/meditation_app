@@ -9,16 +9,17 @@ class BaseButton extends StatelessWidget {
   bool justpressed = false;
   bool margin;
   Color color;
-  Color textcolor;
+  Color textcolor,  bordercolor;
   bool noelevation, border;
   double aspectRatio;
+  double width;
 
-  BaseButton({this.onPressed, this.text,this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
+  BaseButton({this.onPressed, this.text,this.bordercolor, this.width, this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
   
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: Configuration.width*0.9,
+      width: width !=  null ?  width: Configuration.width*0.9,
       margin: EdgeInsets.only(bottom: margin ? Configuration.verticalspacing * 1.5 : 0),
       child: AspectRatio(
         aspectRatio:aspectRatio != null ? aspectRatio: Configuration.buttonRatio,
@@ -34,7 +35,7 @@ class BaseButton extends StatelessWidget {
           elevation: noelevation ? 0.0 : 2.0,
           primary: color != null ? color: Configuration.maincolor,
           shape: RoundedRectangleBorder(
-            side:border ? BorderSide(color:Colors.grey) :  BorderSide.none ,
+            side:border ? BorderSide(color: bordercolor != null  ? bordercolor :Colors.grey) :  BorderSide.none ,
             borderRadius: BorderRadius.circular(Configuration.borderRadius)
           )
         ),

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -157,6 +158,13 @@ abstract class _UserState with Store {
     return repository.updateUser(user: u != null ? u : user);
   }
 
+
+  Future finishRecording(Content c, Duration done, Duration total) async{
+    if(user.finishRecording(c, done, total)){
+      repository.updateUser(user: user, toAdd: [c],type: 'recording');
+    }
+  }
+
   //UTILIZAR UPLOADIMAGE EN ESTE!!
   @action 
   Future changeImage(dynamic image) async {
@@ -167,8 +175,6 @@ abstract class _UserState with Store {
     user.setImage(imgString);
 
     foldResult(result: await repository.updateUserProfile(u:user, image: imgString));
-
-    
   }
 
   @action 
@@ -243,7 +249,7 @@ abstract class _UserState with Store {
   }
 
   Future uploadContent({Content c}) async{
-    c.createdBy = user;
+    //c.createdBy = user;
     
     user.uploadContent(c:c);
     Either<Failure,void> upload = await repository.uploadContent(c:c);
@@ -309,4 +315,21 @@ abstract class _UserState with Store {
     return repository.updateUser(user:user);
   }
 
+  @action
+  Future finishMeditation({Meditation m}) async {
+    user.takeMeditation(m, data);
+
+    uploadActions(user, repository);
+
+    //HAY QUE HACER UN FOLD CON ESTO !!!
+    repository.updateUser(user: user,d:data, toAdd: [m],type: 'meditate');
+
+    AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
+    assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
+  }
+
+  @action 
+  Future closeStageUpdate(){
+    user.stageupdated = false;
+  }
 }

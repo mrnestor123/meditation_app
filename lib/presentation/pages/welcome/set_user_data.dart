@@ -45,19 +45,29 @@ class _SetUserDataState extends State<SetUserData> {
               textcolor: Colors.black,
               color: Colors.white,
               onPressed:() async{
-                    //PPORQUE HAGO GETDATA AQUI????
-                    if(_nameController.text !=null &&  _nameController.text.isNotEmpty){
-                      if(_userstate.user == null && _loginstate.loggeduser !=null || _userstate.user != null && _loginstate.loggeduser!=null && _loginstate.loggeduser.coduser != _userstate.user.coduser){
-                        _userstate.setUser(_loginstate.loggeduser);
-                      }
-                      _userstate.changeName(_nameController.text);
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => CarrouselIntro()),
-                        (Route<dynamic> route) => false,
-                      );
-                    }
-                  },
+                //PPORQUE HAGO GETDATA AQUI????
+                if(_nameController.text !=null &&  _nameController.text.isNotEmpty){
+                  if(_userstate.user == null && _loginstate.loggeduser !=null || _userstate.user != null && _loginstate.loggeduser!=null && _loginstate.loggeduser.coduser != _userstate.user.coduser){
+                    _userstate.setUser(_loginstate.loggeduser);
+                  }
+                  
+                  _userstate.changeName(_nameController.text);
+
+                  if(_userstate.user.seenIntroCarousel != null && !_userstate.user.seenIntroCarousel){
+                     Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => Layout()),
+                      (Route<dynamic> route) => false,
+                    );
+                  }else{
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => CarrouselIntro()),
+                      (Route<dynamic> route) => false,
+                    );
+                  }
+                }
+              },
             ),
           ],
         ),

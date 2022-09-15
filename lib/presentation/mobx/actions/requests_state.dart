@@ -90,7 +90,7 @@ abstract class _RequestState with Store {
     }else if(comment != null){
       c = new Comment(
         codrequest: r.cod,
-        comment: comment,
+        comment: comment, date: DateTime.now(),
         username: user.nombre, userimage: user.image, coduser: user.coduser, user:user);
       r.comment(c);
     }
@@ -171,17 +171,40 @@ abstract class _RequestState with Store {
 
   @action
   Future setRequest({String cod,Request r})async {
-
     if(cod != null){
       gettingrequests = true;
       Either<Failure,Request> either = await repository.getRequest(cod);
       //HACER ALGO CON EL ERROR
-      either.fold(
-        (l) => null, 
-        (r) { 
+      foldResult(
+        result: either,
+        onSuccess:(r) { 
           if(r.cod != null && r.title != null){
             gettingrequests = false;
+            if(r.comments.length > 0){
+              r.comments.sort((Comment a,Comment b){
+                if(a.date == null && b.date == null){
+                  return 0;
+                }else if(a.date == null){
+                  return -1;
+                }else if(b.date == null){
+                  return 1;
+                }else {
+                  return a.date.compareTo(b.date);
+                }
+              });
+            }
             selectedrequest = r;
+
+            if(user.notifications !=  null &&  user.notifications.length >  0){
+
+              List <Notify> notifications = user.notifications.where((element) => element.codrequest == cod).toList();
+
+              for(Notify not in notifications){
+                if(!not.seen){
+                  viewNotification(not);
+                }
+              }
+            }
           }
         }
       );

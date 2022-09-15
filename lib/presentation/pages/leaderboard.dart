@@ -48,7 +48,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
 
     if(list.length == 0){
       return Center(
-        child: Text('You are not following any users',
+        child: Text('No users were found',
           style: Configuration.text('small', Colors.black),
         ),
       );
@@ -60,31 +60,30 @@ class _LeaderBoardState extends State<LeaderBoard> {
             child: Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             columnWidths: {
-              0:FractionColumnWidth(0.12),
+              0:FractionColumnWidth(0.1),
               1:FractionColumnWidth(0.15),
-              2:FractionColumnWidth(0.4),
+              2:FractionColumnWidth(0.5),
               3:FractionColumnWidth(0.2),
-              4:FractionColumnWidth(0.13)
             },
-            children:   list.map((u) => 
+            children: list.map((u) => 
             TableRow(
               children: [
                 Container(
-                padding: EdgeInsets.symmetric(
+                  padding: EdgeInsets.symmetric(
                     vertical: Configuration.smpadding,
                     horizontal: Configuration.tinpadding),
-                child: Text(
-                  (++count).toString(),
-                  style: Configuration.text('small', Colors.black),
-                  textAlign: TextAlign.center,
-                ),
-                ),
+                  child: Text(
+                    (++count).toString(),
+                    style: Configuration.text('small', Colors.black),
+                    textAlign: TextAlign.center,
+                )),
 
                 ProfileCircle(
                   key:Key(u.coduser),
                   width: 30,
                   userImage: u.image,
                 ),
+
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -93,11 +92,13 @@ class _LeaderBoardState extends State<LeaderBoard> {
                     Text('Stage ' + u.stagenumber.toString(),style: Configuration.text('verytiny', Colors.grey, font: 'Helvetica'))
                   ],
                 ),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start, 
                   children: [
                     texticon(Icons.timer, u.timemeditated.isNotEmpty ? u.timemeditated : '0')
                   ]),
+                  /*
                 Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -115,7 +116,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                           },
                         ) :  Container(),
                     ],
-                  )
+                  )*/
               ]
             )).toList()
           ),
@@ -158,114 +159,106 @@ class _LeaderBoardState extends State<LeaderBoard> {
         leading: ButtonBack(color: Colors.white),
         title: Text('Leaderboard', style: Configuration.text('big', Colors.white)),
       ),
-      body: DefaultTabController(
-        length: 2,
-        initialIndex: 0,
-        child: Container(
-          height: Configuration.height,
-          width: Configuration.width,
-          child: Column(children: [
-            Flexible(
-              flex: 2,
-                child: Container(
-                width: Configuration.width,
-                color: Configuration.maincolor,
-                child: Observer(
-                  builder: (context) {
-                    return !_userstate.loading && _userstate.users.length > 0 ? 
-                     Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.users[1], large: false, position: 2,)),
-                        Align(child: UserProfile(user:_userstate.users[0], large: true, position: 1,)),
-                        Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.users[2], large:false, position: 3))
-                      ],
-                    ): Container();
-                  }
-                ) ,
-              ),
-            ),
-            Flexible(
-              flex: 4,
-              child: Column(children: [
-                Container(
-                  decoration: BoxDecoration(color: Configuration.lightgrey),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      body: Container(
+        height: Configuration.height,
+        width: Configuration.width,
+        child: Column(children: [
+          Flexible(
+            flex: 2,
+              child: Container(
+              width: Configuration.width,
+              color: Configuration.maincolor,
+              child: Observer(
+                builder: (context) {
+                  return !_userstate.loading && _userstate.users.length > 0 ? 
+                   Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Container(
-                      width: Configuration.width*0.85,
-                      child: searching 
-                      ? TextField(
-                            onChanged: (string) {
-                              setState(() {
-                                _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
-                              });
-                            },
-                            controller: _searchController,
-                            style: Configuration.text('small',Colors.black),
-                            decoration: InputDecoration(
-                              constraints: BoxConstraints.expand(height:Configuration.height*0.05),
-                              hintText: 'Username',
-                              border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
-                            ),
-                      )
-                      : TabBar(
-                         // labelPadding:   EdgeInsets.all(Configuration.width > 500 ? Configuration.smpadding : 2),
-                          controller: _tabController,
-                          indicatorSize: TabBarIndicatorSize.label,
-                          indicatorWeight: Configuration.width > 500 ? 5 : 2.5 ,
-                          indicatorColor: Configuration.maincolor,
-                          tabs: [
-                            Tab(
-                                child: Text('All users',style: Configuration.text('small', Colors.black))),
-                           
-                            Tab(
-                              child: Text('Following', style:Configuration.text('small', Colors.black)),
-                            ),
-                          ]),
-                      ),
-                      Container( 
-                        width: Configuration.width *0.1,
-                        child: IconButton(
-                          iconSize: Configuration.smicon,
-                          icon: Icon(searching ? Icons.close : Icons.search), 
-                          onPressed: () => 
-                          setState(() { 
-                            if(searching){
-                              _userstate.filteredusers = _userstate.users;
-                            }
-                              searching = !searching; 
-                              _searchController.clear(); 
-                              condition = true; 
-                            })
-                          )
-                        )
+                      Positioned(bottom: 10, left: 45, child: UserProfile(user: _userstate.users[1], large: false, position: 2,)),
+                      Align(child: UserProfile(user:_userstate.users[0], large: true, position: 1,)),
+                      Positioned(bottom: 10, right: 45 , child: UserProfile(user: _userstate.users[2], large:false, position: 3))
                     ],
-                  ),
-                ),
-                Observer(
-                  builder: (context) {
-                    return  _userstate.loading ? 
-                      Expanded(
-                        child: Center(
-                          child: CircularProgress(),
-                        ),
-                      ) :
-                      Expanded(child: TabBarView(
-                        physics: NeverScrollableScrollPhysics(),
+                  ): Container();
+                }
+              ) ,
+            ),
+          ),
+          Flexible(
+            flex: 4,
+            child: Column(children: [
+              Container(
+                decoration: BoxDecoration(color: Configuration.lightgrey),
+                padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                    child: searching 
+                    ? TextField(
+                          onChanged: (string) {
+                            setState(() {
+                              _userstate.filteredusers = _userstate.users.where((element) => element.nombre != null && element.nombre.contains(string)).toList();
+                            });
+                          },
+                          controller: _searchController,
+                          style: Configuration.text('small',Colors.black),
+                          decoration: InputDecoration(
+                            constraints: BoxConstraints.expand(height:Configuration.height*0.05),
+                            hintText: 'Username',
+                            border: UnderlineInputBorder(borderSide: BorderSide(color: Configuration.maincolor, width: 3.0))
+                          ),
+                    )
+                    : Text('All users',style: Configuration.text('small', Colors.black))
+                      /*
+                    TabBar(
+                       // labelPadding:   EdgeInsets.all(Configuration.width > 500 ? Configuration.smpadding : 2),
                         controller: _tabController,
-                        children: [
-                          createTable(_userstate.filteredusers, context,false),
-                          createTable(_userstate.user.following, context, true),
-                        ])
-                      );
-                  }
-                )
-              ]),
-            )
-          ]),
-        ),
+                        indicatorSize: TabBarIndicatorSize.label,
+                        indicatorWeight: Configuration.width > 500 ? 5 : 2.5 ,
+                        indicatorColor: Configuration.maincolor,
+                        tabs: [
+                          Tab(
+                            child: 
+                          ),
+                          Tab(
+                            child: Text('Following', style:Configuration.text('small', Colors.black)),
+                          ),
+                        ]),
+                      */
+                    ),
+                    IconButton(
+                      iconSize: Configuration.smicon,
+                      icon: Icon(searching ? Icons.close : Icons.search), 
+                      onPressed: () => 
+                      setState(() { 
+                        if(searching){
+                          _userstate.filteredusers = _userstate.users;
+                        }
+                        searching = !searching; 
+                        _searchController.clear(); 
+                        condition = true; 
+                        })
+                      )
+                  ],
+                ),
+              ),
+              Observer(
+                builder: (context) {
+                  return  _userstate.loading ? 
+                    Expanded(
+                      child: Center(
+                        child: CircularProgress(),
+                      ),
+                    ) :
+                    Expanded(child: 
+                      createTable(_userstate.filteredusers, context,false),
+                      // createTable(_userstate.user.following, context, true),
+                    );
+                }
+              )
+            ]),
+          )
+        ]),
       ),
     );
   }

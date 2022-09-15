@@ -69,7 +69,16 @@ class StageModel extends Stage {
         }
         
         if(json['games'] != null){
+          
           s.setGames(json['games'].map((g) => new GameModel.fromJson(g)).toList());
+        }
+
+        if(json['videos'] != null){
+          if(json['videos'].length > 0){
+            for(var video in json['videos']){
+              s.addVideo(Content.fromJson(video));
+            }
+          }
         }
 
     return s;

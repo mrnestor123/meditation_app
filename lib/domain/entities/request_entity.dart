@@ -56,10 +56,13 @@ class Request {
     this.coduser = json['coduser'];
     this.userimage = json['userimage'];
     this.state = json['state'];
-    this.date = json['date'] == null ? DateTime.now().subtract(Duration(days: 30))  : DateTime.parse(json["date"]).toLocal();
+    this.date = json['date'] == null ? DateTime.now().subtract(Duration(days: 30)): 
+      json['date']  is String ? DateTime.parse(json["date"]).toLocal() :
+      DateTime.fromMillisecondsSinceEpoch(json['date']).toLocal();
+
+
     //ESTO SE PUEDE HACER EN OTROS SITIOS
     if (json['comments'] != null) {
-     
       json['comments'].forEach((v) {
         if(v['username'] != null){
           this.comments.add(new Comment.fromJson(v));
@@ -203,8 +206,6 @@ class Request {
     this.comments.add(c);
 
     this.shortcomments.add(c.cod);
-    
-   // this.comentaries++;
   }
 }
 
@@ -214,15 +215,15 @@ class Comment{
   String coduser;
   String userimage, cod, codrequest;
   User user;
+  DateTime date;
 
-  Comment({this.cod,this.comment, this.username, this.coduser, this.userimage, this.user,this.codrequest}){
+  Comment({this.cod,this.comment, this.username, this.coduser, this.userimage, this.user,this.codrequest,this.date}){
     if (cod == null) {
       this.cod = Uuid().v1();
     } else {
       this.cod = cod;
     }
   }
-
 
   Comment.fromJson(Map<String, dynamic> json) {
     this.cod = json['cod'];
@@ -231,6 +232,7 @@ class Comment{
     this.coduser = json['coduser'];
     this.userimage = json['userimage'];
     this.codrequest = json['codrequest'];
+    this.date = json['date'] != null ? json['date'] is String ? DateTime.parse(json['date']).toLocal() : DateTime.fromMillisecondsSinceEpoch(json['date'])  : null;
     this.user = json['user'] != null ? UserModel.fromJson(json['user']) : null;
   }
 
@@ -242,6 +244,8 @@ class Comment{
     data['codrequest'] = this.codrequest;
     data['coduser'] = this.coduser;
     data['cod'] = this.cod;
+    data['date'] = this.date.millisecondsSinceEpoch;
+
     return data;
   }
 }

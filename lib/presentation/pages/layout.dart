@@ -7,12 +7,14 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/progress_dialog.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/path_screen.dart';
+import 'package:meditation_app/presentation/pages/recordings_screen.dart';
 import 'package:meditation_app/presentation/pages/teachers_screen.dart';
 
 import 'package:provider/provider.dart';
@@ -82,7 +84,6 @@ class _MobileLayoutState extends State<MobileLayout> {
     Widget chiporText(String text, bool chip, int page){
       Widget g;
 
-      var types = {'Guided':'guided','Free':'free','Games':'games'};
 
       if (chip){
         g = Chip(
@@ -108,18 +109,21 @@ class _MobileLayoutState extends State<MobileLayout> {
       );
     }
 
-
     List<BottomNavigationBarItem> bottomItems(){
-
       return [
         BottomNavigationBarItem(
           icon: Icon(Icons.home,size: Configuration.smicon),
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.book,size: Configuration.smicon),
-          label: 'Learn',
+          icon: Icon(Icons.self_improvement,size: Configuration.smicon),
+          label: 'Stages',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.record_voice_over,size: Configuration.smicon),
+          label: 'Recordings',
+        ),
+        /*
         BottomNavigationBarItem(
           icon: Icon(Icons.self_improvement,size: Configuration.smicon),
           label:'Practice'
@@ -127,168 +131,201 @@ class _MobileLayoutState extends State<MobileLayout> {
         BottomNavigationBarItem(
           icon: Icon(Icons.terrain,size: Configuration.smicon),
           label: 'Path',
+        ),*/
+        BottomNavigationBarItem(
+          label: 'Timer',
+          icon: Icon(Icons.timer, size: Configuration.smicon),
         )
       ];
     }
 
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      extendBodyBehindAppBar: false,
-      appBar: AppBar(
-        elevation: 0.0,
-        toolbarHeight: Configuration.width > 500 ? 80 : 50,
-        backgroundColor: Configuration.white,
-        bottom: PreferredSize(
-            child: currentindex == 2 ?
-              Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // HACEN FALTA 3 OBSERVERS ???
-                      Observer(builder: (BuildContext context) {  
-                        return chiporText('Free', _meditationstate.currentpage == 0, 0);
-                      }),
-
-                      Observer(builder: (BuildContext context) {  
-                        return chiporText('Guided', _meditationstate.currentpage == 1, 1);
-                      }),
-
-                      Observer(builder: (BuildContext context) {  
-                        return chiporText('Games', _meditationstate.currentpage == 2, 2);
-                      }),
-                    ],
+      body: Stack(
+        children: [
+          Scaffold(
+            resizeToAvoidBottomInset: false,
+            extendBodyBehindAppBar: false,
+            appBar: AppBar(
+              elevation: 0.0,
+              toolbarHeight: Configuration.width > 500 ? 80 : 50,
+              backgroundColor: Configuration.white,
+              bottom: PreferredSize(
+                  child: currentindex == 3 ?
+                    Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // HACEN FALTA 3 OBSERVERS ???
+                            Observer(builder: (BuildContext context) {  
+                              return chiporText('Timer', _meditationstate.currentpage == 0, 0);
+                            }),
+    
+                            /*
+                            Observer(builder: (BuildContext context) {  
+                              return chiporText('Guided', _meditationstate.currentpage == 1, 1);
+                            }),
+                            */
+    
+                            Observer(builder: (BuildContext context) {  
+                              return chiporText('Games', _meditationstate.currentpage == 1, 1);
+                            }),
+                          ],
+                        ),
+                        SizedBox(height: Configuration.verticalspacing/2),
+                        Container(
+                          color: Colors.grey,
+                          height: 1.0,
+                        )
+                      ]
+                    ) :
+                    Container(
+                      color: Colors.grey,
+                      height: 1.0,
+                    ),
+                  preferredSize: //Size.fromHeight(4.0)
+                  currentindex == 3 ? Size.fromHeight(60) : Size.fromHeight(4.0)
                   ),
-                  SizedBox(height: Configuration.verticalspacing/2),
-                  Container(
-                    color: Colors.grey,
-                    height: 1.0,
-                  )
-                ],
-              ):
-              Container(
-                color: Colors.grey,
-                height: 1.0,
+              leadingWidth: Configuration.width > 500 ? 90 : 50,
+              leading: GestureDetector(
+                onTap: (){
+                  this._c.jumpToPage(0);
+                },
+                child: Container(
+                  child: Image.asset('assets/logo-no-text.png')
+                ),
               ),
-            preferredSize: 
-            currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
-            ),
-        leadingWidth: Configuration.width > 500 ? 90 : 50,
-        leading: GestureDetector(
-          onTap: (){
-            this._c.jumpToPage(0);
-          },
-          child: Container(
-            child: Image.asset('assets/logo-no-text.png')
-          ),
-        ),
-        automaticallyImplyLeading: false,
-        actions: [
-          MessagesIcon(),
-          SizedBox(width: Configuration.verticalspacing),
-          Stack(
-            alignment:Alignment.center,
-            children: [
-              IconButton(
-                color: Colors.black,
-                icon: Icon(Icons.bug_report,  size: Configuration.smicon),
-                onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
-              ),
-              /*
-              _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
-              Positioned(
-                top: 5,
-                right: 5,
-                child:  Container(
-                  padding: EdgeInsets.all(5.0),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.red
+              automaticallyImplyLeading: false,
+              actions: [
+                //MessagesIcon(),
+                SizedBox(width: Configuration.verticalspacing),
+                Stack(
+                  alignment:Alignment.center,
+                  children: [
+                    IconButton(
+                      color: Colors.black,
+                      icon: Icon(Icons.bug_report,  size: Configuration.smicon),
+                      onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
+                    ),
+                    
+                    _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
+                    Positioned(
+                      top: 2,
+                      right: 5,
+                      child:  Container(
+                        padding: EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.red
+                        ),
+                        child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('tiny', Colors.white))
+                    )) : Container()
+                    
+                  ],
+                ),
+                
+                SizedBox(width: Configuration.verticalspacing),
+              
+                Container(
+                  margin:EdgeInsets.only(
+                    right: Configuration.width > 500 ? Configuration.tinpadding : 0,
+                    top: 2,
+                    bottom: 2
                   ),
-                  child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('small', Colors.white))
-                )) : Container()
-              */
-            ],
-          ),
-          
-          SizedBox(width: Configuration.verticalspacing),
-        
-          Container(
-            margin:EdgeInsets.only(
-              right: Configuration.width > 500 ? Configuration.tinpadding : 0,
-              top: 2,
-              bottom: 2
-            ),
-            child: ProfileCircle(
-              userImage: _userstate.user.image, 
-              onTap: ()=>  Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: Colors.grey, width: 0.5))
-        ),
-        child: BottomNavigationBar(
-          elevation: 2.0,
-          selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
-          unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
-          unselectedItemColor: Colors.black,
-          type: BottomNavigationBarType.fixed,
-          items: 
-          _userstate.user.isTeacher() ? 
-            bottomItems() + [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.school,size: Configuration.smicon),
-              label: 'Teacher',
-            )] : bottomItems()
-          ,
-          currentIndex: currentindex,
-          selectedItemColor: Configuration.maincolor,
-          onTap: (int index) {
-            {
-              this._c.jumpToPage(index);
-            }
-          },
-        ),
-      ),
-      body: WillPopScope(
-        onWillPop:(){
-          print('onpop');
-          DateTime now = DateTime.now();
-          if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 5)) {
-            currentBackPressTime = now;
-             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  behavior: SnackBarBehavior.fixed,
-                  content: Container(
-                    padding: EdgeInsets.all(12.0),
-                    child: Text('Press back two times to exit the app', style: Configuration.text('small', Colors.white))
+                  child: ProfileCircle(
+                    userImage: _userstate.user.image, 
+                    onTap: ()=>  Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
                   ),
                 ),
-              );
-            return Future.value(false);
-          }
-          return Future.value(true);
-        },
-        child: Container(
-          padding: EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
-          color: Configuration.lightgrey,
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _c,
-
-            onPageChanged: (newPage) {
-              setState(() {
-                currentindex = newPage;
-              });
-            },
-            children: [MainScreen(), LearnScreen(), MeditationScreen(), PathScreen(), TeachersManagement()],
+              ],
+            ),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(top: BorderSide(color: Colors.grey, width: 0.5))
+              ),
+              child: BottomNavigationBar(
+                elevation: 2.0,
+                selectedLabelStyle: Configuration.text("verytiny", Configuration.maincolor),
+                unselectedLabelStyle: Configuration.text("verytiny", Colors.grey),
+                unselectedItemColor: Colors.black,
+                type: BottomNavigationBarType.fixed,
+                items:bottomItems()
+                /* 
+                _userstate.user.isTeacher() ? 
+                  bottomItems() + [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.school,size: Configuration.smicon),
+                    label: 'Teacher',
+                  )] 
+                  : */
+                ,
+                currentIndex: currentindex,
+                selectedItemColor: Configuration.maincolor,
+                onTap: (int index) {
+                  {
+                    this._c.jumpToPage(index);
+                  }
+                },
+              ),
+            ),
+            body: WillPopScope(
+              onWillPop:(){
+                print('onpop');
+                DateTime now = DateTime.now();
+                if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 5)) {
+                  currentBackPressTime = now;
+                   ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.fixed,
+                        content: Container(
+                          padding: EdgeInsets.all(12.0),
+                          child: Text('Press back two times to exit the app', style: Configuration.text('small', Colors.white))
+                        ),
+                      ),
+                    );
+                  return Future.value(false);
+                }
+                return Future.value(true);
+              },
+              child: Container(
+                padding: currentindex == 0 ? EdgeInsets.only(top:0):EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
+                color: Configuration.lightgrey,
+                child: PageView(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: _c,
+                  onPageChanged: (newPage) {
+                    setState(() {
+                      currentindex = newPage;
+                    });
+                  },
+                  children: [MainScreen(), LearnScreen(), RecordingsScreen(),  MeditationScreen(), TeachersManagement()],
+    
+                  //MeditationScreen()
+                ),
+              ),
+            ),
           ),
-        ),
+
+          /*
+          HAY QUE HACER QUE ESTO APAREZCA EN EL MOMENTO EN QUE SE SUBE DE ETAPA !!!
+          Observer(builder: (context){
+            bool showModal = _userstate.user.stageupdated != null && _userstate.user.stageupdated;
+
+              return Positioned.fill(
+                child: AnimatedOpacity(duration: Duration(seconds: 1),
+                opacity: showModal ?  1: 0,
+                child: showModal ? stageUpdated(
+                  s:_userstate.user.stage, 
+                  userstate:_userstate,
+                  close:(){
+                    setState(() {});
+                  }
+                ):Container())
+              );
+            })*/
+        ],
       ),
     );
   }

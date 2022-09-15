@@ -9,6 +9,7 @@ import 'package:meditation_app/domain/repositories/user_repository.dart';
 
 import '../../entities/action_entity.dart';
 
+
 class MeditateUseCase extends UseCase<User, Params> {
   MeditationRepository repository;
   UserRepository userRepository;

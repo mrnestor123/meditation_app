@@ -36,6 +36,9 @@ class User {
   //estadísticas
   UserStats userStats;
 
+  // ESTO QUE ES ????
+  DateTime meditationTime;
+
   List<User> students = new List.empty(growable: true);
   List<Content> addedcontent =  new List.empty(growable:true);
 
@@ -60,6 +63,13 @@ class User {
 
   List<File> files = new List.empty(growable:true);
 
+
+  //AGRUPAR TODO EL CONTENIDO EN UNA LISTA
+  List<Content> contentDone =  new List.empty(growable:true);
+
+
+  TeacherSettings teacherSettings ;
+
   //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
@@ -69,59 +79,56 @@ class User {
   //HACE FALTA ESTO ???
   Map<dynamic,dynamic> answeredquestions = new Map();
   
-
   User({this.coduser, this.nombre, this.user, this.position = 0, 
         this.image, this.stagenumber = 1,this.stage, 
         this.role,this.meditposition= 0,this.userStats, this.followed,
         this.answeredquestions ,this.gameposition = 0, this.settings, this.version = 0,
-        this.stagelessonsnumber = 1, this.unreadmessages,
+        this.stagelessonsnumber = 1, this.unreadmessages, this.meditationTime,
         this.website,this.teachinghours,this.location,this.description, this.seenIntroCarousel = false
         }) {
           
-    if(userStats != null){
-      getTimeMeditatedString();
-    }
+      if(userStats != null){
+        getTimeMeditatedString();
+      }
 
-    if(unreadmessages == null){
-      this.unreadmessages = new List.empty(growable: true);
-    }
+      if(unreadmessages == null){
+        this.unreadmessages = new List.empty(growable: true);
+      }
+          
+      if (coduser == null) {
+        var uuid = Uuid();
+        this.coduser = uuid.v1();
+      } else {
+        this.coduser = coduser;
+      }
+
+      if(answeredquestions == null){
+        answeredquestions = new Map();
+      }
+
+      if(settings == null){
+        settings = UserSettings.empty();
+      }
+
+      if(userStats == null){
+        userStats = UserStats.empty();
+      }
         
-    if (coduser == null) {
-      var uuid = Uuid();
-      this.coduser = uuid.v1();
-    } else {
-      this.coduser = coduser;
-    }
-
-    if(answeredquestions == null){
-      answeredquestions = new Map();
-    }
-
-    if(settings == null){
-      settings = UserSettings.empty();
-    }
-
-    if(userStats == null){
-      userStats = UserStats.empty();
-    }
-      
-    // SE EJECUTA SIEMPRE
-    inituser();
+      // SE EJECUTA SIEMPRE
+      inituser();
   }
 
   void checkStreak(){
+      print(DateTime(2022,1,32));
      if(this.userStats != null && this.userStats.streak > 0 && this.userStats.lastmeditated != null){
-      print('CHECKING streak');
-      var lastmeditated = DateTime.parse(this.userStats.lastmeditated);
       var today = DateTime.now();
-      print(lastmeditated.toIso8601String());
-      if(lastmeditated.month != today.month || lastmeditated.day != today.day || lastmeditated.day != today.subtract(Duration(days: 1)).day){
-        print('CHANGING STREAK');
+      var lastday = DateTime(this.userStats.lastmeditated.year,this.userStats.lastmeditated.month,this.userStats.lastmeditated.day+1);
+
+      if(this.userStats.lastmeditated.day != today.day && lastday.day != today.day){
         this.userStats.streak = 0;
       }
     } 
   }
-
 
   //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
   void inituser() {
@@ -169,7 +176,20 @@ class User {
   }
 
   bool isStageBlocked(Stage s){
-    return !settings.unlocksLesson() && this.stagelessonsnumber < s.stagenumber;
+    return !settings.unlocksLesson() && (this.stagelessonsnumber < s.stagenumber && this.stagenumber < s.stagenumber);
+  }
+
+  // UNIFICAR
+  bool isContentBlocked(Content c){
+    if(this.isAdmin() || this.isTeacher()){
+      return false;
+    }else if(c.isMeditation()){
+      return isBlocked(c);
+    }else if(c.isVideo()) {
+      return false;
+    }else{
+      return isLessonBlocked(c);
+    }
   }
 
   bool isAdmin(){
@@ -179,6 +199,7 @@ class User {
   bool isTeacher(){
     return this.role =='teacher';
   }
+  
 
   void setVersion(int version) => this.version = version;
   void setImage(String image) => this.image = image;
@@ -315,6 +336,7 @@ class User {
 
 
   //CAMBIAR LOS MAPS A CLASES !!!!
+  // HACER ESTO MÁS SENCILLO !!!
   void setPercentage() {
     Stage s = this.stage;
 
@@ -440,8 +462,10 @@ class User {
 
   void getTimeMeditatedString(){
     var time = this.userStats.total.timemeditated;
+  
 
-    int hours = time ~/ 60;
+    int hours = time ~/ 60; 
+
 
     if(hours > 24){
       int days = hours ~/ 24;
@@ -456,7 +480,7 @@ class User {
         timemeditated = days.toString() + 'd ' + remaininghours.toString() + 'h';
       }
     }else{
-      if(hours > 1){
+      if(hours >= 1){
         timemeditated = hours.toString() + 'h';
       }else{
         int minutes = time % 60;
@@ -465,21 +489,38 @@ class User {
     }
   }
 
+
+  // cambiar content por recording !!
+  bool finishRecording(Content c, Duration done, Duration totalDuration){
+    int index = this.contentDone.indexWhere((element) => element.cod == c.cod);
+    
+    if(index == -1){
+      c.done = done;
+      c.doneBy = this.coduser;
+      contentDone.add(c);
+      return true;
+    }else{
+      if(contentDone[index].done != null && contentDone[index].done.inMinutes  < done.inMinutes){
+        c.done = done;
+        contentDone[index] = c;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
 
-    // HAY QUE QUITAR ESTO DE AQUI !!!
-    if(m.day == null){
-      m.day = DateTime.now();
-    }
-
+    // HAY  QUE RESTARLE EL TIEMPO DE CADA MEDITACIÓN
+    m.day = DateTime.now();
+    
     if (m.title == null) {
-      this.totalMeditations.add(m);
-      if (
-        this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes &&
-        this.userStats.stage.timemeditations <   this.stage.stobjectives.meditationcount
-        ) {
+      if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes &&
+        this.userStats.stage.timemeditations < this.stage.stobjectives.meditationcount) {
+
         this.userStats.stage.timemeditations++;
         this.progress = Progress(
           stage: this.stage,
@@ -491,20 +532,23 @@ class User {
     } else if (m.stagenumber != null && m.stagenumber == this.stagenumber && !totalMeditations.contains(m)) {
       this.userStats.stage.guidedmeditations++;
       this.meditposition++;
-      totalMeditations.add(m);
       progress = Progress(
         stage: this.stage,
         done: this.userStats.stage.guidedmeditations,
         total: this.stage.stobjectives.meditguiadas, 
-        what: ' guided meditations');
+        what: ' guided meditations'
+      );
     }
 
+    this.totalMeditations.add(m);
+
     if (this.userStats.streak > 0 && this.userStats.lastmeditated != null) {
-      DateTime lastmeditation = DateTime.parse(this.userStats.lastmeditated);
-      //si meditamos ayer
-      if (lastmeditation.add(Duration(days: 1)).day == m.day.day) {
+      final lastday = DateTime(this.userStats.lastmeditated.year, this.userStats.lastmeditated.month, this.userStats.lastmeditated.day + 1);
+
+      //si meditamos ayer subimos la racha !
+      if (lastday.day == m.day.day) {
         this.userStats.streakUp();
-      } else if (lastmeditation.day != m.day.day) {
+      } else if (this.userStats.lastmeditated.day != DateTime.now().day) {
         this.userStats.streak = 1;
       }
     } else {
@@ -527,15 +571,39 @@ class User {
       setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);
     }
     
-
+    //  PORQUE DEVOLVEMOS ALGO ???
     return false;
-
-    //minutesMeditated += m.duration.inMinutes;
-    //setTimeMeditated();
   }
 }
 
 
+// settings de cada profesor
+class TeacherSettings {
+  String description, website, location, teachinghours;
+
+  List<User> students = new List.empty(growable: true);
+
+  TeacherSettings({this.description,this.website,this.location,this.teachinghours});
+
+  Map<String,dynamic> toJson(){
+    return {
+      'description':description,
+      'website':website,
+      'location':location,
+      'teachinghours':teachinghours
+    };
+  }
+
+  // HAY QUE SABER QUIEN ES QUIEN !!!
+  factory TeacherSettings.fromJson(json){
+    return TeacherSettings(
+      description: json['description']!= null ? json['description']:'',
+      website: json['website']!= null ? json['website']:'',
+      location: json['location']!= null ? json['location']:'',
+      teachinghours: json['teachinghours']!= null ? json['teachinghours']:'',
+    );
+  }
+}
 
 
 // WE NEED TO CREATE DIFFERENT CLASSES

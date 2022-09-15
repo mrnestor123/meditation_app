@@ -8,7 +8,7 @@ class IntervalBell{
   final String sound;
   final bool isActive;
 
-  IntervalBell({this.id, this.name, this.interval, this.sound, this.isActive});
+  IntervalBell({this.id, this.name, this.interval, this.sound= "assets/bowl-sound.mp3", this.isActive});
 
  
 }

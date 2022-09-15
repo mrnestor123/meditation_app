@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
+import 'package:meditation_app/data/models/helpers.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
@@ -16,6 +15,7 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
+import 'package:meditation_app/domain/entities/path_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -115,8 +115,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     database = FirebaseFirestore.instance;
     // nodejs = 'http://localhost:5001/app';
     // nodejs = 'https://public.digitalvalue.es:8002';
-  //  nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
-    nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
+   // nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
+   nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -169,9 +169,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     //Sacamos la primera etapa
     //Esto se debería de sacar del getStage
 
-    dynamic user = await getUser(usuario.uid);
+    
+    QuerySnapshot query = await database.collection('users').where('coduser',isEqualTo: usuario.uid).get();
 
-    if(user == null){
+    if(query.docs.length == 0){
       var url = Uri.parse('$nodejs/stage/1');
       http.Response response = await http.get(url);
 
@@ -214,8 +215,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try{
       var response = await http.get(url);
 
-      print(response.body);
-
       var actions = json.decode(response.body);
       
       if(actions['today'] != null && actions['today'].length > u.todayactions.length){
@@ -234,6 +233,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   Future<DataBase> getData([bool getStages]) async  {
     DataBase d = new DataBase();
     var url = Uri.parse('$nodejs/stages');
+    
     try{
       http.Response response = await http.get(url);
       List<StageModel> stages = new List.empty(growable: true);
@@ -247,10 +247,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       // esto también debería sacarlo en el servidor
       QuerySnapshot nostageContent = await database.collection('content').where('stagenumber', isEqualTo: 'none').get();
 
+      // HAY QUE VOLVER A AÑADIR ESTO !!!!
       for(DocumentSnapshot doc in nostageContent.docs){
         Map data = doc.data();
         if(data['type'] == 'meditation-practice'){
-          //PODRIA SER TODO LA MISMA LISTA !!!!!
           d.nostagemeditations.add(MeditationModel.fromJson(data));
         }else{
           d.nostagelessons.add(LessonModel.fromJson(data));
@@ -263,26 +263,30 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         d.addVersion(Version.fromJson(doc.data()));
       }
 
-      d.getLastVersion();
-
-
-      List<Phase> phases = [
-        Phase(title: ' The novice meditator',description: 'Continuous attention to the meditation object'),
-        Phase(title: 'The skilled meditator', description: 'Sustained exclusive focus of attention and purifying of mental hindrances'),
-        Phase(title: 'The adept meditator', description: 'Persistence of the mental qualities of an adept')
-      ];
+      var newContent = Uri.parse('$nodejs/newcontent');
+      http.Response contentres = await http.get(newContent);
       
-      for(StageModel s in d.stages){
-        if(s.stagenumber <= 3){
-          phases[0].content.addAll(s.path);
-        }else if(s.stagenumber <=7){
-          phases[1].content.addAll(s.path);
-        }else{
-          phases[2].content.addAll(s.path);
+      if(contentres.statusCode != 400){
+        List<dynamic> newcontent  = json.decode(contentres.body);
+        
+        for(var c in newcontent){
+          d.newContent.add(c['type'] == 'meditation-practice' ? MeditationModel.fromJson(c): LessonModel.fromJson(c));
         }
       }
+
+
+      var paths = Uri.parse('$nodejs/paths');
+      http.Response pathsresponse = await http.get(paths);
       
-      d.phases = phases;
+      if(pathsresponse.statusCode != 400){
+        List<dynamic> paths  = json.decode(pathsresponse.body);
+        
+        for(var p in paths){
+          d.paths.add(Path.fromJson(p));
+        }
+      }
+
+      d.getLastVersion();
 
       return d;
     }catch(e){
@@ -362,23 +366,37 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   @override
   // ESTO HAY QUE PASARLO AL SERVER !!!!!
-  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type}) async {
+  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type, Content toUpload}) async {
     try{
-      QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
-      String documentId = userreference.docs[0].id;
-  
-      await database.collection("users").doc(documentId).set(
-        user.updateFields(),
-        SetOptions(
-          merge: true
-        )
-      );
+      // PORQUE  NO PASAMOS 
+      if(type == 'recording'){
+        Content c = toAdd[0];
+        QuerySnapshot docreference = await database.collection('doneContent').where('cod', isEqualTo: c.cod).where('doneBy',isEqualTo: user.coduser).get();
 
-      //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
-      if (type == 'meditate') {
-        await database.collection('meditations').add(toAdd[0].shortMeditation());
-      }else if(type =='lesson'){
-        //Añadirlo a las lessonss del usuario !!
+        if(docreference.docs.length > 0){
+          await database.collection("doneContent").doc(docreference.docs[0].id).set(
+            {'done':c.done.inMinutes},
+            SetOptions(merge: true)
+          );
+        }else{
+          // ESTO DEBERÍA DE GUARDARSE SIEMPRE !!!!!
+          await database.collection('doneContent').add(c.toJson());
+        }
+      }else{
+        QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
+        String documentId = userreference.docs[0].id;
+    
+        await database.collection("users").doc(documentId).set(
+          user.updateFields(),
+          SetOptions(merge: true)
+        );
+
+        //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
+        if (type == 'meditate') {
+          await database.collection('meditations').add(toAdd[0].shortMeditation());
+        }else if(type =='lesson'){
+          //Añadirlo a las lessonss del usuario !!
+        }
       }
     }catch(e){  
       print(e.toString());
@@ -406,9 +424,10 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       UserModel u = await connect(coduser);
 
       if(u !=null){
+        /*
         Future.delayed(Duration(seconds: 5),(){
           getActions(u);
-        });
+        });*/
 
         /*
         ESTO NO LO VAMOS A HACER ASI. CADA VEZ QUE ENTRE A MAINSCREEN SACAMOS ACTIONS

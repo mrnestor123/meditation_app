@@ -18,13 +18,6 @@ class WelcomeWidget extends StatelessWidget {
         child: Center(
           child: Stack(
             children: [
-              /*UpgradeAlert(
-                  dialogStyle: Platform.isAndroid ? 
-                  UpgradeDialogStyle.material:  
-                  UpgradeDialogStyle.cupertino,
-                appcastConfig: cfg,
-                child: Text(''),
-              ),*/
               Column(
                 children: <Widget>[
                   Spacer(),

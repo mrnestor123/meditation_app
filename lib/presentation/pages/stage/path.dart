@@ -26,7 +26,10 @@ class ImagePath extends StatelessWidget {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         bottom: PreferredSize(
-          child:Flexible(child: Center(child: Text(stage.description, style: Configuration.text('small', Colors.black)))), 
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+            child: Text(stage.description, textAlign: TextAlign.center, style: Configuration.text('small', Colors.black)),
+          ), 
           preferredSize: Size.fromHeight(Configuration.width > 500 ? 60: 20)
         ),
         backgroundColor: Colors.transparent,
@@ -46,12 +49,10 @@ class ImagePath extends StatelessWidget {
       backgroundColor: Color.fromARGB(255,220,208,186),
       body: Stack(
         children: <Widget>[
-          SingleChildScrollView(
-            child: Image(
-              image: CachedNetworkImageProvider(stage != null ? stage.longimage : _userstate.user.stage.longimage) ,
-              width: Configuration.width,
-              height: Configuration.height,
-            ),
+          Image(
+            image: CachedNetworkImageProvider(stage != null ? stage.longimage : _userstate.user.stage.longimage) ,
+            width: Configuration.width,
+            height: Configuration.height
           ),
           Align(
             alignment: Alignment.topCenter,
@@ -61,7 +62,6 @@ class ImagePath extends StatelessWidget {
               ],
             ),
           ),
-          
         ],
       ),
     );

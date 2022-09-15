@@ -9,10 +9,13 @@ import 'meditation_entity.dart';
 class Stage {
   int stagenumber, userscount;
   String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext, longdescription;
-  // ESTO SERIA SOLO LESSONS
+  // EN EL  FUTURO UNA LISTA SOLO CON CONTENT
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
+  List<Content> videos = new List.empty(growable: true);
+
+
   //hay que empezar a utilizar stobjectives!!
   StageObjectives stobjectives;
   //PARA EL FUTURO !!! 
@@ -65,8 +68,13 @@ class Stage {
         addGame(game);
       }
     }
-
   }
+
+  void addVideo(Content v){
+    videos.add(v);
+    videos.sort((a, b) => a.position - b.position);
+  }
+
 
   void setMeditations(List<dynamic> meditations){
     if(meditations.length > 0){
@@ -97,7 +105,7 @@ class StageObjectives {
       totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
       streak: json['streak'] == null ? 0 : json['streak'],
       meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'] == null ? 0 : json['meditation']['count'],
-      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null || json['meditation']['time'] == 0   ? null : json['meditation']['time'].toString() + ' min meditations ',
+      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null || json['meditation']['time'] == 0   ? null : json['meditation']['time'].toString() + ' min free meditations ',
       meditationfreetime: json['meditation'] == null   ? 0 :  json['meditation']['time']  == null ? 0 :json['meditation']['time'],
       meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
       lecciones: json['lessons'] == null ? 0 : json['lessons']
@@ -205,7 +213,7 @@ class StageObjectives {
     if(value >= labels[objective]){
       return 1;
     }else{
-      return value.toString() +'/' + labels[objective].toString();
+      return value.toString() + '/' + labels[objective].toString();
     }
     
     //  ESTO ES PARA SACAR EL PORCENTAJE !!!

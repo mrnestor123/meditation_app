@@ -15,6 +15,8 @@ class Meditation extends Content {
   Map<dynamic, dynamic> content;
   Map<dynamic,dynamic> followalong;
 
+  MeditationSettings meditationSettings;
+
   //for referencing the user.
   //final String userId;
   Meditation(
@@ -25,25 +27,31 @@ class Meditation extends Content {
       this.content,
       this.followalong,
       cod,
-      type,
+      type = 'meditation-practice',
       stagenumber,
       description,
       image,
       title,
       file = '',
       position,
-      createdBy
-      //this.userId
+      this.meditationSettings,
+      createdBy,
+      isNew,
+      total
       })
-      : super(cod: cod,
-            description: description,
-            image: image,
-            title: title,
-            createdBy: createdBy,
-            stagenumber: stagenumber,
-            position: position,
-            file:file,
-            type: type) {
+  : super(
+      cod: cod,
+      total: total,
+      isNew: isNew,
+      description: description,
+      image: image,
+      title: title,
+      createdBy: createdBy,
+      stagenumber: stagenumber,
+      position: position,
+      file:file,
+      type: type
+    ) {
         day == null ? day = DateTime.now() : null;
     }
 
@@ -71,6 +79,15 @@ class Meditation extends Content {
   }
 
 
+  Map<String, dynamic> shortMeditation() => { 
+    "coduser":this.coduser == null ? null : this.coduser,
+    "cod": this.cod  == null  ?  null : this.cod,
+    //"title": this.title == null ? null : this.title,
+    "duration": this.duration == null ? null : duration.inMinutes,
+    //"recording": this.recording == null ? null : this.recording,
+    "day": this.day == null ? null : day.millisecondsSinceEpoch
+  };
+
 }
 
 
@@ -81,15 +98,12 @@ class GuidedMeditation extends Meditation{
 
 }
 
-/// CREAR CLaSE INTERVALBELL??
-class IntervalBell {
-
-}
 
 class MeditationPreset {
   int duration;
   double warmuptime;
   String name,cod, intervalBell;
+  List<IntervalBell> bells = new List.empty(growable: true);
 
   MeditationPreset({this.intervalBell, this.name, this.cod, this.duration,this.warmuptime}){
     if(cod == null){
@@ -105,18 +119,68 @@ class MeditationPreset {
       'name':name,
       'duration':duration,
       'intervalBell':intervalBell,
-      'warmuptime':warmuptime
+      'warmuptime':warmuptime,
+      'bells': bells.length > 0 ? bells.map((b)=> b.toJson()).toList(): null
     };
   }
 
   factory MeditationPreset.fromJson(Map<String,dynamic> json){
-    return MeditationPreset(
+    MeditationPreset m = MeditationPreset(
       cod: json['cod'],
       name: json['name'],
       duration: json['duration'],
       intervalBell: json['intervalBell'],
       warmuptime: json['warmuptime'] != null ? json['warmuptime'].toDouble() : null
     );
+
+    if(json['bells'] != null && json['bells'].length > 0){
+      for(var bell in json['bells']){
+        m.bells.add(IntervalBell.fromJson(bell));
+      }
+    }
+
+    return m;
+
+
+  }
+}
+
+
+class MeditationSettings{
+  double warmuptime;
+  
+  List<IntervalBell> bells = new List.empty(growable: true);
+  
+  MeditationSettings({this.warmuptime = 0});
+}
+
+
+class IntervalBell{
+  // DE MOMENTO SIEMPRE ES EL MISMO
+  String sound; 
+  int playAt;
+  String name;
+  String image;
+  bool repeat;
+
+  IntervalBell({this.sound,this.playAt, this.name, this.image,this.repeat = false});
+
+  //  GUARDAR LA IMAGEN ???
+  Map<String,dynamic> toJson(){
+    return {
+      'sound':sound,
+      'playAt':playAt,
+      'name':name,
+      'repeat': repeat,
+    };
   }
 
+  factory IntervalBell.fromJson(json){
+    return IntervalBell(
+      sound: json['sound'],
+      playAt: json['playAt'],
+      name: json['name'],
+      repeat: json['repeat']
+    );
+  }
 }

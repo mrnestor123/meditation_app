@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/messages_screen.dart';
+import 'package:meditation_app/presentation/pages/path_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
@@ -95,6 +96,7 @@ class MyApp extends StatelessWidget {
               '/addcontent':(BuildContext context)=> AddContent(),
               '/messages':(BuildContext context) => MessagesScreen(),
               '/chat':(BuildContext context) => ChatScreen(),
+              '/progress':(BuildContext context) => ProgressScreen(),
               '/requestview': (BuildContext context) => RequestView(),
               '/messageusers': (BuildContext context) => NewMessageScreen()
           })

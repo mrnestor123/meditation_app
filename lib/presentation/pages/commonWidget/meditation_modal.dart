@@ -8,6 +8,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/progress_dialog.d
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/entities/content_entity.dart';
 import '../../../domain/entities/meditation_entity.dart';
 import '../../mobx/actions/meditation_state.dart';
 import '../config/configuration.dart';
@@ -78,8 +79,8 @@ Future<dynamic> meditationModal(Meditation m) {
                                 child: Chip(
                                   backgroundColor: Colors.lightBlue,
                                   
-                                  avatar: ProfileCircle(userImage: m.createdBy.image, width: Configuration.smicon, bordercolor: Colors.white),
-                                  label: Text('Created by ' + m.createdBy.nombre, style: Configuration.text('small', Colors.white),),
+                                  avatar: ProfileCircle(userImage: m.createdBy['image'], width: Configuration.smicon, bordercolor: Colors.white),
+                                  label: Text('Created by ' + m.createdBy['nombre'], style: Configuration.text('small', Colors.white),),
                                   ),
                               )
                               : Container(),
@@ -97,13 +98,11 @@ Future<dynamic> meditationModal(Meditation m) {
                       onPressed: (){
                         _meditationstate.setDuration(m.duration.inMinutes);
                         
-                        _meditationstate.selectMeditation(m);
+                        // _meditationstate.selectMeditation(m);
                         
                         Navigator.pop(context);
                         
-                        Navigator.pushNamed(context, '/countdown').then(
-                          (value) => _userstate.user.progress != null ? autocloseDialog(_userstate.user) : null
-                        );
+                        Navigator.pushNamed(context, '/countdown');
                       },
                     ),
                     SizedBox(height: Configuration.verticalspacing*3)
@@ -111,6 +110,91 @@ Future<dynamic> meditationModal(Meditation m) {
                 ),
               );
             });
-  
     }
   }
+
+
+
+
+
+
+class TimeChip extends StatelessWidget {
+  UserState _userstate;
+  Duration seenTime;
+  bool finished = false;
+
+  String getTime(Duration d){
+    String time = '';
+
+    if(seenTime != null && !finished){    
+      d = d - seenTime;
+    }
+
+    if(d.inHours >= 1){
+      time += d.inHours.toString() + ' h ';
+    }
+
+    if(d.inMinutes % 60 > 0){
+      time += (d.inMinutes % 60).toString()  + ' m';
+    }
+
+    if(seenTime != null && !finished){
+      time += ' left';
+    }
+
+    return time;
+  }
+
+  Content c;
+  
+  TimeChip({
+    this.c,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    
+    if(_userstate.user.contentDone.length > 0){ 
+      dynamic content = _userstate.user.contentDone.firstWhere((element) => element.cod == c.cod,
+        orElse: (){}
+      );
+
+      if(content != null  && content.done != null){
+        seenTime = content.done;
+        finished = seenTime.inMinutes >= c.total.inMinutes;
+      }
+    }  
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+       
+        Container(
+          padding: EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(Configuration.borderRadius) ,
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.timer,size: Configuration.tinicon, color:seenTime != null && !finished ? Colors.lightBlue :Colors.black),
+              SizedBox(width: Configuration.verticalspacing/2),
+              Text(getTime(c.total),style: Configuration.text('small',seenTime != null && !finished ? Colors.lightBlue:  Colors.black))
+            ],
+          ),
+        ),
+        SizedBox(width: Configuration.verticalspacing),
+        
+        finished ? 
+        Icon(Icons.visibility,color: Colors.lightBlue)
+        : Container(),
+      ],
+    );
+  }
+}
+
+
+

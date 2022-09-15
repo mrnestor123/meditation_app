@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/data/models/stageData.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -41,8 +42,10 @@ class UserModel extends User {
       int version,
       unreadmessages,
       seenIntroCarousel,
+      meditationTime,
       stats})
       : super(
+        meditationTime:meditationTime,
         coduser: coduser,
         user: user,
         gameposition: gameposition,
@@ -93,10 +96,10 @@ class UserModel extends User {
         teachinghours:json['teachinghours'],
         location: json['location'],
         website: json['website'],
+        meditationTime: json['meditationtime'] != null ? DateTime.parse(json['meditationtime']):null,
         answeredquestions: json['answeredquestions'] == null ? new Map() : json['answeredquestions'],
         userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
       ); 
-
 
       
     if(expand){
@@ -107,6 +110,12 @@ class UserModel extends User {
       if(json['presets']!= null){
         for(var preset in json['presets'] ){
           u.presets.add(MeditationPreset.fromJson(preset));
+        }
+      }
+
+      if(json['doneContent'] != null){
+        for(var doneContent in json['doneContent']){
+          u.contentDone.add(Content.fromJson(doneContent));
         }
       }
 
@@ -133,6 +142,8 @@ class UserModel extends User {
           for(var content in json['addedcontent']){
             if(content['type'] == 'meditation-practice'){
               u.addedcontent.add(MeditationModel.fromJson(content));
+            }else if(content['type']=='video'){
+              u.addedcontent.add(Content.fromJson(content));
             }else{
               u.addedcontent.add(LessonModel.fromJson(content));
             }
@@ -208,6 +219,7 @@ class UserModel extends User {
         "settings": settings == null ? null: settings.toJson(),
         "following": following.map((user) => user.coduser).toList(),
         "unreadmessages":unreadmessages.map((e)=> e).toList(),
+        "meditationtime": meditationTime != null ? meditationTime.toIso8601String():null,
         //MENSAJES Y ACTIONS MUCHO JSON !!!!
         "students": students.map((stud)=> stud.coduser).toList(),
      //   'messages': messages.map((msg)=> msg.toJson()).toList(), 

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../mobx/actions/user_state.dart';
 import '../../mobx/login_register/login_state.dart';
+import '../commonWidget/start_button.dart';
 
 class CarrouselIntro extends StatefulWidget {
   const CarrouselIntro({ Key key }) : super(key: key);
@@ -34,7 +35,6 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
       "description":" This application is based on The Mind Illuminated, written by John Yates, a neuroscientist that got interested in meditation. It combines ancient buddhist wisdom with brain science. \n \n  It is recommended to use the book along with the application."
     },
     {
-      
       "title":" Ten Stages of training", 
       "description":" The process of training the mind is divided into ten different stages. \n \n In each stage you will learn new information about how your mind works and how to progress in meditation. "
     },
@@ -45,6 +45,7 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
   ];
 
   CarouselController controller = new CarouselController();
+  TextEditingController _nameController = new TextEditingController();
 
   @override
   void initState() {
@@ -79,6 +80,29 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
     if(_userState.user == null){
       _userState.setUser(_loginState.loggeduser);
     }
+  }
+
+
+  Widget setUsername(){
+    Container(
+        height: Configuration.height,
+        width: Configuration.width,
+        color: Configuration.maincolor,
+        padding: EdgeInsets.all(Configuration.medpadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('Type your username', style: Configuration.text('medium', Colors.white)),
+            SizedBox(height: Configuration.verticalspacing),
+            TextField(
+              controller: _nameController, 
+              style: Configuration.text('small', Colors.white),
+            ),
+            SizedBox(height: Configuration.verticalspacing * 2),
+        ],
+      )
+    );
+
   }
 
   @override
@@ -145,7 +169,7 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
                 children: [
                   CarouselBalls(
                     index: _index, 
-                    items: slides,
+                    items: slides.length,
                     showNext: true,
                     onNext:(index){
                       if(index < slides.length -1){
@@ -154,13 +178,13 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
                         });
                       }else {
                         _userState.user.seenIntroCarousel = true;
-                        print({_userState.user.seenIntroCarousel,'SEENCAROUSEL'});
                         _userState.updateUser();
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => Layout()),
-                            (Route<dynamic> route) => false,
-                          );
+                        
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => Layout()),
+                          (Route<dynamic> route) => false,
+                        );
                       }
                     }),
                   SizedBox(height: Configuration.verticalspacing*2)

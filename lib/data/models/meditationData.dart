@@ -21,26 +21,30 @@ class MeditationModel extends Meditation {
       int position,
       file,
       followalong,
-      createdBy
+      createdBy,
+      total,
+      isNew
       })
       : super(
-            cod: cod,
-            title: title,
-            coduser: coduser,
-            duration: duration,
-            content: content,
-            description: description,
-            createdBy:createdBy,
-            day: day,
-            type: type,
-            image: image,
-            file: file,
-            stagenumber: stagenumber,
-            followalong: followalong,
-            position: position);
+      cod: cod,
+      total:total,
+      title: title,
+      coduser: coduser,
+      duration: duration,
+      content: content,
+      description: description,
+      createdBy:createdBy,
+      day: day,
+      type: type,
+      image: image,
+      isNew:isNew,
+      file: file,
+      stagenumber: stagenumber,
+      followalong: followalong,
+      position: position
+    );
 
-  factory MeditationModel.fromRawJson(String str) =>
-      MeditationModel.fromJson(json.decode(str), false);
+  factory MeditationModel.fromRawJson(String str) => MeditationModel.fromJson(json.decode(str), false);
 
   String toRawJson() => json.encode(toJson());
 
@@ -50,7 +54,7 @@ class MeditationModel extends Meditation {
     MeditationModel model = medorLessfromJson(json, true);
       
     if(!isShort){ 
-      model.content =  json['content'] == null ? null: json['content'];
+      model.content =  json['content'] == null ? null : json['content'];
       model.followalong = json['followalong'] == null ? null : json['followalong'];
     }else{
       model = new MeditationModel();
@@ -58,7 +62,8 @@ class MeditationModel extends Meditation {
 
     model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']);
 
-    model.day = json["day"] == null ? null : DateTime.parse(json["day"]);
+    model.day = json["day"] == null ? null : json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
+      DateTime.fromMillisecondsSinceEpoch(json['day']).toLocal();
 
     model.coduser = json['coduser'] == null ? null : json['coduser'];
 
@@ -72,18 +77,9 @@ class MeditationModel extends Meditation {
     // FALTA AÑADIR CONTENIDO ESPECIAL DE LA MEDITACIÓN
     return json;
   } 
-
-
-  Map<String, dynamic> shortMeditation() => { 
-       // "codmed": this.codmed == null ? null : this.codmed,
-        "coduser":this.coduser == null ? null : this.coduser,
-        //"title": this.title == null ? null : this.title,
-        "duration": this.duration == null ? null : duration.inMinutes,
-        //"recording": this.recording == null ? null : this.recording,
-        "day": this.day == null ? null : day.toIso8601String()
-      };
 }
 
+// ESTO SE UTILIZA ???? 
 Duration parseDuration(String s) {
   int hours = 0;
   int minutes = 0;
@@ -96,5 +92,6 @@ Duration parseDuration(String s) {
     minutes = int.parse(parts[parts.length - 2]);
   }
   seconds = int.parse(parts[parts.length - 1].substring(0, 2));
+
   return Duration(hours: hours, minutes: minutes, seconds: seconds);
 }

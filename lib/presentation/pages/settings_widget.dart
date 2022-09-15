@@ -45,6 +45,7 @@ class _SettingsState extends State<Settings> {
                   condition: (name)=> _userstate.user.settings.progression == name,
                   action: (name){
                     _userstate.user.settings.setProgression(name);
+                    _userstate.updateUser();
                     setState((){});
                   },
                   options: [

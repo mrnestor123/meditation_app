@@ -6,18 +6,18 @@ import '../config/configuration.dart';
 
 class CarouselBalls extends StatelessWidget {
   int index = 0;
-  List<dynamic> items = new List.empty(growable: true);
+  int items ;
   Color activecolor;
 
   bool showNext;
   dynamic onNext;
 
-  CarouselBalls({this.index, this.items, this.activecolor = Colors.white, Key key, this.showNext = false, this.onNext}): super(key:key);
+  CarouselBalls({this.index, this.items = 0, this.activecolor = Colors.white, Key key, this.showNext = false, this.onNext}): super(key:key);
 
   List<Widget> getBalls() {
       List<Widget> res = new List.empty(growable: true);
       
-      for(int i = 0; i < items.length; i++){
+      for(int i = 0; i < items; i++){
          res.add(Container(
           width: Configuration.safeBlockHorizontal * 3,
           height: Configuration.safeBlockHorizontal * 3,
@@ -25,8 +25,8 @@ class CarouselBalls extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: i == index
-                ? activecolor
-                : Color.fromRGBO(0, 0, 0, 0.4),
+              ? activecolor
+              : Color.fromRGBO(0, 0, 0, 0.4),
           ),
         ));
       }
@@ -58,7 +58,7 @@ class CarouselBalls extends StatelessWidget {
                 onTap:()=>{
                   onNext(index)
                 }, 
-                child: Text((index +1) == items.length ? 'Finish': 'Next', style: Configuration.text('smallmedium', Colors.white))
+                child: Text((index +1) == items ? 'Finish': 'Next', style: Configuration.text('smallmedium', Colors.white))
               ),
             ),
           ) : Container()

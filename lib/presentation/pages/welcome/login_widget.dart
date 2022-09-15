@@ -107,7 +107,7 @@ class _LoginWidgetState extends State<LoginWidget> {
               ),
               Spacer(),
               GoogleButton(registerstate: _loginstate,register: false),
-              SizedBox(height: Configuration.verticalspacing*2),
+              SizedBox(height: Configuration.verticalspacing*3),
               /*
               FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
               SizedBox(height: 40
@@ -146,10 +146,14 @@ class InputField extends StatelessWidget {
         style: Configuration.text('small', Colors.black),
         obscureText: obscuretext != null ? true: false,
         decoration: InputDecoration(
+            isDense: true,
             focusColor: Configuration.maincolor,
            // focusedBorder: new OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
             errorStyle: Configuration.text('small', Colors.red),
-            contentPadding: EdgeInsets.symmetric(vertical: Configuration.smpadding,horizontal:Configuration.bigpadding),
+            contentPadding: EdgeInsets.symmetric(
+              vertical: Configuration.medpadding,
+              horizontal:Configuration.bigpadding
+            ),
             filled: true,
             labelStyle:  Configuration.text('small',Colors.grey),
             labelText: labeltext,

@@ -16,9 +16,11 @@ class Lesson extends Content {
       createdBy,
       file,
       blocked,
+      isNew,
       @required description,
       @required this.text})
       : super(
+          isNew:isNew,
           cod: cod,
           title: title,
           blocked:blocked,

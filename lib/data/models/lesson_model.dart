@@ -11,7 +11,8 @@ import 'helpers.dart';
 
 class LessonModel extends Lesson {
   LessonModel(
-      {String title,
+    {
+      String title,
       String cod,
       image,
       String description,
@@ -21,19 +22,23 @@ class LessonModel extends Lesson {
       createdBy,
       file,
       blocked,
-      int position})
-      : super(
-            title: title,
-            cod: cod,
-            createdBy:createdBy,
-            image: image,
-            description: description,
-            type: type,
-            text: text,
-            file:file,
-            blocked:blocked,
-            stagenumber: stagenumber,
-            position: position);
+      isNew,
+      int position
+    })
+    : super(
+      title: title,
+      cod: cod,
+      createdBy:createdBy,
+      image: image,
+      description: description,
+      type: type,
+      text: text,
+      file:file,
+      blocked:blocked,
+      stagenumber: stagenumber,
+      position: position,
+      isNew: isNew
+    );
 
   factory LessonModel.fromRawJson(String str) =>
       LessonModel.fromJson(json.decode(str));
@@ -42,6 +47,7 @@ class LessonModel extends Lesson {
 
   @override
   factory LessonModel.fromJson(Map<String, dynamic> json) {
+   // LessonModel model = Content.fromJson(json);
     LessonModel model =  medorLessfromJson(json, false);
     model.text = json['text'] == null ? null : json['text'];
     return model;

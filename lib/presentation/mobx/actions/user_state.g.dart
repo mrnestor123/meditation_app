@@ -267,6 +267,17 @@ mixin _$UserState on _UserState, Store {
   }
 
   @override
+  Future<dynamic> closeStageUpdate() {
+    final _$actionInfo = _$_UserStateActionController.startAction(
+        name: '_UserState.closeStageUpdate');
+    try {
+      return super.closeStageUpdate();
+    } finally {
+      _$_UserStateActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 user: ${user},

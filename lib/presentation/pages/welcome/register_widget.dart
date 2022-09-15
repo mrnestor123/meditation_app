@@ -138,7 +138,7 @@ class RegisterWidget extends StatelessWidget {
               ),
               Spacer(),
               GoogleButton(registerstate: _registerstate, register:true),
-              SizedBox(height: Configuration.verticalspacing*2),
+              SizedBox(height: Configuration.verticalspacing*3),
               /*
               FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _registerstate, register:true),
               SizedBox(height: 40)*/
@@ -246,10 +246,7 @@ class GoogleButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text((register ? 'SIGN UP' :'LOG IN') + ' WITH GOOGLE', style: Configuration.text('smallmedium', Colors.white)),
-              Icon(FontAwesomeIcons.google,
-              color: Colors.white,
-              size: Configuration.smicon,
-              )
+              Icon(FontAwesomeIcons.google,color: Colors.white,size: Configuration.smicon)
             ]);
           }
         })

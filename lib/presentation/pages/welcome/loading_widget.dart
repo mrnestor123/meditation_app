@@ -55,6 +55,7 @@ class _LoadingState extends State<Loading> {
 
 
     _controller = VideoPlayerController.asset('assets/tenstages.mp4')..initialize().then((_) {
+    
     _controller.play();
       // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
       setState(() { });
@@ -192,13 +193,14 @@ class _LoadingState extends State<Loading> {
                     ),
                   ),
                 ) : Container(),
+                 _controller.value.isInitialized ?  
                 Align(
                   alignment: Alignment.center,
                   child: AspectRatio(
                     aspectRatio: _controller.value.aspectRatio,
                     child: VideoPlayer(_controller),
                   ),
-                ),
+                ):Container(),
               ],
             )
             ));

@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import '../../domain/entities/stage_entity.dart';
 import '../../domain/entities/user_entity.dart';
 
-class PathScreen extends StatelessWidget {
-  PathScreen();
+class ProgressScreen extends StatelessWidget {
+  ProgressScreen();
 
   UserState _userstate;
 
@@ -92,7 +92,6 @@ class PathScreen extends StatelessWidget {
             children: [
             Text(text,style: Configuration.text('tiny', Colors.black)),
             Icon(icon, color: Configuration.maincolor,size: Configuration.medicon),
-
           ]),
         ),
       );
@@ -138,13 +137,13 @@ class PathScreen extends StatelessWidget {
         children: [
           _userstate.user.passedObjectives[key] == 1 ? 
           Icon(Icons.check_circle, size: Configuration.medpadding, color: Colors.green):
-          Text(
-            _userstate.user.passedObjectives[key].toString(), 
-            style:Configuration.text('medium',Configuration.maincolor)),
+          Text(_userstate.user.passedObjectives[key].toString(), 
+            style:Configuration.text('medium',Configuration.maincolor)
+          ),
           SizedBox(height: Configuration.blockSizeVertical * 0.2),
           Container(
             width: Configuration.width*0.3,
-            child: Text( key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
+            child: Text(key, style: Configuration.text('tiny',Colors.black), textAlign: TextAlign.center)
           )
         ])
       );
@@ -175,30 +174,43 @@ class PathScreen extends StatelessWidget {
   }
   
   Widget oldPathScreen(context){
-    return Column(
-    //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
-      children: [
-        SizedBox(height: Configuration.verticalspacing),
-        
-        Column(
+    return Scaffold(
+      backgroundColor:Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: BackButton(color: Colors.black),
+      ),
+      body: Container(
+        padding: EdgeInsets.all(Configuration.smpadding),
+        child: Column(
+        //direction: Configuration.width > 600 ? Axis.horizontal : Axis.vertical,
           children: [
-              Text('Stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
-              SizedBox(height: Configuration.verticalspacing/2),
-
-              Text(_userstate.user.stage.description, style:Configuration.text('small',Colors.grey)),
-              //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
-              SizedBox(height: Configuration.verticalspacing),
-              porcentaje()
-          ]
-        ),
-
-        Expanded( 
-          child:labels(context)
-        )
-      ],
-      );
+            
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                  Text('Stage ' + _userstate.user.stagenumber.toString(), 
+                  style: Configuration.text('big', Colors.black)),
+                  SizedBox(height: Configuration.verticalspacing/2),
+          
+                  Text(_userstate.user.stage.description, 
+                    textAlign: TextAlign.center,
+                  style:Configuration.text('small',Colors.black,font: 'Helvetica')),
+                  //Text(_userstate.user.stage.description, style: Configuration.text('small',Colors.grey), textAlign: TextAlign.center,),
+                  SizedBox(height: Configuration.verticalspacing),
+                  porcentaje()
+              ]
+            ),
+          
+            Expanded( 
+              child:labels(context)
+            )
+          ],
+          ),
+      ),
+    );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -220,8 +232,9 @@ class PathScreen extends StatelessWidget {
   }
 }
 
-class Path extends StatelessWidget {
-  Path({
+/*
+class ProgressScreen extends StatelessWidget {
+  ProgressScreen({
     Key key,
     @required this.s,
     @required this.user
@@ -392,3 +405,4 @@ class Path extends StatelessWidget {
   }
 }
 
+*/

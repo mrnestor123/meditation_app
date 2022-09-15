@@ -16,7 +16,7 @@ class LoginRegisterButton extends StatelessWidget {
     return Container(
         width: Configuration.width*0.9,
         child: AspectRatio(
-          aspectRatio:  Configuration.buttonRatio,
+          aspectRatio: Configuration.buttonRatio,
           child: ElevatedButton(
           onPressed: () async {
             this.onPressed();

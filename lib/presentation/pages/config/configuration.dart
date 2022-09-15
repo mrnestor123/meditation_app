@@ -157,7 +157,6 @@ class Configuration {
 
   //textstyles HAY QUE QUITAR ESTO DE AQUI !!!
   /*
-
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
   */
   static TextStyle tabletText(String size, Color color, {String style, double spacing, String font}) {

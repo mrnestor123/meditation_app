@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../../mobx/actions/messages_state.dart';
 
- Future showUserProfile({User user,String usercod, followbutton, followaction,  hideChat}) {
+Future showUserProfile({User user,String usercod, followbutton, followaction,  hideChat, isTeacher = false}) {
 
   var stateSetter;
 
@@ -44,12 +44,15 @@ import '../../mobx/actions/messages_state.dart';
   return showModalBottomSheet<void>(
       context: navigatorKey.currentContext,
       builder: (BuildContext context) {
-        bool following = user != null ? userstate.user.following.where((element) => element.coduser == user.coduser).isNotEmpty : false;
+        //bool following = user != null ? userstate.user.following.where((element) => element.coduser == user.coduser).isNotEmpty : false;
         return StatefulBuilder(
             builder:(BuildContext context, StateSetter setState ) {
             stateSetter = setState;
             return  Container(
             color: Configuration.maincolor,
+            constraints: BoxConstraints(
+              minHeight: Configuration.height*0.25
+            ),
             child:  Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,6 +84,11 @@ import '../../mobx/actions/messages_state.dart';
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          isTeacher ? 
+                          user== null ? Row(): 
+                          Text(user.description, style: Configuration.text('small',Colors.white))
+
+                          :
                           Table(
                             children: [
                               TableRow(
@@ -126,6 +134,7 @@ import '../../mobx/actions/messages_state.dart';
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    /*
                     followbutton != null ?
                     Row(
                       children: [
@@ -144,7 +153,7 @@ import '../../mobx/actions/messages_state.dart';
                         ),
                         SizedBox(width: Configuration.verticalspacing)
                       ],
-                    ) : Container(),
+                    ) : Container(),*/
 
                     outlineButton(
                       color: Colors.white,
@@ -163,6 +172,7 @@ import '../../mobx/actions/messages_state.dart';
                     ),
                     SizedBox(width: Configuration.verticalspacing),
 
+                    /*
                     hideChat != true ?
                     outlineButton(
                       color: Colors.white,
@@ -177,7 +187,7 @@ import '../../mobx/actions/messages_state.dart';
                           ),
                         );
                       }
-                    ) : Container(),
+                    ) : Container(),*/
 
                   ],
                 ),

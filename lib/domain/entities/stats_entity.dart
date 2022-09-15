@@ -3,6 +3,7 @@
   for accessing user stats 
 */
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 
 import 'lesson_entity.dart';
 
@@ -14,7 +15,7 @@ class UserStats {
   List<dynamic> lastread = new List.empty(growable: true);
   int streak;
   // ESTO DEBERIA DE SER UNA FECHA !!!!!!
-  String lastmeditated;
+  DateTime lastmeditated;
   Map<String,dynamic> meditationtime;
 
   UserStats({this.stage,this.total,this.lastread,this.streak,this.lastmeditated,this.meditationtime});
@@ -33,7 +34,7 @@ class UserStats {
       total: json['total'] == null ? TotalStats.empty() : TotalStats.fromJson(json['total']),
       streak: json['racha'] == null ? 0 : json['racha'],
       meditationtime: json['meditationtime'] == null ? new Map() : json['meditationtime'],
-      lastmeditated: json['lastmeditated'] == null ? null : json['lastmeditated'],
+      lastmeditated: json['lastmeditated'] == null ? null : DateTime.parse(json['lastmeditated']),
       lastread: json['lastread'] == null ? [] : json['lastread']
     );  
 
@@ -42,7 +43,7 @@ class UserStats {
     "total": total == null ? null : total.toJson(),
     "racha": streak == null ? 0 : streak,
     "meditationtime": meditationtime == null ? null: meditationtime,
-    "lastmeditated": lastmeditated == null ? null : lastmeditated,
+    "lastmeditated": lastmeditated == null ? null : datetoString(lastmeditated),
     "lastread": lastread == null ? [] : lastread
   };
 
@@ -62,11 +63,11 @@ class UserStats {
   }
 
   void meditate(Meditation m){
-    this.lastmeditated = DateTime.now().toIso8601String();    
+    this.lastmeditated = DateTime.now();    
     this.stage.timemeditated += m.duration.inMinutes;
     this.total.timemeditated += m.duration.inMinutes;
     this.total.meditations++;
-
+    // CREO QUE ESTO NO HACE FALTA !!!!!
     if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] != null) {
       this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] += m.duration.inMinutes;
     } else {
@@ -82,7 +83,6 @@ class UserStats {
     this.stage.timemeditations = 0;
     this.lastread.clear();
   }
-
 }
 
 //timemeditations son meditaciones por encima de x tiempo establecido

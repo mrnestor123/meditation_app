@@ -12,6 +12,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
@@ -41,6 +42,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool editingProfile = false;
   bool isMe = false;
+
+
+  int personal_info = 0;
+  int teacher_content = 1;
+  int viewing;
 
   Widget textIcon(IconData icon, String text, [onclick]){
     return GestureDetector(
@@ -118,134 +124,154 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget teacherProfile(User user){
-    Widget teacherView(){
-      Widget content(){
-
-
-      }
-
-
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          isMe ? 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary:Colors.lightBlue
-                ),
-                onPressed: () {  
-                  setState(() {
-                    editingProfile =true;
-                  });
-                },
-                child: Text('Edit profile',style:Configuration.text('small',Colors.white)),
+    
+    Widget addedContent(){
+      return user.addedcontent.length > 0 ? 
+        Column(
+          children: [
+            SizedBox(height: Configuration.verticalspacing*2),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Configuration.crossAxisCount + 1,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: Configuration.verticalspacing,
+                mainAxisSpacing: Configuration.verticalspacing,
               ),
-            ],
-          ) : Container(),
-
-          SizedBox(height:Configuration.verticalspacing*2),
-          Text(user.description != null ? user.description : 'The description goes here',
-            style:Configuration.text('small',Colors.black, height:1.4, font:'Helvetica')
-          ),
-          SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.group, user.students.length.toString() + ' students', (){
-            Navigator.push(
-                context,
-                  MaterialPageRoute(
-                      builder: (context) => ViewFollowers(
-                      users: user.students,
-                      title: 'Students'
-                  )
-              ),
-            );
-          }),
-          SizedBox(height:Configuration.verticalspacing*1.5),
-          textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
-          (){
-             Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context)=> Scaffold(
-                    appBar: AppBar(
-                      leading: ButtonClose(),
-                      backgroundColor:Colors.white,
-                      elevation: 0,
-                    ),
-                    body: WebView(
-                      initialUrl:'https:' + user.website,
-                      javascriptMode: JavascriptMode.unrestricted),
-                  )
-                  )
-              );
-          }),
-          SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.place, user.location != null ?  user.location : 'Add a location'),
-          SizedBox(height: Configuration.verticalspacing*1.5),
-          textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
-          SizedBox(height: Configuration.verticalspacing*1.5),
-
-          user.addedcontent.length > 0 ? 
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Added content',style:Configuration.text('medium',Colors.black)),
-              SizedBox(height: Configuration.verticalspacing * 1.5),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: Configuration.crossAxisCount + 1,
-                  childAspectRatio: 1.0,
-                  crossAxisSpacing: Configuration.verticalspacing,
-                  mainAxisSpacing: Configuration.verticalspacing,
-                ),
-                itemCount: user.addedcontent.length,
-                itemBuilder: (BuildContext context, int index) { 
-                  Content c = user.addedcontent[index];
-                  return ClickableSquare(
-                    border: true,
-                    onTap:()=>{
-                      meditationModal(c)
-                    },
-                    blocked: _userstate.user.isBlocked(c),
-                    text: c.title,
-                    selected: true,
-                    image: c.image,
-                  );
-                 },
-              
-              ),
-            ],
-          ): Container(),
-
-          Spacer(),
-          /*
-          !isMe && user.messages.where((element) => element.sender == _userstate.user.coduser).length == 0 ? 
-          BaseButton(
-            margin:true,
-            onPressed:(){
-              sendMessage(
-                state:_messagesState,
-                to: user,
-                from: _userstate.user,
-                then:(){
-                }  
-              );
-
-             // _userstate.sendMessage(user,'classrequest');
-             // setState(() {});
-            },
-            color:Configuration.maincolor,
-            text: 'Send a Message '
-          ) : Container(),*/
+              itemCount: user.addedcontent.length,
+              itemBuilder: (BuildContext context, int index) { 
+                Content c = user.addedcontent[index];
+                return ClickableSquare(
+                  blockedtext: '',
+                  border: true,
+                  onTap:()=>{
+                    Navigator.push(context, 
+                      MaterialPageRoute(builder: (context){
+                        return ContentFrontPage(
+                          content: c,
+                        );
+                      })
+                    )
+                  },
+                  blocked: _userstate.user.isContentBlocked(c),
+                  text: c.title,
+                  selected: true,
+                  image: c.image,
+                );
+              },
+            ),
           
-          SizedBox(height:Configuration.verticalspacing*2)
-      ]);
+          
+            SizedBox(height: Configuration.verticalspacing*2),
+
+          ],
+        ): Container();
+    }
+    
+    Widget teacherView(){
+      
+
+
+      return DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            
+
+            Expanded(
+              child: TabBarView(children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    isMe ? 
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary:Colors.lightBlue
+                          ),
+                          onPressed: () {  
+                            setState(() {
+                              editingProfile =true;
+                            });
+                          },
+                          child: Text('Edit profile',style:Configuration.text('small',Colors.white)),
+                        ),
+                      ],
+                    ) : Container(),
+              
+                    SizedBox(height:Configuration.verticalspacing*2),
+                    Text(user.description != null ? user.description : 'The description goes here',
+                      style:Configuration.text('small',Colors.black, height:1.4, font:'Helvetica')
+                    ),
+                    SizedBox(height: Configuration.verticalspacing*1.5),
+                    textIcon(Icons.group, user.students.length.toString() + ' students', (){
+                      Navigator.push(
+                          context,
+                            MaterialPageRoute(
+                                builder: (context) => ViewFollowers(
+                                users: user.students,
+                                title: 'Students'
+                            )
+                        ),
+                      );
+                    }),
+                    SizedBox(height:Configuration.verticalspacing*1.5),
+                    textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
+                    (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context)=> Scaffold(
+                              appBar: AppBar(
+                                leading: ButtonClose(),
+                                backgroundColor:Colors.white,
+                                elevation: 0,
+                              ),
+                              body: WebView(
+                                initialUrl:'https:' + user.website,
+                                javascriptMode: JavascriptMode.unrestricted),
+                            )
+                            )
+                        );
+                    }),
+                    SizedBox(height: Configuration.verticalspacing*1.5),
+                    textIcon(Icons.place, user.location != null ?  user.location : 'Add a location'),
+                    SizedBox(height: Configuration.verticalspacing*1.5),
+                    textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
+                    SizedBox(height: Configuration.verticalspacing*1.5),      
+                    /*
+                    !isMe && user.messages.where((element) => element.sender == _userstate.user.coduser).length == 0 ? 
+                    BaseButton(
+                      margin:true,
+                      onPressed:(){
+                        sendMessage(
+                          state:_messagesState,
+                          to: user,
+                          from: _userstate.user,
+                          then:(){
+                          }  
+                        );
+              
+                      // _userstate.sendMessage(user,'classrequest');
+                      // setState(() {});
+                      },
+                      color:Configuration.maincolor,
+                      text: 'Send a Message '
+                    ) : Container(),*/
+                    
+                    SizedBox(height:Configuration.verticalspacing*2)
+                  ]),
+                  addedContent()
+              ]),
+            )
+        
+          ],
+        ),
+      );
     } 
 
     Widget teacherEdit(){
@@ -311,21 +337,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
+    return DefaultTabController(
+      length: 2, 
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(color: Configuration.lightgrey),
+            child: TabBar(
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: Colors.lightBlue,
+              labelStyle: Configuration.text('small',Colors.black),
+              tabs: [
+              Tab(child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(Icons.info),
+                  Text('Information'),
+                ],
+              )),
+              Tab(child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(Icons.book),
+                  Text('Added Content'),
+                ],
+              ))
+            ]),
+          ),
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-      child: !editingProfile ? teacherView() : teacherEdit()
-    );
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+              child: TabBarView(children: [
+                _profilestate.loading ? 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgress(),
+                  ],
+                ) 
+                : !editingProfile ?  teacherView() 
+                : teacherEdit(),
+                addedContent()
+              ]),
+            ),
+          )
+        ],
+        )
+      ) ;
   }
 
   Widget userProfile(User user){
-    return  ListView(
+    return _profilestate.loading ? 
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgress(),
+        ],
+      ):  ListView(
       primary: false,
       physics: ClampingScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
       children: <Widget>[
-        SizedBox(height: Configuration.verticalspacing*2),
-        Row(
+        SizedBox(height: Configuration.verticalspacing),
+        /*Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
           TextButton(
@@ -367,8 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ) 
         ],
-        ),
-        SizedBox(height: Configuration.verticalspacing*1.5),
+        ),*/
         Table(children: [
           TableRow(children: [
             ProfileInfoBigCard(
@@ -423,6 +498,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void didChangeDependencies(){
     super.didChangeDependencies();
 
+    viewing = personal_info;
     _profilestate = Provider.of<ProfileState>(context);
     _userstate = Provider.of<UserState>(context);
     _messagesState = Provider.of<MessagesState>(context);
@@ -445,7 +521,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           leading: ButtonBack(color: Colors.white),
           actions: 
             isMe ? [
-              MessagesIcon(color: Colors.white),
+              //MessagesIcon(color: Colors.white),
               IconButton(
                 padding: EdgeInsets.all(0.0),
                 onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -457,6 +533,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ]: 
             [
+              Container()
+              /*
               Container(
                 margin:EdgeInsets.only(right:Configuration.verticalspacing),
                 child: PopupMenuButton<String>(
@@ -501,7 +579,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     size: Configuration.medicon,
                   ),
                 ),
-              ),
+              ),*/
           ],
       ),
       body:Stack(children: <Widget>[
@@ -573,18 +651,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width:Configuration.width,
                     height:Configuration.height,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                      color: Colors.white
                     ),
                     child: Observer(builder: (context){
-                     return _profilestate.loading ? 
-                      Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         CircularProgress(),
-                       ],
-                      ):
-                      user.isTeacher() ? teacherProfile(_profilestate.selected): 
+                     return user.isTeacher() ? teacherProfile(_profilestate.selected): 
                       userProfile(_profilestate.selected);
                     })
                   ),

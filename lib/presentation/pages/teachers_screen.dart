@@ -11,7 +11,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/content_view.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
@@ -108,7 +108,15 @@ class _TeachersScreenState extends State<TeachersScreen> {
               color:Configuration.lightgrey,
               child: Observer(
                 builder: (context) {
-                  return ListView.separated(
+                  if(_userstate.loading){
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgress(),
+                      ],
+                    );
+                  }else{
+                    return ListView.separated(
                     physics: ClampingScrollPhysics(),
                     itemBuilder: (context,int){
                       User user = _userstate.teachers[int];
@@ -154,6 +162,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
                     }, 
                     itemCount: _userstate.teachers.length
                   );
+                  } 
                 }
               ),
             ),

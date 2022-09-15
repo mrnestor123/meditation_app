@@ -147,12 +147,12 @@ abstract class _LoginState with Store {
     startedmaillogin = false;
 
     if (loggeduser != null && user != null) {
-      if(loggeduser.nombre == null){
+       if(loggeduser.nombre == null){
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => SetUserData()),
           (Route<dynamic> route) => false
-          );
+        );
       }else{
         if(!loggeduser.seenIntroCarousel){
           Navigator.pushAndRemoveUntil(
@@ -167,12 +167,12 @@ abstract class _LoginState with Store {
             (Route<dynamic> route) => false,
           );
         }
-      } 
+      }
     } else if(errormsg != null && errormsg != ''){
       if(type == 'google' && user != null){
         googleSignin.disconnect();
       }
-      print(errormsg);
+
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

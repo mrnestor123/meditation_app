@@ -1,27 +1,24 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
-import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/carousel_balls.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_card.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/stage_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
+import 'commonWidget/meditation_modal.dart';
 import 'commonWidget/progress_dialog.dart';
 
 class LearnScreen extends StatefulWidget {
@@ -46,14 +43,12 @@ class _LearnScreenState extends State<LearnScreen> {
           crossAxisCount: Configuration.width > 500 ? 3 : 2,
         ),
         itemBuilder: (context, index) {
-          var flex = _userstate.user.stage.stobjectives.lecciones == 0
+        /*  var flex = _userstate.user.stage.stobjectives.lecciones == 0
               ? 0
-              : ((_userstate.user.userStats.stage.lessons /
-                          _userstate.user.stage.stobjectives.lecciones) *
+              : ((_userstate.user.userStats.stage.lessons / _userstate.user.stage.stobjectives.lecciones) *
                       6)
-                  .round();
-          var _blocked =
-              _userstate.user.isStageBlocked(_userstate.data.stages[index]);
+                  .round();*/
+          var _blocked = _userstate.user.isStageBlocked(_userstate.data.stages[index]);
           return Container(
             decoration: BoxDecoration(
                 borderRadius:
@@ -95,10 +90,15 @@ class _LearnScreenState extends State<LearnScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => StageView(
-                              stage: _userstate.data.stages[index],
-                            )),
-                  ).then((value) => setState(() {}));
+                      builder: (context) => StageView(
+                        stage: _userstate.data.stages[index],
+                      )
+                    ),
+                  ).then((value) =>
+                    setState(() {
+                      print('SETTING STATE');
+                    })
+                  );
                 }
               },
               child: Stack(children: [
@@ -110,6 +110,7 @@ class _LearnScreenState extends State<LearnScreen> {
                         "smallmedium", !_blocked ? Colors.white : Colors.grey),
                   ),
                 ),
+                /*
                 false &&
                         !_blocked &&
                         _userstate.user.stagenumber == index + 1 &&
@@ -156,7 +157,7 @@ class _LearnScreenState extends State<LearnScreen> {
                                         : Container()
                                   ])),
                         ))
-                    : Container()
+                    : Container()*/
               ]),
               style: ElevatedButton.styleFrom(
                   elevation: _blocked ? 0 : 4,
@@ -172,96 +173,6 @@ class _LearnScreenState extends State<LearnScreen> {
             ),
           );
         });
-  }
-
-  Widget newLearnScreen() {
-    Widget listbutton({Phase phase}) {
-      return Expanded(
-        flex: 1,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => PhaseView(phase: phase)));
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(phase.title,
-                  style: Configuration.text('smallmedium', Colors.white)),
-              SizedBox(height: Configuration.verticalspacing),
-              Row(
-                children: [
-                  Icon(Icons.checklist, size: Configuration.smicon),
-                  SizedBox(width: Configuration.verticalspacing),
-                  Flexible(
-                      child: Text(phase.description,
-                          style: Configuration.text('small', Colors.white,
-                              font: 'Helvetica')))
-                ],
-              ),
-            ],
-          ),
-          style: ElevatedButton.styleFrom(
-              minimumSize: Size(double.infinity, double.infinity),
-              primary: Configuration.maincolor),
-        ),
-      );
-    }
-
-    List<Widget> listOfPhases() {
-      List<Widget> l = new List.empty(growable: true);
-
-      for (Phase p in _userstate.data.phases) {
-        l.add(listbutton(phase: p));
-        l.add(SizedBox(height: Configuration.verticalspacing));
-      }
-
-      return l;
-    }
-
-    return Column(
-      children: [
-        SizedBox(height: Configuration.verticalspacing),
-        Container(
-          padding: EdgeInsets.all(Configuration.smpadding),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
-                top: Radius.circular(Configuration.borderRadius)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                height: Configuration.height * 0.2,
-                child: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(Configuration.borderRadius / 3),
-                    child: Image.asset('assets/tenstages-book.png')),
-              ),
-              SizedBox(height: Configuration.verticalspacing),
-              Text('The Mind illuminated',
-                  style: Configuration.text('medium', Colors.black))
-            ],
-          ),
-        ),
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.all(Configuration.smpadding),
-            decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(Configuration.borderRadius / 3),
-                color: Colors.white),
-            child: Column(
-              children: listOfPhases(),
-            ),
-          ),
-        ),
-        SizedBox(height: Configuration.verticalspacing)
-      ],
-    );
   }
 
   @override
@@ -281,14 +192,18 @@ class StageView extends StatefulWidget {
   _StageViewState createState() => _StageViewState();
 }
 
+// PORQUE NO PASAMOS LA STAGE AQUI ????
 class _StageViewState extends State<StageView> {
   UserState _userstate;
 
-  var filter = ['all'];
+  var filter = ['lesson','meditation'];
+
+  List<Content> path ;
 
   FutureOr onGoBack(dynamic value) {
+    print('ONGOBACK');
     setState(() {
-      if (_userstate.user.progress != null) autocloseDialog(_userstate.user);
+      //if (_userstate.user.progress != null) autocloseDialog(_userstate.user);
     });
   }
 
@@ -302,166 +217,77 @@ class _StageViewState extends State<StageView> {
     List<Widget> lessons = new List.empty(growable: true);
     var count = 0;
 
-    widget.stage.path.forEach((content) {
-      count++;
-      var image;
-      var _blocked = _userstate.user.isLessonBlocked(content);
+    path = filter.contains('meditation-practice') ? widget.stage.meditpath :
+    filter.contains('video') ?  widget.stage.videos :
+    widget.stage.path;
 
-      if (filter.contains(content.type) || filter.contains('all')) {
-        lessons.add(AspectRatio(
-          aspectRatio: Configuration.lessonratio,
-          child: Container(
-            margin: EdgeInsets.all(Configuration.verticalspacing),
-            child: ElevatedButton(
-              onPressed: () {
-                if (!_blocked) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ContentView(
-                              lesson: content,
-                              content: content,
-                              slider: image))).then(onGoBack);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(0),
-                  primary: Colors.white,
-                  onPrimary: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          Configuration.borderRadius / 3)),
-                  minimumSize: Size(double.infinity, double.infinity)),
-              child: Stack(
-                children: [
-                  content.image != null && content.image.isNotEmpty
-                      ? Align(
-                          alignment: Alignment.centerRight,
-                          child: Hero(
-                              tag: content.cod,
-                              child: AspectRatio(
-                                  aspectRatio: 0.9,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.horizontal(
-                                        right: Radius.circular(
-                                            Configuration.borderRadius / 3)),
-                                    child: CachedNetworkImage(
-                                      imageUrl: content.image,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                        color: Colors.white,
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Icon(Icons.error),
-                                    ),
-                                  ))),
-                        )
-                      : Container(),
-                  Positioned(
-                      top: 15,
-                      left: 15,
-                      child: Row(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(
-                                right: Configuration.blockSizeHorizontal * 2),
-                            width: Configuration.safeBlockHorizontal * 5,
-                            height: Configuration.safeBlockHorizontal * 5,
-                            child: Icon(
-                                content.type == 'meditation'
-                                    ? Icons.self_improvement
-                                    : Icons.book,
-                                color: Colors.grey),
-                          ),
-                          _userstate.user.readLesson(content)
-                              ? Container(
-                                  width: Configuration.safeBlockHorizontal * 5,
-                                  height: Configuration.safeBlockHorizontal * 5,
-                                  child: Icon(Icons.visibility,
-                                      color: Colors.lightBlue),
-                                )
-                              : Container(),
-                        ],
-                      )),
-                  Positioned(
-                      left: 15,
-                      bottom: 15,
-                      child: Container(
-                        width: Configuration.width * 0.5,
-                        child: Text(
-                          content.title,
-                          style: Configuration.text(
-                            "small",
-                            _blocked ? Colors.grey : Colors.black,
-                          ),
-                        ),
-                      )),
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    top: 0,
-                    child: AnimatedContainer(
-                      padding: EdgeInsets.all(0),
-                      key: Key(content.cod),
-                      duration: Duration(seconds: 2),
-                      child: _blocked
-                          ? Center(
-                              child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.lock, size: Configuration.smicon),
-                                SizedBox(height: 10),
-                                Text(
-                                    'Unlocked after reading ' +
-                                        widget
-                                            .stage
-                                            .path[content.position == 0
-                                                ? content.position
-                                                : content.position - 1]
-                                            .title,
-                                    style: Configuration.text(
-                                        'tiny', Colors.white),
-                                    textAlign: TextAlign.center),
-                              ],
-                            ))
-                          : Container(),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              Configuration.borderRadius / 3),
-                          color: _blocked
-                              ? Colors.grey.withOpacity(0.8)
-                              : Colors.transparent),
-                      curve: Curves.fastOutSlowIn,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ));
-      }
+    path.forEach((content) {      
+      bool blocked = _userstate.user.isContentBlocked(content);
+      
+      lessons.add(
+        ContentCard(onPressed: () {
+          if(!blocked){
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ContentFrontPage(
+                  content: content, 
+                  then: onGoBack
+                  )
+              )
+            ).then(onGoBack);
+          } 
+        },
+        unlocksContent: path[content.position == 0
+          ? content.position
+          : content.position - 1],
+        content: content,
+        blocked: blocked,
+      )); 
     });
+
+    lessons.add(SizedBox(height: Configuration.verticalspacing*2));
 
     return Container(
       width: Configuration.width,
       color: Configuration.lightgrey,
-      child: lessons.length > 0
-          ? SingleChildScrollView(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: lessons),
-            )
-          : Center(
-              child: Text(
-              'There are no lessons',
-              style: Configuration.text('small', Colors.black),
-            )),
+      child: lessons.length > 1
+        ? SingleChildScrollView(
+          physics: ClampingScrollPhysics(),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: lessons
+            ),
+          )
+        : Center(
+            child: Text(
+            'There are no ' + (filter.contains('meditation-practice') ? 'meditations' : 'lessons'),
+            style: Configuration.text('small', Colors.black),
+          )
+        )
     );
   }
 
+  Widget filterButton({IconData icon, onPressed, condition}){
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: Configuration.verticalspacing*1.5),
+      child: OutlinedButton(
+        onPressed: onPressed,
+        child: Icon(icon,
+            color: condition
+                ? Colors.white
+                : Colors.black.withOpacity(0.5)),
+        style: ButtonStyle(
+        backgroundColor: condition
+          ? MaterialStateProperty.all<Color>(Configuration.maincolor)
+          : null,
+        )
+      ),
+    );
+  }
+  
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
@@ -473,29 +299,29 @@ class _StageViewState extends State<StageView> {
           IconButton(
               iconSize: Configuration.smicon,
               onPressed: () => {
-                    showGeneralDialog(
-                        context: context,
-                        barrierLabel: 'dismiss',
-                        barrierDismissible: true,
-                        pageBuilder: (context, anim1, anim2) {
-                          return AbstractDialog(
-                            content: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  color: Colors.white),
-                              padding: EdgeInsets.all(12),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  htmlToWidget(widget.stage.longdescription,
-                                    color: Colors.black, fontsize: 12.0
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        })
+                showGeneralDialog(
+                    context: context,
+                    barrierLabel: 'dismiss',
+                    barrierDismissible: true,
+                    pageBuilder: (context, anim1, anim2) {
+                      return AbstractDialog(
+                        content: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.white),
+                          padding: EdgeInsets.all(12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              htmlToWidget(widget.stage.longdescription,
+                                color: Colors.black, fontsize: 12.0
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    })
                   },
               icon: Icon(Icons.info, color: Colors.black))
         ],
@@ -505,73 +331,64 @@ class _StageViewState extends State<StageView> {
       body: Container(
         color: Configuration.white,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-              child: StageCard(stage: widget.stage),
+              padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  StageCard(stage: widget.stage),
+                  SizedBox(height: Configuration.verticalspacing),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('Showing', style: Configuration.text('small',Colors.black)),
+
+                      filterButton(
+                        icon:Icons.book,
+                        condition:filter.contains('lesson') || filter.contains('meditation'),
+                        onPressed:(){
+                          setState(() {
+                            filter = ['lesson','meditation'];
+                          });
+                        }
+                      ),
+
+                      widget.stage.meditpath.length > 0  ?
+                      filterButton(
+                        icon:Icons.self_improvement,
+                        condition:filter.contains('meditation-practice'),
+                        onPressed:(){
+                          setState(() {
+                            filter = ['meditation-practice'];
+                          });
+                        }
+                      ):Container(),
+
+                      widget.stage.videos.length > 0 && false ?
+                      filterButton(
+                        icon:Icons.ondemand_video,
+                        condition:filter.contains('video') ,
+                        onPressed:(){
+                          setState(() {
+                            filter = ['video'];
+                          });
+                        }
+                      ): Container()
+                    ],
+                  ),
+                ],
+              ),
             ),
+            
             SizedBox(height: Configuration.verticalspacing),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  'Filter',
-                  style: Configuration.text('small', Colors.black),
-                ),
-                OutlinedButton(
-                  onPressed: () => setState(
-                      () => filter.contains('all') ? '' : filter = ['all']),
-                  child: Icon(Icons.more_vert,
-                      color: filter.contains('all')
-                          ? Colors.white
-                          : Colors.black.withOpacity(0.5)),
-                  style: ButtonStyle(
-                    backgroundColor: filter.contains('all')
-                        ? MaterialStateProperty.all<Color>(
-                            Configuration.maincolor)
-                        : null,
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: () => setState(() {
-                    filter.contains('lesson') ? '' : filter = ['lesson'];
-                  }),
-                  child: Icon(Icons.book,
-                      color: filter.contains('lesson')
-                          ? Colors.white
-                          : Colors.black.withOpacity(0.5)),
-                  style: ButtonStyle(
-                    backgroundColor: filter.contains('lesson')
-                        ? MaterialStateProperty.all<Color>(
-                            Configuration.maincolor)
-                        : null,
-                  ),
-                ),
-                OutlinedButton(
-                  onPressed: () => setState(() => filter.contains('meditation')
-                      ? ''
-                      : filter = ['meditation']),
-                  child: Icon(Icons.self_improvement,
-                      color: filter.contains('meditation')
-                          ? Colors.white
-                          : Colors.black.withOpacity(0.5)),
-                  style: ButtonStyle(
-                    backgroundColor: filter.contains('meditation')
-                        ? MaterialStateProperty.all<Color>(
-                            Configuration.maincolor)
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
             Container(
-              height: 2,
+              height: 1,
               width: Configuration.width,
               color: Colors.grey,
             ),
-            Expanded(child: getLessons(context))
+            Expanded(child:getLessons(context))
           ],
         ),
       ),
@@ -579,75 +396,23 @@ class _StageViewState extends State<StageView> {
   }
 }
 
-class ContentView extends StatefulWidget {
-  Content content;
-  Meditation meditation;
+class LessonView extends StatefulWidget {
   Lesson lesson;
   NetworkImage slider;
 
-  ContentView({this.content, this.lesson, this.meditation, this.slider});
+  LessonView({this.lesson, this.slider});
 
   @override
-  _ContentViewState createState() => _ContentViewState();
+  _LessonViewState createState() => _LessonViewState();
 }
 
-// PODRIAMOS HACER CONTENTVIEW PARA TODO ???
-class _ContentViewState extends State<ContentView> {
+class _LessonViewState extends State<LessonView> {
   int _index = -1;
   var _userstate;
   Map<int, NetworkImage> textimages = new Map();
   var reachedend = false;
 
-  Widget portada() {
-    return Column(children: [
-      widget.content.image.isNotEmpty
-          ? Hero(
-              tag: widget.content.cod,
-              child: CachedNetworkImage(
-                imageUrl: widget.content.image,
-                placeholder: (context, url) => Container(
-                  height: Configuration.height * 0.4,
-                  width: Configuration.width,
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-                width: Configuration.width,
-                height: Configuration.height * 0.6,
-                fit: BoxFit.cover,
-              ))
-          : Container(
-              color: Configuration.lightgrey,
-              height: Configuration.height * 0.6),
-      Expanded(
-        child: Container(
-          width: Configuration.width,
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      left: Configuration.smpadding,
-                      right: Configuration.smpadding,
-                      top: Configuration.medpadding),
-                  child: Text(widget.content.title,
-                      textAlign: TextAlign.center,
-                      style: Configuration.text('big', Colors.black)),
-                ),
-              ),
-              Center(
-                  child: BaseButton(
-                      margin: true,
-                      text: 'Start Lesson',
-                      onPressed: () async {
-                        setState(() => _index = 0);
-                      }))
-            ],
-          ),
-        ),
-      )
-    ]);
-  }
-
+  // AQUÍ HABRÍA QUE PONER VISTA LECCIÓN ???
   Widget vistaLeccion() {
     return CarouselSlider.builder(
         itemCount: widget.lesson.text.length,
@@ -707,9 +472,9 @@ class _ContentViewState extends State<ContentView> {
             onPageChanged: (index, reason) {
               setState(() {
                 _index = index;
-                if (_index == widget.lesson.text.length - 1) {
+                if (_index == widget.lesson.text.length - 1  &&  !reachedend) {
                   Future.delayed(Duration(seconds: 2),
-                      () => setState(() => reachedend = true));
+                    () => setState(() => reachedend = true));
                 }
               });
             }));
@@ -718,20 +483,22 @@ class _ContentViewState extends State<ContentView> {
   @override
   void initState() {
     super.initState();
-    _index = -1;
+    _index = 0;
   }
 
   @override
   void didChangeDependencies() {
     var configuration = createLocalImageConfiguration(context);
 
-    if (widget.content.type == 'lesson') {
-      widget.lesson.text.forEach((slide) {
-        print(slide['image']);
-        if (slide['image'] != '') {
-          new NetworkImage(slide['image'])..resolve(configuration);
-        }
-      });
+    widget.lesson.text.forEach((slide) {
+      print(slide['image']);
+      if (slide['image'] != '') {
+        new NetworkImage(slide['image'])..resolve(configuration);
+      }
+    });
+
+    if(widget.lesson.text.length == 1){
+      reachedend = true;
     }
 
     super.didChangeDependencies();
@@ -745,46 +512,38 @@ class _ContentViewState extends State<ContentView> {
         extendBody: true,
         appBar: AppBar(
           leading: CloseButton(
-              color: Colors.black,
-              onPressed: () => showAlertDialog(
-                  title: 'Are you sure you want to exit ?',
-                  context: context,
-                  text: "This lesson will not count as read one")),
+            color: Colors.black,
+            onPressed: () => showAlertDialog(
+              title: 'Are you sure you want to exit ?',
+              context: context,
+              text: "This lesson will not count as read one"
+          )),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         extendBodyBehindAppBar: true,
-        body: _index == -1
-            ? portada()
-            : WillPopScope(
+        body: WillPopScope(
                 onWillPop: () {
                   print('CANT Go back');
                   return Future.value(true);
                 },
                 child: Stack(children: [
                   vistaLeccion(),
+                  
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
                       margin: EdgeInsets.all(15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: widget.lesson.text.map((url) {
-                          int index = widget.lesson.text.indexOf(url);
-                          return Container(
-                            width: Configuration.safeBlockHorizontal * 3,
-                            height: Configuration.safeBlockHorizontal * 3,
-                            margin: EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 2.0),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _index == index
-                                  ? Color.fromRGBO(0, 0, 0, 0.9)
-                                  : Color.fromRGBO(0, 0, 0, 0.4),
-                            ),
-                          );
-                        }).toList(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CarouselBalls(
+                            activecolor: Colors.black,
+                            index:_index,
+                            items:widget.lesson.text.length,
+                          ),
+                          SizedBox(height: Configuration.verticalspacing)
+                        ],
                       ),
                     ),
                   ),
@@ -793,438 +552,7 @@ class _ContentViewState extends State<ContentView> {
   }
 }
 
-class Portada extends StatelessWidget {
-  const Portada() : super();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-// PARA BORRAR.  UNA ALTERNATIVA !!!!!
-class PhaseView extends StatefulWidget {
-  Phase phase;
-
-  PhaseView({Key key, this.phase}) : super(key: key);
-
-  @override
-  _PhaseViewState createState() => _PhaseViewState();
-}
-
-class _PhaseViewState extends State<PhaseView> with TickerProviderStateMixin {
-  UserState _userstate;
-
-  TabController tabController;
-  int selectedIndex = 0;
-  var image;
-
-  List<Content> mindContent = new List.empty(growable: true);
-  List<Content> lessons = new List.empty(growable: true);
-  List<Content> meditations = new List.empty(growable: true);
-
-  FutureOr onGoBack(dynamic value) {
-    setState(() {
-      if (_userstate.user.progress != null) autocloseDialog(_userstate.user);
-    });
-  }
-
-  @override
-  void initState() {
-    tabController = TabController(length: 3, vsync: this);
-
-    tabController.addListener(() {
-      setState(() {});
-    });
-
-    mindContent = widget.phase.content
-        .where((element) => element.type == 'mind')
-        .toList();
-    lessons = widget.phase.content
-        .where((element) => element.type == 'lesson')
-        .toList();
-    meditations = widget.phase.content
-        .where((element) => element.type == 'meditation')
-        .toList();
-
-    super.initState();
-  }
-  /*
-  List<Widget> lessons(){
-    List<Widget> lessons = new List.empty(growable: true);
-
-    widget.phase.content.forEach((content) {
-      var image;
-      var _blocked = _userstate.user.isLessonBlocked(content);
-
-      if (true) {
-        lessons.add(AspectRatio(
-            aspectRatio: Configuration.lessonratio,
-            child: Container(
-            margin: EdgeInsets.all(Configuration.verticalspacing),
-           
-            child: ElevatedButton(
-              onPressed: () {
-                if (!_blocked) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ContentView(
-                      lesson: content,
-                      content: content,
-                      slider: image
-                      )
-                    )
-                  ).then(onGoBack);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.all(0),
-                  primary: Colors.white,
-                  onPrimary: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
-                  ),
-                  minimumSize: Size(double.infinity, double.infinity)),
-              child: Stack(
-                children: [
-                  content.image != null && content.image.isNotEmpty ?
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Hero(tag: content.cod ,
-                    child: AspectRatio(
-                      aspectRatio: 0.9,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.horizontal(right: Radius.circular(Configuration.borderRadius/3)),
-                        child: CachedNetworkImage(
-                          imageUrl: content.image,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            color: Colors.white,
-                          ),
-                          errorWidget: (context, url, error) => Icon(Icons.error),
-                        ),
-                        ))
-                    ),
-                  ) : Container(),
-                  Positioned(
-                      top: 15,
-                      left: 15,
-                      child: Row(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(right: Configuration.blockSizeHorizontal *2),
-                            width: Configuration.safeBlockHorizontal * 5,
-                            height: Configuration.safeBlockHorizontal * 5,
-                            child: Icon(
-                                content.type == 'meditation'
-                                    ? Icons.self_improvement
-                                    : Icons.book,
-                                color: Colors.grey),
-                          ),
-                          _userstate.user.readLesson(content)
-                            ?  
-                            Container(
-                              width: Configuration.safeBlockHorizontal * 5,
-                              height: Configuration.safeBlockHorizontal * 5,
-                              child: Icon(Icons.visibility,color: Colors.lightBlue),
-                            ): Container(),
-                        ],
-                      )),
-                  Positioned(
-                      left: 15,
-                      bottom: 15,
-                      child: Container(
-                        width: Configuration.width * 0.5,
-                        child: Text(
-                          content.title,
-                          style:Configuration.text("small", _blocked ? Colors.grey : Colors.black, 
-                                ),
-                        ),
-                      )),
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    top: 0,
-                    child: AnimatedContainer(
-                      padding: EdgeInsets.all(0),
-                      key: Key(content.cod),
-                      duration: Duration(seconds: 2),
-                      child: _blocked?
-                        Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(Icons.lock, size: Configuration.smicon),
-                              SizedBox(height: 10),
-                             // Text('Unlocked after reading ' + widget.stage.path[content.position == 0 ? content.position :content.position-1].title , style: Configuration.text('tiny', Colors.white),textAlign: TextAlign.center ),
-                            ],
-                          )
-                        ) :Container(),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
-                          color: _blocked
-                              ? Colors.grey.withOpacity(0.8)
-                              : Colors.transparent),
-                      curve: Curves.fastOutSlowIn,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ));
-      }
-    });
-
-    return lessons;
-  }
-  */
-
-  Widget contentView({Content content, blocked = false}) {
-    return AspectRatio(
-      aspectRatio: Configuration.lessonratio,
-      child: Container(
-        margin: EdgeInsets.all(Configuration.verticalspacing),
-        child: ElevatedButton(
-          onPressed: () {
-            if (!blocked) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ContentView(
-                      lesson: content,
-                      content: content,
-                      slider: image))).then(onGoBack);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.all(0),
-              primary: Colors.white,
-              onPrimary: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(Configuration.borderRadius / 3)),
-              minimumSize: Size(double.infinity, double.infinity)),
-          child: Stack(
-            children: [
-              content.image != null && content.image.isNotEmpty
-                  ? Align(
-                      alignment: Alignment.centerRight,
-                      child: Hero(
-                          tag: content.cod,
-                          child: AspectRatio(
-                              aspectRatio: 0.9,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(
-                                        Configuration.borderRadius / 3)),
-                                child: CachedNetworkImage(
-                                  imageUrl: content.image,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Container(
-                                    color: Colors.white,
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
-                                ),
-                              ))),
-                    )
-                  : Container(),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  width: Configuration.width * 0.5,
-                  child: Text(content.title,
-                      style: Configuration.text(
-                          "small", blocked ? Colors.grey : Colors.black),
-                      textAlign: TextAlign.center),
-                )
-              ),
-              Positioned(
-                left: 0,
-                bottom: 0,
-                right: 0,
-                top: 0,
-                child: AnimatedContainer(
-                  padding: EdgeInsets.all(0),
-                  key: Key(content.cod),
-                  duration: Duration(seconds: 2),
-                  child: blocked
-                      ? Center(
-                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.lock, size: Configuration.smicon),
-                            SizedBox(height: 10),
-                            // Text('Unlocked after reading ' + widget.stage.path[content.position == 0 ? content.position :content.position-1].title , style: Configuration.text('tiny', Colors.white),textAlign: TextAlign.center ),
-                          ],
-                        ))
-                      : Container(),
-                  decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(Configuration.borderRadius / 3),
-                      color: blocked
-                          ? Colors.grey.withOpacity(0.8)
-                          : Colors.transparent),
-                  curve: Curves.fastOutSlowIn,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // contenedor
-  Widget containerIcon({IconData icon, Color color, child}) {
-    return Stack(children: [
-      Container(
-          padding: EdgeInsets.all(Configuration.smpadding),
-          decoration: BoxDecoration(
-              color: color,
-              borderRadius:
-                  BorderRadius.circular(Configuration.borderRadius / 2)),
-          child: child),
-      Align(
-        alignment: Alignment.topLeft,
-        child: Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(Configuration.borderRadius / 2),
-                  bottomRight:
-                      Radius.circular(Configuration.borderRadius / 2))),
-          child: Icon(icon, size: Configuration.tinicon),
-        ),
-      ),
-    ]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        bottom: PreferredSize(
-            child: Container(
-              color: Colors.grey,
-              height: 1.0,
-            ),
-            preferredSize: Size.fromHeight(2)),
-        backgroundColor: Colors.transparent,
-        leading: ButtonBack(),
-        title: Text(widget.phase.title,
-            style: Configuration.text('small', Colors.black)),
-      ),
-      body: Container(
-        padding: EdgeInsets.all(Configuration.smpadding),
-        child: ListView(
-          shrinkWrap: true,
-          physics: ClampingScrollPhysics(),
-          children: [
-            containerIcon(
-                icon: Icons.check,
-                color: Configuration.maincolor,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('The objective of this phase is to achieve',
-                          style: Configuration.text('small', Colors.white,
-                              font: 'Helvetica')),
-                      SizedBox(height: Configuration.verticalspacing),
-                      Text(widget.phase.description,
-                          style: Configuration.text('small', Colors.white),
-                          textAlign: TextAlign.center)
-                    ])),
-            SizedBox(height: Configuration.verticalspacing),
-            containerIcon(
-                color: Configuration.lightgrey,
-                icon: FontAwesomeIcons.brain,
-                child: Column(
-                  children: [
-                    Text(
-                      'The map of the mind',
-                      style: Configuration.text('small', Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    ListView.builder(
-                      padding: EdgeInsets.all(0),
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: mindContent.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Content c = mindContent[index];
-                        return contentView(content: c);
-                      },
-                    )
-                  ],
-                )),
-            SizedBox(height: Configuration.verticalspacing),
-            containerIcon(
-                icon: Icons.self_improvement,
-                color: Colors.lightBlue,
-                child: Column(
-                  children: [
-                    Text(
-                      'You will encounter this problems meditating',
-                      style: Configuration.text('small', Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    ListView.builder(
-                      padding: EdgeInsets.all(0),
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: meditations.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Content c = meditations[index];
-                        return contentView(content: c);
-                      },
-                    ),
-                  ],
-                )),
-            SizedBox(height: Configuration.verticalspacing),
-            containerIcon(
-                icon: Icons.book,
-                color: Colors.lightBlue,
-                child: Column(
-                  children: [
-                    Text(
-                      'Meditation information you should know',
-                      style: Configuration.text('small', Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    ListView.builder(
-                      padding: EdgeInsets.all(0),
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: lessons.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Content c = lessons[index];
-                        return contentView(content: c);
-                      },
-                    ),
-                  ],
-                )),
-            SizedBox(height: Configuration.verticalspacing),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 
 

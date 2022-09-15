@@ -6,11 +6,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/progress_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/main.dart';
+
+import '../../../domain/entities/stage_entity.dart';
 
 
 void autocloseDialog(User user, {isTablet = false}) async {
@@ -211,3 +214,73 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
     );
   }
 }
+
+
+
+
+Widget stageUpdated({Stage s,UserState userstate, close}){
+    return Container(
+      color: Colors.black.withOpacity(0.9),
+      padding: EdgeInsets.all(Configuration.smpadding),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height:Configuration.verticalspacing*5),
+          Text('Congratulations', style: Configuration.text('big', Colors.white)),
+          SizedBox(height:Configuration.verticalspacing*2),
+          Text('You have updated to the next stage', style: Configuration.text('smallmedium', Colors.white) ),
+          SizedBox(height: Configuration.verticalspacing * 2),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+              border: Border.all(
+                color: Colors.white,
+              )
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/3)),
+                  child: CachedNetworkImage(
+                    imageUrl: s.shortimage, 
+                    fit:BoxFit.cover, 
+                    width: Configuration.width,
+                    placeholder: (context, url) => Container(height: Configuration.width*0.2, width: Configuration.width*0.2,), errorWidget: (context, url, error) => Container(height: Configuration.width*0.2, width: Configuration.width*0.2,))
+                ),
+                SizedBox(height: Configuration.verticalspacing),
+                Padding(
+                  padding:EdgeInsets.only(left:6),
+                  child: Text('Stage '+ s.stagenumber.toString(), style: Configuration.text('big', Colors.black)),
+                ),
+                SizedBox(height: Configuration.verticalspacing/2),
+                Padding(
+                  padding:EdgeInsets.only(left:6),
+                  child: Text(s.description, style: Configuration.text('smallmedium', Colors.black, font:'Helvetica')),
+                ),
+                SizedBox(height: Configuration.verticalspacing),
+                htmlToWidget(s.longdescription,color: Colors.black, fontsize: 13)
+              ],
+            ),
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+          Spacer(),
+          BaseButton(
+            color: Colors.red,
+            text:'Close',
+            textcolor: Colors.white,
+            border: true,
+            onPressed: (){
+              userstate.closeStageUpdate();
+              close();
+              //Navigator.of(navigatorKey.currentContext).pop();
+            },
+          ),
+          SizedBox(height: Configuration.verticalspacing * 2),
+        ],
+      ),
+    );
+  }
