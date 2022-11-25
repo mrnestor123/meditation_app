@@ -15,11 +15,8 @@ import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dar
 import 'package:meditation_app/presentation/pages/commonWidget/stage_card.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
-import 'commonWidget/meditation_modal.dart';
-import 'commonWidget/progress_dialog.dart';
 
 class LearnScreen extends StatefulWidget {
   LearnScreen();
@@ -224,20 +221,8 @@ class _StageViewState extends State<StageView> {
     path.forEach((content) {      
       bool blocked = _userstate.user.isContentBlocked(content);
       
-      lessons.add(
-        ContentCard(onPressed: () {
-          if(!blocked){
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ContentFrontPage(
-                  content: content, 
-                  then: onGoBack
-                  )
-              )
-            ).then(onGoBack);
-          } 
-        },
+      lessons.add(ContentCard(
+        then:onGoBack,
         unlocksContent: path[content.position == 0
           ? content.position
           : content.position - 1],
@@ -270,7 +255,6 @@ class _StageViewState extends State<StageView> {
   }
 
   Widget filterButton({IconData icon, onPressed, condition}){
-
     return Container(
       margin: EdgeInsets.symmetric(horizontal: Configuration.verticalspacing*1.5),
       child: OutlinedButton(
@@ -294,36 +278,36 @@ class _StageViewState extends State<StageView> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: ButtonBack(),
+        leading: BackButton(color: Colors.black),
         actions: [
           IconButton(
-              iconSize: Configuration.smicon,
-              onPressed: () => {
-                showGeneralDialog(
-                    context: context,
-                    barrierLabel: 'dismiss',
-                    barrierDismissible: true,
-                    pageBuilder: (context, anim1, anim2) {
-                      return AbstractDialog(
-                        content: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.white),
-                          padding: EdgeInsets.all(12),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              htmlToWidget(widget.stage.longdescription,
-                                color: Colors.black, fontsize: 12.0
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    })
-                  },
-              icon: Icon(Icons.info, color: Colors.black))
+            iconSize: Configuration.smicon,
+            onPressed: () => {
+              showGeneralDialog(
+                context: context,
+                barrierLabel: 'dismiss',
+                barrierDismissible: true,
+                pageBuilder: (context, anim1, anim2) {
+                  return AbstractDialog(
+                    content: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          color: Colors.white),
+                      padding: EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          htmlToWidget(widget.stage.longdescription,
+                            color: Colors.black, fontsize: 12.0
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                })
+              },
+            icon: Icon(Icons.info, color: Colors.black))
         ],
         backgroundColor: Configuration.white,
         elevation: 0,
@@ -366,7 +350,7 @@ class _StageViewState extends State<StageView> {
                         }
                       ):Container(),
 
-                      widget.stage.videos.length > 0 && false ?
+                      widget.stage.videos.length > 0  ?
                       filterButton(
                         icon:Icons.ondemand_video,
                         condition:filter.contains('video') ,

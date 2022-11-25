@@ -31,6 +31,10 @@ class Content {
   bool isVideo(){
     return type =='video';
   }
+  
+  bool isLesson() {
+    return type =='lesson' || type == 'meditation';
+  }
 
   Map<String,dynamic> toJson(){
     return {
@@ -49,25 +53,24 @@ class Content {
   Map<String,dynamic> toFullJson(){
     return {
       'cod': cod,
-      'stagenumber':stagenumber,
-      'title':title,
-      'description':description,
-      'type':type,
+      'stagenumber': stagenumber,
+      'title': title,
+      'description': description,
+      'type': type,
       // ESTO NO DEBERÍA DE ESTAR AQUI !!! O
-      'done':done != null  ? done.inMinutes : 0,
-      'total':total != null ? total.inMinutes: 0,
-      "file":file != null ? file : '',
+      'done': done != null  ? done.inMinutes : 0,
+      'total': total != null ? total.inMinutes: 0,
+      "file": file != null ? file : '',
       'doneBy': doneBy,
-      "image":image != null ? image :''
+      "image": image != null ? image :''
     };
   }
 
   IconData getIcon(){
-    if(this.file.isNotEmpty){
-      return isAudio(this.file) ? Icons.audiotrack : Icons.browse_gallery;
-    }else {
-      return Icons.abc;
-    }
+    return isRecording() ? Icons.audiotrack :
+      isVideo() ? Icons.ondemand_video : 
+      isMeditation() ? Icons.self_improvement
+      : Icons.book;
   }
 
   String getText(){

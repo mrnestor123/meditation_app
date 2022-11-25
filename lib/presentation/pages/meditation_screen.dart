@@ -24,6 +24,7 @@ import 'package:meditation_app/presentation/pages/more_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/local_notifications.dart';
+import 'commonWidget/animated_toggle.dart';
 import 'commonWidget/horizontal_picker.dart';
 import 'commonWidget/progress_dialog.dart';
 import 'config/configuration.dart';
@@ -40,7 +41,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
   MeditationState _meditationstate;
   GameState _gamestate;
   int seltime = 5;  
-  String presetName = '';
 
   //podriamos utilizar meditationstate de arriba
   var meditationtype = 'free';
@@ -49,20 +49,25 @@ class _MeditationScreenState extends State<MeditationScreen> {
   var finished = false;
   bool canStart = false;
 
-
-
   AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
 
   // LISTA DE BELLS
   List<IntervalBell> bells = [
     IntervalBell(sound: 'assets/audios/bowl-sound.mp3',name:'Bowl sound',image:'assets/audios/bowl.png'),
     IntervalBell(sound: 'assets/audios/high-gong.wav',name:'High gong',image:'assets/audios/high-gong.png'),
-    IntervalBell(sound: 'assets/audios/church-bell.mp3',name: 'Church bell', image:'assets/audios/church-bell.jpg'),
+    IntervalBell(sound: 'assets/audios/church-bell.mp3',name: 'Church bell', image:'assets/audios/church-bell.png'),
     IntervalBell(sound: 'assets/audios/bronze-bell.wav',name: 'Bronze bell', image:'assets/audios/bronze-bell.png'),
   ];
 
+  // LISTA DE SONIDOS AMBIENTALES
+  List<IntervalBell> ambientSounds = [
+    IntervalBell(sound: 'assets/ambient_sounds/bonfire.mp3',name:'Bonfire',image:'assets/ambient_sounds/bonfire.jpg'),
+    IntervalBell(sound: 'assets/ambient_sounds/ocean.mp3',name:'Ocean Waves ',image:'assets/ambient_sounds/ocean.jpg'),
+    IntervalBell(sound: 'assets/ambient_sounds/rain.mp3',name: 'Rain', image:'assets/ambient_sounds/rain.jpg'),
+    IntervalBell(sound: 'assets/ambient_sounds/thunderStorm.m4a',name: 'Thunder Storm', image:'assets/ambient_sounds/thunder.jpg'),
+  ];
 
-  Widget buttonModal(child, text, selected,[scroll = false]){
+  Widget buttonModal(child, text, selected,[scroll = false,then]){
     return AspectRatio(
       aspectRatio: 11/2,
       child: ElevatedButton(
@@ -77,7 +82,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           showModalBottomSheet(
             isScrollControlled: scroll,
             barrierColor: Colors.black.withOpacity(0.5),
-             shape: RoundedRectangleBorder(
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
             ),
             context: context, 
@@ -86,9 +91,12 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 padding: EdgeInsets.all(Configuration.smpadding),
                 child: child
               );
-            }).then((value) => 
-              setState((){})            
-            )
+            }).then((value) {
+              setState((){}); 
+              if(then != null){
+                then();
+              }           
+            })
         }, 
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +107,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
         )
       ),
     );
-
   }
 
   String getBellString({List<IntervalBell> bells}){
@@ -113,12 +120,13 @@ class _MeditationScreenState extends State<MeditationScreen> {
   }
 
   Widget freeMeditation() {
+    String whatIsplaying;
 
     Widget presets(){
       bool isEditingPresets = false;
       List<MeditationPreset> toRemove = new List.empty(growable: true);
 
-      Widget myPresets(setState){
+      Widget myPresets(setSt){
         return ListView.separated(
           shrinkWrap:true,
           physics: ClampingScrollPhysics(),
@@ -137,73 +145,83 @@ class _MeditationScreenState extends State<MeditationScreen> {
                     if(!isEditingPresets){
                       _meditationstate.selectPreset(p);
                       Navigator.pop(context);
-                      setState(() {});
+                      setState(() {
+                        print('SET STATE');
+                      });
                     }
                   },
                   trailing: Container(
-                        constraints:BoxConstraints(
-                          maxWidth:Configuration.width*0.6
-                        ),
-                        child: Stack(
-                          children: [
-                            Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.timer,size: Configuration.tinicon),
-                                  Text('${p.duration} min', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
-                                  
-                                  SizedBox(width: Configuration.verticalspacing),
-                                  
-                                  p.intervalBell != null && p.intervalBell.isNotEmpty ?
-                                  Expanded(
-                                     child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.notifications,size: Configuration.tinicon),
-                                        Flexible(
-                                          child: Text('${p.intervalBell}',
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
-                                        ),
-                                      ],
-                                    ),
-                                  ): Container(),
+                    constraints:BoxConstraints(
+                      maxWidth:Configuration.width*0.7,
+                    ),
+                    child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.timer,size: Configuration.tinicon),
+                          Text('${p.duration} min', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                                                    
+                          p.intervalBell != null && p.intervalBell.isNotEmpty ?
+                          Expanded(
+                              child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.notifications,size: Configuration.tinicon),
+                                Flexible(
+                                  child: Text('${p.intervalBell}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                                ),
+                              ],
+                            ),
+                          ): Container(),
 
-                                p.bells != null && p.bells.length > 0 ?
-                                  Container(
-                                    constraints: BoxConstraints(
-                                      maxWidth: Configuration.width*0.2
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(Icons.notifications,size: Configuration.tinicon),
-                                        Flexible(
-                                          child: Text(getBellString(bells:p.bells), 
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Configuration.text('tiny', Colors.black, font:'Helvetica'))
-                                        ),
-                                      ],
-                                    ),
-                                  ): Container(),
-                                
-                                 SizedBox(width: Configuration.verticalspacing),
-                                  p.warmuptime > 0 ?  
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.local_fire_department, size:  Configuration.tinicon),
-                                      Text('${p.warmuptime.floor().toString()} s', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
-                                    ],
-                                  )
-                                  :Container()
-                                ],
-                              ),
-                           
-                          
-                          ],
+
+                        p.settings.ambientsound != null && p.settings.ambientsound.name.isNotEmpty ? 
+                        Container(
+                          constraints: BoxConstraints(
+                            maxWidth: Configuration.width*0.2
+                          ),
+                          child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.audiotrack,size: Configuration.tinicon),
+                                Flexible(
+                                  child: Text(p.settings.ambientsound.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                                ),
+                              ],
+                          ),
+                        ) : Container(),
+
+                      p.settings.bells != null && p.settings.bells.length > 0 ?
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: Configuration.width*0.25
                         ),
-                      ), 
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.notifications,size: Configuration.tinicon),
+                            Flexible(
+                              child: Text(getBellString(bells:p.settings.bells), 
+                              overflow: TextOverflow.ellipsis,
+                              style: Configuration.text('tiny', Colors.black, font:'Helvetica'))
+                            ),
+                          ],
+                        )): Container(),
+                        
+                        p.settings.warmuptime > 0 ?  
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.local_fire_department, size:  Configuration.tinicon),
+                            Text('${p.settings.warmuptime.floor().toString()} s', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                          ],
+                        ): Container()
+                        ],
+                      ),
+                  ), 
                   title: Text(p.name, style: Configuration.text('small', Colors.black)),
             ),
                 
@@ -219,7 +237,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                             onYes:(){
                               _userstate.user.presets.remove(p);
                               _userstate.updateUser();
-                              setState((){});
+                              setSt((){});
                             },
                             onNo:(){
                             }
@@ -296,6 +314,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
     }
 
     Widget savePreset(){
+      String presetName = '';
+
+
       Widget item(left, right){
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -309,67 +330,81 @@ class _MeditationScreenState extends State<MeditationScreen> {
   
       return StatefulBuilder(
         builder: (context,setState) {
-          return Container(
-            padding: EdgeInsets.all(Configuration.smpadding),              
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(height: Configuration.verticalspacing),
-                Container(
-                  height: Configuration.verticalspacing*5,
-                  child: TextField(
-                  onChanged:(e){ setState((){presetName = e;});},
-                  minLines: null,
-                  maxLines: null,
-                  expands: true,
-                    scrollPadding: EdgeInsets.all(Configuration.smpadding),
-                    style: Configuration.text('small', Colors.black),
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-                      hintText: 'Session name',
-                      labelStyle:Configuration.text('small', Colors.black),
-                      hintStyle: Configuration.text('small', Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
-                        borderSide: BorderSide(color: Colors.grey)
-                      )
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: EdgeInsets.all(Configuration.smpadding),              
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: Configuration.verticalspacing),
+                  Container(
+                    height: Configuration.verticalspacing*5,
+                    child: TextField(
+                    
+                    onChanged:(e){ setState((){presetName = e;});},
+                    minLines: null,
+                    maxLines: null,
+                    expands: true,
+                      scrollPadding: EdgeInsets.all(Configuration.smpadding),
+                      style: Configuration.text('small', Colors.black),
+                      decoration: InputDecoration(
+                        
+                        contentPadding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                        hintText: 'Session name',
+                        labelStyle:Configuration.text('small', Colors.black),
+                        hintStyle: Configuration.text('small', Colors.grey),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+                          borderSide: BorderSide(color: Colors.grey)
+                        )
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: Configuration.verticalspacing),
-                item('Duration', _meditationstate.selmeditation.duration.inMinutes.toString() + ' min'),
-                SizedBox(height: Configuration.verticalspacing),
-                item('Warm up time', _meditationstate.selmeditation.meditationSettings.warmuptime.floor().toString() + ' s'),
-                SizedBox(height: Configuration.verticalspacing),
-                item('Interval', _meditationstate.bells.length > 0 ? getBellString() : 'No interval'),
-                SizedBox(height: Configuration.verticalspacing*2),
-                BaseButton(
-                  onPressed: presetName.isNotEmpty ? (){
-                    MeditationPreset p = new MeditationPreset(
-                      name: presetName,
-                      duration: _meditationstate.selmeditation.duration.inMinutes,
-                      warmuptime: _meditationstate.selmeditation.meditationSettings.warmuptime,
-                    );
+                  SizedBox(height: Configuration.verticalspacing),
+                  item('Duration',_meditationstate.selmeditation.meditationSettings.isUnlimited  ? 'Unlimited':   _meditationstate.selmeditation.duration.inMinutes.toString() + ' min'),
+                  SizedBox(height: Configuration.verticalspacing),
+                  item('Warm up time', _meditationstate.selmeditation.meditationSettings.warmuptime.floor().toString() + ' s'),
+                  SizedBox(height: Configuration.verticalspacing),
+                  item('Interval', _meditationstate.bells.length > 0 ? getBellString() : 'No interval'),
+                  SizedBox(height: Configuration.verticalspacing),
+                  item('Ambient sound', _meditationstate.selmeditation.meditationSettings.ambientsound != null ? _meditationstate.selmeditation.meditationSettings.ambientsound.name : 'None'),
+                  SizedBox(height: Configuration.verticalspacing),
+                  item('Add Six step preparation', _meditationstate.selmeditation.meditationSettings.addSixStepPreparation ? 'Yes' : 'No'),
+                  
+                  SizedBox(height: Configuration.verticalspacing*2),
 
-                    p.bells = _meditationstate.bells;
+                  BaseButton(
+                    onPressed: presetName.isNotEmpty ? (){
+                      
+                      MeditationPreset p = new MeditationPreset(
+                        name: presetName,
+                        duration: _meditationstate.selmeditation.duration.inMinutes,
+                        settings:  _meditationstate.selmeditation.meditationSettings
+                      );
 
-                    _userstate.user.presets.add(p);
-                    _userstate.updateUser();
-                    
-                    Navigator.pop(context);
-                  } : null,
-                  color: Colors.lightBlue,
-                  text: 'Save session',
-                ),
-                SizedBox(height: Configuration.verticalspacing*2)
-              ],
-            )
+                      // de momento esto hace falta !!
+                      p.settings.bells = _meditationstate.bells;
+
+                      _userstate.user.presets.add(p);
+                      _userstate.updateUser();
+
+                      Navigator.pop(context);
+
+                    } : null,
+                    color: Colors.lightBlue,
+                    text: 'Save session',
+                  ),
+                  SizedBox(height: Configuration.verticalspacing*2)
+                ],
+              )
+            ),
           );
         }
       );
@@ -437,16 +472,13 @@ class _MeditationScreenState extends State<MeditationScreen> {
                         initialPage: selectedIndex,
                         enableInfiniteScroll: false,
                         onPageChanged: (int i, d){
-                          
-                            assetsAudioPlayer.stop().then((s){
-                              assetsAudioPlayer.open(Audio(bells[i].sound));
-                            
-                            });
+                          assetsAudioPlayer.stop().then((s){
+                            assetsAudioPlayer.open(Audio(bells[i].sound));
+                          });
 
-                            setState(() {
-                              selectedIndex =  i;
-                            });
-                          
+                          setState(() {
+                            selectedIndex =  i;
+                          });
                         }
                       )
                     ),
@@ -484,8 +516,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
                         thumbColor: Colors.white,
                         inactiveColor: Colors.white,
                         min: 1,
-                        max: _meditationstate.selmeditation.duration.inMinutes.toDouble() - 1,
-                        divisions: _meditationstate.selmeditation.duration.inMinutes -2,
+                        max: _meditationstate.selmeditation.meditationSettings.isUnlimited ? 60 :  _meditationstate.selmeditation.duration.inMinutes.toDouble() - 1,
+                        divisions:_meditationstate.selmeditation.meditationSettings.isUnlimited ? 59 : _meditationstate.selmeditation.duration.inMinutes -2,
                         onChanged: (a){
                           setState((){selectedTime = a.toInt();});
                         }, 
@@ -510,7 +542,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
                           image: bells[selectedIndex].image,
                           sound:bells[selectedIndex].sound
                         ); 
-                        
+
+                        // hay que pasar esto a meditation settings !!
                         if(b != null){
                           _meditationstate.bells[i] = bell;
                         }else{
@@ -579,179 +612,394 @@ class _MeditationScreenState extends State<MeditationScreen> {
       );
     }
 
-    return layout(
-      Column(
-      children: [
-        SizedBox(height: Configuration.verticalspacing*2),
-        buttonModal(
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CirclePicker(),
-              SizedBox(height: Configuration.verticalspacing*1.5),
-              Text('Warm up', style: Configuration.text('small',Colors.black)),
-              SizedBox(height: Configuration.verticalspacing),
-              HorizontalPicker(
-                minValue: 0,
-                maxValue: 90,
-                divisions: 18,
-                selectedValue: _meditationstate.selmeditation.meditationSettings.warmuptime ,
-                onChanged:(value){
-                  _meditationstate.selmeditation.meditationSettings.warmuptime = value;
-                },
-                suffix: " s",
-                initialPosition: InitialPosition.start,
-                showCursor: false,
-                backgroundColor: Colors.grey.withOpacity(0.6),
-                activeItemTextColor: Colors.lightBlue,
-                passiveItemsTextColor: Colors.black.withOpacity(0.8),
-                height: Configuration.verticalspacing*6,
+    Widget volumeSlider({String text, String audio, onPressed, double value, onChanged, setState}){
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(text,style: Configuration.text('small',Colors.white)),
+                    SizedBox(width: Configuration.verticalspacing),
+                    Text(value.floor().toString() + '%',
+                      style: Configuration.text('small',Colors.white.withOpacity(0.8),font: 'Helvetica'),
+                    )
+                  ],
+                ),
+
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    shape: CircleBorder(),
+                    minimumSize: Size(0,0),
+                    surfaceTintColor: Colors.white,
+                    padding: EdgeInsets.all(6),
+                    side: BorderSide(color: Colors.white)
+                  ),
+                  onPressed: (){
+                    if(assetsAudioPlayer.isPlaying.value){
+                      assetsAudioPlayer.stop().then((value) => setState((){})); 
+                    }else{
+                      whatIsplaying = text;
+                      assetsAudioPlayer.open(
+                        Audio(audio),
+                        volume: value /  100
+                      ).then((value) => setState((){}));
+                    }
+                }, child: Icon(
+                  assetsAudioPlayer.isPlaying.value  && whatIsplaying == text ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                  size: Configuration.tinicon
+                ))
+              ],
+            ),
+
+            // CAMBIAR TODOS LOS SLIDERS A UN SLIDER COMÚN !!!
+            SizedBox(
+              height: Configuration.verticalspacing*2,
+              child: SliderTheme(
+                data: SliderThemeData(
+                  trackShape: CustomTrackShape(),
+                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: Configuration.verticalspacing*1),
+                  minThumbSeparation: 5
+                ),
+                child: Slider(
+                  max: 100,
+                  activeColor: Colors.white,
+                  inactiveColor: Colors.grey,
+                  label: value.floor().toString() + '%',
+                  value: value, 
+                  divisions: 100,
+                  onChanged: (e){
+                    assetsAudioPlayer.setVolume(e/100);
+                    onChanged(e);
+                  }
+                ),
               ),
-              SizedBox(height: Configuration.verticalspacing*2),
-            ],
+            ),
+          ]
+        );
+
+      }
+
+   
+    return layout(
+      Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child: Column(
+        children: [
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              shape: CircleBorder()
+            ),
+            onPressed: (){
+              showGeneralDialog(
+                context: context,
+                barrierColor: Colors.black12.withOpacity(0.93), // Background color
+                barrierDismissible: false,
+                barrierLabel: 'Dialog',
+                transitionDuration: Duration(milliseconds: 400),
+                pageBuilder: (_, __, ___) {
+                  return StatefulBuilder(
+                    builder: (context,setState) {
+                     
+                      return AbstractDialog(
+                        content: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Column(
+                              children: [
+                                Text('Meditation settings',
+                                  style: Configuration.text('medium',Colors.white),
+                                ),
+                                Divider(color: Colors.white,thickness: 2),
+                              ],
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: Configuration.smpadding
+                              ),
+                              child: Column(
+                                children: [
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.all(0)
+                                    ),
+                                    onPressed: (){
+                                      setState((){
+                                        _meditationstate.selmeditation.meditationSettings.addSixStepPreparation  = !_meditationstate.selmeditation.meditationSettings.addSixStepPreparation;
+                                      });
+                                    },
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Add six step preparation',
+                                                style: Configuration.text('small',Colors.white),
+                                              ),
+                                              SizedBox(height: Configuration.verticalspacing/2),
+                                              Text('An audio guiding the six step preparation will be introduced at the beginning of the meditation',
+                                                style: Configuration.text('tiny',Colors.white,font: 'Helvetica'),
+                                              ),
+                                              SizedBox(height: Configuration.verticalspacing/2),
+                                              Text('5 extra minutes will be added',
+                                                style: Configuration.text('tiny',Colors.white.withOpacity(0.7),font: 'Helvetica'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                  
+                                        Container(
+                                          width: Configuration.width*0.2,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              Text(_meditationstate.selmeditation.meditationSettings.addSixStepPreparation ? 'Yes': 'No',
+                                                style: Configuration.text('small',Colors.white,font:'Helvetica'),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                  
+                                      ],
+                                    ),
+                                  ),
+                                
+                                  SizedBox(height: Configuration.verticalspacing*2),
+
+                                  volumeSlider(
+                                    text: 'Ambient volume',
+                                    value: _meditationstate.selmeditation.meditationSettings.ambientvolume,
+                                    audio: ambientSounds[0].sound,
+                                    onChanged:(e)=>{
+                                      setState((){
+                                        _meditationstate.selmeditation.meditationSettings.ambientvolume = e;
+                                      })
+                                    },
+                                    setState: setState
+                                  ),
+                                  
+                                  SizedBox(height: Configuration.verticalspacing*2),
+
+                                  volumeSlider(
+                                    text: 'Bells volume',
+                                    value: _meditationstate.selmeditation.meditationSettings.bellsvolume,
+                                    audio: bells[0].sound,
+                                    onChanged:(e)=>{
+                                      setState((){
+                                        _meditationstate.selmeditation.meditationSettings.bellsvolume = e;
+                                      })
+                                    },
+                                    setState: setState
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: Configuration.verticalspacing*3),
+                            BaseButton(
+                              color: Colors.red,
+                              text: 'Close',
+                              border: true,
+                              bordercolor: Colors.red,
+                              textcolor: Colors.white,
+                              onPressed: (){
+                                assetsAudioPlayer.stop();
+                                Navigator.pop(context);
+                              }
+                            )
+                          ],
+                        ),
+                      );
+                    }
+                  );
+                },
+              );
+          }, child: Icon(Icons.settings,size: Configuration.smicon,color: Colors.black), 
           ),
-          'Duration', 
-          Observer(
-              builder: (context) {
-                return Text(_meditationstate.selmeditation.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black, font:'Helvetica'));
+
+          SizedBox(height: Configuration.verticalspacing),
+          buttonModal(
+            MeditationDuration(),
+            'Duration', 
+            Observer(
+                builder: (context) {
+                  return Text(
+                    _meditationstate.selmeditation.meditationSettings.isUnlimited ? ' Unlimited':
+                    _meditationstate.selmeditation.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black, font:'Helvetica'));
+                }
+              ),
+              true
+          ),
+          SizedBox(height: Configuration.verticalspacing*2),
+          buttonModal(
+            StatefulBuilder(
+              builder: (context,setState) {
+                return  GridView.builder(
+                  itemCount: ambientSounds.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context,index){
+                    IntervalBell ambientsound = ambientSounds[index];
+                    bool isSelected =_meditationstate.selmeditation.meditationSettings.ambientsound != null && _meditationstate.selmeditation.meditationSettings.ambientsound.name == ambientsound.name;
+                    
+                    return ClickableSquare(
+                      fit: BoxFit.cover,
+                      isAsset:true,
+                      onTap: (){
+                        _meditationstate.selmeditation.meditationSettings.ambientsound = isSelected ? null : ambientsound;
+                        
+                        assetsAudioPlayer.stop().then((s){
+                          if(!isSelected){
+                            assetsAudioPlayer.open(Audio(ambientsound.sound));
+                          }
+                        });
+
+                        setState(() {});
+                      },
+                      selected: isSelected,
+                      image: ambientsound.image,
+                      text: ambientsound.name,
+                    );
+                  },
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: Configuration.crossAxisCount
+                  )
+                );
               }
+            ), 
+            "Ambient Sound", 
+            Text(_meditationstate.selmeditation.meditationSettings.ambientsound != null ?
+              _meditationstate.selmeditation.meditationSettings.ambientsound.name : 'None',
+              style: Configuration.text('small', Colors.black, font:'Helvetica')),
+            true,
+            ()=> assetsAudioPlayer.stop()
+          ),
+          SizedBox(height: Configuration.verticalspacing*2),
+          buttonModal(
+            StatefulBuilder(
+              builder: (context,setState) {
+                int i = 0;
+
+                return Column(
+                  mainAxisSize:MainAxisSize.min,
+                  children: [
+                    SizedBox(height: Configuration.verticalspacing*2),
+
+                    _meditationstate.bells.length == 0 ? 
+                    Text('Press add to set up a new bell for the meditation',  style:Configuration.text('small',Colors.black,font: 'Helvetica')):
+                    Column(children:_meditationstate.bells.map((IntervalBell b){
+                      return bell(b,setState,i++);
+                    }).toList()),
+                    SizedBox(height: Configuration.verticalspacing*2),
+                    OutlinedButton(
+                      onPressed: (){
+                        addModifyBell().then((d){setState((){});});
+                      },
+                      child: Row(
+                        mainAxisSize:MainAxisSize.min,
+                        children: [
+                          Text('Add new interval bell',style: Configuration.text('tiny', Colors.green),),
+
+                          Icon(Icons.add, color: Colors.green,size: Configuration.smicon-5),
+                        ],
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        primary: Colors.white,
+                        side:BorderSide(color: Colors.green),
+                        padding:EdgeInsets.all(Configuration.tinpadding),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                          side: BorderSide(color: Colors.black)
+                        )
+                      ),
+                    ),
+                    SizedBox(height: Configuration.verticalspacing*5)
+                  ],
+                );
+              }
+            ), 
+            "Interval Bell", 
+            // NO HACE FALTA OBSERVER
+            Container(
+              
+              constraints: BoxConstraints(
+                maxWidth: Configuration.width*0.5
+              ),
+              child: OverflowBox(
+                child: Row(
+                  mainAxisAlignment:MainAxisAlignment.end,
+                  children:_meditationstate.bells.length > 0 ?
+                    [
+                      Flexible(child: Text(getBellString(),
+                      overflow: TextOverflow.ellipsis, 
+                      style:Configuration.text('small',Colors.black,font: 'Helvetica'))
+                      )
+                    ]
+                  : [Text('None', style:Configuration.text('small',Colors.black,font: 'Helvetica'))]
+                ),
+              ),
             ),
             true
-        ),
-        SizedBox(height: Configuration.verticalspacing*2),
-        buttonModal(
-          Container(
-            height: Configuration.height*0.4,
-            padding: EdgeInsets.all(Configuration.smpadding),
-            child: Center(
-              child: Text(
-                'We are working on recording some great ambient sounds for the app. Any help is appreciated!!', 
-                style: Configuration.text('small', Colors.black),
-              ),
-            ),
-          ), 
-          "Ambient Sound", 
-          Text('Coming soon',style: Configuration.text('small', Colors.black, font:'Helvetica')),
-          true
-        ),
-        SizedBox(height: Configuration.verticalspacing*2),
-        buttonModal(
-          StatefulBuilder(
-            builder: (context,setState) {
-              int i = 0;
-
-              return Column(
-                mainAxisSize:MainAxisSize.min,
-                children: [
-                  SizedBox(height: Configuration.verticalspacing*2),
-
-                  _meditationstate.bells.length == 0 ? 
-                  Text('Press add to set up a new bell for the meditation',  style:Configuration.text('small',Colors.black,font: 'Helvetica')):
-                  Column(children:_meditationstate.bells.map((IntervalBell b){
-                    return bell(b,setState,i++);
-                  }).toList()),
-                  SizedBox(height: Configuration.verticalspacing*2),
-                  OutlinedButton(
-                    onPressed: (){
-                      addModifyBell().then((d){setState((){});});
-                    },
-                    child: Row(
-                      mainAxisSize:MainAxisSize.min,
-                      children: [
-                        Text('Add new interval bell',style: Configuration.text('tiny', Colors.green),),
-
-                        Icon(Icons.add, color: Colors.green,size: Configuration.smicon-5),
-                      ],
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      primary: Colors.white,
-                      side:BorderSide(color: Colors.green),
-                      padding:EdgeInsets.all(Configuration.tinpadding),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Configuration.borderRadius),
-                        side: BorderSide(color: Colors.black)
-                      )
-                    ),
-                  ),
-                  SizedBox(height: Configuration.verticalspacing*5)
-                ],
-              );
-            }
-          ), 
-          "Interval Bell", 
-          // NO HACE FALTA OBSERVER
-          Container(
-            
-            constraints: BoxConstraints(
-              maxWidth: Configuration.width*0.5
-            ),
-            child: OverflowBox(
-              child: Row(
-                mainAxisAlignment:MainAxisAlignment.end,
-                children:_meditationstate.bells.length > 0 ?
-                  [
-                    Flexible(child: Text(getBellString(),
-                    overflow: TextOverflow.ellipsis, 
-                    style:Configuration.text('small',Colors.black,font: 'Helvetica'))
-                    )
-                  ]
-                : [Text('None', style:Configuration.text('small',Colors.black,font: 'Helvetica'))]
-              ),
-            ),
           ),
-          true
-        ),
 
-        SizedBox(height: Configuration.verticalspacing*2),
-      
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            OutlinedButton(
+          SizedBox(height: Configuration.verticalspacing*2),
+        
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              OutlinedButton(
+              onPressed:(){
+                showModalBottomSheet(
+                  isScrollControlled: true,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                  ),
+                  context: context, 
+                  builder: (context){
+                    return savePreset();
+                  }
+                );
+              },
+              child:Text('Save this session', 
+                style: Configuration.text('small', Colors.lightBlue)
+              ),
+              style: OutlinedButton.styleFrom(
+                side:BorderSide(color: Colors.lightBlue, width: 1),
+                foregroundColor: Colors.lightBlue,
+                elevation: 0
+              ),
+            ),
+
+              // HAY QUE HACER ESTO RESIZABLE !!!
+              OutlinedButton(
             onPressed:(){
               showModalBottomSheet(
-                isScrollControlled: false,
+                isScrollControlled: true,
                 barrierColor: Colors.black.withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
                 ),
-              context: context, 
-              builder: (context){
-                return savePreset();
-                
-              });
+                context: context, 
+                builder: (context){
+                  return presets();  
+                });
             },
-            child:Text('Save this session', style: Configuration.text('small', Colors.lightBlue)),
+            child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue)),
             style: OutlinedButton.styleFrom(
               side:BorderSide(color: Colors.lightBlue, width: 1),
-              primary: Colors.lightBlue,
-              elevation: 0
-            ),
-          ),
-
-          OutlinedButton(
-          onPressed:(){
-            showModalBottomSheet(
-              isScrollControlled: true,
-              barrierColor: Colors.black.withOpacity(0.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
-              ),
-              context: context, 
-              builder: (context){
-                return presets();  
-              });
-          },
-          child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue)),
-          style: OutlinedButton.styleFrom(
-            side:BorderSide(color: Colors.lightBlue, width: 1),
-            primary: Colors.lightBlue,
-            elevation:0
-          ))
-          ],
-        )
-      ]), 
+              foregroundColor: Colors.lightBlue,
+              elevation:0
+            ))
+            ],
+          )
+        ]),
+      ), 
       () {
          //ESTO LO PODRÍAMOS HACER EN OTRO SITIO !!!
         _meditationstate.createIntervalBells();
@@ -769,111 +1017,111 @@ class _MeditationScreenState extends State<MeditationScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => CountDownScreen(
-                then: (value){
-                  setState((){});
-                },
                 content: _meditationstate.selmeditation,
               )
             )
           );
         }
-
-      }, _meditationstate.selmeditation.duration.inMinutes > 0,
+      }, _meditationstate.selmeditation.duration.inMinutes > 0 || _meditationstate.selmeditation.meditationSettings.isUnlimited,
         'Set the timer for a free meditation' 
       );
   }
 
   Widget games() {
     Widget gamelist(){
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: _userstate.data.stages[0].games.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: Configuration.crossAxisCount
-        ), 
-        itemBuilder: (context,index) {
-          var game = _userstate.data.stages[0].games[index];
-          var _blocked = _userstate.user.isGameBlocked(game);
-          var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: _userstate.data.stages[0].games.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: Configuration.crossAxisCount
+          ), 
+          itemBuilder: (context,index) {
+            var game = _userstate.data.stages[0].games[index];
+            var _blocked = _userstate.user.isGameBlocked(game);
+            var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
 
-          return ClickableSquare(
+            return ClickableSquare(
+              /*
+              rightlabel: Chip(
+                _userstate.user.answeredquestions[game.cod] ? 
+                
+              ),*/
+              text: game.title,
+              image: game.image,
+              onTap: (){
+                _gamestate.selectgame(game);
+                setState(() {});
+              },
+              selected: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod,
+              blocked: _blocked,
+              blockedtext: 'Complete '+ gamebefore.title,
+            );
             /*
-            rightlabel: Chip(
-              _userstate.user.answeredquestions[game.cod] ? 
-            ),*/
-            text: game.title,
-            image: game.image,
-            onTap: (){
-              _gamestate.selectgame(game);
-              setState(() {});
-            },
-            selected: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod,
-            blocked: _blocked,
-            blockedtext: 'Complete '+ gamebefore.title,
-          );
-          /*
-          return GestureDetector(
-            onTap: ()=> setState((){
-              
-            }),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.0),
-                color:    ? Colors.grey.withOpacity(0.1) : Colors.transparent,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 5),
-                  Container(
-                    width: Configuration.width*0.35,
-                    height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?  
-                    Configuration.width*0.3: Configuration.width * 0.26,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(image: NetworkImage(game.image)),
-                    ),
-                   child:
-                    _blocked ? 
+            return GestureDetector(
+              onTap: ()=> setState((){
+                
+              }),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                  color:    ? Colors.grey.withOpacity(0.1) : Colors.transparent,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 5),
                     Container(
+                      width: Configuration.width*0.35,
+                      height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?  
+                      Configuration.width*0.3: Configuration.width * 0.26,
                       decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.7)
+                        image: DecorationImage(image: NetworkImage(game.image)),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(Icons.lock),
-                          Text('Complete ' +  gamebefore.title , style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
-                        ],
-                      ),
-                    )  :
-                    Stack(
-                     children: [
-                       _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?
-                       Positioned(
-                         top: -5,
-                         right: 25,
-                         child:
-                         Chip(
-                           side: BorderSide.none,
-                           label: Text( 
-                             (_userstate.user.answeredGame(game.cod) ? _userstate.user.answeredquestions[game.cod].toString(): '0' )
-                             + '/' + game.questions.length.toString(), 
-                              style: Configuration.text('mini', Colors.white)
+                     child:
+                      _blocked ? 
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.7)
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.lock),
+                            Text('Complete ' +  gamebefore.title , style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
+                          ],
+                        ),
+                      )  :
+                      Stack(
+                       children: [
+                         _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?
+                         Positioned(
+                           top: -5,
+                           right: 25,
+                           child:
+                           Chip(
+                             side: BorderSide.none,
+                             label: Text( 
+                               (_userstate.user.answeredGame(game.cod) ? _userstate.user.answeredquestions[game.cod].toString(): '0' )
+                               + '/' + game.questions.length.toString(), 
+                                style: Configuration.text('mini', Colors.white)
+                              )
                             )
-                          )
-                       ) : Container()
-                     ],
-                   ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(game.title, style: Configuration.text('small', _blocked ?  Colors.grey:  Colors.black),)
-                ]
+                         ) : Container()
+                       ],
+                     ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(game.title, style: Configuration.text('small', _blocked ?  Colors.grey:  Colors.black),)
+                  ]
+                ),
               ),
-            ),
-          );*/
-        });
+            );*/
+          }),
+      );
     }
 
     return layout(
@@ -892,7 +1140,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         SizedBox(height: Configuration.verticalspacing*2.5),
-        title != null ? Center(child: Text(title,style: Configuration.text('smallmedium', Colors.black),textAlign: TextAlign.center)): Container(),
+        title != null ? Center(
+          child: Text(title, overflow: TextOverflow.clip,style: Configuration.text('smallmedium', Colors.black),textAlign: TextAlign.center)): Container(),
         SizedBox(height: Configuration.verticalspacing), 
         Expanded(child: 
           child,
@@ -904,17 +1153,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
       ],
     );
   }
-
-  /*
-  Widget guidedMeditations(){
-    return ListView(
-        physics: ClampingScrollPhysics(),
-        children:[
-          SizedBox(height: Configuration.verticalspacing*2.5),
-          MeditationList()
-        ]
-    );
-  }*/
 
   @override 
   void initState(){
@@ -948,6 +1186,73 @@ class _MeditationScreenState extends State<MeditationScreen> {
         });
       },
       children: [freeMeditation(), games()],
+    );
+  }
+}
+
+class MeditationDuration extends StatefulWidget {
+  const MeditationDuration({
+    Key key
+  }) : super(key: key);
+
+  @override
+  State<MeditationDuration> createState() => _MeditationDurationState();
+}
+
+class _MeditationDurationState extends State<MeditationDuration> {
+  String selectedMeditation;
+
+  @override
+  Widget build(BuildContext context) {
+    MeditationState _meditationstate = Provider.of<MeditationState>(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _meditationstate.selmeditation.meditationSettings.isUnlimited ? 
+        Container() :
+        CirclePicker(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Transform.scale(
+              scale: Configuration.width > 500 ? 1.5 :1.2,
+              child: Switch(
+                activeColor: Colors.lightBlue,
+              splashRadius: Configuration.verticalspacing*5,
+              value: _meditationstate.selmeditation.meditationSettings.isUnlimited,
+              onChanged: (bool){
+                print({'isfree',bool});
+                setState(()=>{
+                  _meditationstate.selmeditation.meditationSettings.isUnlimited = bool
+                });
+              }),
+            ),
+            Text('Meditate without a given duration', style: Configuration.text('small',Colors.black,font: 'Helvetica'),)
+          ],
+        ),
+        SizedBox(height: Configuration.verticalspacing*1.5),
+        Text('Warm up', style: Configuration.text('small',Colors.black)),
+        SizedBox(height: Configuration.verticalspacing),
+        HorizontalPicker(
+          minValue: 0,
+          maxValue: 90,
+          divisions: 18,
+          selectedValue: _meditationstate.selmeditation.meditationSettings.warmuptime ,
+          onChanged:(value){
+            _meditationstate.selmeditation.meditationSettings.warmuptime = value;
+          },
+          suffix: " s",
+          initialPosition: InitialPosition.start,
+          showCursor: false,
+          backgroundColor: Colors.grey.withOpacity(0.6),
+          activeItemTextColor: Colors.lightBlue,
+          passiveItemsTextColor: Colors.black.withOpacity(0.8),
+          height: Configuration.verticalspacing*6,
+        ),
+        SizedBox(height: Configuration.verticalspacing*2),
+      ],
     );
   }
 }
@@ -1073,14 +1378,17 @@ class _MeditationListState extends State<MeditationList> {
 
 
 // PASARLE CONTENT  !!!!!!!!!!!!
+// MUY IMPORTANTE !!!!!!!
 class ClickableSquare extends StatelessWidget {
   String blockedtext, image,text;
-  bool selected; 
+  bool selected, isAsset; 
   dynamic onTap;
   bool blocked, border;
   Widget rightlabel;
+  BoxFit fit;
 
-  ClickableSquare({this.border = false, this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text, this.rightlabel}) : super();
+
+  ClickableSquare({this.border = false, this.fit = BoxFit.contain, this.isAsset = false, this.blockedtext,this.onTap,this.blocked= false,this.image,this.selected= false,this.text, this.rightlabel}) : super();
 
   @override
   Widget build(BuildContext context) {
@@ -1098,14 +1406,18 @@ class ClickableSquare extends StatelessWidget {
         ),
         child: Stack(
           children: [
+            Positioned.fill(child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Container(color: Colors.white))
+            ),
+
             Positioned.fill(child:ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: image != null && image != '' ? 
-              Image(image: CachedNetworkImageProvider(image)) : Container(),
+              Image(
+                fit: fit,
+                image: isAsset ?  AssetImage(image):CachedNetworkImageProvider(image)) : Container(),
             )),
-            
-            
-            
               
             Positioned(
               bottom: 0,
@@ -1174,6 +1486,7 @@ class ClickableSquare extends StatelessWidget {
 
 
 //VISTA DE MEDITACIÓN
+// ESTO YA NO SE UTILIZA !!!!!!
 class Countdown extends StatefulWidget {
   const Countdown({Key key}) :  super(key: key);
 
@@ -1539,6 +1852,9 @@ class _CountdownState extends State<Countdown> {
     _meditationstate = Provider.of<MeditationState>(context);
     _userstate = Provider.of<UserState>(context);
 
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
+
     _meditationstate.shadow = false;
 
     if(_meditationstate.state == _meditationstate.warmup){
@@ -1592,7 +1908,6 @@ class _CountdownState extends State<Countdown> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
     return WillPopScope(
       onWillPop: () {  
@@ -1645,6 +1960,38 @@ class _CountdownState extends State<Countdown> {
         )
       ),
     );
+  }
+}
+
+class CustomTrackShape extends RoundedRectSliderTrackShape {
+  Rect getPreferredRect({
+    @required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    @required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final double trackHeight = sliderTheme.trackHeight;
+    final double trackLeft = offset.dx;
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackWidth = parentBox.size.width;
+    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
+  }
+}
+
+class NoTrackShape extends RoundedRectSliderTrackShape {
+  Rect getPreferredRect({
+    @required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    @required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final double trackHeight = sliderTheme.trackHeight;
+    final double trackLeft = offset.dx;
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackWidth = parentBox.size.width;
+    return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
 }
 

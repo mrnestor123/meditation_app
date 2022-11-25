@@ -111,7 +111,7 @@ Future showUserProfile({User user,String usercod, followbutton, followaction,  h
                                 children: [
                                     ProfileInfoBigCard(
                                     firstText:user != null ?  user.timemeditated : '',
-                                    secondText: "Time meditated",
+                                    secondText: "Time\nmeditated",
                                     color: 'white',
                                     icon: Icon(Icons.timer,  color: Colors.white),
                                   ),

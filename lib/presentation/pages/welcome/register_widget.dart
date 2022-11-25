@@ -46,7 +46,7 @@ class RegisterWidget extends StatelessWidget {
       resizeToAvoidBottomInset: false,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          leading: ButtonBack(),
+          leading: BackButton(),
           elevation: 0,
         ),
         body: Center(
@@ -62,15 +62,15 @@ class RegisterWidget extends StatelessWidget {
                   children: [
                     InputField(
                       controller: _userController,
-                      labeltext: 'Mail',
+                      labeltext: 'email',
                       icon: Icons.email,
                       validator: (value){
                         if(value == null  || value.isEmpty){
-                            return 'Please enter the mail';
-                          }else if(!_registerstate.validateMail(value)){
-                            return 'Please input a valid mail';
-                          } 
-                          return null;
+                          return 'Please enter the email';
+                        }else if(!_registerstate.validateMail(value)){
+                          return 'Please input a valid email';
+                        } 
+                        return null;
                       },
                     ),
                     SizedBox(height: Configuration.verticalspacing),
@@ -89,7 +89,7 @@ class RegisterWidget extends StatelessWidget {
                     SizedBox(height: Configuration.verticalspacing),
                     InputField(
                       controller: _confirmController,
-                      labeltext: 'Confirm password',
+                      labeltext: 'confirm password',
                       icon: Icons.lock,
                       obscuretext:true,
                       validator: (value){
@@ -121,7 +121,7 @@ class RegisterWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'SIGN UP WITH MAIL',
+                              'SIGN UP WITH EMAIL',
                               style: Configuration.text('smallmedium', Colors.white),
                             ),
                             Icon(

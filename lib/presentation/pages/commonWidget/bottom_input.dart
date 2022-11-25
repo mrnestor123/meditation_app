@@ -10,7 +10,6 @@ class BottomInput extends StatelessWidget {
   String placeholder;
   bool noPop;
   
-
   BottomInput({this.onSend, this.placeholder, this.noPop = false}) : super();
 
   @override
@@ -34,10 +33,10 @@ class BottomInput extends StatelessWidget {
                 onPressed: (){
                   if(_controller.text.trim().isNotEmpty){
                     onSend(_controller.text.trim());
-                      FocusScopeNode currentFocus = FocusScope.of(context);
-                      if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null && !noPop) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      }
+                    FocusScopeNode currentFocus = FocusScope.of(context);
+                    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null && !noPop) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    }
                     _controller.clear();
                   }
                 },   

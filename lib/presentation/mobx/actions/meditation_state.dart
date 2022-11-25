@@ -190,14 +190,11 @@ abstract class _MeditationState with Store {
       this.duration = m.duration;
       this.totalduration = m.duration;
     }
-
-
   }
 
   @action 
   void setDuration(int time){
     selmeditation.duration = new Duration(minutes: time);
-    print(selmeditation.duration);
   }
 
   // BORRAR
@@ -337,7 +334,7 @@ abstract class _MeditationState with Store {
         }
       }
 
-      aux.sort((a,b)=> a.playAt-b.playAt);
+      aux.sort((a,b)=> a.playAt - b.playAt);
       
       selmeditation.meditationSettings.bells = aux;
     }
@@ -367,9 +364,7 @@ abstract class _MeditationState with Store {
   void selectPreset(MeditationPreset p){
     selmeditation = new Meditation(
       duration: Duration(minutes: p.duration),
-      meditationSettings: MeditationSettings(
-        warmuptime: p.warmuptime != null ? p.warmuptime : 0,
-      )
+      meditationSettings: p.settings
     );
 
 
@@ -389,8 +384,8 @@ abstract class _MeditationState with Store {
       ));
     }else{
       this.selectedIntervalBell = '';
-      if(p.bells.length > 0){
-        this.bells.addAll(p.bells);
+      if(p.settings.bells.length > 0){
+        this.bells.addAll(p.settings.bells);
       }
     }
   }

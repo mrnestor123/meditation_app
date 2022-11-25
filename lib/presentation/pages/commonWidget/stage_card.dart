@@ -33,6 +33,8 @@ class StageCard extends StatelessWidget {
         children: [ 
           Text('Stage ' + stage.stagenumber.toString(),style: Configuration.text('medium', textcolor != null ? textcolor : Colors.white)),
           SizedBox(height: Configuration.verticalspacing),
+          Text(stage.description,style: Configuration.text('small',Colors.white,font: 'Helvetica')),
+          SizedBox(height: Configuration.verticalspacing),
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.0),

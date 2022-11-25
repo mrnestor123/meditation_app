@@ -28,14 +28,12 @@ import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-
 import '../../login_injection_container.dart';
 import 'game_screen.dart';
 
 //final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 final navigatorKey = new GlobalKey<NavigatorState>();
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +54,11 @@ class MyApp extends StatelessWidget {
 // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual, 
+      overlays: [SystemUiOverlay.bottom]
+    );
+    
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);    
     //we pass the userstate class to all the classes
     return MultiProvider(
@@ -98,7 +100,9 @@ class MyApp extends StatelessWidget {
               '/chat':(BuildContext context) => ChatScreen(),
               '/progress':(BuildContext context) => ProgressScreen(),
               '/requestview': (BuildContext context) => RequestView(),
-              '/messageusers': (BuildContext context) => NewMessageScreen()
+              '/messageusers': (BuildContext context) => NewMessageScreen(),
+              '/sendcomment':(BuildContext  context)=> SendComment(),
+              '/mymeditations':(context)=> MyMeditations()
           })
         );
   }

@@ -77,6 +77,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
        }
    }
+
+    packagingOptions {
+        exclude 'META-INF/com.android.tools/proguard/coroutines.pro'
+    }
+
     /*
    configurations {
         all*.exclude group: 'com.google.android.exoplayer', module: 'exoplayer-ui'

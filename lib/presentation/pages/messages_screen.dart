@@ -143,12 +143,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      /*
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           Navigator.pushNamed(context, '/messageusers');
         },
         child: Icon(Icons.add),
-      ),
+      ),*/
       appBar: AppBar(
         elevation:0,
         centerTitle:true,
@@ -237,6 +238,7 @@ class MessagesIcon extends StatefulWidget {
   State<MessagesIcon> createState() => _MessagesIconState();
 }
 
+
 class _MessagesIconState extends State<MessagesIcon> {
 
   UserState _userstate;
@@ -275,7 +277,6 @@ class _MessagesIconState extends State<MessagesIcon> {
   }
 }
 
-
 class NewMessageScreen extends StatefulWidget {
   const NewMessageScreen() : super();
 
@@ -285,7 +286,6 @@ class NewMessageScreen extends StatefulWidget {
 
 class _NewMessageScreenState extends State<NewMessageScreen> {
 
-  // you only can send messages to users that you have added to your contacts
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
@@ -323,8 +323,6 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
     );
   }
 }
-
-
 
 class ChatScreen extends StatefulWidget {
 
@@ -390,7 +388,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: GestureDetector(
           onTap: (){
             showUserProfile(
-              user:_messagesState.selecteduser, 
+              //user:_messagesState.selecteduser, 
               usercod: _messagesState.selectedChat.notMe['coduser'], 
               hideChat: true
             );

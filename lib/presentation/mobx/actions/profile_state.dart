@@ -51,7 +51,7 @@ abstract class _ProfileState with Store {
           selected = r;
           selected.checkStreak();
 
-          if(selected.isTeacher()){
+          if(selected.isTeacher() && selected.addedcontent.length > 0){
             selected.addedcontent.sort((a,b)=> a.stagenumber  - b.stagenumber);
           }
 

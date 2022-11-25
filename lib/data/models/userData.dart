@@ -15,6 +15,7 @@ import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/user_settings_entity.dart';
 
 class UserModel extends User {
@@ -75,6 +76,7 @@ class UserModel extends User {
   String toRawJson() => json.encode(toJson());
 
   factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =false]) {
+
     UserModel u = UserModel(
         coduser: json["coduser"],
         nombre: json['nombre'],
@@ -119,6 +121,7 @@ class UserModel extends User {
         }
       }
 
+      
       if(json['meditations'] != null) {
         
         for(var med in json['meditations'] ){
@@ -138,6 +141,7 @@ class UserModel extends User {
           }
         }
 
+        
         if(json['addedcontent']!= null){
           for(var content in json['addedcontent']){
             if(content['type'] == 'meditation-practice'){
@@ -159,6 +163,14 @@ class UserModel extends User {
             print(e);
           }
         }
+
+
+        /*
+        if(json['addedcourses']!= null){
+          for(var course in json['addedcourses']){
+            u.addedcourses.add(Course.fromJson(course));
+          }
+        }*/
       }else{
         // SE PUEDE SEGUIR A UN PROFESOR !!! YO DIRÍA QUE SIII
         if(json['following']!=null){
@@ -183,15 +195,22 @@ class UserModel extends User {
           u.notifications.add(Notify.fromJson(not));
         }
       }
+
     
       if(json['messages']!=null){
         for(var msg in json['messages']){
           u.messages.add(Message.fromJson(msg));
         }
       }
-      
-    }
 
+
+      /*
+      if(json['joinedcourses']!= null){
+        for(var course in json['joinedcourses']){
+          u.joinedcourses.add(Course.fromJson(course));
+        }
+      }*/
+    }
 
     //  u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
     //  u.setFollowedUsers(json['following'] != null ? json['following'] : []);
@@ -201,32 +220,32 @@ class UserModel extends User {
   }
 
   Map<String, dynamic> toJson() => {
-        "coduser": coduser == null ? null : coduser,
-        "role": role == null ? null : role,
-        "stagenumber": stagenumber == null ? 1 : stagenumber,
-        "position": position == null ? 0 : position,
-        "meditposition": meditposition == null ? 0 : meditposition,
-        "gameposition": gameposition == null ? 0 : gameposition,
-        "nombre": nombre == null ? null : nombre,
-        'stats': userStats == null ? null : userStats.toJson(),
-        'image': image == null ? '' : image,
-        "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
-        'description': description,
-        'teachinghours':teachinghours, 
-        'location':location,
-        "seenIntroCarousel":seenIntroCarousel,
-        'website': website,
-        "settings": settings == null ? null: settings.toJson(),
-        "following": following.map((user) => user.coduser).toList(),
-        "unreadmessages":unreadmessages.map((e)=> e).toList(),
-        "meditationtime": meditationTime != null ? meditationTime.toIso8601String():null,
-        //MENSAJES Y ACTIONS MUCHO JSON !!!!
-        "students": students.map((stud)=> stud.coduser).toList(),
-     //   'messages': messages.map((msg)=> msg.toJson()).toList(), 
-        "followsyou": followers.map((user) => user.coduser).toList(),
-        "answeredquestions": answeredquestions,
-        "version": version
-      };
+    "coduser": coduser == null ? null : coduser,
+    "role": role == null ? null : role,
+    "stagenumber": stagenumber == null ? 1 : stagenumber,
+    "position": position == null ? 0 : position,
+    "meditposition": meditposition == null ? 0 : meditposition,
+    "gameposition": gameposition == null ? 0 : gameposition,
+    "nombre": nombre == null ? null : nombre,
+    'stats': userStats == null ? null : userStats.toJson(),
+    'image': image == null ? '' : image,
+    "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
+    'description': description,
+    'teachinghours':teachinghours, 
+    'location':location,
+    "seenIntroCarousel":seenIntroCarousel,
+    'website': website,
+    "settings": settings == null ? null: settings.toJson(),
+    "following": following.map((user) => user.coduser).toList(),
+    "unreadmessages":unreadmessages.map((e)=> e).toList(),
+    "meditationtime": meditationTime != null ? meditationTime.toIso8601String():null,
+    "students": students.map((stud)=> stud.coduser).toList(),
+    //"joinedcourses": joinedcourses.map((course)=> course.cod).toList(),
+    //'messages': messages.map((msg)=> msg.toJson()).toList(), 
+    "followsyou": followers.map((user) => user.coduser).toList(),
+    "answeredquestions": answeredquestions,
+    "version": version
+  };
 
 
   Map<String, dynamic> updateFields() => {
@@ -243,6 +262,7 @@ class UserModel extends User {
     'location':location,
     "seenIntroCarousel":seenIntroCarousel,
     "students": students.map((stud)=> stud.coduser).toList(),
+    "joinedcourses": joinedcourses.map((course)=> course.cod).toList(),
     'website': website,
     "settings": settings == null ? null : settings.toJson(),
     "presets": presets == null ? null : presets.map((e) => e.toJson()).toList(),

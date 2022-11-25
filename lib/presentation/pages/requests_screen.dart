@@ -61,7 +61,8 @@ class _RequestsState extends State<Requests> {
     return StatefulBuilder(
       builder:(BuildContext context, StateSetter setState ) {
       stateSetter = setState;
-      return  Padding(
+      
+      return Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
             padding: EdgeInsets.all(12.0),
@@ -414,7 +415,7 @@ class _RequestsState extends State<Requests> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        leading: ButtonBack(),
+        leading: BackButton(color: Colors.black),
         actions: [
           Stack(
             children:[
@@ -453,7 +454,7 @@ class _RequestsState extends State<Requests> {
       ),
       bottomSheet: Material(
         elevation: 10,
-        child: Container(
+        child: Container(        
           width: Configuration.width,
           height:Configuration.height * 0.09,
           decoration: BoxDecoration(
@@ -598,18 +599,39 @@ class _RequestViewState extends State<RequestView> {
     _userState = Provider.of<UserState>(context);
     RequestState _requestState = Provider.of<RequestState>(context);
 
+   
     return Scaffold(
-      bottomSheet: BottomInput(
-        onSend: (text){
-          _requestState.updateRequest(_requestState.selectedrequest, null,text);
-          setState(() {});
-        },
+      bottomSheet: Material(
+        elevation: 10,
+        child: Container(
+          padding: EdgeInsets.all(Configuration.smpadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: (){
+                  Navigator.pushNamed(context, '/sendcomment').then((value) => setState((){}));
+                },
+                child: Container(
+                  width: Configuration.width,
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  decoration: BoxDecoration(
+                    color: Configuration.lightgrey,
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+                  ),
+                  child: Text('Add a comment', style: Configuration.text('small',Colors.grey,font: 'Helvetica')),
+                ),
+              ),
+              SizedBox(height: Configuration.verticalspacing)
+            ],
+          ),
+        ),
       ),
       backgroundColor: Configuration.lightgrey,
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Configuration.lightgrey,
-        leading: ButtonBack(),
+        leading: BackButton(color: Colors.black),
         actions: [
            //Pasar esto a admin
            _userState.user.isAdmin() ?
@@ -737,6 +759,82 @@ class _RequestViewState extends State<RequestView> {
 }
 
 
+class SendComment extends StatefulWidget {
+  const SendComment({Key key}) : super(key: key);
+
+  @override
+  State<SendComment> createState() => _SendCommentState();
+}
+
+class _SendCommentState extends State<SendComment> {
+  String addedComment = '';
+  TextEditingController _controller = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    RequestState _requestState = Provider.of<RequestState>(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: CloseButton(color: Colors.black),
+        elevation: 1,
+        title: Text("Add comment",
+          style:  Configuration.text('smallmedium',Colors.black),
+        ),
+      ),
+      body: Container(
+        color: Configuration.lightgrey,
+        padding: EdgeInsets.all(Configuration.smpadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(_requestState.selectedrequest.title, 
+              style: Configuration.text('small', Colors.black)
+            ),
+            SizedBox(height: Configuration.verticalspacing),
+            Divider(),
+            SizedBox(height: Configuration.verticalspacing),
+            Expanded(
+              child: TextField(
+                
+                onChanged: (str)=> setState(()=>{}),
+                controller: _controller,
+                style: Configuration.text('small', Colors.black,font: 'Helvetica'),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Your comment here'
+                ),
+                expands: true,
+                maxLines: null,
+                minLines: null,
+              ),
+            ),
+
+            BaseButton(
+              text: 'Send Comment',
+              color: Configuration.maincolor,
+              onPressed: _controller.text.isNotEmpty ? (){
+                _requestState.updateRequest(_requestState.selectedrequest, null,_controller.text);
+                Navigator.pop(context);
+              }: null,
+            ),
+            SizedBox(height: Configuration.verticalspacing)
+          ],
+        ),
+      )
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
 class RequestHeader extends StatelessWidget {
   const RequestHeader() : super();
 
@@ -766,39 +864,4 @@ class StateChip extends StatelessWidget {
   }
 }
 
-class ButtonBack extends StatelessWidget {
-  Color color;
-  
-  ButtonBack({this.color = Colors.black}) : super();
 
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      
-      onPressed: ()=> Navigator.pop(context), 
-      icon: Icon(
-        Icons.arrow_back_ios,
-        size: Configuration.smicon,
-        color: color
-        )
-      );
-  }
-}
-
-class ButtonClose extends StatelessWidget {
-  Color color;
-  
-  ButtonClose({this.color = Colors.black}) : super();
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: ()=> Navigator.pop(context), 
-      icon: Icon(
-        Icons.close,
-        size: Configuration.smicon,
-        color: color,
-        )
-      );
-  }
-}

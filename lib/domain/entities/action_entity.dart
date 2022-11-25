@@ -26,7 +26,6 @@ class UserAction {
     return str;
   }
 
-
   void setAction(action){ 
     if(this.action is List) {
       this.action.add(action[0]);
@@ -36,18 +35,20 @@ class UserAction {
   }
 
   UserAction({this.type, this.time, this.action, this.username, this.coduser,this.message, this.userimage, this.user}){
-    if(this.message == null){
-   
-    var types = {
-      "follow": () => "followed " + getAction(action),
-      "unfollow": () => "unfollowed " + getAction(action),
-      "meditation": () => 'meditated for ' + action[0].toString() + ' min',
-      "guided_meditation": () => "took " + action[0].toString() + ' for ' + action[1].toString() + ' min',
-      "updatestage": () => "climbed up one stage to " + action,
-      'game': () => 'played ',
-      'lesson': () => 'read ' + getAction(action)
-    };
-    this.message = types[type]();   
+    if(this.message == null) {
+      
+      var types = {
+        "follow": () => "followed " + getAction(action),
+        "unfollow": () => "unfollowed " + getAction(action),
+        "meditation": () => 'meditated for ' + action[0].toString() + ' min',
+        "guided_meditation": () => "took " + action[0].toString() + ' for ' + action[1].toString() + ' min',
+        "updatestage": () => "climbed up one stage to " + action,
+        "recording": ()=> "listened to " + action[0].toString() +  ', ' + action[1].toString(),
+        'game': () => 'played ',
+        'lesson': () => 'read ' + getAction(action)
+      };
+    
+      this.message = types[type]();   
     } 
 
     if(time == null){
@@ -71,10 +72,11 @@ class UserAction {
       'guided_meditation': Icons.self_improvement,
       'updatestage': Icons.landscape,
       'game': Icons.games,
-      'lesson' : Icons.book
+      'lesson' : Icons.book,
+      'recording': Icons.audiotrack
     };
-    this.icono = icons[type];
     
+    this.icono = icons[type];
   }
 
   //un pateo crear otra clase para estos dos

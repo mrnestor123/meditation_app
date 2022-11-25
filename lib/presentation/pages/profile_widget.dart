@@ -1,27 +1,32 @@
 import 'dart:io';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/bottom_sheet_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/calendar.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
-import 'package:meditation_app/presentation/pages/messages_screen.dart';
+import 'package:meditation_app/presentation/pages/recordings_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-
 import '../../domain/entities/content_entity.dart';
+import '../../domain/entities/meditation_entity.dart';
+import 'commonWidget/alert_dialog.dart';
 import 'commonWidget/image_upload_modal.dart';
-import 'commonWidget/start_button.dart';
+import 'messages_screen.dart';
+
 
 
 class ProfileScreen extends StatefulWidget {
@@ -48,6 +53,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int teacher_content = 1;
   int viewing;
 
+  List<Tab> tabs = [Tab( text: 'Information')];
+
+  int day_filter = 0;
+  int week_filter = 1;
+  int month_filter = 2;
+
+  int selectedFilter = 0;
+
+  List<bool> selectedFilterBools =  [true,false,false];
+
   Widget textIcon(IconData icon, String text, [onclick]){
     return GestureDetector(
       onTap: (){
@@ -55,28 +70,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onclick();
         }
       },
-      child: Row(
-        children: [
-          Icon(icon,size: Configuration.smicon, color:Colors.black),
-          SizedBox(width:Configuration.verticalspacing),
-          Flexible(
-            child: Text(text, 
-              style:Configuration.text('small',onclick != null ? Colors.lightBlue : Colors.black)
-            ),
-          ),
-          
-          /*onclick !=null ? 
-          Container(
-            margin:EdgeInsets.only(left:Configuration.verticalspacing),
-            child: ElevatedButton(
-              onPressed: onclick, 
-              style:ElevatedButton.styleFrom(
-                primary: Colors.lightBlue,
+      child: Container(
+        margin: EdgeInsets.only(bottom: Configuration.verticalspacing*2),
+        child: Row(
+          children: [
+            Icon(icon,size: Configuration.smicon, color:Colors.black),
+            SizedBox(width:Configuration.verticalspacing),
+            Flexible(
+              child: Text(text, 
+                style:Configuration.text('small',onclick != null ? Colors.lightBlue : Colors.black)
               ),
-              child:Text('View website',style:Configuration.text('small',Colors.white))
             ),
-          ) : Container()*/
-        ],
+            
+            /*onclick !=null ? 
+            Container(
+              margin:EdgeInsets.only(left:Configuration.verticalspacing),
+              child: ElevatedButton(
+                onPressed: onclick, 
+                style:ElevatedButton.styleFrom(
+                  primary: Colors.lightBlue,
+                ),
+                child:Text('View website',style:Configuration.text('small',Colors.white))
+              ),
+            ) : Container()*/
+          ],
+        ),
       ),
     );
   }
@@ -123,154 +141,136 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget teacherProfile(User user){
-    
+  //NO  HACE FALTA  EL USUARIO !!!
+  List<Widget> teacherProfile(User user){
+
     Widget addedContent(){
       return user.addedcontent.length > 0 ? 
-        Column(
-          children: [
-            SizedBox(height: Configuration.verticalspacing*2),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: Configuration.crossAxisCount + 1,
-                childAspectRatio: 1.0,
-                crossAxisSpacing: Configuration.verticalspacing,
-                mainAxisSpacing: Configuration.verticalspacing,
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+          child: Column(
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: Configuration.crossAxisCount + 1,
+                  childAspectRatio: 1.0,
+                  crossAxisSpacing: Configuration.verticalspacing,
+                  mainAxisSpacing: Configuration.verticalspacing,
+                ),
+                itemCount: user.addedcontent.length,
+                itemBuilder: (BuildContext context, int index) { 
+                  Content c = user.addedcontent[index];
+                  return ClickableSquare(
+                    blockedtext: '',
+                    border: true,
+                    onTap:()=>{
+                      Navigator.push(context, 
+                        MaterialPageRoute(builder: (context){
+                          return ContentFrontPage(
+                            content: c,
+                          );
+                        })
+                      )
+                    },
+                    blocked: _userstate.user.isContentBlocked(c),
+                    text: c.title,
+                    selected: true,
+                    image: c.image,
+                  );
+                },
               ),
-              itemCount: user.addedcontent.length,
-              itemBuilder: (BuildContext context, int index) { 
-                Content c = user.addedcontent[index];
-                return ClickableSquare(
-                  blockedtext: '',
-                  border: true,
-                  onTap:()=>{
-                    Navigator.push(context, 
-                      MaterialPageRoute(builder: (context){
-                        return ContentFrontPage(
-                          content: c,
-                        );
-                      })
-                    )
-                  },
-                  blocked: _userstate.user.isContentBlocked(c),
-                  text: c.title,
-                  selected: true,
-                  image: c.image,
-                );
-              },
-            ),
-          
-          
-            SizedBox(height: Configuration.verticalspacing*2),
+              SizedBox(height: Configuration.verticalspacing*2),
 
-          ],
-        ): Container();
+            ],
+          ),
+        ): Container(
+          margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+          child: Text(
+            "No content has been added yet",
+            style: Configuration.text('small',Colors.black,font: 'Helvetica'),
+          ),
+        );
     }
     
     Widget teacherView(){
-      
-
-
-      return DefaultTabController(
-        length: 2,
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
         child: Column(
-          children: [
-            
-
-            Expanded(
-              child: TabBarView(children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    isMe ? 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            primary:Colors.lightBlue
-                          ),
-                          onPressed: () {  
-                            setState(() {
-                              editingProfile =true;
-                            });
-                          },
-                          child: Text('Edit profile',style:Configuration.text('small',Colors.white)),
-                        ),
-                      ],
-                    ) : Container(),
-              
-                    SizedBox(height:Configuration.verticalspacing*2),
-                    Text(user.description != null ? user.description : 'The description goes here',
-                      style:Configuration.text('small',Colors.black, height:1.4, font:'Helvetica')
+            children: [
+              isMe ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:Colors.lightBlue
                     ),
-                    SizedBox(height: Configuration.verticalspacing*1.5),
-                    textIcon(Icons.group, user.students.length.toString() + ' students', (){
-                      Navigator.push(
-                          context,
-                            MaterialPageRoute(
-                                builder: (context) => ViewFollowers(
-                                users: user.students,
-                                title: 'Students'
-                            )
-                        ),
-                      );
-                    }),
-                    SizedBox(height:Configuration.verticalspacing*1.5),
-                    textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
-                    (){
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context)=> Scaffold(
-                              appBar: AppBar(
-                                leading: ButtonClose(),
-                                backgroundColor:Colors.white,
-                                elevation: 0,
-                              ),
-                              body: WebView(
-                                initialUrl:'https:' + user.website,
-                                javascriptMode: JavascriptMode.unrestricted),
-                            )
-                            )
-                        );
-                    }),
-                    SizedBox(height: Configuration.verticalspacing*1.5),
-                    textIcon(Icons.place, user.location != null ?  user.location : 'Add a location'),
-                    SizedBox(height: Configuration.verticalspacing*1.5),
-                    textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times'),
-                    SizedBox(height: Configuration.verticalspacing*1.5),      
-                    /*
-                    !isMe && user.messages.where((element) => element.sender == _userstate.user.coduser).length == 0 ? 
-                    BaseButton(
-                      margin:true,
-                      onPressed:(){
-                        sendMessage(
-                          state:_messagesState,
-                          to: user,
-                          from: _userstate.user,
-                          then:(){
-                          }  
-                        );
+                    onPressed: () {  
+                      setState(() {
+                        editingProfile =true;
+                      });
+                    },
+                    child: Text('Edit profile',style:Configuration.text('small',Colors.white)),
+                  ),
+                ],
+              ) : Container(),
               
-                      // _userstate.sendMessage(user,'classrequest');
-                      // setState(() {});
-                      },
-                      color:Configuration.maincolor,
-                      text: 'Send a Message '
-                    ) : Container(),*/
-                    
-                    SizedBox(height:Configuration.verticalspacing*2)
-                  ]),
-                  addedContent()
-              ]),
-            )
-        
-          ],
-        ),
+              Text(user.description != null ? user.description : 'The description goes here',
+                style:Configuration.text('small',Colors.black, height:1.4, font:'Helvetica')
+              ),
+              SizedBox(height: Configuration.verticalspacing*1.5),
+              textIcon(Icons.group, user.students.length.toString() + ' students', (){
+                Navigator.push(
+                    context,
+                      MaterialPageRoute(
+                          builder: (context) => ViewFollowers(
+                          users: user.students,
+                          title: 'Students'
+                      )
+                  ),
+                );
+              }),
+              isMe || user.website != null ?
+              textIcon(Icons.language, user.website != null ?  user.website : 'www.website.com',
+              (){
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context)=> Scaffold(
+                        appBar: AppBar(
+                          leading: CloseButton(),
+                          backgroundColor:Colors.white,
+                          elevation: 0,
+                        ),
+                        body: WebView(
+                          initialUrl:'https:' + user.website,
+                          javascriptMode: JavascriptMode.unrestricted),
+                      )
+                      )
+                  );
+              }) : Container(),
+              
+              isMe || user.location != null ?
+              textIcon(Icons.place, user.location != null ?  user.location : 'Add a location') : Container(),
+              isMe || user.teachinghours != null ?
+              textIcon(Icons.date_range, user.teachinghours != null ?  user.teachinghours : 'Available times') :
+              Container(),
+              SizedBox(height: Configuration.verticalspacing*2),
+              !isMe ? 
+              BaseButton(
+                margin:true,
+                onPressed:(){
+                  _messagesState.selectChat(user, _userstate.user);
+                  Navigator.pushNamed(context, '/chat');
+                },
+                color:Configuration.maincolor,
+                text: 'Contact teacher '
+              ) : Container(),
+              
+              SizedBox(height:Configuration.verticalspacing*2)
+            ],
+          ),
       );
     } 
 
@@ -295,204 +295,485 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
 
-      return Column(
-        children:[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                style:ElevatedButton.styleFrom(
-                  primary:Colors.lightBlue
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child: Column(
+          children:[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style:ElevatedButton.styleFrom(
+                    primary:Colors.lightBlue
+                  ),
+                  onPressed: (){
+                    _userstate.updateUser();
+                    setState(() {
+                      editingProfile = false;
+                    });
+                  },
+                  child:Text('Save', style:Configuration.text('small',Colors.white))
                 ),
-                onPressed: (){
-                  _userstate.updateUser();
-                  setState(() {
-                    editingProfile = false;
-                  });
-                },
-                child:Text('Save', style:Configuration.text('small',Colors.white))
-              ),
-            ],
-          ),
-          formElement('Description', _userstate.user.description, (text){
-            user.description = text;
-            _userstate.user.description = text;
-          }),
-          SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Website',  _userstate.user.website, (text){
-            user.website = text;
-            _userstate.user.website = text;
-          }),
-          SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Hours available', _userstate.user.teachinghours, (text){
-            user.teachinghours = text;
-            _userstate.user.teachinghours = text;
-          }),
-          SizedBox(height:Configuration.verticalspacing*2),
-          formElement('Location',  _userstate.user.location , (text){
-            user.location = text;
-            _userstate.user.location = text;
-          })
-        ]
+              ],
+            ),
+            formElement('Description', _userstate.user.description, (text){
+              user.description = text;
+              _userstate.user.description = text;
+            }),
+            SizedBox(height:Configuration.verticalspacing*2),
+            formElement('Website',  _userstate.user.website, (text){
+              user.website = text;
+              _userstate.user.website = text;
+            }),
+            SizedBox(height:Configuration.verticalspacing*2),
+            formElement('Hours available', _userstate.user.teachinghours, (text){
+              user.teachinghours = text;
+              _userstate.user.teachinghours = text;
+            }),
+            SizedBox(height:Configuration.verticalspacing*2),
+            formElement('Location',  _userstate.user.location , (text){
+              user.location = text;
+              _userstate.user.location = text;
+            })
+          ]
+        ),
       );
     }
 
-    return DefaultTabController(
-      length: 2, 
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(color: Configuration.lightgrey),
-            child: TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: Colors.lightBlue,
-              labelStyle: Configuration.text('small',Colors.black),
-              tabs: [
-              Tab(child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(Icons.info),
-                  Text('Information'),
-                ],
-              )),
-              Tab(child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(Icons.book),
-                  Text('Added Content'),
-                ],
-              ))
-            ]),
-          ),
+    Widget addedCourses(){
 
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-              child: TabBarView(children: [
-                _profilestate.loading ? 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgress(),
-                  ],
-                ) 
-                : !editingProfile ?  teacherView() 
-                : teacherEdit(),
-                addedContent()
-              ]),
+      Widget courseCircle({Course course}){
+        return AspectRatio(
+          aspectRatio: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Configuration.maincolor,
+              shape: BoxShape.circle
             ),
-          )
-        ],
-        )
-      ) ;
+            padding: EdgeInsets.all(8),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white,)
+              ),
+              child: Center(
+                child: Icon(Icons.spa, color: Colors.white,  size: Configuration.medicon),
+              ),
+            ),
+          ),
+        );
+      }
+
+      List<Widget> getCourseStats({Course course}){
+        List<Widget> w = new List.empty(growable: true);
+
+        Widget columnText(int howMany, String  what){
+          return Column(
+            children: [
+              Text(
+                howMany.toString(),
+                style: Configuration.text('medium',Colors.black)
+              ),
+              SizedBox(height: Configuration.verticalspacing/2),
+              Text(what + (howMany > 1? 's':''),
+                style: Configuration.text('tiny', Colors.grey,font: 'Helvetica')
+              )
+            ],
+          );
+
+        }
+
+        if(course.content.where((element) => element.isLesson()).length > 0){
+          w.add(columnText(course.content.where((element) => element.isLesson()).length,'lesson'));
+        }
+
+        if(course.content.where((element) => element.isVideo()).length > 0){
+          w.add(columnText(course.content.where((element) => element.isVideo()).length,'video'));
+        }
+
+        if(course.content.where((element) => element.isMeditation()).length > 0){
+          w.add(columnText(course.content.where((element) => element.isMeditation()).length,'meditation'));
+        }
+
+        if(course.content.where((element) => element.isRecording()).length > 0){
+          w.add(columnText(course.content.where((element) => element.isRecording()).length,'recording'));
+        }
+
+        return w;
+      }
+
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child:user.addedcourses.length > 0  ?
+          GridView.builder(
+            itemCount: user.addedcourses.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: Configuration.crossAxisCount+1), 
+            itemBuilder: (BuildContext context, int index) {
+              Course course = user.addedcourses[index];
+              
+              return GestureDetector(
+                onTap: ()=>{
+                  showModalBottomSheet(
+                    isScrollControlled: false,
+                    context: context,
+                    barrierColor: Colors.black.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                    ), 
+                    builder: (context){
+                      return StatefulBuilder(
+                        builder: (context,setState) {
+                          bool hasJoined = user.joinedcourses.where((element) => element.cod == course.cod).length > 0;
+                          bool canJoin = user.joinedcourses.length < 3;
+
+                          return BottomSheetModal(
+                            child: Container(
+                              margin: EdgeInsets.all(Configuration.smpadding),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(height: Configuration.verticalspacing),
+                                  Center(
+                                    child: Container(
+                                      width: Configuration.width*0.25,
+                                      child: courseCircle(),
+                                    ),
+                                  ),
+                                  SizedBox(height: Configuration.verticalspacing*2),
+                                  Text(course.title, style: Configuration.text('medium',Colors.black),),
+                                  SizedBox(height: Configuration.verticalspacing*2),
+                                  Container(
+                                    width: Configuration.width*0.7,
+                                    child: BaseButton(
+                                      text: hasJoined ? 'View course': 'Join course',
+                                      color: Colors.white,
+                                      bordercolor: Configuration.maincolor,
+                                      noelevation: true,
+                                      textcolor: Configuration.maincolor,
+                                      border: true,
+                                      onPressed: (){
+                                        if(!canJoin && !hasJoined){
+                                          showAlertDialog(
+                                            context:context,
+                                            title: "You can't join this  course",
+                                            text: 'You can only enrol to a maximum of three courses',
+                                            hideYesButton:  true,
+                                            noText: 'Close'
+                                          );
+                                        }else{
+                                          
+                                          if(!hasJoined){
+                                            user.joinedcourses.add(course);
+                                            _userstate.updateUser(u:user);
+                                            setState(() {});
+                                          }
+                                          
+                                          Navigator.push(context, MaterialPageRoute(builder: (context){
+                                            return PathPage(
+                                              path: course
+                                            );
+                                          })).then(((value) =>  setState((){})));
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: Configuration.verticalspacing),
+                                  Divider(),
+                                  SizedBox(height: Configuration.verticalspacing),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: getCourseStats(course: course)
+                                  ),
+                                  SizedBox(height: Configuration.verticalspacing),
+
+                                  Divider(),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      SizedBox(height: Configuration.verticalspacing),
+                                      Text('Description',style: Configuration.text('small',Colors.black)),
+                                      SizedBox(height: Configuration.verticalspacing),
+                                      Text(course.description,style: Configuration.text('small',Colors.black,font: 'Helvetica'))
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          );
+                        }
+                      );
+                    }
+                  )
+                },
+                child: Container(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: courseCircle()
+                      ),
+                      SizedBox(height: Configuration.verticalspacing/2),
+                      Text(course.title,style: Configuration.text('small',Colors.black)),
+                    ],
+                  ),
+              
+                ),
+              );
+            }
+          ): 
+          Text('No courses have been created yet', style: Configuration.text('small',Colors.black,font: 'Helvetica'))
+      );
+    }
+
+    List<Widget> l = new List.empty(growable: true);
+
+    l.add(!editingProfile ? teacherView() : teacherEdit());
+
+    if(user.addedcontent.length > 0){
+      l.add(addedContent());
+    }
+
+    if(user.addedcourses.length > 0){
+      l.add(addedCourses());
+    }
+
+    return l;
   }
 
-  Widget userProfile(User user){
-    return _profilestate.loading ? 
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgress(),
-        ],
-      ):  ListView(
-      primary: false,
-      physics: ClampingScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-      children: <Widget>[
-        SizedBox(height: Configuration.verticalspacing),
-        /*Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  List<Widget> userProfile(User user){
+    Widget userInfo(){
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          TextButton(
-            onPressed: ()=>  
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => 
-                  ViewFollowers(
-                    users:user.following,
-                    title: 'Following',
-              )),
-          ), 
-          child: Column(
+            Table(children: [
+              TableRow(children: [
+                ProfileInfoBigCard(
+                  firstText:  user.userStats.total.meditations.toString(),
+                  secondText: "Meditations\ncompleted",
+                  icon: Icon(Icons.self_improvement),
+                ),
+                ProfileInfoBigCard(
+                    firstText: user.userStats.total.lessons.toString(),
+                    secondText: "Lessons\ncompleted",
+                    icon: Icon(Icons.book))
+              ]),
+              TableRow(
+                children: [
+                  ProfileInfoBigCard(
+                    firstText:  user.timemeditated,
+                    secondText: "Time \nmeditated",
+                    icon: Icon(Icons.timer),
+                  ),
+                  ProfileInfoBigCard(
+                    firstText: user.userStats.total.maxstreak.toString() + (user.userStats.total.maxstreak == 1 ? ' day' : ' days'),
+                    secondText: "Max \nstreak",
+                    icon: Icon(Icons.calendar_today),
+                  )
+                ]
+              )
+            ]),
+            SizedBox(height: Configuration.verticalspacing*2),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Following', style: Configuration.text('tiny', Colors.black)),
-                SizedBox(height:2),
-                Text(user.following.length.toString(), style: Configuration.text('tiny',Colors.black))
+                Text('Meditation record', style: Configuration.text('small', Colors.black)),
+                
+                TextButton(onPressed: ()=>{
+                  Navigator.pushNamed(context, '/mymeditations')
+                }, child: Text('View all',style: Configuration.text('small', Colors.lightBlue))
+                ),
               ],
             ),
-          ),
-          TextButton(
-            onPressed: ()=>  
-              Navigator.push(
-                context,
-                  MaterialPageRoute(
-                      builder: (context) => ViewFollowers(
-                      users: user.followers ,
-                      title: 'Followers',
-                  )
+            user.userStats.streak > 1 ?
+            Container(
+              width: Configuration.width,
+              padding: EdgeInsets.all(Configuration.smpadding),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey)
+              ),
+              child: Row(
+                mainAxisAlignment:MainAxisAlignment.spaceAround,
+                children:[
+                  Text('Current streak', style:Configuration.text('small',Colors.black)),
+                  Text(user.userStats.streak.toString() + ' DAYS',style:Configuration.text('smallmedium',Colors.black)),
+                ]
+              ), 
+            ): Container(),
+            CalendarWidget(  meditations: user.totalMeditations),
+            SizedBox(height: Configuration.verticalspacing),
+          ],
+        ),
+      );
+    }
+
+    Widget userStats(){
+
+      List<String> days = ['M','T','W','TH','F','S','S'];
+      List<String> months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+
+      Widget bottomTitles(double value, TitleMeta meta) {
+        const style = TextStyle(color: Color(0xff939393), fontSize: 10);
+         
+        return SideTitleWidget(
+          child: Text(
+            selectedFilter == month_filter ?
+            months[value.toInt()]:
+            selectedFilter == week_filter ? 
+            'Week ' + value.toInt().toString() :
+            days[value.toInt()], 
+            style: style),
+          axisSide: meta.axisSide,
+        );
+      }
+
+      Widget leftTitles(double value, TitleMeta meta) {
+          if (value == meta.max) {
+            return Container();
+          }
+
+          // ESTO SE PODRÍA COMBINAR CON ARRIBA
+          const style = TextStyle(
+            color: Color(
+              0xff939393,
+            ),
+            fontSize: 10,
+          );
+
+          return SideTitleWidget(
+            child: Text(
+              meta.formattedValue + 'min',
+              style: style,
+            ),
+            axisSide: meta.axisSide,
+          );
+        } 
+
+      List<BarChartGroupData> chartData(){
+        Object m = new Object();
+        List<BarChartGroupData> charts= new List.empty(growable: true);
+
+        DateTime now = DateTime.now();
+        DateTime startingFilter = selectedFilter == month_filter  ?
+          DateTime(now.year, 1, 1):
+          selectedFilter == week_filter  ?
+          DateTime(now.year,now.month,0):
+          now.subtract(Duration(days: now.weekday - 1));
+    
+    
+        List<double> daysMeditated = new List.filled(selectedFilter == month_filter ? 12:  selectedFilter == week_filter ? 4 : 7,0);
+        int day = 0;
+
+        // HAY QUE SACAR LAS DE ESTA SEMANA  DE ESTE MES Y TOTAL
+        for(Meditation m in _profilestate.selected.totalMeditations.where((element) => element.day.isAfter(startingFilter))){
+          if(m.day != null){
+            print(m.day.month);
+
+            daysMeditated[selectedFilter == week_filter ?
+              1: selectedFilter ==  month_filter ?
+              m.day.month-1: m.day.weekday-1
+            ] += m.duration.inMinutes.toDouble();
+          }
+        }
+        
+        for(double d in daysMeditated){
+          charts.add(BarChartGroupData(
+            x: day++,
+            barRods: [
+              BarChartRodData(toY: d)
+            ])
+          );
+        }
+
+        return charts;
+      }
+
+      return Container(
+        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ToggleButtons(children: ['Day','Week','Month'].map((e) => 
+              Container(
+                padding: EdgeInsets.all(Configuration.smpadding),
+                child: Text(e))
+            ).toList(), 
+            constraints: const BoxConstraints(
+              minHeight: 40.0,
+              minWidth: 80.0,
+            ),
+            onPressed: (index) => {
+              setState((){
+                selectedFilter = index;
+               for (int i = 0; i < selectedFilterBools.length; i++) {
+                  selectedFilterBools[i] = i == index;
+                }
+              })
+            },
+            
+            selectedColor: Colors.white,
+            fillColor: Colors.lightBlue,
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            isSelected: selectedFilterBools
+            ),
+
+            SizedBox(height: Configuration.verticalspacing*2),
+            Text('Time meditated',style: Configuration.text('small',Colors.black)),
+
+            SizedBox(height: Configuration.verticalspacing*2),
+            Container(
+              width: Configuration.width,
+              child: AspectRatio(
+                aspectRatio: 1.66,
+                child: BarChart(
+                BarChartData(
+
+                  groupsSpace: Configuration.width*0.9/
+                    (selectedFilter == week_filter ? 4 :
+                    selectedFilter == month_filter ? 12 :
+                    7),
+                  alignment: BarChartAlignment.center,
+                  barTouchData: BarTouchData(
+                    enabled: false,
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: bottomTitles,
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        getTitlesWidget: leftTitles,
+                      ),
+                    ),
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  barGroups: chartData()
+                  ),
+                  swapAnimationDuration: Duration(milliseconds: 0),
                 ),
               ),
-              child: Column(
-              children: [
-                Text('Followers', style: Configuration.text('tiny', Colors.black)),
-                SizedBox(height:2),
-                Text(user.followers.length.toString(), style: Configuration.text('tiny',Colors.black))
-              ],
             ),
-          ) 
-        ],
-        ),*/
-        Table(children: [
-          TableRow(children: [
-            ProfileInfoBigCard(
-              firstText:  user.userStats.total.meditations.toString(),
-              secondText: "Meditations\ncompleted",
-              icon: Icon(Icons.self_improvement),
-            ),
-            ProfileInfoBigCard(
-                firstText: user.userStats.total.lessons.toString(),
-                secondText: "Lessons\ncompleted",
-                icon: Icon(Icons.book))
-          ]),
-          TableRow(
-            children: [
-              ProfileInfoBigCard(
-                firstText:  user.timemeditated,
-                secondText: "Time \nmeditated",
-                icon: Icon(Icons.timer),
-              ),
-              ProfileInfoBigCard(
-                firstText: user.userStats.total.maxstreak.toString() + (user.userStats.total.maxstreak == 1 ? ' day' : ' days'),
-                secondText: "Max \nstreak",
-                icon: Icon(Icons.calendar_today),
-              )
-            ]
-          )
-        ]),
-        SizedBox(height: Configuration.verticalspacing*2),
-        Text('Meditation record', style: Configuration.text('small', Colors.black)),
-        SizedBox(height: Configuration.verticalspacing),
-        user.userStats.streak > 1 ?
-        Container(
-          width: Configuration.width,
-          padding: EdgeInsets.all(Configuration.smpadding),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey)
-          ),
-          child: Row(
-            mainAxisAlignment:MainAxisAlignment.spaceAround,
-            children:[
-              Text('Current streak', style:Configuration.text('small',Colors.black)),
-              Text(user.userStats.streak.toString() + ' DAYS',style:Configuration.text('smallmedium',Colors.black)),
-            ]
-          ), 
-        ): Container(),
-        CalendarWidget(meditations: user.totalMeditations),
-        SizedBox(height: Configuration.verticalspacing),
-      ],
-    );
+            Container(),
+          ],
+        ),
+      );
+    }
+
+    return [userInfo()];
   }
 
   void didChangeDependencies(){
@@ -506,7 +787,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _profilestate.init(
       widget.user != null ? widget.user : _userstate.user, 
       _userstate.user
-    );
+    ).then((res){
+
+      if(_profilestate.selected.isTeacher()){
+        if(_profilestate.selected.addedcontent.length > 0){
+          tabs.add(Tab(text:'Added Content'));
+        }
+
+        if(_profilestate.selected.addedcourses.length > 0){
+          tabs.add(Tab(text:'Courses'));
+        }
+      }        
+
+      setState((){});
+               
+    });
   }
 
   @override
@@ -515,13 +810,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     isMe = _profilestate.isMe;
 
     return Scaffold(
+      backgroundColor: Configuration.maincolor,
       appBar: AppBar(
           backgroundColor: Configuration.maincolor,
           elevation: 0,
-          leading: ButtonBack(color: Colors.white),
+          leading: BackButton(color: Colors.white),
           actions: 
             isMe ? [
-              //MessagesIcon(color: Colors.white),
+              MessagesIcon(color: Colors.white),
               IconButton(
                 padding: EdgeInsets.all(0.0),
                 onPressed: () => Navigator.pushNamed(context, '/settings'),
@@ -533,8 +829,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ]: 
             [
-              Container()
-              /*
+              Container(),
+              //PÂRA ENVIAR MENSAJES !!!
               Container(
                 margin:EdgeInsets.only(right:Configuration.verticalspacing),
                 child: PopupMenuButton<String>(
@@ -547,30 +843,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             _messagesState.selectChat(user, _userstate.user);
                             Navigator.pushNamed(context, '/chat');
-                        
                           });
-                         // 
-                          print('QUE PASA QUE NO PUSHEA');
                         },
                         value: 'tap',
                         child: Text('Send a message',style: Configuration.text('small',Colors.black, font: 'Helvetica')),
                       ),
-                      PopupMenuItem(
-                        value: 'fol',
-                        onTap:(){
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            bool following = _userstate.user.following.where((u)=> u.coduser == user.coduser).length > 0;
-
-                            _userstate.follow(user, !following);
-                            setState((){});
-                          });
-                          setState((){});
-                        },
-                        child: Text(
-                          _userstate.user.following.where((u)=> u.coduser == user.coduser).length > 0 ? 'Unfollow' : 'Follow', 
-                          style: Configuration.text('small',Colors.black, font: 'Helvetica')
-                        ),
-                      )
                     ];
                   },
                   child: Icon(
@@ -579,88 +856,130 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     size: Configuration.medicon,
                   ),
                 ),
-              ),*/
+              ),
           ],
       ),
-      body:Stack(children: <Widget>[
-            Container(
-                height: Configuration.height,
-                width: Configuration.width,
-                color: Configuration.maincolor),
-            Column(
-              children: <Widget>[
-                Stack(
-                  fit:StackFit.passthrough,
-                  alignment:AlignmentDirectional.center,
-                  children: [
-                    //PASAR UPLOAD A PROFILE WIDGET !! 
-                    ProfileCircle(
-                      width:100,
-                      bordercolor: Colors.white,
-                      userImage: user.image,
-                      color:Colors.transparent,
-                      onTap:()=>{
-                        if(isMe){
-                          showPicker(onSelectImage: (image) async{
-                            if(image != null){          
-                              setState(() {
-                                uploading = true;
-                              });
-
-                              await _userstate.changeImage(image);
-                              
-                              setState(() {
-                                uploading = false;
-                              });
-                            }
-                          })
-                        }
-                      }
+      body: Stack(children: <Widget>[
+          Container(
+            height: Configuration.height,
+            width: Configuration.width,
+            color: Configuration.maincolor
+          ),
+          SingleChildScrollView(
+            physics: ClampingScrollPhysics(),
+            child: Column(
+                children: <Widget>[
+                  Container(
+                    constraints: BoxConstraints(
+                      minHeight: Configuration.height*0.2
                     ),
-                    uploading ? 
-                    Align(
-                      alignment:Alignment.center,
-                      child: CircularProgress(
-                        color:Colors.white
-                      )
-                    ): Container(width: 0),
-                    isMe ? Positioned(
-                      right:0,
-                      top:0,
-                      child: Container(
-                        padding: EdgeInsets.all(Configuration.tinpadding),
-                        decoration:BoxDecoration(
-                          shape:BoxShape.circle,
-                          color:Colors.white
+                    child: Column(
+                      children: [
+                        Stack(
+                          fit:StackFit.passthrough,
+                          alignment:AlignmentDirectional.center,
+                          children: [
+                            ProfileCircle(
+                              width:100,
+                              bordercolor: Colors.white,
+                              userImage: user.image,
+                              color:Colors.transparent,
+                              onTap:()=>{
+                                if(isMe){
+                                  showPicker(onSelectImage: (image) async{
+                                    if(image != null){          
+                                      setState(() {
+                                        uploading = true;
+                                      });
+          
+                                      await _userstate.changeImage(image);
+                                      
+                                      setState(() {
+                                        uploading = false;
+                                      });
+                                    }
+                                  })
+                                }
+                              }
+                            ),
+                            uploading ? 
+                            Align(
+                              alignment:Alignment.center,
+                              child: CircularProgress(
+                                color:Colors.white
+                              )
+                            ): Container(width: 0),
+                            isMe ? Positioned(
+                              right:0,
+                              top:0,
+                              child: Container(
+                                padding: EdgeInsets.all(Configuration.tinpadding),
+                                decoration:BoxDecoration(
+                                  shape:BoxShape.circle,
+                                  color:Colors.white
+                                ),
+                                child: Icon(Icons.edit_rounded,
+                                size: Configuration.tinicon, color:Colors.black
+                                ),
+                              ),
+                            ) :Container(),
+                          ],
                         ),
-                        child: Icon(Icons.edit_rounded,
-                        size: Configuration.tinicon, color:Colors.black
-                        ),
-                      ),
-                    ) :Container(),
-                  ],
-                ),
-                SizedBox(height: Configuration.verticalspacing),
-                Text(user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white)),
-                SizedBox(height: Configuration.verticalspacing),
-                identificationText(),
-                SizedBox(height:Configuration.verticalspacing*2),
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    width:Configuration.width,
-                    height:Configuration.height,
-                    decoration: BoxDecoration(
-                      color: Colors.white
+                        SizedBox(height: Configuration.verticalspacing),
+                        Text(user.nombre != null ? user.nombre : 'Guest',style: Configuration.text('medium', Colors.white)),
+                        SizedBox(height: Configuration.verticalspacing),
+                        identificationText(),
+                        SizedBox(height:Configuration.verticalspacing*2),
+                      ],
                     ),
-                    child: Observer(builder: (context){
-                     return user.isTeacher() ? teacherProfile(_profilestate.selected): 
-                      userProfile(_profilestate.selected);
-                    })
                   ),
-                ),
-              ],
-            ),
+                  Container(
+                    width:Configuration.width,
+                    constraints: BoxConstraints(
+                      minHeight: Configuration.height*0.8
+                    ),
+                    height: Configuration.height*0.8,
+                      decoration: BoxDecoration(
+                        color: Colors.white
+                      ),
+                      child: DefaultTabController(
+                      length: tabs.length, 
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(color: Configuration.lightgrey),
+                            child: TabBar(
+                              labelColor: Colors.black,
+                              unselectedLabelColor: Colors.grey,
+                              indicatorColor:  _profilestate.loading ? Configuration.lightgrey : Colors.lightBlue,
+                              labelStyle: Configuration.text('small',Colors.black),
+                              tabs: _profilestate.loading ? [
+                                Tab(text: "")
+                              ]: tabs
+                            ),
+                          ),
+                          SizedBox(height: Configuration.verticalspacing*2),
+                          Expanded(child: Container(child: Observer(builder: (context){
+                            return TabBarView(children: 
+                              _profilestate.loading ? [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgress(),
+                                  ],
+                                )] :                    
+                              user.isTeacher() ? teacherProfile(_profilestate.selected): 
+                              userProfile(_profilestate.selected)
+                              );
+                            }),
+                          ))
+                        ])
+                      )
+                    )
+                ],
+              ),
+          ),
       ])
     );
   }
@@ -710,7 +1029,7 @@ class _ViewFollowersState extends State<ViewFollowers> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading: ButtonBack(color: Colors.black),
+        leading: BackButton(color: Colors.black),
         title: Text(widget.title, style: Configuration.text('small', Colors.black)),
       ),
       body: Container(
@@ -808,6 +1127,41 @@ class _StudentsState extends State<Students> {
 
       body: Container(
         
+      ),
+    );
+  }
+}
+
+
+class MyMeditations extends StatelessWidget {
+  const MyMeditations({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+    
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        leading: CloseButton(color: Colors.black),
+        title: Text('Meditation record',style: Configuration.text('medium', Colors.black),),
+      ),
+      body: Container(
+        color: Configuration.lightgrey,
+        child: ListView.separated(
+          itemBuilder: ((context, index) {
+            Meditation m = _userstate.user.totalMeditations[(_userstate.user.totalMeditations.length-1)-index];
+
+            return ListTile(
+              title: Text(getMonth(m.day) + ' '+  m.day.day.toString() + ', ' + m.day.year.toString() + ' '+ getHour(m.day)),
+              subtitle: Text((m.cod != null ? 'Guided  meditation ':'Free Meditation') +   'Duration ' + m.duration.inMinutes.toString() + ' min'),
+            );
+          }),
+          separatorBuilder: ((context, index) {
+            return Divider();
+          }), 
+          itemCount: _userstate.user.totalMeditations.length
+          ),
       ),
     );
   }

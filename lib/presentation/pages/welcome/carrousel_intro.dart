@@ -25,22 +25,26 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
   UserState _userState;
   LoginState _loginState;
 
-  Image slide1, slide2,slide3;
+  Image slide1, slide2,slide3, slide4;
 
   bool loadedImages = false;
 
   List<Map<String,dynamic>> slides = [
     {
       "title":"Welcome to TenStages", 
-      "description":" This application is based on The Mind Illuminated, written by John Yates, a neuroscientist that got interested in meditation. It combines ancient buddhist wisdom with brain science. \n \n  It is recommended to use the book along with the application."
+      "description":"This application is based on The Mind Illuminated, written by John Yates, a neuroscientist that got interested in meditation. It combines ancient buddhist wisdom with brain science.\n\nIt is recommended to use the book along with the application."
     },
     {
       "title":" Ten Stages of training", 
-      "description":" The process of training the mind is divided into ten different stages. \n \n In each stage you will learn new information about how your mind works and how to progress in meditation. "
+      "description":"The process of training the mind is divided into ten different stages.\n\nIn each stage you will master certain goals, learn new information about how your mind works or meditation. "
+    },
+    {
+      "title": "Progress is not linear", 
+      "description": "The stages form a broad map to help you figure out where you are and how best to continue. Although we present the stages as linear, the practice doesn't actually unfold that way. Expect to be moving between stages.\n\nThe goal is to give you tools for you to work, at the level you are in each moment "
     },
     {
       "title":"Commit to the practice", 
-      "description":" In order to progress to the next stages you will have to accomplish certain objectives. \n \n Don't make the objectives and the stages a goal itself, the main goal of this app is to understand your brain and what really is meditation. "
+      "description":"In order to progress to the next stages you will have to accomplish certain objectives.This objectives should be used as general guidelines.\n\nDon't make the stages a goal itself, the target is to understand your mind and what really is meditation about.\n "
     }
   ];
 
@@ -55,13 +59,14 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
     slides[0]['image']= slide1;
     slide2 = Image.asset("assets/second_slide.png");
     slides[1]['image']= slide2;
-
-    slide3 = Image.asset("assets/third_slide.png");
-
+    slide3 = Image.asset("assets/fourth_slide.png");
     slides[2]['image']= slide3;
+    slide4 = Image.asset("assets/third_slide.png");
+    slides[3]['image']= slide4;
 
   } 
 
+  @override
   void didChangeDependencies(){
     super.didChangeDependencies();
     if(Configuration.width == null){
@@ -72,6 +77,8 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
     precacheImage(slide1.image, context).then((value) => setState((){ loadedImages = true;}));
     precacheImage(slide2.image, context);
     precacheImage(slide3.image, context);
+    precacheImage(slide4.image, context);
+
 
 
     _loginState = Provider.of<LoginState>(context);
@@ -139,9 +146,10 @@ class _CarrouselIntroState extends State<CarrouselIntro> {
                               child: slide['image']
                             ),
                             SizedBox(height: Configuration.verticalspacing*4),
-                            Text(slide['title'],textAlign: TextAlign.center,  style: Configuration.text('medium',Colors.white)),
+                            Text(slide['title'],textAlign: TextAlign.left,  style: Configuration.text('medium',Colors.white)),
                             SizedBox(height: Configuration.verticalspacing*2),
-                            Text(slide["description"],textAlign: TextAlign.center, style:Configuration.text('small',Colors.white)),
+                            Text(slide["description"],textAlign: TextAlign.left, 
+                            style:Configuration.text('small',Colors.white, font: 'Helvetica')),
                           ],
                         ),
                       ),

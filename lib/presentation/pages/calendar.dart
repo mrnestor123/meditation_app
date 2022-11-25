@@ -136,15 +136,15 @@ class CustomCalendar{
 
 class CalendarWidget extends StatefulWidget {
   List<Meditation> meditations;
+  Map<String,dynamic> entries;
 
-  CalendarWidget({this.meditations});
+  CalendarWidget({this.meditations, Map<String,dynamic> entries});
 
   @override
   _CalendarState createState() => _CalendarState();
 }
 
 enum StartWeekDay {sunday, monday}
-
 
 class _CalendarState extends State<CalendarWidget> {
   DateTime _currentDateTime;

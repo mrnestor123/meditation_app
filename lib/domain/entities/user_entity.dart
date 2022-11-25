@@ -5,6 +5,7 @@ import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
+import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/progress_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
@@ -41,9 +42,12 @@ class User {
 
   List<User> students = new List.empty(growable: true);
   List<Content> addedcontent =  new List.empty(growable:true);
+  List<Course> addedcourses = new List.empty(growable: true);
 
   List<dynamic> unreadmessages = new List.empty(growable: true);
   List<Message> messages = new List.empty(growable:true);
+
+  List<Course> joinedcourses = new  List.empty(growable: true);
 
   //passed objectives también deberia estar en stats
   Map<String, dynamic> passedObjectives = new Map();
@@ -412,51 +416,53 @@ class User {
   }
 
   void takeLesson(Lesson l, [DataBase d]) {
-    if(this.readlessons.where((element)=> l.cod == element).isEmpty){
-      // EMPEZAR A UTILIZAR 
-      if(l.stagenumber == this.stagenumber && this.userStats.stage.lessons < this.stage.stobjectives.lecciones){
-        this.userStats.stage.lessons++;
-        this.progress = Progress(
-          done: this.userStats.stage.lessons,
-          total: this.stage.stobjectives.lecciones, 
-          what: ' Lessons'
-        );
+    if(l.stagenumber != null){
+      if(this.readlessons.where((element)=> l.cod == element).isEmpty){
+        // EMPEZAR A UTILIZAR 
+        if(l.stagenumber == this.stagenumber && this.userStats.stage.lessons < this.stage.stobjectives.lecciones){
+          this.userStats.stage.lessons++;
+          this.progress = Progress(
+            done: this.userStats.stage.lessons,
+            total: this.stage.stobjectives.lecciones, 
+            what: ' Lessons'
+          );
 
-        setPercentage();
-       
-        if (this.percentage >= 100) {
-          this.updateStage(d);
+          setPercentage();
+        
+          if (this.percentage >= 100) {
+            this.updateStage(d);
+          }
         }
-      }
 
-      // VAMOS A QUITAR ESTO !!!!!!!!!!
-      // REVISAR QUE VA UNO DETRAS DE OTRO !!!
-      if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
-        this.position += 1;
-        this.userStats.lastread.clear();
-      } else {
-        this.userStats.lastread.add({'cod': l.cod});
-      }
-
-      this.readlessons.add(l.cod);
-
-
-      bool updatestage = true;
-     
-      for(Lesson l in d.stages[l.stagenumber -1].path){
-        if(!this.readlessons.contains(l.cod)){
-          updatestage = false;
+        // VAMOS A QUITAR ESTO !!!!!!!!!!
+        // REVISAR QUE VA UNO DETRAS DE OTRO !!!
+        if (this.stage.path.where((c) => c.position == this.position).length <= this.userStats.lastread.length + 1) {
+          this.position += 1;
+          this.userStats.lastread.clear();
+        } else {
+          this.userStats.lastread.add({'cod': l.cod});
         }
-      }
+
+        this.readlessons.add(l.cod);
+
+
+        bool updatestage = true;
       
-      if(updatestage){
-        this.stagelessonsnumber++;
-        this.position = 0;
-      }
+        for(Lesson l in d.stages[l.stagenumber -1].path){
+          if(!this.readlessons.contains(l.cod)){
+            updatestage = false;
+          }
+        }
+        
+        if(updatestage){
+          this.stagelessonsnumber++;
+          this.position = 0;
+        }
 
-      this.userStats.takeLesson();
+        this.userStats.takeLesson();
+      }
+    
     }
-  
     setAction('lesson', attribute: l.title);
   }
 
@@ -489,11 +495,14 @@ class User {
     }
   }
 
-
   // cambiar content por recording !!
   bool finishRecording(Content c, Duration done, Duration totalDuration){
     int index = this.contentDone.indexWhere((element) => element.cod == c.cod);
-    
+
+    if(c.isRecording()){
+      setAction('recording',attribute: [c.title, c.description]);
+    }
+
     if(index == -1){
       c.done = done;
       c.doneBy = this.coduser;
@@ -514,8 +523,8 @@ class User {
   bool takeMeditation(Meditation m,[DataBase d]) {
     m.coduser = this.coduser;
 
-    // HAY  QUE RESTARLE EL TIEMPO DE CADA MEDITACIÓN
-    m.day = DateTime.now();
+    // sacamos  cuando se empieza la meditación
+    m.day = DateTime.now().subtract(m.duration);
     
     if (m.title == null) {
       if (this.stage.stobjectives.meditationfreetime != 0 && this.stage.stobjectives.meditationfreetime <= m.duration.inMinutes &&

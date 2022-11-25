@@ -466,7 +466,7 @@ class ContentFrontPage extends StatelessWidget {
                     children: [
                       BaseButton(
                         margin: true,
-                        text: 'Start ' + (content.type== 'meditation-practice' ? 'Meditation' : 'Lesson'),
+                        text: 'Start ' + (content.isVideo() ? 'Video' :  content.isMeditation() ? 'Meditation' : 'Lesson'),
                         onPressed: () async {
                           Navigator.pushReplacement(
                             context, 
@@ -485,9 +485,9 @@ class ContentFrontPage extends StatelessWidget {
                                       );
                                     }
                                   }else if(content.isVideo()) {
-                                    //return VideoScreen(video:content);
+                                    return VideoScreen(video:content);
                                     // HAY QUE CREAR LA VISTA DE VIDEO AÚN !!
-                                    return LessonView(lesson: content);
+                                    //return LessonView(lesson: content);
                                   }else{
                                     return LessonView(lesson: content);
                                   }
@@ -515,7 +515,7 @@ class ContentFrontPage extends StatelessWidget {
 
 
 
-/*
+
 class VideoScreen extends StatefulWidget {
   Content video;
 
@@ -544,7 +544,6 @@ class _VideoScreenState extends State<VideoScreen> {
 
   double _aspectRatio = 16/9;
   ChewieController chewiController;
-
 
   void  loadController()  async{
     controller = new VideoPlayerController.network(widget.video.file);
@@ -580,8 +579,8 @@ class _VideoScreenState extends State<VideoScreen> {
       );
 
       if(content != null && content.done != null && content.done.inMinutes < widget.video.total.inMinutes){
-        //controller.seekTo(content.done);
-       // chewiController.seekTo(content.done);
+        controller.seekTo(content.done);
+        chewiController.seekTo(content.done);
       }
     }  
 
@@ -679,7 +678,6 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
-    print(MediaQuery.of(context).orientation);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Configuration.maincolor,
@@ -701,30 +699,29 @@ class _VideoScreenState extends State<VideoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: Configuration.verticalspacing*2),
-            loaded  ?
+            loaded ?
             Column(
               children: [
                 video(),
+                SizedBox(height: Configuration.verticalspacing*3),
 
                 Padding(
                   padding: EdgeInsets.all(Configuration.smpadding),
                   child: Column(
                     crossAxisAlignment:CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       SizedBox(height: Configuration.verticalspacing*1.5),
-                      Text(widget.video.title,style: Configuration.text('medium',Colors.white)),
+                      Text(widget.video.title,style: Configuration.text('medium',Colors.white),textAlign: TextAlign.left),
                       SizedBox(height: Configuration.verticalspacing),
                       widget.video.description.isNotEmpty ?
-                      Text(widget.video.description,style: Configuration.text('small',Colors.white,font:'Helvetica'),)
+                      Text(widget.video.description,style: Configuration.text('small',Colors.white,font:'Helvetica'))
                       : Container(),
                     ],
                   ),
                 ),
-                SizedBox(height: Configuration.verticalspacing*1.5),
 
-
-                
+                SizedBox(height: Configuration.verticalspacing*1.5)
               ],
             )
             : Column(
@@ -735,105 +732,12 @@ class _VideoScreenState extends State<VideoScreen> {
                 ),
               ],
             )
-            
-            /*
-            SizedBox(height: Configuration.verticalspacing),
-
-            Spacer(),
-
-            totalDuration != null ?
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('0:00',style: Configuration.text('small',Colors.white)),
-                  GestureDetector(
-                    onDoubleTap: (){
-                    },
-                    child: Text(totalDuration.inHours.toString() + ':' + getMinutes(totalDuration),
-                      style: Configuration.text('small',Colors.white)),
-                  )
-                ],  
-              ),
-            ): Container(),
-            
-            
-            SizedBox(height: Configuration.verticalspacing/2),
-            Slider.adaptive(
-              activeColor: Colors.lightBlue,
-              thumbColor: Colors.white,
-              inactiveColor: Colors.white,
-              min: 0.0,
-              max: loaded ? totalDuration.inSeconds.toDouble() : 100,
-              onChangeStart: (a)=>{
-                //isDragging = true
-              },
-              onChanged: (a){
-                null;
-                //assetsAudioPlayer.seek(Duration(seconds: a.toInt()));
-                //setState(() {});
-              }, 
-              value: loaded ? controller.value.position.inSeconds.toDouble() : 0,
-            ),
-            SizedBox(height:Configuration.verticalspacing*2),
-            
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                secondaryButton(
-                  Icons.replay_30, 
-                  (){
-                    if(controller.value.position.inSeconds > 30){
-                      controller.seekTo(Duration(seconds: controller.value.position.inSeconds-30));
-                    }
-                    setState(() {});
-                  },
-                  'heroTag1'
-                ),
-                FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  onPressed: () {
-                    if(isPlaying){
-                      controller.pause(); 
-                    }else{
-                      controller.play();
-                    }
-                    isPlaying =  !isPlaying;
-                  },
-                  child: Icon(
-                    isPlaying ? Icons.pause  : Icons.play_arrow, 
-                    color: Colors.black,
-                    size: Configuration.smicon,
-                  )
-                ),
-
-
-                  secondaryButton(
-                  Icons.forward_30, 
-                  (){
-                    if(controller.value.position.inSeconds > 30){
-                      controller.seekTo(Duration(seconds: controller.value.position.inSeconds+30));
-                    }
-                    setState(() {});
-                  },
-                  'heroTag2'
-                  ),
-
-              ]
-            ),     
-            
-            */
-
-          ],
-        
-          )
+        ])
       ),
     );
   }
 }
-*/
+
 
 
 // HAY QUE CREAR UN  SLIDER DEFAULT ???

@@ -1,6 +1,6 @@
 //Objeto para almacenar información de la base de datos
 
-import 'package:meditation_app/domain/entities/path_entity.dart';
+import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -25,7 +25,7 @@ class DataBase {
     // PARA QUITAR !!!
   List<Phase> phases = new List.empty(growable: true);
 
-  List<Path>  paths = new List.empty(growable: true);
+  List<Course>  paths = new List.empty(growable: true);
 
   List<Version> versions = new List.empty(growable: true);
   Version lastVersion;
@@ -34,7 +34,6 @@ class DataBase {
   DataBase();
 
   void addVersion(Version v){
-    print('Adding version');
     versions.add(v);
   }
 

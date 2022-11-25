@@ -100,7 +100,6 @@ class _WeekItemState extends State<WeekItem> {
   bool changed = false;
   @override
   Widget build(BuildContext context) {
-    print(changed);
     if (widget.animate && !changed) {
       var timer = Timer(Duration(seconds: 1), () => setState(() => changed = true));
     }

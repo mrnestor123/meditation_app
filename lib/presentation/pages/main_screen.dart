@@ -15,6 +15,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
+import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/stage/path.dart';
 import 'package:provider/provider.dart';
@@ -55,8 +56,9 @@ class _MainScreenState extends State<MainScreen> {
     _userstate = Provider.of<UserState>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      
       // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
-      if(_userstate.user.version == null || _userstate.user.version < _userstate.data.lastVersion.versionNumber){
+      if(_userstate.data != null && (_userstate.user.version == null || _userstate.user.version < _userstate.data.lastVersion.versionNumber)){
         _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
 
        showDialog(
@@ -225,37 +227,73 @@ class _MainScreenState extends State<MainScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  width: Configuration.width*0.3,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Configuration.lightgrey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)
-                      )
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    width: Configuration.width*0.25,
+                   
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Configuration.lightgrey,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)
+                        )
+                      ),
+                      onPressed: ()=>{
+                         Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StageView(
+                              stage: _userstate.data.stages[_userstate.user.stagenumber-1],
+                            )
+                          ),
+                        ).then((value) =>
+                          setState(() {
+                            print('SETTING STATE');
+                          })
+                        )
+                      }, 
+                      child:Text('Learn',style: Configuration.text('tiny', Colors.black)),
                     ),
-                    onPressed: ()=>{Navigator.pushNamed(context, '/progress')}, 
-                    child:Text('Objectives',style: Configuration.text('tiny', Colors.black)),
                   ),
                 ),
-                Container(
-                  width: Configuration.width*0.3,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Configuration.lightgrey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4)
-                      )
-                    ),
-                    onPressed: ()=>{
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ImagePath(stage: _userstate.user.stage)
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    width: Configuration.width*0.25,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Configuration.lightgrey,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)
                         )
-                      )
-                    }, 
-                    child: Text('Path',style: Configuration.text('tiny', Colors.black),) 
+                      ),
+                      onPressed: ()=>{Navigator.pushNamed(context, '/progress')}, 
+                      child:Text('Objectives',style: Configuration.text('tiny', Colors.black)),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    width: Configuration.width*0.25,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Configuration.lightgrey,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4)
+                        )
+                      ),
+                      onPressed: ()=>{
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImagePath(stage: _userstate.user.stage)
+                          )
+                        )
+                      }, 
+                      child: Text('Path',style: Configuration.text('tiny', Colors.black),) 
+                    ),
                   ),
                 ),
               ],
@@ -264,6 +302,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
 
+      /*
       _userstate.data != null && _userstate.data.newContent.length > 0 ? 
       Container(
         margin: EdgeInsets.only(top: Configuration.verticalspacing*2),
@@ -325,7 +364,7 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       ): Container(),
-
+      */
 
       /*
       Center(
@@ -344,6 +383,7 @@ class _MainScreenState extends State<MainScreen> {
       //StageCard(stage: _userstate.user.stage),
       
       SizedBox(height: Configuration.verticalspacing*2),
+      
       Container(
         padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
         child: Column(

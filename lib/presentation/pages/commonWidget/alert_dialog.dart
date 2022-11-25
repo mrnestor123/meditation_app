@@ -7,7 +7,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
-void showAlertDialog({String title,String text, onYes, context, onNo, noPop = false}){
+void showAlertDialog({String title,String text, onYes, context, onNo, noText, noPop = false,  hideYesButton = false}){
 
   showDialog(
     context: context, 
@@ -43,6 +43,8 @@ void showAlertDialog({String title,String text, onYes, context, onNo, noPop = fa
                   }
                 ),
                 SizedBox(height: Configuration.verticalspacing),
+                
+                !hideYesButton ?
                 BaseButton(
                   noelevation: true,
                   onPressed:(){
@@ -55,7 +57,7 @@ void showAlertDialog({String title,String text, onYes, context, onNo, noPop = fa
                     }
                   }, 
                   text: 'Yes'
-                )
+                ): Container(),
               ],
             ),
           )

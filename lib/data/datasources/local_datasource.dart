@@ -32,6 +32,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   @override
   Future<void> cacheUser(UserModel userToCache) async {
     sharedPreferences.setString(CACHED_USER, json.encode(userToCache.coduser));
+   // sharedPreferences.setString(CACHED_USER, json.encode("upFNZQiPrbZfcIQstDd1XF7xYqG3"));
   }
 
   @override

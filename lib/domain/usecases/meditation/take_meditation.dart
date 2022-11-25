@@ -40,6 +40,7 @@ class Params {
  
 
 
+// ESTO PORQUE ESTA AQUI Y NO EN  USERSTATE ???
 void uploadActions(User user, UserRepository repository){
   if(user.lastactions.length > 0 ){
     for(UserAction a in user.lastactions){

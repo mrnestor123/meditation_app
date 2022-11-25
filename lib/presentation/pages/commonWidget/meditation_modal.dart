@@ -126,7 +126,7 @@ class TimeChip extends StatelessWidget {
   String getTime(Duration d){
     String time = '';
 
-    if(seenTime != null && !finished){    
+    if(seenTime != null && !finished ){    
       d = d - seenTime;
     }
 
@@ -163,14 +163,13 @@ class TimeChip extends StatelessWidget {
 
       if(content != null  && content.done != null){
         seenTime = content.done;
-        finished = seenTime.inMinutes >= c.total.inMinutes;
+        finished = seenTime.inMinutes >= (c.total.inMinutes - 1);
       }
     }  
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-       
         Container(
           padding: EdgeInsets.all(6),
           decoration: BoxDecoration(
@@ -186,6 +185,7 @@ class TimeChip extends StatelessWidget {
             ],
           ),
         ),
+        
         SizedBox(width: Configuration.verticalspacing),
         
         finished ? 

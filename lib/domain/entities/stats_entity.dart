@@ -71,7 +71,7 @@ class UserStats {
     if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] != null) {
       this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] += m.duration.inMinutes;
     } else {
-      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] =  m.duration.inMinutes;
+      this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] = m.duration.inMinutes;
     }
   }
 

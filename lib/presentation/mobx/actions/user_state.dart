@@ -8,6 +8,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/game_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -17,6 +18,7 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
+import 'package:mindful_minutes/mindful_minutes.dart';
 import 'package:mobx/mobx.dart';
 
 import 'error_helper.dart';
@@ -30,7 +32,19 @@ class UserState extends _UserState with _$UserState {
 abstract class _UserState with Store {
   UserRepository repository;
 
-  _UserState({this.repository});
+  bool perm;
+
+  final _plugin = MindfulMinutesPlugin();
+
+
+
+  _UserState({this.repository}){
+     if(Platform.isIOS){
+      _plugin.checkPermission().then((hasPermission){
+        if (!hasPermission) _plugin.requestPermission();
+      });
+     }
+  }
 
   @observable
   User user;
@@ -67,6 +81,7 @@ abstract class _UserState with Store {
 
   @observable
   Map lessondata;
+
 
   @action
   void setUser(var u) {
@@ -163,6 +178,8 @@ abstract class _UserState with Store {
     if(user.finishRecording(c, done, total)){
       repository.updateUser(user: user, toAdd: [c],type: 'recording');
     }
+
+    uploadActions(user, repository);
   }
 
   //UTILIZAR UPLOADIMAGE EN ESTE!!
@@ -274,7 +291,6 @@ abstract class _UserState with Store {
   }
 
 
-
   Future <User> getUser({String cod})async{
 
     Either<Failure,User> res = await repository.getUser(cod);
@@ -326,6 +342,10 @@ abstract class _UserState with Store {
 
     AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
     assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
+
+    if(Platform.isIOS){
+      _plugin.writeMindfulMinutes(DateTime.now().subtract(m.duration), DateTime.now());
+    }
   }
 
   @action 

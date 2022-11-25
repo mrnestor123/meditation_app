@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
 import 'package:meditation_app/core/network/network_info.dart';
@@ -5,6 +6,7 @@ import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/repositories/meditation_repository.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
+import 'package:meditation_app/domain/entities/audio_handler.dart';
 import 'package:meditation_app/domain/entities/local_notifications.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
@@ -26,7 +28,7 @@ final sl = GetIt.instance;
 Future<void> init() async {
   await Firebase.initializeApp();
 
-  LocalNotifications.init();
+ // LocalNotifications.init();
 
   //Mobx
   sl.registerFactory(
@@ -37,6 +39,7 @@ Future<void> init() async {
   sl.registerFactory(
     () => MeditationState(),
   );
+
 
   /// A lo mejor userstate hace demasiado ??
   sl.registerFactory(
@@ -98,4 +101,6 @@ Future<void> init() async {
   //External
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(()=> sharedPreferences);
+  
+  sl.registerSingleton<AudioHandler>(await initAudioService());
 }

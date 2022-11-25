@@ -60,11 +60,12 @@ class MeditationModel extends Meditation {
       model = new MeditationModel();
     }
 
-    model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']);
+    model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) 
+      : Duration(minutes: json['duration']);
 
     model.day = json["day"] == null ? null : json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
       DateTime.fromMillisecondsSinceEpoch(json['day']).toLocal();
-
+      
     model.coduser = json['coduser'] == null ? null : json['coduser'];
 
     return model;
@@ -74,7 +75,6 @@ class MeditationModel extends Meditation {
   Map<String,dynamic> toJson(){
     Map<String,dynamic> json = new Map();
     json.addAll(super.toJson());
-    // FALTA AÑADIR CONTENIDO ESPECIAL DE LA MEDITACIÓN
     return json;
   } 
 }

@@ -8,7 +8,7 @@ import 'package:meditation_app/presentation/pages/contentWidgets/meditation_scre
 import 'package:provider/provider.dart';
 
 import '../../domain/entities/content_entity.dart';
-import '../../domain/entities/path_entity.dart';
+import '../../domain/entities/course_entity.dart';
 import 'config/configuration.dart';
 
 class RecordingsScreen extends StatefulWidget {
@@ -20,13 +20,13 @@ class RecordingsScreen extends StatefulWidget {
 
 class _RecordingsScreenState extends State<RecordingsScreen> {
   
-  Widget pathView({Path path}){
+  Widget pathView({Course path}){
     return Container(
       width: Configuration.width,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.all(Configuration.smpadding),
-          primary: Configuration.maincolor,
+          backgroundColor: Configuration.maincolor,
           shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2))
         ),
         onPressed: (){
@@ -126,7 +126,6 @@ class _RecordingsScreenState extends State<RecordingsScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +274,7 @@ class _RecordingsScreenState extends State<RecordingsScreen> {
 
 
 class PathPage extends StatefulWidget {
-  Path path;
+  Course path;
 
   PathPage({ Key key, this.path}) : super(key: key);
 
@@ -331,36 +330,17 @@ class _PathPageState extends State<PathPage> {
               padding: EdgeInsets.symmetric(vertical: Configuration.smpadding),
               decoration: BoxDecoration(
                 color: Configuration.lightgrey,
-                borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius))
               ),
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context,i){
                   return ContentCard(
-                    //key: Key(widget.path.content[i].do),
-                    // HAY QUE REFACTORIZAR LA PESTAÑA DE MEDITACIONES 
-                    onPressed: (){
-                      Content c =  Content.fromJson(widget.path.content[i].toFullJson());
-                      c.description = c.title;
-                      c.title  = widget.path.title;
-      
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context){
-                          return CountDownScreen(
-                            content: c,
-                            then:(){setState((){});},
-                          );
-                        })
-                      ).then((value) { 
-                        Future.delayed(Duration(milliseconds: 700),(){
-                          setState((){
-                            print('QUE PASAA VALENCIANS REBUILDING !!!!');
-                          });
-                        })
-                        ;});
-                    },  
+                    then:(value)=> Future.delayed(Duration(milliseconds: 700),(){
+                      setState((){ });
+                    }),
+                    title: widget.path.title, 
                     content: widget.path.content[i]
                   );
                 }, 
@@ -375,8 +355,9 @@ class _PathPageState extends State<PathPage> {
 }
 
 
+
 class PathRecordingScreen extends StatelessWidget {
-  Path path;
+  Course path;
 
   Content selectedcontent;
 

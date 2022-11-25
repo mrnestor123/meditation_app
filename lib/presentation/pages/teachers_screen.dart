@@ -56,7 +56,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: ButtonBack(color:Colors.white),
+        leading: BackButton(color:Colors.white),
         backgroundColor: Configuration.maincolor,
         elevation:0,
         actions: [
@@ -75,7 +75,7 @@ class _TeachersScreenState extends State<TeachersScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        'Here can be added more information about TMI TEACHERS',
+                        "Tmi Teachers have participated in the training's course done by Culadasa",
                         style: Configuration.text('small', Colors.black,font: 'Helvetica'),
                       ),
                     )

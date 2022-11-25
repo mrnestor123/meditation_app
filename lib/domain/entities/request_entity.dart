@@ -126,7 +126,7 @@ class Request {
     if(this.state =='open'){
       return Colors.green;
     }else if(this.state == 'inprogress'){
-      return Colors.yellow;
+      return Colors.orange;
     }else{
       return Colors.red;
     }

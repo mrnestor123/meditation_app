@@ -1,4 +1,5 @@
 {
     "diffEditor.renderSideBySide": false,
-    "editor.minimap.renderCharacters": false
+    "editor.minimap.renderCharacters": false,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/meditation_screens.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/entities/content_entity.dart';
@@ -12,10 +14,12 @@ import '../config/configuration.dart';
 
 class ContentCard extends StatelessWidget {
   Content content, unlocksContent;
-  dynamic onPressed;
+  dynamic onPressed,then;
   bool blocked,seen;
+
+  String title;
   
-  ContentCard({this.content, this.onPressed, this.blocked = false, this.unlocksContent, this.seen = false ,key}):super(key:key);
+  ContentCard({this.content,this.then, this.title, this.onPressed, this.blocked = false, this.unlocksContent, this.seen = false ,key}):super(key:key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,36 @@ class ContentCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.all(Configuration.verticalspacing),
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: (){
+            if(!blocked){
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context){
+                  
+                  // tenemos  que saber si estamos en un curso !!!!
+                  if(content.isRecording()){
+                    // ESTO PORQUE NO ES SIEMPRE IGUAL ?????????
+                    Content c =  Content.fromJson(content.toFullJson());
+                    c.description = c.title;
+                    c.title  = title;
+    
+                    return CountDownScreen(
+                      content: c,
+                      then:then
+                    );
+                  }else{
+                    return ContentFrontPage(
+                      content:content, 
+                      then: then
+                    );
+                  }
+                }
+              )
+            ).then(then);
+          } 
+
+          },
           /* () {
             if(content.type == 'meditation-practice'){
               meditationModal(content);
@@ -91,6 +124,8 @@ class ContentCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: Configuration.verticalspacing),
+
+                      // HAY QUE PONER  SI el  usuario ha leido una lección o no !!
                       content.total != null && content.total.inMinutes  > 0 ?
                       TimeChip(c:content): Container(),
                     ],

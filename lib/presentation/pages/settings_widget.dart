@@ -25,7 +25,7 @@ class _SettingsState extends State<Settings> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        leading:   ButtonBack()
+        leading:   BackButton(color: Colors.black)
       ),
       body: Container(
         color: Configuration.lightgrey,
@@ -148,7 +148,7 @@ class _StageProgressionState extends State<StageProgression> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: ButtonBack(),
+        leading: BackButton(),
         title: Text(widget.title,style:Configuration.text('small', Colors.black)
       )),
       body: Container(

@@ -15,7 +15,7 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
-import 'package:meditation_app/domain/entities/path_entity.dart';
+import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -113,10 +113,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
     database = FirebaseFirestore.instance;
-    // nodejs = 'http://localhost:5001/app';
-    // nodejs = 'https://public.digitalvalue.es:8002';
-   // nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
-   nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
+  //  nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
+    nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
   }
 
   Map<int, Map<String, List<LessonModel>>> alllessons;
@@ -153,11 +151,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     UserModel loggeduser = await connect(usuario.uid);
     if(loggeduser != null){
       getActions(loggeduser);
-      //HAY QUE QUITAR ESTO UNA VEZ SE DESCONECTA
-      /*
-      Timer.periodic(new Duration(seconds: 30), (timer) {
-        getActions(loggeduser);
-      });*/   
       return loggeduser;
     }else{
       throw LoginException();
@@ -282,7 +275,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         List<dynamic> paths  = json.decode(pathsresponse.body);
         
         for(var p in paths){
-          d.paths.add(Path.fromJson(p));
+          d.paths.add(Course.fromJson(p));
         }
       }
 
@@ -375,6 +368,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
         if(docreference.docs.length > 0){
           await database.collection("doneContent").doc(docreference.docs[0].id).set(
+            //  NO DEBERÍA DE SER EN MINUTOS !! SINO EN SEGUNDOS  !!
             {'done':c.done.inMinutes},
             SetOptions(merge: true)
           );
@@ -424,10 +418,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       UserModel u = await connect(coduser);
 
       if(u !=null){
-        /*
-        Future.delayed(Duration(seconds: 5),(){
-          getActions(u);
-        });*/
+        await getActions(u);
 
         /*
         ESTO NO LO VAMOS A HACER ASI. CADA VEZ QUE ENTRE A MAINSCREEN SACAMOS ACTIONS
@@ -507,8 +498,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     try{
       var url = Uri.parse('$nodejs/sendmessage/new');
       var response = await http.post(url,
-          headers: {"Content-Type": "application/json"},
-          body: json.encode(m.toJson())
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(m.toJson())
       );
     }catch(e) {
       throw ServerException();
@@ -690,9 +681,11 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
           if(snapshot.docs.isNotEmpty){
             var messages = snapshot.docs;
             List<Message> m = new List.empty(growable: true);
+            
             for(var message in messages){
               m.add(Message.fromJson(message.data()));
             }
+
             _chatController.add(m);
           }
         });
@@ -707,6 +700,8 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
+
+  // Lioso!! mejor que sean dos strings !!!
   @override
   Future<Chat> getChat({User sender, String receiver}) async{
     var url = Uri.parse('$nodejs/messages/${sender.coduser}/$receiver/new');

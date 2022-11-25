@@ -16,7 +16,6 @@ String getMonth(DateTime d){
 
 
 String getHour(DateTime d){
-  
   return d.hour.toString() + ':' + d.minute.toString();
 }
 
@@ -31,4 +30,31 @@ String getMinutes(Duration d){
     return '0'+ minutes;
   }
 }
+
+String getSeconds(Duration d){
+  String seconds = (d.inSeconds % 60).toString();
+
+  if(seconds.length > 1){
+    return seconds;
+  }else{
+    return '0'+ seconds;
+  }
+}
+
+
+
+int weekOfMonth(DateTime d){
+    var wom = 0;
+    var month = d.month;
+    DateTime aux = new  DateTime(d.year,d.month,d.day);
+
+
+    while (aux.month == month) {
+      wom++;
+      aux = aux.subtract(const Duration(days: 7));
+    }
+
+    return wom;
+  }
+
 

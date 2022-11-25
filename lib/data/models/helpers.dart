@@ -31,7 +31,7 @@ Content medorLessfromJson(json, bool isMeditation){
       title: json['title'],
       isNew: json['isNew'],
       description: json['description'],
-      createdBy: json['createdBy'] != null ? json['createdBy'] : null,
+      createdBy: json['createdBy'] != null && json['createdBy'] is Map ? json['createdBy'] : null,
       image: json['image'],
       type: json['type'],
       file: json['file'] == null ? '' : json['file'],

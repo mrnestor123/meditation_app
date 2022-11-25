@@ -44,7 +44,7 @@ class ImagePath extends StatelessWidget {
           )
         ],
         elevation: 0,
-        leading: ButtonBack()
+        leading: BackButton()
       ),
       backgroundColor: Color.fromARGB(255,220,208,186),
       body: Stack(

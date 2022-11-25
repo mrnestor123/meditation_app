@@ -69,15 +69,12 @@ class StageModel extends Stage {
         }
         
         if(json['games'] != null){
-          
           s.setGames(json['games'].map((g) => new GameModel.fromJson(g)).toList());
         }
 
-        if(json['videos'] != null){
-          if(json['videos'].length > 0){
-            for(var video in json['videos']){
-              s.addVideo(Content.fromJson(video));
-            }
+        if(json['videos'] != null && json['videos'].length > 0){
+          for(var video in json['videos']){
+            s.addVideo(Content.fromJson(video));
           }
         }
 
@@ -85,16 +82,16 @@ class StageModel extends Stage {
   }
 
   Map<String, dynamic> toJson() => {
-        "stagenumber": stagenumber == null ? null : stagenumber,
-        "description": description == null ? null : description,
-        "userscount": userscount == null ? null : userscount,
-        "longimage": longimage == null ? null: longimage,
-        "image": image == null ? null : image,
-        "goals": goals == null ? null : goals,
-        "obstacles": obstacles == null ? null : obstacles,
-        "skills": skills == null ? null : skills,
-        'objectives': stobjectives == null? null : stobjectives.toJson(),
-        "mastery": mastery == null ? null : mastery,
-        "path": path == null ? null : path
-      };
+    "stagenumber": stagenumber == null ? null : stagenumber,
+    "description": description == null ? null : description,
+    "userscount": userscount == null ? null : userscount,
+    "longimage": longimage == null ? null: longimage,
+    "image": image == null ? null : image,
+    "goals": goals == null ? null : goals,
+    "obstacles": obstacles == null ? null : obstacles,
+    "skills": skills == null ? null : skills,
+    'objectives': stobjectives == null? null : stobjectives.toJson(),
+    "mastery": mastery == null ? null : mastery,
+    "path": path == null ? null : path
+  };
 }

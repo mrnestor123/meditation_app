@@ -22,7 +22,7 @@ abstract class _MessagesState with Store {
   UserRepository repository;
 
   @observable
-  Map<User,List<Message>> messages = new Map();
+  Map<User, List<Message>> messages = new Map();
 
   @observable
   List<User> users = new List.empty(growable: true);
@@ -49,14 +49,13 @@ abstract class _MessagesState with Store {
   _MessagesState({this.repository});
 
   @action
-  Future sendMessage({ String type, String text, User from}) async {
+  Future sendMessage({String type, String text, User from}) async {
     Message m = from.sendMessage(selectedChat.notMe['coduser'],type, text);
     realTimeMessages.insert(0,m);
-
+    
     Either<Failure,void> userlist = await repository.sendMessage(message: m);
 
     if(!userChats.contains(selectedChat)){
-      print('no contiene');
       selectedChat.lastMessage = m;
       userChats.add(selectedChat);
     }
@@ -115,12 +114,11 @@ abstract class _MessagesState with Store {
   @action 
   Future selectChat(User receiver, [User sender, Chat chat])async{ 
     isLoading = true;
-
     realTimeMessages.clear();
+
     if(receiver != null){
       selecteduser = receiver;
     }
-
 
     // es mensaje privado
     if(chat == null){
@@ -169,9 +167,9 @@ abstract class _MessagesState with Store {
           'coduser':receiver.coduser,
           'userimage':receiver.image,
           'username':receiver.nombre
-        }
+        },
       );
-      isLoading= false;
+      isLoading = false;
     }
   }
 }

@@ -198,7 +198,7 @@ class _MobileLayoutState extends State<MobileLayout> {
               ),
               automaticallyImplyLeading: false,
               actions: [
-                //MessagesIcon(),
+                MessagesIcon(),
                 SizedBox(width: Configuration.verticalspacing),
                 Stack(
                   alignment:Alignment.center,
@@ -290,7 +290,8 @@ class _MobileLayoutState extends State<MobileLayout> {
                 return Future.value(true);
               },
               child: Container(
-                padding: currentindex == 0 ? EdgeInsets.only(top:0):EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
+                padding: currentindex == 0 || currentindex == 3 ? EdgeInsets.only(top:0) : 
+                EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
                 color: Configuration.lightgrey,
                 child: PageView(
                   physics: NeverScrollableScrollPhysics(),

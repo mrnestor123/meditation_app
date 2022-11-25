@@ -29,8 +29,7 @@ class Message{
     } else {
       this.cod = cod;
     }
-}
-
+  }
 
   Map<String,dynamic> toJson(){
     return {
@@ -75,20 +74,21 @@ class Chat{
   // AQUI SE GUARDAN LOS DOS USUARIOS DEL CHAT
   Map<String,dynamic> notMe = new Map();
   Map<String,dynamic> me = new Map();
+  List<String> users = new List.empty(growable: true);
 
 
   Chat({this.codchat, this.lastMessage,  this.notMe, this.me });
 
-
-  // AÑADIR FUNCIÓN LEER CHAT !!!
-  // Se utiliza ???
   Map<String,dynamic> toJson(){
     return {
       'codchat':codchat,
-      'users': notMe['coduser'] != null && me['coduser'] != null  ? [notMe['coduser'], me['coduser']] : '',
       'lastMessage':lastMessage.toJson(),
-      'me':me,
-      'notMe':notMe
+      'users':{
+        notMe['coduser'] :true,
+        me['coduser']:true
+      },
+      notMe['coduser']: notMe,
+      me['coduser'] : me    
     };
   }
 
@@ -98,14 +98,14 @@ class Chat{
     Map<String,dynamic> userNotMe;
 
     json['users'].forEach((key,value){
-      key == user.coduser ?  userMe = value : userNotMe = value;
+      key == user.coduser ? userMe = value : userNotMe = value;
     });
 
     Chat c = Chat(
       codchat: json['cod'],
       lastMessage: json['lastMessage'] != null && json['lastMessage'] != '' ? Message.fromJson(json['lastMessage']) : null,
-      me:userMe,
-      notMe: userNotMe
+      notMe: userNotMe,
+      me: userMe
     );
 
     if(json['messages'] != null && json['messages'].isNotEmpty){

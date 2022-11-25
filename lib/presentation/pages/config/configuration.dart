@@ -1,4 +1,6 @@
 //Class that stores all the configuration of the project. The colors of the leters the
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class Configuration {
@@ -70,7 +72,7 @@ class Configuration {
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
     HACER EL TEXTO RESIZABLE PARA TODOS
   */
-  static TextStyle text(String size, Color color,{String style, double spacing, String font, height}) {
+  static TextStyle text(String size, Color color,{String style, double spacing, String font, height, bool fontFeatures=false}) {
     var px;
     var weight = FontWeight.normal;
     double letterspacing = 0;
@@ -146,12 +148,13 @@ class Configuration {
     }
 
     return TextStyle(
-        fontFamily: fontfamily,
-        fontSize: px,
-        color: color,
-        fontWeight: weight,
-        height: height != null ? height : 1.2,
-        letterSpacing: letterspacing);
+      fontFamily: fontfamily,
+      fontSize: px,
+      color: color,
+      fontWeight: weight,
+      height: height != null ? height : 1.2,
+      letterSpacing: letterspacing
+    );
   }
 
 

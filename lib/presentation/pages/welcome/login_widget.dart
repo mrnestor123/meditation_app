@@ -36,7 +36,7 @@ class _LoginWidgetState extends State<LoginWidget> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: ButtonBack()
+          leading: BackButton()
         ),
         body: Center(
           child: Column(
@@ -55,9 +55,9 @@ class _LoginWidgetState extends State<LoginWidget> {
                     icon: Icons.mail,
                     validator: (value){
                       if(value == null  || value.isEmpty){
-                        return 'Please enter the mail';
+                        return 'Please enter the email';
                       }else if(!_loginstate.validateMail(value)){
-                        return 'Please input a valid mail';
+                        return 'Please input a valid email';
                       } 
                       return null;
                     },
@@ -93,7 +93,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                           crossAxisAlignment:CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('LOG IN WITH MAIL',
+                            Text('LOG IN WITH EMAIL',
                               style: Configuration.text('smallmedium', Colors.white),
                             ),
                             Icon(Icons.mail,size: Configuration.smicon)

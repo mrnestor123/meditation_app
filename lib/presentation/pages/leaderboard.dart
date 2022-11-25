@@ -79,6 +79,9 @@ class _LeaderBoardState extends State<LeaderBoard> {
                 )),
 
                 ProfileCircle(
+                  onTap: (){
+                    showUserProfile(user:u);
+                  },
                   key:Key(u.coduser),
                   width: 30,
                   userImage: u.image,
@@ -156,7 +159,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Configuration.maincolor,
-        leading: ButtonBack(color: Colors.white),
+        leading: BackButton(color: Colors.white),
         title: Text('Leaderboard', style: Configuration.text('big', Colors.white)),
       ),
       body: Container(

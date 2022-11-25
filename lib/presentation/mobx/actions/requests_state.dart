@@ -34,9 +34,9 @@ abstract class _RequestState with Store {
   bool gettingrequests= false;
 
   @observable 
-  String selectedfilter = 'None';
+  String selectedfilter = 'Date';
 
-  List<String> filters = ['None','Date','Votes'];
+  List<String> filters = ['Date','Votes'];
 
   _RequestState({this.repository});
 
@@ -74,6 +74,7 @@ abstract class _RequestState with Store {
       onSuccess: (requests) {
         this.requests = requests;
         gettingrequests = false;
+        filterRequests('Date');
       },
     );
   }
