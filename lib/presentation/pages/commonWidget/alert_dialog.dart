@@ -7,10 +7,14 @@ import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
-void showAlertDialog({String title,String text, onYes, context, onNo, noText, noPop = false,  hideYesButton = false}){
-
+void showAlertDialog({
+  String title,String text, onYes, context, yesText,
+  onNo, noText, noPop = false,  hideYesButton = false, String buttonText,
+  Widget customWidget, hideNoButton = false, bool dismissible = true
+ }){
   showDialog(
     context: context, 
+    barrierDismissible: dismissible,
     builder: (_){
         return AbstractDialog(
           content: Container(
@@ -24,14 +28,16 @@ void showAlertDialog({String title,String text, onYes, context, onNo, noText, no
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 title != null ? 
-                Text(title,style: Configuration.text('smallmedium',Colors.black)) : Container(),
+                Text(title,style: Configuration.text('subtitle',Colors.black)) : Container(),
                 SizedBox(height: Configuration.verticalspacing,),
                 text != null ? 
                 Text(text,style: Configuration.text('small',Colors.grey,font:'Helvetica')): Container(),
-                SizedBox(height: Configuration.verticalspacing),
+                SizedBox(height: Configuration.verticalspacing*2),
+                customWidget != null ? customWidget : Container(),
+                !hideNoButton ?
                 BaseButton(
                   noelevation: true,
-                  text: 'No',
+                  text: noText  !=  null ? noText : 'No',
                   textcolor: Colors.black,
                   color:Colors.white,
                   border:true,
@@ -41,22 +47,25 @@ void showAlertDialog({String title,String text, onYes, context, onNo, noText, no
                     }
                     Navigator.pop(context);
                   }
-                ),
+                ): Container(),
                 SizedBox(height: Configuration.verticalspacing),
                 
                 !hideYesButton ?
                 BaseButton(
                   noelevation: true,
                   onPressed:(){
+                    Navigator.pop(context);
+
                     if(onYes != null){
                       onYes();
                     }
-                    Navigator.pop(context);
+                   
+                    // ESTO ESTÁ MAL GESTIONADO !!!
                     if(!noPop){
                       Navigator.pop(context); 
                     }
                   }, 
-                  text: 'Yes'
+                  text: yesText != null ? yesText  : 'Yes'
                 ): Container(),
               ],
             ),

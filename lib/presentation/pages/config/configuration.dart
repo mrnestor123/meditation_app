@@ -17,16 +17,18 @@ class Configuration {
   static bool nightmode = false;
 
   static Color maincolor2 = Colors.white;
-
-  //buttoncolor ??
+  
+  static Color blue = Color.fromRGBO(3, 169, 244, 1);
 
   // scaffoldcolor ??
   static Color scaffoldcolor = !nightmode ? Colors.deepPurpleAccent.withOpacity(0.8) : Colors.black;
 
-  //the purple color
-  static Color maincolor = !nightmode ? Color.fromRGBO(216, 187, 120, 1.0) : Colors.black;
+  // the purple colorz
+  static Color maincolor = !nightmode ? Color.fromRGBO(216, 187, 120, 1) : Colors.black;
   static Color darkpurple = Colors.deepPurple;
   static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
+
+  static  Color boxBackground =  Color.fromARGB(255,236,225,197);
 
   static Color white = !nightmode ? Colors.white : Colors.black;
   static Color lightgrey = Color.fromARGB(255, 242, 242, 242);
@@ -52,6 +54,9 @@ class Configuration {
   static double medicon;
   static double bigicon;
 
+
+  static double htmlTextSize;
+
   //margin
   static double smmargin;
   static double medmargin;
@@ -67,15 +72,22 @@ class Configuration {
 
   static int crossAxisCount;
 
+
+  static double leading;
+
   //textstyles
   /*
     fonts can be : Gotham-bold, Helvetica, Gotham-rounded, Gotham
     HACER EL TEXTO RESIZABLE PARA TODOS
   */
-  static TextStyle text(String size, Color color,{String style, double spacing, String font, height, bool fontFeatures=false}) {
+  static TextStyle text(String size, Color color,{
+      String style, double spacing, fontWeight, 
+      String font, height, bool fontFeatures=false, dynamic shadows
+    }) {
     var px;
-    var weight = FontWeight.normal;
+    var weight = fontWeight != null ? fontWeight  : FontWeight.normal;
     double letterspacing = 0;
+
 
     String fontfamily = 'Gotham-rounded';
 
@@ -88,23 +100,25 @@ class Configuration {
     }
 
     if(font != null){
-      fontfamily = font;
+      fontfamily = 'OpenSans';
     }
+
+    if(size == 'title'){
+      weight = FontWeight.w800;
+    }
+
+    if(size == 'subtitle' && fontWeight == null){
+      weight = FontWeight.bold;
+    }
+
+    
     
     if(width < 480){
       switch (size) {
-        case 'mini':
-          px = 8.0;
-          break;
-        case 'verytiny':
-          px = 10.0;
-          break;
         case "tiny":
           px = 12.0;
           break;
-        case "small":
-          px = 14.0;
-          break;
+        
         case "smallmedium":
           px = 16.0;
           break;
@@ -117,20 +131,31 @@ class Configuration {
         case "huge":
           px = 30.0;
           break;
-      }
-    }else{
-      switch (size) {
-        case 'mini':
-          px = 14.0;
+
+        case "small":
+          px = 15.0;
           break;
-        case 'verytiny':
+
+        case "h3":
+          px = 17.0;
+          break;
+        case "subtitle":
+          px = 19.0;
+          break;
+        case "title":
+          px = 29.0;
+          break;
+      }
+    } else {
+      switch (size) {
+        case "tiny":
           px = 16.0;
           break;
-        case "tiny":
+        case "small":
           px = 18.0;
           break;
-        case "small":
-          px = 20.0;
+        case "subtitle":
+          px = 24.0;
           break;
         case "smallmedium":
           px = 22.0;
@@ -139,8 +164,12 @@ class Configuration {
           px = 24.0;
           break;
         case "big":
-          px = 26.0;
+          px = 28.0;
           break;
+         case "title":
+          px = 32.0;
+          break;
+        
         case "huge":
           px = 30.0;
           break;
@@ -153,7 +182,8 @@ class Configuration {
       color: color,
       fontWeight: weight,
       height: height != null ? height : 1.2,
-      letterSpacing: letterspacing
+      letterSpacing: letterspacing,
+      shadows: shadows != null? shadows : [],
     );
   }
 
@@ -240,24 +270,27 @@ class Configuration {
     //Paddings
     if(width > 500){
       tinpadding = 15;
-      verticalspacing = 20;
+      verticalspacing = 15;
       smpadding = 25;
       medpadding = 31;
       bigpadding = 36;
       tinicon = 25;
       smicon = 35;
+      htmlTextSize  = 20;
+      leading = 28;
       medicon = 45;
       bigicon = 50;
-      strokewidth = 8;
+      strokewidth = 6;
       bigicon = safeBlockHorizontal * 5;
       crossAxisCount = 3;
       lessonratio = 11/3;
-      buttonRatio = 10/1;
+      buttonRatio = 7/1;
     }else {
       tinpadding = 10;
       verticalspacing = 10;
       strokewidth = 4;
       smpadding = 14;
+      htmlTextSize = 16;
       medpadding = 20;
       bigpadding = 30;
       crossAxisCount = 2;
@@ -265,6 +298,7 @@ class Configuration {
       buttonRatio = 8/3;
       tinicon = 15;
       smicon = 24;
+      leading = 24;
       medicon = 30;
       bigicon = 40;
       buttonRatio = 6/1;

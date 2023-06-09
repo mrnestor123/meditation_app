@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
@@ -13,6 +14,7 @@ import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 
+import 'commonWidget/back_button.dart';
 import 'commonWidget/user_bottom_dialog.dart';
 
 /*
@@ -42,7 +44,10 @@ class _LeaderBoardState extends State<LeaderBoard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
         Icon(icon, size: Configuration.smicon),
-        Text(text,style: Configuration.text('tiny',Colors.black))
+        Text(text, 
+          overflow: TextOverflow.ellipsis,
+          style: Configuration.text('tiny',Colors.black)
+        )
       ]);
     }
 
@@ -55,77 +60,64 @@ class _LeaderBoardState extends State<LeaderBoard> {
     }else {
       return ListView(
       physics:ClampingScrollPhysics(),
-      children: [
-          Container(
-            child: Table(
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            columnWidths: {
-              0:FractionColumnWidth(0.1),
-              1:FractionColumnWidth(0.15),
-              2:FractionColumnWidth(0.5),
-              3:FractionColumnWidth(0.2),
+      shrinkWrap: true,
+      children: list.map((u) => 
+            
+        GestureDetector(
+          onTap: ()=>{
+              showUserProfile(user:u)
             },
-            children: list.map((u) => 
-            TableRow(
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    vertical: Configuration.smpadding,
-                    horizontal: Configuration.tinpadding),
-                  child: Text(
-                    (++count).toString(),
-                    style: Configuration.text('small', Colors.black),
-                    textAlign: TextAlign.center,
-                )),
-
-                ProfileCircle(
-                  onTap: (){
-                    showUserProfile(user:u);
-                  },
-                  key:Key(u.coduser),
-                  width: 30,
-                  userImage: u.image,
+          child: Row(
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  minWidth: Configuration.width * 0.8,
+                  maxWidth:  Configuration.width * 0.8
                 ),
-
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Text(u.nombre == null ? 'Anónimo' : u.nombre, style: Configuration.text('small', Colors.black)),
-                    SizedBox(height: Configuration.safeBlockVertical*0.6,),
-                    Text('Stage ' + u.stagenumber.toString(),style: Configuration.text('verytiny', Colors.grey, font: 'Helvetica'))
+                    Container(
+                      constraints: BoxConstraints(
+                        minWidth: 50,
+                        maxWidth: 50
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: Configuration.smpadding,
+                        horizontal: Configuration.tinpadding
+                      ),
+                      child: Text(
+                        (++count).toString(),
+                        style: Configuration.text('small', Colors.black),
+                        textAlign: TextAlign.left,
+                    )),
+                
+                
+                    ProfileCircle(
+                      key:Key(u.coduser),
+                      width: 30,
+                      userImage: u.image,
+                    ),
+                
+                    SizedBox(width: Configuration.verticalspacing*1.5),
+              
+                    Flexible(child: Text(u.nombre == null ? 'Anónimo' : u.nombre, style: Configuration.text('small', Colors.black))),
+                      
                   ],
                 ),
+              ),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start, 
-                  children: [
-                    texticon(Icons.timer, u.timemeditated.isNotEmpty ? u.timemeditated : '0')
-                  ]),
-                  /*
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      u.coduser != _userstate.user.coduser ?
-                      IconButton(
-                        iconSize: Configuration.smicon,
-                        icon: Icon(following || u.followed != null && u.followed ? Icons.person : Icons.person_add), 
-                        onPressed: () async { 
-                           showUserProfile(
-                              user:u, 
-                              followaction:()=>{setState(()=>{})},
-                              followbutton:true, 
-                            );
-                              
-                          },
-                        ) :  Container(),
-                    ],
-                  )*/
-              ]
-            )).toList()
+              Icon(Icons.timer, size: Configuration.smicon),
+
+              Flexible(
+                child: Text(u.timemeditated.isNotEmpty ? u.timemeditated : '0',
+                  style: Configuration.text('small', Colors.black),
+                ),
+              )
+            ]
           ),
-        )] 
+        )).toList()
+          
       );
-  
     }
   }
 
@@ -156,11 +148,18 @@ class _LeaderBoardState extends State<LeaderBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: Configuration.maincolor, 
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.light, // For Android (dark icons)
+          statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Configuration.maincolor,
-        leading: BackButton(color: Colors.white),
-        title: Text('Leaderboard', style: Configuration.text('big', Colors.white)),
+        leading: ButtonBack(color: Colors.white),
+        title: Text('Leaderboard', style: Configuration.text('subtitle', Colors.white)),
       ),
       body: Container(
         height: Configuration.height,
@@ -253,8 +252,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
                         child: CircularProgress(),
                       ),
                     ) :
-                    Expanded(child: 
-                      createTable(_userstate.filteredusers, context,false),
+                    Expanded(child: createTable(_userstate.filteredusers, context,false),
                       // createTable(_userstate.user.following, context, true),
                     );
                 }
@@ -287,14 +285,15 @@ class UserProfile extends StatelessWidget {
           Stack(
             children: [
               Container(
-              padding: EdgeInsets.all(2.0),
-              decoration: BoxDecoration(
-                image: user.image != null && user.image.isNotEmpty ? DecorationImage(image: CachedNetworkImageProvider(user.image), fit: BoxFit.fitWidth) : null,
-                border: Border.all(color: Colors.white, width: 2.5),
-                shape: BoxShape.circle
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 2.5),
+                  shape: BoxShape.circle
                 ),
-              height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
-              width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
+                child: ProfileCircle(
+                  userImage: user.image,
+                ),
+                height: !large  ?  Configuration.width*0.2 : Configuration.width* 0.25,
+                width: !large ? Configuration.width*0.2 : Configuration.width* 0.25,
               ),
               position != null ?
               Positioned(
@@ -302,7 +301,7 @@ class UserProfile extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.all(Configuration.tinpadding),
                   decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.lightBlue),
-                  child: Text(position.toString(), style: Configuration.text('tiny', Colors.white)),
+                  child: Text(position.toString(), style: Configuration.text('small', Colors.white)),
                 )
               ) : Container(),
             ],
@@ -310,7 +309,7 @@ class UserProfile extends StatelessWidget {
           SizedBox(height: 4.0),
           Text(user.nombre != null ? user.nombre : 'Anónimo', style: Configuration.text('small', Colors.black)),
           SizedBox(height: 2.0),
-          Text(user.timemeditated, style: Configuration.text('tiny', Colors.white, font: 'Helvetica'))
+          Text(user.timemeditated, style: Configuration.text('small', Colors.white))
         ],
       ),
     );

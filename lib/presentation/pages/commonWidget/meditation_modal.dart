@@ -78,8 +78,11 @@ Future<dynamic> meditationModal(Meditation m) {
                                 },
                                 child: Chip(
                                   backgroundColor: Colors.lightBlue,
-                                  
-                                  avatar: ProfileCircle(userImage: m.createdBy['image'], width: Configuration.smicon, bordercolor: Colors.white),
+                                  avatar: ProfileCircle(
+                                    userImage: m.createdBy['image'], 
+                                    width: Configuration.smicon, 
+                                    bordercolor: Colors.white
+                                  ),
                                   label: Text('Created by ' + m.createdBy['nombre'], style: Configuration.text('small', Colors.white),),
                                   ),
                               )
@@ -115,15 +118,18 @@ Future<dynamic> meditationModal(Meditation m) {
 
 
 
-
-
-
 class TimeChip extends StatelessWidget {
   UserState _userstate;
   Duration seenTime;
   bool finished = false;
 
   String getTime(Duration d){
+
+    if(c.isMeditation()){
+
+    }
+
+
     String time = '';
 
     if(seenTime != null && !finished ){    
@@ -144,11 +150,16 @@ class TimeChip extends StatelessWidget {
 
     return time;
   }
+  
 
-  Content c;
+  FileContent c;
+  bool isSmall =false;
+  bool seen = false;
   
   TimeChip({
     this.c,
+    this.isSmall = false,
+    this.seen = false,
     Key key,
   }) : super(key: key);
 
@@ -156,13 +167,15 @@ class TimeChip extends StatelessWidget {
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
     
-    if(_userstate.user.contentDone.length > 0){ 
-      dynamic content = _userstate.user.contentDone.firstWhere((element) => element.cod == c.cod,
+    if(seen ){ 
+      // ESTO DEBERÍA ESTAR SEPARADO POR ETAPA PARA HACERLO MÁS RÁPIDO !!
+      DoneContent content = _userstate.user.contentDone.firstWhere((element) => element.cod == c.cod,
         orElse: (){}
       );
 
       if(content != null  && content.done != null){
         seenTime = content.done;
+        // PODRÍA SER UNA RECORDING,UNA MEDITACIÓN O UN VIDEO !!
         finished = seenTime.inMinutes >= (c.total.inMinutes - 1);
       }
     }  
@@ -171,7 +184,7 @@ class TimeChip extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.all(6),
+          padding: EdgeInsets.all(isSmall ? 4: 6),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(color: Colors.grey),
@@ -181,7 +194,12 @@ class TimeChip extends StatelessWidget {
             children: [
               Icon(Icons.timer,size: Configuration.tinicon, color:seenTime != null && !finished ? Colors.lightBlue :Colors.black),
               SizedBox(width: Configuration.verticalspacing/2),
-              Text(getTime(c.total),style: Configuration.text('small',seenTime != null && !finished ? Colors.lightBlue:  Colors.black))
+              Text(getTime(c.total),
+               style: Configuration.text('tiny',
+               
+                seenTime != null && !finished ? Colors.lightBlue:  Colors.black
+                )
+              )
             ],
           ),
         ),
@@ -189,7 +207,7 @@ class TimeChip extends StatelessWidget {
         SizedBox(width: Configuration.verticalspacing),
         
         finished ? 
-        Icon(Icons.visibility,color: Colors.lightBlue)
+        Icon(Icons.visibility,color: Colors.grey, size: Configuration.smicon)
         : Container(),
       ],
     );

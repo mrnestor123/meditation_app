@@ -7,10 +7,8 @@ import 'package:meditation_app/data/datasources/remote_data_source.dart';
 import 'package:meditation_app/data/repositories/meditation_repository.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
 import 'package:meditation_app/domain/entities/audio_handler.dart';
-import 'package:meditation_app/domain/entities/local_notifications.dart';
 import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/domain/usecases/user/answer_question.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
@@ -28,8 +26,17 @@ final sl = GetIt.instance;
 Future<void> init() async {
   await Firebase.initializeApp();
 
- // LocalNotifications.init();
+  /* if (kDebugMode) {    
+    await FirebaseAppCheck.instance.activate(    
+      // CAmbiar esto a release  cuando se suba !!!
+      androidProvider: AndroidProvider.debug,
+      appleProvider: AppleProvider.debug
+    );
+  }else{
+    await FirebaseAppCheck.instance.activate();
+  }*/
 
+  
   //Mobx
   sl.registerFactory(
     () => LoginState(repository: sl()),
@@ -62,8 +69,6 @@ Future<void> init() async {
     () => MessagesState(repository: sl()),
   );
 
-  //Use cases
-  sl.registerLazySingleton(() => AnswerQuestionUseCase(sl()));
  // sl.registerLazySingleton(() => LoginUseCase(sl()));
  // sl.registerLazySingleton(() => RegisterUseCase(sl()));
  // sl.registerLazySingleton(()=> CachedUserUseCase(sl()));

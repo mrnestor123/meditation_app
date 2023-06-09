@@ -188,13 +188,16 @@ class _CalendarState extends State<CalendarWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), 
-                style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('small', Colors.black)
-                ),
+              Flexible(
+                child: Text(_monthNames[selectedmonth] + ' ' + selectedyear.toString(), 
+                  style:  Configuration.text('small', Colors.black)
+                  ),
+              ),
 
               Chip(
+                padding: EdgeInsets.all(Configuration.tinpadding),
                 label: Text(filteredmeditations.length.toString() + ' meditations', 
-                style: Configuration.width > 500 ? Configuration.tabletText('verytiny', Colors.black): Configuration.text('verytiny', Colors.black))
+                style:  Configuration.text('tiny', Colors.black))
               ),
               Row(
                 children: [
@@ -206,7 +209,7 @@ class _CalendarState extends State<CalendarWidget> {
               )
             ],
           ),
-          SizedBox(height: 10),
+          SizedBox(height: Configuration.verticalspacing),
           _calendarBody(),
           
         ],
@@ -244,14 +247,22 @@ class _CalendarState extends State<CalendarWidget> {
       },
       child: Container(
         alignment: Alignment.center,
-        child: Icon((next) ? Icons.arrow_forward_ios : Icons.arrow_back_ios, color: Colors.black),
+        child: Icon(
+          (next) ? Icons.arrow_forward_ios : Icons.arrow_back_ios, 
+          color: Colors.black,
+          size: Configuration.smicon,
+        ),
       ),
     );
   }
   
   // calendar header
   Widget _weekDayTitle(int index){
-    return Center(child: Text(_weekDays[index], style: TextStyle(color: Colors.black, fontSize: 12)));
+    return Center(
+      child: Text(_weekDays[index], 
+        style: Configuration.text('small',Colors.black,font: 'Helvetica')
+      )
+    );
   }
 
   // calendar element
@@ -271,24 +282,16 @@ class _CalendarState extends State<CalendarWidget> {
         } 
       },
       child: Center(
-        child: Column(
-          children: [
-            Text(
-              '${calendarDate.date.day}', 
-              style: TextStyle(
-                color: (calendarDate.thisMonth) 
-                ? hasMeditated ? Configuration.maincolor : 
-                Colors.black 
-                :Colors.black.withOpacity(0.5),
-              ),
-            ),
-            /*
-          hasMeditated ?
-            Icon(
-              Icons.self_improvement, size: 5, 
-              color: Configuration.maincolor
-              ) : Container()*/
-          ],
+        child: Text(
+          '${calendarDate.date.day}', 
+          style: Configuration.text('small',
+           hasMeditated ? Configuration.maincolor :
+            (calendarDate.thisMonth) ?Colors.black 
+            :Colors.black.withOpacity(0.5),
+            
+            font: 'Helvetica' 
+          ),
+          overflow: TextOverflow.visible,
         )
       ),
     );

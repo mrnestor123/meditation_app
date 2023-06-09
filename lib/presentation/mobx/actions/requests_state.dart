@@ -3,6 +3,7 @@
 
 
 import 'package:dartz/dartz.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
@@ -10,6 +11,8 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/presentation/mobx/actions/error_helper.dart';
 import 'package:mobx/mobx.dart';
+
+import '../../../domain/entities/stage_entity.dart';
 
 part 'requests_state.g.dart';
 
@@ -64,10 +67,10 @@ abstract class _RequestState with Store {
 
   //HACER UN REQUEST STATE ???????
   @action 
-  Future getRequests() async{
+  Future getRequests({String coduser}) async{
     requests.clear();
     gettingrequests = true;
-    Either<Failure, List<Request>> res = await repository.getRequests();
+    Either<Failure, List<Request>> res = await repository.getRequests(coduser: coduser);
 
     foldResult(
       result: res,
@@ -79,7 +82,7 @@ abstract class _RequestState with Store {
     );
   }
 
-  Future updateRequest(Request r, bool like, [String comment, User u]) async{
+  Future updateRequest(Request r, bool like, [Comment comment, User u]) async{
     Comment c;
 
     if(like != null){
@@ -89,10 +92,13 @@ abstract class _RequestState with Store {
         r.dislike(user.coduser);
       }
     }else if(comment != null){
+     
       c = new Comment(
         codrequest: r.cod,
-        comment: comment, date: DateTime.now(),
-        username: user.nombre, userimage: user.image, coduser: user.coduser, user:user);
+        comment: comment.comment, date: DateTime.now(),
+        username: user.nombre, userimage: user.image, coduser: user.coduser, user:user
+      );
+      c.images = comment.images;
       r.comment(c);
     }
 
@@ -146,24 +152,33 @@ abstract class _RequestState with Store {
   }
 
   @action
-  Future<Request> uploadRequest( String title, String content, String  image, String type) async{
+  Future<Request> uploadRequest( String title, String content, String  image, String type, [dynamic stage]) async{
+   
     Request  r = new Request(
-      coduser: user.coduser, username:user.nombre, userimage:user.image,
-      type:type, content: content, title: title, state:'open');
-    requests.add(r);
+      coduser: user.coduser, username:user.nombre, 
+      userimage:user.image,
+      content: content, title: title, state:'open', type: type,
+      image: image
+    );
+
+    if(stage != null) {
+      r.stagenumber =  stage;
+    }
+    
+    requests.insert(0,r);
     //requests.add(r);
     Either<Failure,void> res = await repository.uploadRequest(r);
     bool hasFailed = false;
 
-    if(res != null){
-      res.fold((f) {
-        _mapFailureToMessage(f);
-        hasFailed = true;
-      }, 
-      (r) => print('bien'));
-    }
+    // ESTO AUN VA CON EL MODELO ANTIGUO
+    foldResult(
+      result: res,
+      onSuccess: (void v) {
+        print('bien');
+      },   
+    );
 
-    if(!hasFailed){
+    if(!res.isLeft()){
       return r;
     }else {
       return null;
@@ -214,6 +229,19 @@ abstract class _RequestState with Store {
     }
   }
 
+  Future uploadToFeed({Request r}) async {
+
+    Either<Failure,void> res = await repository.uploadRequest(r);
+
+    // ESTO AUN VA CON EL MODELO ANTIGUO
+    foldResult(
+      result: res,
+      onSuccess: (void v) {
+        print('bien');
+      },   
+    );
+  }
+
   void viewNotification(Notify n){
     //HACER ESTO EN EL Notify
     n.view();
@@ -238,4 +266,23 @@ abstract class _RequestState with Store {
     }
     selectedfilter = s;  
   }
+
+  @action
+  Future getStageRequests({Stage s})async {
+    requests.clear();
+    gettingrequests = true;
+
+    Either<Failure, List<Request>> res = await repository.getStageRequests();
+
+    foldResult(
+      result: res,
+      onSuccess: (requests) {
+        this.requests = requests;
+        gettingrequests = false;
+        filterRequests('Date');
+      },
+    );
+  }
+
+
 }

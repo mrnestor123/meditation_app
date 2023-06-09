@@ -1,21 +1,16 @@
 
 // WIDGET COMÚN DE VISTA DE CONTENIDO
 // SE PODRÁN VER LECCIONES Y MEDITACIONES, Y EDITAR 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
@@ -25,10 +20,13 @@ import 'package:meditation_app/presentation/pages/contentWidgets/meditation_widg
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import 'package:wakelock/wakelock.dart';
 
+import '../../../domain/entities/lesson_entity.dart';
+import '../commonWidget/back_button.dart';
 import '../commonWidget/profile_widget.dart';
 
-
+/*
 class ContentShow extends StatefulWidget {
   Content content;
   Meditation m;
@@ -118,8 +116,17 @@ class _ContentShowState extends State<ContentShow> {
                       margin:true,
                       text:'Start ' + type,
                       onPressed: () async{
+                        print('QUE P ASA AQUI');
                         if(c.isMeditation()){
                           //_meditationstate.selectMeditation(c);
+                        }
+
+                        if(c.isLesson()){
+                          print('CHANGING SYSTEMCHROME');
+
+                          SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersive
+                          );
                         }
                         setState(() => started = true);
                       } 
@@ -360,164 +367,294 @@ class _ContentShowState extends State<ContentShow> {
     );
   }
 }
+*/
 
 
-class ContentFrontPage extends StatelessWidget {
+// IR SIEMPRE A CONTENTFRONTPAGE AUNQUE SEA RECORDING
+class ContentFrontPage extends StatefulWidget {
   Content content;
   dynamic then;
 
   ContentFrontPage({this.content,this.then}) : super();
 
+  @override
+  State<ContentFrontPage> createState() => _ContentFrontPageState();
+}
+
+class _ContentFrontPageState extends State<ContentFrontPage> {
+  
   checkMedhasPreText(Meditation m){
     return m.content.entries != null && m.content.entries.length > 0;
   }
 
+  bool hasBells(Meditation m){
+    return m.meditationSettings.bells != null && m.meditationSettings.bells.length > 0;
+  }
+
+  Duration getTime(FileContent f){
+    return f.total;
+  }
+
+  void cacheImages(Lesson lesson){
+    print('CACHING LESSON IMAGES');
+    lesson.text.forEach((slide) {
+      if (slide['image'] != '') {
+        print({'CACHING',slide['image']});
+        precacheImage(new CachedNetworkImageProvider(slide['image']), context);
+      }
+    });
+  }
+  
+  // didChangedependencies
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    if(widget.content.isLesson()){
+      cacheImages(widget.content);
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final  _meditationstate = Provider.of<MeditationState>(context);
-
+  
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar:AppBar(
-        backgroundColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: Colors.white, 
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+          statusBarBrightness: Brightness.light, // For iOS (dark icons)
+        ),
+        backgroundColor: Colors.white,
         elevation:0,
-        leading: CloseButton(
+        leading: ButtonClose(
           color: Colors.black,
         ),
       ),
-      body: Column(children: [
-        content.image != null && content.image.isNotEmpty
-        ? Hero(
-            tag: content.cod,
-            child: Container(
-              color:Colors.white,
-              height: Configuration.height*0.6,
-              child: Center(
-                child: CachedNetworkImage(
-                  imageUrl: content.image,
-                  placeholder: (context, url) => Container(
-                    height: Configuration.height * 0.4,
+      body: ListView(
+        physics: ClampingScrollPhysics(),
+        children: [
+        widget.content.image != null && widget.content.image.isNotEmpty
+        ?  Stack(
+            children: [
+              Container(
+                color:Colors.white,
+                height: Configuration.height*0.5 - AppBar().preferredSize.height,
+                child: Center(
+                  child: CachedNetworkImage(
+                    imageUrl: widget.content.image,
+                    placeholder: (context, url) => Container(
+                      height: Configuration.height * 0.4,
+                      width: Configuration.width,
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
                     width: Configuration.width,
-                    color: Colors.grey.withOpacity(0.5),
+                    height: Configuration.height * 0.4,
+                    fit: BoxFit.contain,
                   ),
-                  width: Configuration.width,
-                  height: content.type == 'meditation-practice' ? Configuration.height*0.3: Configuration.height * 0.6,
-                  fit: BoxFit.contain,
                 ),
               ),
-            )
+            ],
           )
         : Container(
           color: Configuration.lightgrey,
-          height: Configuration.height * 0.6
+          height: Configuration.height * 0.5 - AppBar().preferredSize.height
         ),
 
-        Expanded(
-          child: Container(
-            width: Configuration.width,
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: Configuration.smpadding,
-                      right: Configuration.smpadding,
-                      top: Configuration.medpadding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        Container(
+          constraints: BoxConstraints(
+            minHeight: Configuration.height*0.5 - AppBar().preferredSize.height
+          ),
+          width: Configuration.width,
+          child: Column(
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  minHeight: Configuration.height*0.35
+                ),
+                padding: EdgeInsets.only(
+                  left: Configuration.smpadding,
+                  right: Configuration.smpadding,
+                  top: Configuration.medpadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(widget.content.title,
+                      textAlign: TextAlign.left,
+                      style: Configuration.text('subtitle', Colors.black)),
+                    SizedBox(height: Configuration.verticalspacing),
+                    Text(widget.content.description != null ? widget.content.description : '',
+                      textAlign: TextAlign.left,
+                      style: Configuration.text('small',Colors.black,font: 'Helvetica'),
+                    ),
+
+                    SizedBox(height: Configuration.verticalspacing),
+
+                    widget.content.isMeditation() || widget.content.createdBy != null ?
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(content.title,
-                          textAlign: TextAlign.left,
-                          style: Configuration.text('big', Colors.black)),
-                        SizedBox(height: Configuration.verticalspacing),
-                        Text(content.description != null ? content.description : '',
-                          textAlign: TextAlign.left,
-                          style: Configuration.text('small',Colors.grey,font: 'Helvetica'),
-                        ),
-                        SizedBox(height: Configuration.verticalspacing),
-                        content.isMeditation() || content.createdBy != null ?
+                        Divider(),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            TimeChip(c:content),
+                            TimeChip(c:widget.content),
                             SizedBox(width: Configuration.verticalspacing*2),
-                            content.createdBy != null ? 
-                              GestureDetector(
-                                onTap: ()=>{
-                                  showUserProfile(usercod: content.createdBy['coduser'], isTeacher: true)
-                                },
-                                child: Chip(
-                                  backgroundColor: Colors.lightBlue,
-                                  avatar: ProfileCircle(userImage: content.createdBy['image'], width: Configuration.smicon, bordercolor: Colors.white),
-                                  label: Text('Created by ' + content.createdBy['nombre'], style: Configuration.text('small', Colors.white),),
-                                )
+                            widget.content.createdBy != null ? 
+                              Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: Configuration.width*0.6
+                                ),
+                                child: GestureDetector(
+                                  onTap: ()=>{
+                                    showUserProfile(usercod: widget.content.createdBy['coduser'], isTeacher: true)
+                                  },
+                                  child: Chip(
+                                    padding: EdgeInsets.all(Configuration.tinpadding),
+                                    backgroundColor: Colors.lightBlue,
+                                    avatar: ProfileCircle(
+                                      userImage: widget.content.createdBy['image'], 
+                                      width: Configuration.verticalspacing*4, 
+                                      bordercolor: Colors.white),
+                                    label: Text('Created by ' + widget.content.createdBy['nombre'], style: Configuration.text('small', Colors.white),),
+                                  )
+                                ),
                               ) : Container(),
                           ],
-                        )
-                        : Container()
+                        ),
                       ],
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment:Alignment.bottomCenter,
-                  child: Column(
-                    mainAxisSize:MainAxisSize.min,
-                    children: [
-                      BaseButton(
-                        margin: true,
-                        text: 'Start ' + (content.isVideo() ? 'Video' :  content.isMeditation() ? 'Meditation' : 'Lesson'),
-                        onPressed: () async {
-                          Navigator.pushReplacement(
-                            context, 
-                            PageRouteBuilder(
-                                pageBuilder: (context, animation1, animation2){
-                                  if(content.isMeditation()){
-                                    if(checkMedhasPreText(content)){
-                                      return PreMeditationScreen(
-                                        then:then,
-                                        meditation:content
-                                      );
-                                    }else{                 
-                                      return CountDownScreen(
-                                        then:then,
-                                        content: content,
-                                      );
-                                    }
-                                  }else if(content.isVideo()) {
-                                    return VideoScreen(video:content);
-                                    // HAY QUE CREAR LA VISTA DE VIDEO AÚN !!
-                                    //return LessonView(lesson: content);
-                                  }else{
-                                    return LessonView(lesson: content);
-                                  }
-                                },
-                                transitionDuration: Duration.zero,
-                                reverseTransitionDuration: Duration.zero,
+                    ) : Container(),
+
+                    widget.content.isMeditation() ?
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            /*Text(
+                                _meditationstate.bells != null && _meditationstate.bells.length > 0 ? 
+                                getBellString(bells:_meditationstate.bells) :
+                                'No interval bells added',
+                                style: Configuration.text('small',Colors.black,font: 'Helvetica'),
+                            )*/
+
+                            Container(
+                              child: ElevatedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.all(Configuration.smpadding),
+                                  backgroundColor: Colors.white,
+                                  side: BorderSide(color: Colors.lightBlue),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                onPressed: ()=>{
+                                  showModalBottomSheet(
+                                  barrierColor: Colors.black.withOpacity(0.5),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                                  ),
+                                  context: context, 
+                                  builder: (context){
+                                    return Container(
+                                      padding: EdgeInsets.all(Configuration.smpadding),
+                                      child: IntervalBells(time: getTime(widget.content))
+                                    );
+                                  }).then((value) => setState((){}))
+                              }, child: Text('Add Interval Bells', style: Configuration.text('small',Colors.lightBlue))
+                              ),
                             ),
-                          ).then((d){
-                            if(then != null){then(d);}
-                          });
+
+
+                          ],
+                        ),
+                      ],
+                    )
+                    : Container(),
+
+                    SizedBox(height: Configuration.verticalspacing)
+                  
+                  ],
+                ),
+              ),
+              Column(
+                mainAxisSize:MainAxisSize.min,
+                children: [
+                  BaseButton(
+                    margin: true,
+                    text: 'Start ' + (
+
+                      widget.content.isVideo() ? 'Video' :  
+                      widget.content.isMeditation() ? 'Meditation' : 
+                      'Lesson'
+                    ),
+                    onPressed: () async {
+                      if(widget.content.isMeditation()){
+                        _meditationstate.selmeditation = widget.content;
+
+                        if(_meditationstate.selmeditation.report != null){
+                          _meditationstate.selmeditation.report = null;
                         }
-                      ),
-                      SizedBox(height: Configuration.verticalspacing*2)
-                    ],
-                  )
-                )
-              ],
-            ),
+                        
+                        _meditationstate.createIntervalBells();
+                      }
+
+                      Navigator.pushReplacement(
+                        context, 
+                        PageRouteBuilder(
+                            pageBuilder: (context, animation1, animation2){
+                              if(widget.content.isMeditation()){
+                                if(checkMedhasPreText(widget.content)){
+                                  return PreMeditationScreen(
+                                    then:widget.then,
+                                    meditation:widget.content
+                                  );
+                                }else{                 
+                                  return CountDownScreen(
+                                    then:widget.then,
+                                    content: widget.content,
+                                  );
+                                }
+                              }else if(widget.content.isVideo()) {
+                                return VideoScreen(video:widget.content);
+                              }else if(widget.content.isRecording()){
+                                return CountDownScreen(
+                                  then: widget.then,
+                                  content: widget.content,
+                                );
+                              // FALTA HACER UNA PARA ARTICULOS
+                              }else{
+                                return LessonView(lesson: widget.content);
+                              }
+                            },
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                        ),
+                      ).then((d){
+                        if(widget.then != null){widget.then(d);}
+                      });
+                    }
+                ),
+
+                  
+                ],
+              )
+            ],
           ),
-        )
+        ),
       ])
     );
   }
 }
 
 
-
-
 class VideoScreen extends StatefulWidget {
-  Content video;
+  FileContent video;
 
   VideoScreen({this.video}) : super();
 
@@ -544,10 +681,12 @@ class _VideoScreenState extends State<VideoScreen> {
 
   double _aspectRatio = 16/9;
   ChewieController chewiController;
+  bool hasFinished = false;
 
-  void  loadController()  async{
+  bool disposed = false;
+
+  void loadController()  async{
     controller = new VideoPlayerController.network(widget.video.file);
-    
     await controller.initialize();
 
     loaded = true;
@@ -574,11 +713,11 @@ class _VideoScreenState extends State<VideoScreen> {
     );
 
      if(_userstate.user.contentDone.length > 0){ 
-      dynamic content = _userstate.user.contentDone.firstWhere((element) => element.cod == widget.video.cod,
+      DoneContent content = _userstate.user.contentDone.firstWhere((element) => element.cod == widget.video.cod,
         orElse: (){}
       );
 
-      if(content != null && content.done != null && content.done.inMinutes < widget.video.total.inMinutes){
+      if(content != null && content.done != null && content.done.inSeconds < widget.video.total.inSeconds-30){
         controller.seekTo(content.done);
         chewiController.seekTo(content.done);
       }
@@ -586,7 +725,12 @@ class _VideoScreenState extends State<VideoScreen> {
 
     chewiController.addListener(() {
       if (chewiController.isFullScreen) {
-        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);    
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp, 
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.portraitDown  
+        ]);    
        } else {
          SystemChrome.setPreferredOrientations([
           DeviceOrientation.portraitUp,
@@ -597,13 +741,9 @@ class _VideoScreenState extends State<VideoScreen> {
 
 
     controller.addListener(() {
-      //QUITAR ESTOS SET STATE !!!!!!!!!!!!!!!!!!!!!
-      if(start != controller.value.position.inSeconds){
-        setState(() {});
-      }
-
-      if(controller.value.duration.inSeconds > 0 && controller.value.position == controller.value.duration) {
-        setState(() {      
+      if(!disposed && controller.value.position.inSeconds >= widget.video.total.inSeconds - 30){
+        setState(() {
+          hasFinished = true;
         });
       }
     });
@@ -618,59 +758,47 @@ class _VideoScreenState extends State<VideoScreen> {
    // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeLeft,DeviceOrientation.landscapeRight]);    
   }
 
+  void finish(){
+    _userstate.finishContent(widget.video,controller.value.position,totalDuration);
+
+    if(hasFinished && widget.video.stagenumber != null) _userstate.takeLesson(widget.video);
+  }
+
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-
+    Wakelock.enable();
     loadController();
   }
 
   Widget video(){
     return GestureDetector(
-        onTap: ()=> {
-          if(controller.value.isPlaying && false){
-            setState((){ controller.pause();})
-          }else{
-            setState((){started = true; controller.play();})
-          }
-        },
-        child: Container(
-          height: Configuration.width,
-          child: AspectRatio(
-            aspectRatio: _aspectRatio,
-            child: Stack(children:[
-              Chewie(controller: chewiController) 
-              
-              /*!started && !controller.value.isPlaying ? 
-              Positioned.fill(
-                  child: Container(
-                    color: Colors.black.withOpacity(0.9),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.play_arrow, color:Colors.white, size: Configuration.bigicon)
-                      ],
-                    ),
-                  )
-                ) : Container(),
-              */
-            ] ),
-          ),
-        )
-      );
-    }
+      onTap: ()=> {          
+        if(controller.value.isPlaying && false){
+          setState((){ controller.pause();})
+        }else{
+          setState((){started = true; controller.play();})
+        }
+      },
+      child: Container(
+        height: Configuration.width,
+        child: AspectRatio(
+          aspectRatio: _aspectRatio,
+          child: Stack(children:[
+            Chewie(controller: chewiController) 
+          ]),
+        ),
+      )
+    );
+  }
 
   @override
   void dispose(){
     super.dispose();
-
+    disposed = true;
+    Wakelock.disable();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);    
-
-    if(controller.value.position.inSeconds > 0){
-      _userstate.finishRecording(widget.video,controller.value.position,totalDuration);
-    }
     controller.dispose();
     chewiController.dispose();
   }
@@ -678,33 +806,47 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     _userstate = Provider.of<UserState>(context);
+
     return Scaffold(
+      backgroundColor: Configuration.maincolor,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light, // For Android (dark icons)
+          statusBarBrightness: Brightness.dark, // For iO
+        ),
         backgroundColor: Configuration.maincolor,
-        leading: CloseButton(
+        leading: ButtonClose(
           color:Colors.white,
           onPressed: (){
-            showAlertDialog(
+            if(hasFinished){
+              finish();    
+              Navigator.pop(context);
+            }else{
+              showAlertDialog(
                 context:context,
                 title: 'Are you sure you want to exit ?',
-                text: ''
+                text: '',
+                onYes: (){
+                  finish();
+                  //Navigator.pop(context);
+                }
               );
+            }
           },
         ),
         elevation: 0,
       ),
       body: containerGradient(
-        child:Column(
-          mainAxisAlignment:MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
+          physics: ClampingScrollPhysics(),
           children: [
             SizedBox(height: Configuration.verticalspacing*2),
+            
             loaded ?
             Column(
               children: [
                 video(),
-                SizedBox(height: Configuration.verticalspacing*3),
-
                 Padding(
                   padding: EdgeInsets.all(Configuration.smpadding),
                   child: Column(
@@ -721,7 +863,23 @@ class _VideoScreenState extends State<VideoScreen> {
                   ),
                 ),
 
-                SizedBox(height: Configuration.verticalspacing*1.5)
+                SizedBox(height: Configuration.verticalspacing*1.5),
+
+                AnimatedOpacity(
+                  opacity: hasFinished ? 1.0 : 0.0,
+                  duration: Duration(milliseconds: 500),
+                  child: BaseButton(
+                    text: 'Finish',
+                    color: Colors.white,
+                    textcolor: Colors.black,
+                    onPressed: (){
+                      finish();
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+
+                SizedBox(height: Configuration.verticalspacing*2),
               ],
             )
             : Column(

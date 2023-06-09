@@ -21,6 +21,7 @@ class _GameStartedState extends State<GameStarted> {
   bool started = false;
   bool fullscreen = false;
   int lastsecond;
+  bool loadingVideo = false;
 
   @override
   void initState() {
@@ -31,7 +32,14 @@ class _GameStartedState extends State<GameStarted> {
   void didChangeDependencies(){
     super.didChangeDependencies();
     _gamestate = Provider.of<GameState>(context);
-    controller = new VideoPlayerController.network(_gamestate.selectedgame.video)..initialize();
+    loadingVideo = true;
+    controller = new VideoPlayerController.network(_gamestate.selectedgame.video)..initialize().then(((value) => 
+      // HAY UN PROBLEMA SI SE SALE MIENTRAS ESTA LOADEANDO
+      setState(() {
+        loadingVideo = false;
+      })
+    ));
+
     lastsecond= 0;
     controller.addListener(() {
       //QUITAR ESTOS SET STATE !!!!!!!!!!!!!!!!!!!!!
@@ -59,9 +67,7 @@ class _GameStartedState extends State<GameStarted> {
     Widget video(){
       return GestureDetector(
         onTap: ()=> {
-          if(controller.value.isPlaying && false){
-            setState((){ controller.pause();})
-          }else{
+          if(!loadingVideo){
             setState((){started = true; controller.play();})
           }
         },
@@ -73,7 +79,7 @@ class _GameStartedState extends State<GameStarted> {
           width: Configuration.height * controller.value.aspectRatio,
           child: Stack(children:[
             VideoPlayer(controller),
-            !started && !controller.value.isPlaying ? 
+            !started && !controller.value.isPlaying && !loadingVideo ? 
             Positioned.fill(
                 child: Container(
                   color: Colors.black.withOpacity(0.9),
@@ -82,15 +88,35 @@ class _GameStartedState extends State<GameStarted> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text('Press to start', 
-                        style: Configuration.text('medium', Colors.white)
+                        style: Configuration.text('subtitle', Colors.white)
                       ),
                       SizedBox(height: Configuration.verticalspacing/3),
                       Text("Be sure you are focused. You won't be able to pause it", 
-                        style:Configuration.text('tiny',Colors.white)
+                        style:Configuration.text('small',Colors.white)
                       ),
                       SizedBox(height: Configuration.verticalspacing),
                       Icon(Icons.play_arrow, color:Colors.white, size: Configuration.bigicon), 
                         
+                    ],
+                  ),
+                )
+              ) : Container(),
+
+              loadingVideo ? 
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.9),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Loading video...', 
+                        style: Configuration.text('medium', Colors.white)
+                      ),
+                      SizedBox(height: Configuration.verticalspacing/3),
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
                     ],
                   ),
                 )
@@ -171,7 +197,7 @@ class _GameStartedState extends State<GameStarted> {
           width: Configuration.width*0.9,
           child: OutlinedButton(
             style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.all(12.0),
+              padding: EdgeInsets.all(Configuration.smpadding),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
               primary: _gamestate.state ==_gamestate.question_answered && _gamestate.selectedanswer == i ? _gamestate.success ? Colors.green : Colors.red : Colors.white,
               elevation: 0.0
@@ -245,6 +271,13 @@ class _GameStartedState extends State<GameStarted> {
           extendBodyBehindAppBar: true,
           backgroundColor: Configuration.lightgrey,
           appBar: AppBar(
+            systemOverlayStyle: SystemUiOverlayStyle(
+              // Status bar color
+              statusBarColor: Configuration.lightgrey, 
+              // Status bar brightness (optional)
+              statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+              statusBarBrightness: Brightness.light, // For iOS (dark icons)
+            ),
             elevation: 0,
             backgroundColor: Colors.transparent,
             leading: IconButton(

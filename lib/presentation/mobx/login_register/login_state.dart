@@ -5,12 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/domain/usecases/user/registerUser.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
+import 'package:meditation_app/presentation/pages/main.dart';
 import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:mobx/mobx.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 part 'login_state.g.dart';
 
@@ -29,7 +30,6 @@ abstract class _LoginState with Store {
   @observable
   Either<Failure, dynamic> log;
 
-  RegisterUseCase _registerusecase;
 
   @observable
   dynamic loggeduser;
@@ -62,10 +62,6 @@ abstract class _LoginState with Store {
 
   _LoginState({this.repository});
 
-
-  /*
-  JUNTAR STARTLOGIN Y STARTREGISTER EN LA MISMA !!!!!
-  */
   @action
   Future startlogin(context,{username, password, type, token, mail, isTablet = false, register = false}) async {
     startedlogin = true;
@@ -76,6 +72,7 @@ abstract class _LoginState with Store {
     if (!currentFocus.hasPrimaryFocus) {
       currentFocus.unfocus();
     } 
+
     //PASAR TODO ESTO AL SERVER !!!! :(
     try {
       if(type == 'mail'){
@@ -87,7 +84,7 @@ abstract class _LoginState with Store {
               password: password,
             );    
             }else{
-            user = await auth.signInWithEmailAndPassword(email: username, password: password);
+              user = await auth.signInWithEmailAndPassword(email: username, password: password);
             }
           }
       } else if(type =='google'){
@@ -95,30 +92,55 @@ abstract class _LoginState with Store {
           //hay que desconectar !!
           //googleSignin.disconnect();
           GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
+
         if (googleSignInAccount != null) {
           GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+          
           AuthCredential credential = GoogleAuthProvider.credential(
             idToken: googleSignInAuthentication.idToken,
-            accessToken: googleSignInAuthentication.accessToken);
+            accessToken: googleSignInAuthentication.accessToken
+          );
+
           user = await auth.signInWithCredential(credential);
         }
+      } else if(type=='apple'){
+        AuthorizationCredentialAppleID appleCredential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+            AppleIDAuthorizationScopes.email,
+            AppleIDAuthorizationScopes.fullName,
+          ],
+          
+        );
+
+        final credential = OAuthProvider("apple.com").credential(
+          idToken: appleCredential.identityToken,
+          accessToken: appleCredential.authorizationCode,
+        );
+
+        user = await auth.signInWithCredential(credential);
+     
       } else {
-          startedfacelogin = true;
-          final facebookAuthCred = FacebookAuthProvider.credential(token);
-          user = await auth.signInWithCredential(facebookAuthCred);
+        startedfacelogin = true;
+        final facebookAuthCred = FacebookAuthProvider.credential(token);
+        user = await auth.signInWithCredential(facebookAuthCred);
       }
 
       if(user != null) {
         if(register){
-            user.user.sendEmailVerification();
-            var register = await repository.registerUser(usuario: user.user);
+          
+          var register = await repository.registerUser(usuario: user.user);
 
-            register.fold(
-              (Failure failure) => errormsg = _mapFailureToMessage(failure), 
-              (dynamic u) => loggeduser = u
-              );
-        }else{
+          register.fold(
+            (Failure failure) => errormsg = _mapFailureToMessage(failure), 
+            // SOLO eN EL CASO DE QUE SE REGISTRE CON MAIL
+            (dynamic u) {
+              user.user.sendEmailVerification();
+              loggeduser = u;
+            }
+          );
+        }else {
           log = await repository.loginUser(usuario: user.user);
+
           log.fold(
             (Failure f) => errormsg = _mapFailureToMessage(f), 
             (dynamic u) => loggeduser = u
@@ -127,18 +149,19 @@ abstract class _LoginState with Store {
       }
     }on PlatformException catch (e) {
       print(e);
-      errormsg = 'An unexpected error has ocurred';
+      errormsg = 'Could not connect to the server';
     }on FirebaseAuthException catch (e) {
       // simply passing error code as a message
-      print(e.code);
+      
       if(e.message != null) {
         errormsg = e.message;
       }else{
        errormsg = switchExceptions(e.code);
       }
     }on Exception catch (e){
-      print(e);
-      errormsg ='An unexpected error has ocurred';
+      print(e.toString());
+
+      errormsg ='Could not connect to the server';
     }
 
     startedlogin = false;
@@ -154,19 +177,11 @@ abstract class _LoginState with Store {
           (Route<dynamic> route) => false
         );
       }else{
-        if(!loggeduser.seenIntroCarousel){
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => CarrouselIntro()),
-            (Route<dynamic> route) => false,
-          );
-        }else{
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Layout()),
-            (Route<dynamic> route) => false,
-          );
-        }
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Layout()),
+          (Route<dynamic> route) => false,
+        );
       }
     } else if(errormsg != null && errormsg != ''){
       if(type == 'google' && user != null){
@@ -176,14 +191,20 @@ abstract class _LoginState with Store {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+
+          
+          duration: Duration(seconds: 5),
           behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.fixed,
           content: Container(
+            constraints: BoxConstraints(
+              minHeight: 150,
+            ),
             padding: EdgeInsets.all(Configuration.tinpadding),
             child: Row(
               children: [
-                SizedBox(width: 10),
+                SizedBox(width: Configuration.verticalspacing),
                 Icon(Icons.error_outline_rounded, color: Colors.red, size: Configuration.medicon),
-                SizedBox(width: 10),
+                SizedBox(width: Configuration.verticalspacing),
                 Expanded(
                   child:Text(errormsg, style: isTablet ? Configuration.tabletText('small', Colors.white) : Configuration.text('small', Colors.white))
                 ),
@@ -194,7 +215,6 @@ abstract class _LoginState with Store {
       );
     }
   }
-
 
   String switchExceptions(exception){
     //añadir mas excepciones !!
@@ -218,7 +238,6 @@ abstract class _LoginState with Store {
     return false;
   }
 
-
   @action
   Future logout() async {
     loggeduser = null;
@@ -230,6 +249,31 @@ abstract class _LoginState with Store {
     }
     await repository.logout();
   }
+
+  @action
+  Future<bool> forgotPassword(String email)async {
+    try{
+      await auth.sendPasswordResetEmail(email:email);
+
+      return true;
+    }on FirebaseAuthException catch (e) {
+      print('EXCEPTION');
+      return false;
+    }
+
+    return false;
+  }
+
+
+  @action
+  Future<bool> confirmCode(String code,  String password){
+    try{
+
+    }on Exception catch(e){
+
+    }
+  }
+
 
   /*
   @action
@@ -306,11 +350,11 @@ abstract class _LoginState with Store {
     // Instead of a regular 'if (failure is ServerFailure)...'
     switch (failure.runtimeType) {
       case UserExistsFailure:
-        return 'User already exists';
+        return failure.error != null ? failure.error : 'User already exists';
       case ServerFailure:
-        return 'Server failure';
+        return failure.error != null ? failure.error :'Server failure';
       case CacheFailure:
-        return 'Cache failure';
+        return failure.error != null ? failure.error : 'Cache failure';
       case LoginFailure: 
         return failure.error != null ? failure.error : 'User not found in the database';
       default:

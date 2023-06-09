@@ -40,7 +40,7 @@ abstract class _MeditationState with Store {
   Content content;
 
   @observable
-  int currentpage = 0;
+  int currentpage = 1;
 
   PageController practice = new PageController(initialPage: 0);
 
@@ -127,6 +127,7 @@ abstract class _MeditationState with Store {
   @action 
   void switchpage(int index, [avoidjump]) {
     currentpage = index;
+    
     if(avoidjump == null || !avoidjump ){
       practice.jumpToPage(index);
     }
@@ -361,6 +362,7 @@ abstract class _MeditationState with Store {
   }
 
   @action 
+  // EL PRESET  TIENE LOS SETTINGS TAMBIÉN!!! 
   void selectPreset(MeditationPreset p){
     selmeditation = new Meditation(
       duration: Duration(minutes: p.duration),
@@ -447,12 +449,13 @@ abstract class _MeditationState with Store {
   }
 
 
-  // BORRAR
+  // BORRAR ESTO YA NO SE HACE AQUI :(((((
+  
   @action
   Future finishMeditation() async {
     Wakelock.disable();
 
-    int currentposition = user.position;
+    //int currentposition = user.position;
     sentenceindex = 0;
 
     shadow = false;

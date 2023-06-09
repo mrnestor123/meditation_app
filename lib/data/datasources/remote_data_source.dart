@@ -1,98 +1,81 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
-import 'package:meditation_app/data/models/helpers.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
-import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
-import 'package:meditation_app/domain/entities/stats_entity.dart';
-import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:http/http.dart' as http;
-import 'package:meditation_app/domain/entities/version_entity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 import '../../domain/entities/action_entity.dart';
-import '../../domain/entities/lesson_entity.dart';
-import '../../domain/entities/stage_entity.dart';
-import '../models/lesson_model.dart';
-
-typedef CollectionReference CollectionGet(String path);
+import '../../domain/entities/meditation_entity.dart';
 
 //This will use the flutter database.
 abstract class UserRemoteDataSource {
   // sacamos el objeto referencia
 
   /// Logins a user to the DataBase
-  ///
   /// Throws a [ServerException] for all error codes.
-  Future<UserModel> loginUser({var usuario});
-
   UserRemoteDataSource();
+
+  /*
+  * 
+  * USER CONTROLLER !!!
+  **/
+  Future<UserModel> loginUser({User usuario, String coduser });
 
   Future<UserModel> registerUser({var usuario});
 
-  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type});
+  Future <List<UserModel>> getUsers(UserModel u);
 
+  Future <UserModel> getUser(String cod, [bool expand]);
+
+  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type,  DoneContent done});
+  
   //We get all the users data
   Future<DataBase> getData();
 
-  //sacamos los datos del usuario que no guardamos en la bd
-  Future <UserModel> getUserData(String coduser);
-
   Future getActions(UserModel u);
 
-  Future uploadFile({XFile image,FilePickerResult audio, XFile video, User u});
+  Future uploadFile({XFile image,FilePickerResult audio, XFile video, UserModel u});
 
-  Future <List<Request>> getRequests();
+  Future <List<Request>> getRequests({String coduser});
 
   Future updateRequest(Request r, [List<Notify> n, Comment c]);
+  
 
   Future updateNotification(Notify n);
 
   Future uploadRequest(Request r);
 
-  Future <List<User>> getUsers(User u);
-
-  Future <User> getUser(String cod);
-
   Future<Request> getRequest(String cod);
 
-  Future <List<User>> getTeachers();
+  Future <List<UserModel>> getTeachers();
 
   Future sendMessage(Message m);
 
-  Future updateMessage({Message message});
-
-  Future uploadContent({Content c});
-
-  Future expandUser({User u});
-
-  Future follow({User user, User followed, bool follows});
-
-  Future takeLesson({User user, Lesson l});
-
   Future addAction({UserAction a});
 
-  // ESTO TENDRÍA QUE SER MENSAJES
-  Future<List<Chat>> getChats({User user});
 
-  Future<Stream<List<Message>>> startConversation({User sender,String receiver});
+  Future addMeditationReport({Meditation m, MeditationReport report, UserModel user});
 
-  Future<Chat> getChat({User sender,String receiver});
+  Future sendQuestion({String coduser, String question});
 
-  Future updatePhoto({User u, String image});
+  Future setUsername({String coduser, String username});
+
+  Future getContent(String cod);
+
+  Future getFeed();
+
 }
 
 // QUITAR ESTO PARA EL FUTURO
@@ -104,112 +87,180 @@ class MyHttpOverrides extends HttpOverrides{
   }
 }
 
-class UserRemoteDataSourceImpl implements UserRemoteDataSource {
-  FirebaseFirestore database;
 
-  StreamController<List<Message>> _chatController = StreamController<List<Message>>.broadcast();
+
+class UserRemoteDataSourceImpl implements UserRemoteDataSource {
+
+  // CREAR TOKENS YO MISMO PARA LA  SIGUIENTE VERSIÓN !!!
+  String token;
+  User firebaseUser;
+
+  bool downloadedToken = false;
+  //final appCheck = FirebaseAppCheck.instance;
   var nodejs ;
+  Future<String> tokenGet;
+  
 
   UserRemoteDataSourceImpl() {
     HttpOverrides.global = new MyHttpOverrides();
-    database = FirebaseFirestore.instance;
-  //  nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/app';
-    nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/app';
+   // nodejs = 'https://us-central1-the-mind-illuminated-32dee.cloudfunctions.net/default';
+    
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        // HACEMOS LOGIN ANÓNIMO !!!
+        FirebaseAuth.instance.signInAnonymously();
+        firebaseUser = user;
+        print('User is logged in anonymously');
+      } else {
+        firebaseUser = user;
+        print('User is signed in!');
+      }
+    });
+    
+    nodejs = 'http://localhost:5001/the-mind-illuminated-32dee/us-central1/default';
+  
   }
 
-  Map<int, Map<String, List<LessonModel>>> alllessons;
+  Future<dynamic> api_call(uri, { String method = 'GET', Object body, bool omitErrors = false}) async  {
+    // http request   
+    var url = Uri.parse(uri);
+    http.Response response;
 
-  Future<UserModel> connect(String cod) async {
-    try{
-      var url = Uri.parse('$nodejs/connect/$cod');
-      
-      http.Response response = await http.get(url).timeout(
-        const Duration(seconds: 20),
+    if(firebaseUser == null){
+      throw ServerException(error: 'Access denied');
+    } else {
+      token = await firebaseUser.getIdToken();
+    }
+    
+    if (token == null) throw ServerException(error: 'Access denied');
+    
+    Map <String,String> headers = {"X-Firebase-Token": token};
+
+    if(method == 'GET'){
+      response = await http.get(url, headers: headers).timeout(
+        const Duration(seconds:  20),
         onTimeout: () {
           // Time has run out, do what you wanted to do.
-          return http.Response('Error', 400); 
-        },
+          return http.Response('Connection timed out', 400); 
+        }
       );
-
-      if(response.statusCode == 400 ){
-        return null;
-      }else{
-        //comprobar que funciona bien
-        UserModel u = UserModel.fromRawJson(response.body);
-        return u;
-      }
-    }catch(e) {
-      print({'Exception', e.toString()});
-    }
-  }
-
-  //sacamos todos los datos del usuario.
-  //Meditaciones, lecciones y misiones. También sacamos las misiones de cada etapa
-  @override
-  Future<UserModel> loginUser({var usuario}) async {
-      // Vamos a hacer esto en el server !!
-    UserModel loggeduser = await connect(usuario.uid);
-    if(loggeduser != null){
-      getActions(loggeduser);
-      return loggeduser;
-    }else{
-      throw LoginException();
-    }
-  }
-
-  @override
-  Future<UserModel> registerUser({var usuario}) async {
-    //Sacamos la primera etapa
-    //Esto se debería de sacar del getStage
-
-    
-    QuerySnapshot query = await database.collection('users').where('coduser',isEqualTo: usuario.uid).get();
-
-    if(query.docs.length == 0){
-      var url = Uri.parse('$nodejs/stage/1');
-      http.Response response = await http.get(url);
-
-      if(response.statusCode != 400 && response.statusCode != 404){
-        //comprobar que funciona bien
-        //ESTO QUE ES !!!
-        //UserModel u = UserModel.fromRawJson(response.body);
-        StageModel one = StageModel.fromRawJson(response.body);
-
-        //hay que pasar esto al nuevo setting con UserStats
-        // HAY QUE CREAR UN MODELO USERMODEL 
-        UserModel user = new UserModel(
-          coduser: usuario.uid,
-          user: usuario,
-          stagenumber: 1,
-          meditposition: 0,
-          gameposition: 0,
-          role: "meditator",
-          position: 0,
-          stage: one,
-          stagelessonsnumber: 1,
-          userStats: UserStats.empty()
-        );
-
-        //añadimos al usuario en la base de datos de usuarios
-        await database.collection('users').add(user.toJson());
-
-        return user;
-      }else{
-        throw ServerException();
-      }
+    }else if(method == 'PUT'){
+      response = await http.put(url,body: body, headers: headers).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          // Time has run out, do what you wanted to do.
+          return http.Response('Connection timed out', 400); 
+        }
+      );
+    }else if(method == 'POST'){
+      response = await http.post(url,body: body, headers: headers).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          // Time has run out, do what you wanted to do.
+          return http.Response('Connection timed out', 400); 
+        }
+      );
+    }else if(method == 'DELETE'){
+      response = await http.delete(url, headers: headers).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          // Time has run out, do what you wanted to do.
+          return http.Response('Connection timed out', 400); 
+        }
+      );
+    }else if(method =='PATCH'){
+      response = await http.patch(url,body: body, headers: headers).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () {
+          // Time has run out, do what you wanted to do.
+          return http.Response('Connection timed out', 400); 
+        }
+      );
     }else {
-      throw UserException();
+      throw ServerException(error: 'Method not allowed');
+    }
+
+    if((response.statusCode == 400 || response.statusCode == 404 || 
+      response.statusCode  == 403 || response.statusCode == 401) && !omitErrors) {
+      dynamic body = json.decode(response.body);
+      throw ServerException(
+        error: body['message'] != null && body['message'] is String ? body['message'] : 'ERROR'
+      );
+    }else {
+      return response.body;
     }
   }
+
+  /*
+  *
+  * TODO EL TEMA DEL USUARIO!
+  *
+  */
+  @override
+  Future <UserModel> loginUser({User usuario, String coduser = ''}) async {
+    // Vamos a hacer esto en el server !!
+    try {
+      if(firebaseUser != null) {
+        String cod = firebaseUser.uid;
+        String body = await api_call('$nodejs/users/user/$cod?connect=true', omitErrors: true );
+        
+        if(body == null || body.contains('User not found')){
+          body = await api_call(
+            '$nodejs/users/register', 
+            method: 'POST', 
+            body: {'id':firebaseUser.uid}
+          );
+        }
+
+        UserModel u = UserModel.fromRawJson(body);
+
+        print('created user');
+        return u;
+      
+      }
+    } catch (e) {
+      print(e.toString());
+      // COMPROBAR SI ES SERVEREXCEPTION
+      throw ServerException(error: e is ServerException ? e.toString(): 'User not found');
+    }
+  }
+
+  /// PODRÍAMOS PASAR SOLO EL CÓDIGO DEL USUARIO
+  @override
+  Future <UserModel> registerUser({var usuario}) async {
+    // Sacamos la primera etapa
+    // Esto se debería de sacar del getStage
+    try {
+      String body  = await api_call('$nodejs/users/register', method: 'POST', body: {'id':usuario.uid});
+      UserModel u = UserModel.fromRawJson(body);
+      return u;
+    } catch (e) {
+      throw ServerException(error: e is ServerException ? e.toString() : 'Could not sign up user');
+    }
+  }
+
+  // REALMENTE NO ES
+  Future <UserModel> getUser(dynamic coduser,[bool expand = false])async{
+    try{
+      String body = await api_call('$nodejs/users/user/$coduser?expand=$expand');
+      UserModel u = UserModel.fromJson(json.decode(body),expand);
+
+      return u;
+    }catch(e){
+      throw ServerException(error: e.toString());
+    }
+  }
+
+
+
+
 
   // se carga cada x tiempo las últimas acciones del usuario!
   Future getActions(UserModel u) async {
-    var url = Uri.parse('$nodejs/live/${u.coduser}');
-    try{
-      var response = await http.get(url);
-
-      var actions = json.decode(response.body);
-      
+    try {
+      String body = await api_call('$nodejs/users/actions/${u.coduser}');
+      var actions = json.decode(body);
+        
       if(actions['today'] != null && actions['today'].length > u.todayactions.length){
         u.setActions(actions['today'], true);
       }
@@ -217,368 +268,280 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       if(actions['thisweek'] != null && actions['thisweek'].length > u.thisweekactions.length){
         u.setActions(actions['thisweek'], false);
       }
-    }catch(e){
-      print({'GETACTIONS',e});
+    } catch (e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
   @override
-  Future<DataBase> getData([bool getStages]) async  {
-    DataBase d = new DataBase();
-    var url = Uri.parse('$nodejs/stages');
-    
-    try{
-      http.Response response = await http.get(url);
-      List<StageModel> stages = new List.empty(growable: true);
-
-      var stagesquery = json.decode(response.body);
-
-      for(var stage in stagesquery){
-        d.stages.add(StageModel.fromJson(stage));      
-      }
-
-      // esto también debería sacarlo en el servidor
-      QuerySnapshot nostageContent = await database.collection('content').where('stagenumber', isEqualTo: 'none').get();
-
-      // HAY QUE VOLVER A AÑADIR ESTO !!!!
-      for(DocumentSnapshot doc in nostageContent.docs){
-        Map data = doc.data();
-        if(data['type'] == 'meditation-practice'){
-          d.nostagemeditations.add(MeditationModel.fromJson(data));
-        }else{
-          d.nostagelessons.add(LessonModel.fromJson(data));
-        }
-      }
-
-      QuerySnapshot versions = await database.collection('versions').get();
-
-      for(DocumentSnapshot doc in versions.docs){
-        d.addVersion(Version.fromJson(doc.data()));
-      }
-
-      var newContent = Uri.parse('$nodejs/newcontent');
-      http.Response contentres = await http.get(newContent);
-      
-      if(contentres.statusCode != 400){
-        List<dynamic> newcontent  = json.decode(contentres.body);
-        
-        for(var c in newcontent){
-          d.newContent.add(c['type'] == 'meditation-practice' ? MeditationModel.fromJson(c): LessonModel.fromJson(c));
-        }
-      }
-
-
-      var paths = Uri.parse('$nodejs/paths');
-      http.Response pathsresponse = await http.get(paths);
-      
-      if(pathsresponse.statusCode != 400){
-        List<dynamic> paths  = json.decode(pathsresponse.body);
-        
-        for(var p in paths){
-          d.paths.add(Course.fromJson(p));
-        }
-      }
-
-      d.getLastVersion();
-
+  Future<DataBase> getData({String token}) async  {
+    try {
+      String body = await api_call('$nodejs/database');
+      DataBase d = new DataBase.fromJson(json.decode(body));
       return d;
-    }catch(e){
-      print({'exception',e.toString()});
-    }
+    } catch (e) {
+      print(e.toString());
 
-    throw Exception();
+      throw ServerException(error: e.toString());
+    
+    }
   }
 
-  Future<List<User>> getUsers(User loggeduser) async{
-    List<User> l = new List.empty(growable: true);
-    try{
-      var usersUrl = Uri.parse('$nodejs/users/${loggeduser.coduser}');
-      http.Response response = await http.get(usersUrl);
-      var users = json.decode(response.body);
+
+  Future<List<UserModel>> getUsers(UserModel loggeduser) async {
+    try {
+      String body  = await api_call('$nodejs/users');
+      List<UserModel> l = new List.empty(growable: true);
+      var users = json.decode(body);
 
       for(var user in users){
         l.add(UserModel.fromJson(user,false));
       }
 
-      l.sort((a, b) => b.userStats.total.timemeditated.compareTo(a.userStats.total.timemeditated));
+      l.sort((a, b) => b.userStats.timeMeditated.compareTo(a.userStats.timeMeditated));
 
       return l;
-    } catch(e){
-      print({'exception',e});
+    } catch (e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
-
-    throw Exception();
   }
 
   //DEBERIA DE LLAMARSE IMAGE
-  Future<String> uploadFile({XFile image, FilePickerResult audio, XFile video, User u}) async {
-      print('ENTRA AQUI');
-      String name ;
+  // SUBIMOS IMÁGENES SIN NODE !!!!!!!!!!!!!!!
+  Future<String> uploadFile({XFile image, FilePickerResult audio, XFile video, UserModel u}) async {
+    try {
+      
+      Dio dio = new Dio();
 
-      var bytes;
-      //IMAGE Y VIDEO SON LO MISMO !!!!!!!
-      if(image != null){
-        bytes = await image.readAsBytes();
-        List<String> path = image.path.split('/');
-        name = path[path.length-1];
-      }else if(audio != null){
-        bytes = audio.files[0].bytes;
-        name = audio.names[0];
-      }else if(video != null){
-        bytes = await video.readAsBytes();
-       // List<String> path = video.path.split('/');
-       // name = path[path.length-1];
-        name = video.name;
+      if(image == null){
+        throw ServerException(error: 'No file selected');
       }
 
+      String fileName = image.path.split('/').last;
 
-      Reference ref =  FirebaseStorage.instance.ref('/userdocs/${u.coduser}/$name');
+      //create multipart request for POST or PATCH method
+
       
-      final UploadTask storageUpload = ref.putData(bytes);
+      FormData formData = FormData.fromMap({
+        "file":  await MultipartFile.fromFile(image.path, filename:fileName, contentType: new MediaType('image','jpg') ),
+      });
 
-      await (await storageUpload.whenComplete(()=> null));
-      String profilepath = await ref.getDownloadURL();
-      print({'filetodownload',profilepath});
-      return profilepath;
+      var response = await dio.post(
+        '$nodejs/users/upload/$fileName',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            "X-Firebase-AppCheck": token
+          }
+        )
+      );
+
+      //return profilepath;
+    } catch(e){
+      print({'ERROR UPLOADING IMAGE', e.toString()});
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
   }
 
+  // ESTO SACARÁ L AS REQUESTS QUE NO TENGAN STAGENUMBER !!!!
   @override
-  Future<List<Request>> getRequests() async {
-    var url = Uri.parse('$nodejs/requests');
-    http.Response response = await http.get(url);
-    List<Request> requests = new List.empty(growable: true);
+  Future<List<Request>> getRequests({String coduser}) async {
+    try {
+      
+      String body = await api_call('$nodejs/requests/user/$coduser');
+      List<Request> requests = new List.empty(growable: true);
+      for(var j in json.decode(body)){
+        requests.add(Request.fromJson(j));
+      }
+      return requests;
+    
+    } catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
 
-    //Comprobar que no haya error al llamar
-    for(var j in json.decode(response.body)){
-      requests.add(Request.fromJson(j));
+  Future<List<Request>> getFeed() async {
+    try {
+      List<Request> requests = new List.empty(growable: true);
+      String body = await api_call('$nodejs/requests/feed');
+
+      for(var j in json.decode(body)){
+        requests.add(Request.fromJson(j));
+      }
+
+      return requests;
+    
+    } catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
 
-    return requests;
   }
-
 
   @override
   // ESTO HAY QUE PASARLO AL SERVER !!!!!
-  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type, Content toUpload}) async {
+  Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type, DoneContent done}) async {
     try{
-      // PORQUE  NO PASAMOS 
-      if(type == 'recording'){
-        Content c = toAdd[0];
-        QuerySnapshot docreference = await database.collection('doneContent').where('cod', isEqualTo: c.cod).where('doneBy',isEqualTo: user.coduser).get();
-
-        if(docreference.docs.length > 0){
-          await database.collection("doneContent").doc(docreference.docs[0].id).set(
-            //  NO DEBERÍA DE SER EN MINUTOS !! SINO EN SEGUNDOS  !!
-            {'done':c.done.inMinutes},
-            SetOptions(merge: true)
-          );
-        }else{
-          // ESTO DEBERÍA DE GUARDARSE SIEMPRE !!!!!
-          await database.collection('doneContent').add(c.toJson());
-        }
-      }else{
-        QuerySnapshot userreference = await database.collection('users').where('coduser', isEqualTo: user.coduser).get();
-        String documentId = userreference.docs[0].id;
-    
-        await database.collection("users").doc(documentId).set(
-          user.updateFields(),
-          SetOptions(merge: true)
+      if(type != 'content' || type !='recording'){
+        await api_call(
+          '$nodejs/users/${user.coduser}', 
+          method: 'PATCH', 
+          body: json.encode(user.updateFields())
         );
-
-        //Mejor hacer funciones ??????? MEDITAR, SEGUIR A ALGUIEN ,TOMAR UNA LECCION, MUCHO IF !!
-        if (type == 'meditate') {
-          await database.collection('meditations').add(toAdd[0].shortMeditation());
-        }else if(type =='lesson'){
-          //Añadirlo a las lessonss del usuario !!
-        }
       }
-    }catch(e){  
-      print(e.toString());
-      throw ServerException();
-    }
-  }
+        
+      if (type == 'meditate') {
+        for(Meditation meditation in toAdd){
+          await api_call(
+            '$nodejs/users/meditate/finish/${user.coduser}', 
+            method: 'POST', 
+            body: json.encode(meditation.shortMeditation())
+          );
+        }
+      }else if((type =='lesson' || type == null || type == 'content') && done != null){
+        await api_call(
+          '$nodejs/users/donecontent/${user.coduser}', 
+          body: json.encode(done.toJson()),
+          method: 'POST'
+        );           
+      }
 
-  @override
-  Future addAction({UserAction a}){
-    var url = Uri.parse('$nodejs/action/${a.coduser}');
-    var body = json.encode(a.toJson());
+      if(user.lastactions.length > 0){
+        for(UserAction a in user.lastactions){
+          addAction(a:a);
+        }
 
-    return http.post(url,
-      headers: {"Content-Type": "application/json"},
-      body: body
-    );
-  }
-
-  /*
-    TODO: SACAR LAS LECCIONES QUE HA LEIDO !!
-  */
-  @override
-  Future <UserModel> getUserData(String coduser) async{
-    try {
-      UserModel u = await connect(coduser);
-
-      if(u !=null){
-        await getActions(u);
-
-        /*
-        ESTO NO LO VAMOS A HACER ASI. CADA VEZ QUE ENTRE A MAINSCREEN SACAMOS ACTIONS
-        Timer.periodic(new Duration(seconds: 30), (timer) {
-          getActions(u);
-        }); */   
+        user.lastactions.clear();
       
-        if(u == null){
-          throw Exception();
-        }else{
-          return u;
-        }
       }
-    }catch(e){
-      throw ServerException();
+
+    }catch(e){  
+      throw ServerException(error: e is ServerException ? e.toString() : 'Server error');
     }
   }
 
-  Future <User> getUser(dynamic coduser)async{
-    var url = Uri.parse('$nodejs/user/$coduser');
-    http.Response response = await http.get(url);
-
-    if(response.statusCode == 400){
-      throw Exception();
-    }else{
-      //comprobar que funciona bien
-      UserModel u = UserModel.fromJson(json.decode(response.body),false);
-      return u;
+  @override
+  Future addAction({UserAction a}) async{
+    try {
+      await api_call('$nodejs/users/action/${a.coduser}',
+        method: 'POST',
+        body: json.encode(a.toJson())
+      );
+    } catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
+
+  
 
   Future updateRequest(Request r, [List<Notify> n, Comment c]) async{
-    try{
-      QuerySnapshot query = await database.collection('requests').where('cod', isEqualTo: r.cod).get();
-      String docID = query.docs[0].id; 
+    try {
 
-      // UPDATE REQUEST DEBERÍA DE  SER UNA TRANSACCIÓN !!!!!
-      await database.collection("requests").doc(docID).update(r.toJson());
+      await api_call('$nodejs/requests/${r.cod}',
+        method: 'PATCH',
+        body: json.encode(r.toJson())
+      );
 
       if(c != null){
-        await database.collection("comments").add(c.toJson());
+        
+        await api_call('$nodejs/requests/${r.cod}/comment',
+          method: 'POST',
+          body: json.encode(c.toJson())
+        );
 
-
-        await database.collection('requests').doc(docID).collection('comments').add(c.toJson());
       }
 
       if(n != null && n.length > 0){
 
         for(var not in n){
-          await database.collection('notifications').add(not.toJson());
+          await api_call('$nodejs/requests/notification',
+            method: 'POST',
+            body: json.encode(not.toJson())
+          );
         }
+
       }
+
     }catch(e) {
-      throw ServerException();
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
   Future updateNotification(Notify n) async{
-    try{
-      QuerySnapshot query = await database.collection('notifications').where('cod', isEqualTo: n.cod).get();
-      if(query.docs.length  > 0){ 
-        String docID = query.docs[0].id;      
-        await database.collection("notifications").doc(docID).update(n.toJson());
-      }
-    }catch(e) {
-      throw ServerException();
+    try {
+      await api_call('$nodejs/requests/notification/${n.cod}',
+        method: 'PATCH',
+        body: n.toJson()
+      );
+      
+    } catch(e) {
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
   Future uploadRequest(Request r) async{
-    await database.collection('requests').add(r.toJson());
-  }
+     try {
+      
+      await api_call('$nodejs/requests/new',
+        method: 'POST',
+        body: json.encode(r.toJson())
+      );
 
+    } catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
 
   // PORQUE SE SIGUE PASANDO LOS USUARIOS !!!!
   Future sendMessage(Message m) async {
-    try{
-      var url = Uri.parse('$nodejs/sendmessage/new');
-      var response = await http.post(url,
-        headers: {"Content-Type": "application/json"},
+    try {
+
+      await api_call('$nodejs/sendmessage/new',
+        method: 'POST',
         body: json.encode(m.toJson())
       );
-    }catch(e) {
-      throw ServerException();
+      
+    } catch(e) {
+      
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
   @override
   Future<Request> getRequest(String cod) async{
-    try{
-      var url = Uri.parse('$nodejs/request/$cod');
-      http.Response response = await http.get(url);
-      Request request = new Request.fromJson(json.decode(response.body));
+    try {
+      
+      String body = await api_call('$nodejs/requests/$cod');
+      Request request = new Request.fromJson(json.decode(body));
       return request;
+
     }catch(e) {
-      throw ServerException();
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
   @override
   //PASAR ESTA FUNCION AL SERVIDOR
-  Future<List<User>> getTeachers() async{ 
-    try{
-        List<User> teachers = new List.empty(growable: true);
-        var url  =  Uri.parse('$nodejs/teachers');
-        http.Response response = await http.get(url); 
-        var users = json.decode(response.body);
-
-        for(var user in  users){
-          teachers.add(UserModel.fromJson(user,false));
-        }
-
-        return teachers;
-    }catch(e) {
-      throw ServerException();
-    }
-  }
-
-  @override
-  Future updateMessage({Message message}) async{
+  Future<List<UserModel>> getTeachers() async { 
     try {
-      QuerySnapshot msgref = await database.collection('messages').where('cod', isEqualTo: message.cod).get();
-      String documentId = msgref.docs[0].id;
-      
-      await database.collection("messages").doc(documentId).update(message.toJson());
 
-    }catch(e){
-      throw ServerException();
-    }
-  }
+      String body = await api_call('$nodejs/users?role=teacher');
+      var users = json.decode(body);
 
-  @override
-  Future uploadContent({Content c}) async{
-    try{
-      await database.collection('content').add(c.toJson());
-    } catch(e){
-      throw ServerException();
-    }
-  }
-
-  @override
-  Future<User> expandUser({User u}) async{
-    try {
-      var url =  Uri.parse('$nodejs/expanduser/${u.coduser}');
-      http.Response response = await http.get(url); 
-      if(response.statusCode == 200){
-        // PORQUE NO LO HACEMOS DESDE NORMAL
-        UserModel newUser = UserModel.fromRawJson(response.body);
-        return newUser;
-      }else{ 
-        throw ServerException();
+      List<UserModel> teachers = new List.empty(growable: true);
+      for(var user in  users){
+        teachers.add(UserModel.fromJson(user,false));
       }
-    }catch(e){
-      print(e.toString());
-      throw ServerException();
+
+      return teachers;
+    }catch(e) {
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }
 
+  /*
   @override
-  Future follow({User user, User followed, bool follows}) async{
+  Future follow({UserModel user, UserModel followed, bool follows}) async{
     try {
       var url  =  Uri.parse('$nodejs/follow/${followed.coduser}');
       http.Response response = await http.post(url,
@@ -600,8 +563,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
+  
   @override
-  Future takeLesson({User user, Lesson l}) async{
+  Future takeLesson({UserModel user, Lesson l}) async{
 
     try {
       QuerySnapshot query = await database.collection('readlessons').where('coduser', isEqualTo: user.coduser).get();
@@ -631,7 +595,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-  Future<List<Chat>> getChats({User user}) async {
+  Future<List<Chat>> getChats({UserModel user}) async {
 
     try{
       var url = Uri.parse('$nodejs/messages/${user.coduser}/new');
@@ -667,7 +631,7 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
 
   // AQUÍ DEBERÍAMOS DEVOLVER UN CHAT ????
   @override
-  Future<Stream<List<Message>>> startConversation({User sender,String receiver}) async {
+  Future<Stream<List<Message>>> startConversation({UserModel sender,String receiver}) async {
     try{
       //ESTO DEPURARLO
       QuerySnapshot query = await database.collection('chats').where('shortusers.${sender.coduser}',isEqualTo:true)
@@ -700,10 +664,9 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     }
   }
 
-
   // Lioso!! mejor que sean dos strings !!!
   @override
-  Future<Chat> getChat({User sender, String receiver}) async{
+  Future<Chat> getChat({UserModel sender, String receiver}) async{
     var url = Uri.parse('$nodejs/messages/${sender.coduser}/$receiver/new');
     http.Response response = await http.get(url).timeout(
       const Duration(seconds: 20),
@@ -722,29 +685,92 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
     // TODO: implement getChat
     throw ServerException();
   }
-
+  
+  
+  
   @override
-  Future updatePhoto({User u, String image}) async{
-     try{
-      var url = Uri.parse('$nodejs/updatephoto/${u.coduser}');
-      
-      http.Response response = await http.post(url,body: image).timeout(
-        const Duration(seconds: 20),
-        onTimeout: () {
-          // debería throwear una exception
-          // Time has run out, do what you wanted to do.
-          return http.Response('Error', 400); 
-        },
-      );
-
-      if(response.statusCode == 200){
-        return true;     
-      }
-
-      throw ServerException();
-    }catch(e) {
+  Future createRetreat({Retreat r}) {
+    try{
+      //database.collection('retreats').add(r.toJson());
+    }catch(e){
       print({'Exception', e.toString()});
       throw ServerException();
     }
   }
+  */
+  
+  
+  
+  @override
+  Future addMeditationReport({Meditation m,  MeditationReport report, UserModel  user}) async{
+    try {
+      
+      await api_call(
+        '$nodejs/users/meditate/report/${user.coduser}',
+        method: 'PUT',
+        body: json.encode({
+          'cod':m.cod,
+          'report': report.toJson()
+        })
+      );
+
+      return true;  
+    }catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
+  
+  @override
+  Future sendQuestion({String coduser, String question}) async{
+
+    try {
+      await api_call(
+        '$nodejs/users/question',
+        method: 'POST',
+        body: json.encode({
+          'coduser': coduser,
+          'question': question,
+          'date': DateTime.now().millisecondsSinceEpoch
+        })
+      );
+    }catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
+  
+  @override
+  Future setUsername({String coduser, String username}) async {
+    // url to nodejs
+    
+    try{
+      await api_call(
+        '$nodejs/users/setusername/$coduser',
+        method: 'PUT',
+        body: username
+      );
+
+      return true;
+    }catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
+  
+  @override
+  Future getContent(String cod) async {
+     try{
+
+      String body =  await api_call('$nodejs/content/$cod');
+
+        
+      Map<String,dynamic> res  =  json.decode(body);
+        
+      return Content.fromJson(res);
+    } catch(e){
+      throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
+    }
+  }
 }
+
+
+
+

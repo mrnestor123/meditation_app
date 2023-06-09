@@ -10,77 +10,116 @@ import 'lesson_entity.dart';
 //Hacer un método para añadir a meditation time
 //agrupa todas las estadísticas del usuario
 class UserStats {
-  StageStats stage;
-  TotalStats total;
-  List<dynamic> lastread = new List.empty(growable: true);
-  int streak;
-  // ESTO DEBERIA DE SER UNA FECHA !!!!!!
+  List<DateTime> daysMeditated = new List.empty(growable: true);
   DateTime lastmeditated;
-  Map<String,dynamic> meditationtime;
+  int streak, maxStreak, readLessons, doneMeditations, timeMeditated;
 
-  UserStats({this.stage,this.total,this.lastread,this.streak,this.lastmeditated,this.meditationtime});
+  List<dynamic> lastread = new List.empty(growable: true);
+  // ESTO DEBERIA DE SER UNA FECHA !!!!!!
+ // DateTime lastmeditated;
+  Map<String,dynamic> meditationtime;
+  
+  UserStats({
+    this.maxStreak,
+    this.readLessons,
+    this.doneMeditations,
+    this.lastread,
+    this.streak,
+    this.lastmeditated,
+    this.meditationtime,
+    this.timeMeditated,
+    this.daysMeditated
+  });
     
   factory UserStats.empty() => UserStats(
-     stage: StageStats.empty(),
-     total: TotalStats.empty() ,
+     maxStreak: 0,
+     doneMeditations: 0,
+     timeMeditated: 0,
+     readLessons: 0,
      streak: 0,
-     meditationtime:  new Map(),
+     daysMeditated: [],
      lastread: new List.empty(growable: true),
     );
 
   factory UserStats.fromJson(Map<String, dynamic> json) =>
     UserStats(
-      stage: json['etapa'] == null ? StageStats.empty() : StageStats.fromJson(json['etapa']),
-      total: json['total'] == null ? TotalStats.empty() : TotalStats.fromJson(json['total']),
-      streak: json['racha'] == null ? 0 : json['racha'],
+      streak: json['racha'] == null ? json['streak'] != null ? json['streak']: 0 : json['racha'],
       meditationtime: json['meditationtime'] == null ? new Map() : json['meditationtime'],
-      lastmeditated: json['lastmeditated'] == null ? null : DateTime.parse(json['lastmeditated']),
+
+      timeMeditated: json['timeMeditated'] !=  null 
+        ? json['timeMeditated'] : 
+        json['total'] != null && json['total']['tiempo'] != null 
+        ? json['total']['tiempo'] : 0,
+
+      readLessons: json['readLessons'] !=  null 
+        ? json['readLessons'] : 
+        json['total'] != null && json['total']['lecciones'] != null 
+        ? json['total']['lecciones'] : 0,
+
+      doneMeditations: json['doneMeditations'] !=  null 
+        ? json['doneMeditations'] :
+        json['total'] != null && json['total']['meditaciones'] != null
+        ? json['total']['meditaciones'] : 0,
+
+      maxStreak: json['maxStreak'] !=  null ? 
+        json['maxStreak'] :
+        json['total'] != null && json['total']['maxstreak'] != null
+        ? json['total']['maxstreak'] : 0,
+
+      lastmeditated: json['lastmeditated'] == null ? null : 
+        DateTime.parse(json['lastmeditated']),
+        
+      daysMeditated: json['daysMeditated'] != null ?
+        (json['daysMeditated'] as List).map((i) => DateTime.parse(i)).toList() : 
+        json['meditationTime'] != null  ? 
+          (json['meditationTime'] as Map).keys.map((i) => DateTime.parse(i)).toList() : 
+          [],
+
       lastread: json['lastread'] == null ? [] : json['lastread']
+      
     );  
 
   Map<String, dynamic> toJson() => {
-    "etapa": stage == null ? null : stage.toJson(),
-    "total": total == null ? null : total.toJson(),
-    "racha": streak == null ? 0 : streak,
+    "streak": streak == null ? 0 : streak,
     "meditationtime": meditationtime == null ? null: meditationtime,
+    "timeMeditated": timeMeditated == null ? 0 : timeMeditated,
+    "readLessons": readLessons == null ? 0 : readLessons,
+    "doneMeditations": doneMeditations == null ? 0 : doneMeditations,
+    "maxStreak": maxStreak == null ? 0 : maxStreak,
+    //"daysMeditated": daysMeditated == null ? [] : daysMeditated.map((i) => datetoString(i)).toList(),
     "lastmeditated": lastmeditated == null ? null : datetoString(lastmeditated),
     "lastread": lastread == null ? [] : lastread
   };
 
   void takeLesson(){
-    this.total.lessons++;
+    this.readLessons++;
   }
 
   void streakUp(){
     this.streak++;
-    if (this.stage.maxstreak < this.streak) {
-      this.stage.maxstreak = this.streak;
-    }
 
-    if (this.total.maxstreak < this.streak) {
-      this.total.maxstreak = this.streak;
+    if(this.maxStreak <  this.streak){
+      this.maxStreak = this.streak;
     }
   }
 
   void meditate(Meditation m){
-    this.lastmeditated = DateTime.now();    
-    this.stage.timemeditated += m.duration.inMinutes;
-    this.total.timemeditated += m.duration.inMinutes;
-    this.total.meditations++;
+    this.lastmeditated = m.day;    
+    this.doneMeditations++;
+    this.timeMeditated += m.duration.inMinutes;
+
+    //this.daysMeditated.add(DateTime.parse(datetoString(m.day)));
     // CREO QUE ESTO NO HACE FALTA !!!!!
-    if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] != null) {
+    
+
+    /*if (this.meditationtime.isNotEmpty && this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] != null) {
       this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] += m.duration.inMinutes;
     } else {
       this.meditationtime[m.day.day.toString() + '-' + m.day.month.toString()] = m.duration.inMinutes;
-    }
+    }*/
   }
 
   void reset() {
-    this.stage.timemeditated = 0;
-    this.stage.lessons = 0;
-    this.stage.maxstreak = 0;
-    this.stage.guidedmeditations = 0;
-    this.stage.timemeditations = 0;
     this.lastread.clear();
   }
 }

@@ -8,13 +8,15 @@ import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/progress_dialog.dart';
+import 'package:meditation_app/presentation/pages/courses_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/main_screen.dart';
 import 'package:meditation_app/presentation/pages/messages_screen.dart';
-import 'package:meditation_app/presentation/pages/path_screen.dart';
-import 'package:meditation_app/presentation/pages/recordings_screen.dart';
+import 'package:meditation_app/presentation/pages/objectives_screen.dart';
+import 'package:meditation_app/presentation/pages/explore_screen.dart';
+import 'package:meditation_app/presentation/pages/talking_monk.dart';
 import 'package:meditation_app/presentation/pages/teachers_screen.dart';
 
 import 'package:provider/provider.dart';
@@ -47,6 +49,9 @@ class _MobileLayoutState extends State<MobileLayout> {
   int currentindex = 0;
   PageController _c;
   UserState _userstate;
+  bool gotData = false;
+
+
 
   @override
   void initState() {
@@ -62,13 +67,17 @@ class _MobileLayoutState extends State<MobileLayout> {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
     final _loginstate = Provider.of<LoginState>(context);
-    if(_userstate.user==null){
+    
+    if(_userstate.user == null){
       _userstate.setUser(_loginstate.loggeduser);
     }
-    if(_userstate.data == null){
-      _userstate.getData();
-    }
     
+    if(_userstate.gettingData != null){
+      _userstate.gettingData.whenComplete(() => setState(()=> gotData = true));
+    }else{
+      _userstate.getData();
+      _userstate.gettingData.whenComplete(() => setState(()=> gotData = true));
+    }
   }
 
   @override
@@ -78,8 +87,6 @@ class _MobileLayoutState extends State<MobileLayout> {
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
     ProfileState _profilestate = Provider.of<ProfileState>(context);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);    
 
     Widget chiporText(String text, bool chip, int page){
       Widget g;
@@ -115,27 +122,27 @@ class _MobileLayoutState extends State<MobileLayout> {
           icon: Icon(Icons.home,size: Configuration.smicon),
           label: 'Home',
         ),
+        
         BottomNavigationBarItem(
-          icon: Icon(Icons.self_improvement,size: Configuration.smicon),
-          label: 'Stages',
+          icon: Icon(Icons.explore,size: Configuration.smicon),
+          label: 'Explore',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.record_voice_over,size: Configuration.smicon),
-          label: 'Recordings',
-        ),
+        
         /*
         BottomNavigationBarItem(
-          icon: Icon(Icons.self_improvement,size: Configuration.smicon),
-          label:'Practice'
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.terrain,size: Configuration.smicon),
-          label: 'Path',
+          icon: Icon(Icons.explore,size: Configuration.smicon),
+          label: 'Explore',
         ),*/
+
         BottomNavigationBarItem(
           label: 'Timer',
           icon: Icon(Icons.timer, size: Configuration.smicon),
-        )
+        ),
+
+        BottomNavigationBarItem(
+          label: 'Games',
+          icon: Icon(Icons.gamepad, size: Configuration.smicon),
+        ),
       ];
     }
 
@@ -146,60 +153,57 @@ class _MobileLayoutState extends State<MobileLayout> {
             resizeToAvoidBottomInset: false,
             extendBodyBehindAppBar: false,
             appBar: AppBar(
+              systemOverlayStyle: SystemUiOverlayStyle(
+                // Status bar color
+                statusBarColor: Colors.transparent, 
+                statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+                statusBarBrightness: Brightness.light, // For iOS (dark icons)
+              ),
               elevation: 0.0,
               toolbarHeight: Configuration.width > 500 ? 80 : 50,
               backgroundColor: Configuration.white,
               bottom: PreferredSize(
-                  child: currentindex == 3 ?
-                    Column(
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            // HACEN FALTA 3 OBSERVERS ???
-                            Observer(builder: (BuildContext context) {  
-                              return chiporText('Timer', _meditationstate.currentpage == 0, 0);
-                            }),
-    
-                            /*
-                            Observer(builder: (BuildContext context) {  
-                              return chiporText('Guided', _meditationstate.currentpage == 1, 1);
-                            }),
-                            */
-    
-                            Observer(builder: (BuildContext context) {  
-                              return chiporText('Games', _meditationstate.currentpage == 1, 1);
-                            }),
-                          ],
-                        ),
-                        SizedBox(height: Configuration.verticalspacing/2),
-                        Container(
-                          color: Colors.grey,
-                          height: 1.0,
-                        )
-                      ]
-                    ) :
-                    Container(
+                  child: Container(
                       color: Colors.grey,
                       height: 1.0,
                     ),
                   preferredSize: //Size.fromHeight(4.0)
-                  currentindex == 3 ? Size.fromHeight(60) : Size.fromHeight(4.0)
-                  ),
-              leadingWidth: Configuration.width > 500 ? 90 : 50,
-              leading: GestureDetector(
-                onTap: (){
-                  this._c.jumpToPage(0);
-                },
-                child: Container(
-                  child: Image.asset('assets/logo-no-text.png')
+                  currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
+                ),
+              leadingWidth: Configuration.width*0.5,
+              leading: Container(
+                margin: EdgeInsets.only(
+                  left: Configuration.smpadding
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: (){
+                        this._c.jumpToPage(0);
+                      },
+                      child: Text(
+                        'Inside',
+                        style: Configuration.text('subtitle', Colors.black),
+                        textAlign: TextAlign.left,
+                      )
+                    ),
+                  ],
                 ),
               ),
               automaticallyImplyLeading: false,
               actions: [
-                MessagesIcon(),
+                /*IconButton(
+                  color: Colors.black,
+                  onPressed: ()=>{
+                    Navigator.pushNamed(context, '/retreats').then((value) => setState((){}))
+                  }, icon: Icon(Icons.self_improvement, size: Configuration.smicon)
+                )*/
+                /*
                 SizedBox(width: Configuration.verticalspacing),
+
+                //MessagesIcon(),
+                SizedBox(width: Configuration.verticalspacing),
+                
                 Stack(
                   alignment:Alignment.center,
                   children: [
@@ -209,7 +213,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                       onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
                     ),
                     
-                    _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
+                    _userstate.user.notifications != null &&  _userstate.user.notifications.length > 0 && _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
                     Positioned(
                       top: 2,
                       right: 5,
@@ -224,7 +228,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                     
                   ],
                 ),
-                
+                */
                 SizedBox(width: Configuration.verticalspacing),
               
                 Container(
@@ -247,20 +251,11 @@ class _MobileLayoutState extends State<MobileLayout> {
               ),
               child: BottomNavigationBar(
                 elevation: 2.0,
-                selectedLabelStyle: Configuration.text("verytiny", Configuration.maincolor),
-                unselectedLabelStyle: Configuration.text("verytiny", Colors.grey),
+                selectedLabelStyle: Configuration.text("tiny", Configuration.maincolor),
+                unselectedLabelStyle: Configuration.text("tiny", Colors.grey),
                 unselectedItemColor: Colors.black,
                 type: BottomNavigationBarType.fixed,
-                items:bottomItems()
-                /* 
-                _userstate.user.isTeacher() ? 
-                  bottomItems() + [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.school,size: Configuration.smicon),
-                    label: 'Teacher',
-                  )] 
-                  : */
-                ,
+                items: bottomItems(),
                 currentIndex: currentindex,
                 selectedItemColor: Configuration.maincolor,
                 onTap: (int index) {
@@ -272,7 +267,6 @@ class _MobileLayoutState extends State<MobileLayout> {
             ),
             body: WillPopScope(
               onWillPop:(){
-                print('onpop');
                 DateTime now = DateTime.now();
                 if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 5)) {
                   currentBackPressTime = now;
@@ -290,10 +284,15 @@ class _MobileLayoutState extends State<MobileLayout> {
                 return Future.value(true);
               },
               child: Container(
-                padding: currentindex == 0 || currentindex == 3 ? EdgeInsets.only(top:0) : 
-                EdgeInsets.only(right: Configuration.smpadding,left: Configuration.smpadding),
+                padding:  EdgeInsets.only(top:0),
                 color: Configuration.lightgrey,
-                child: PageView(
+                child:  !gotData ?
+                  Center(
+                  child: CircularProgressIndicator(
+                    color: Configuration.maincolor,
+                  )) :
+                
+                 PageView(
                   physics: NeverScrollableScrollPhysics(),
                   controller: _c,
                   onPageChanged: (newPage) {
@@ -301,8 +300,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                       currentindex = newPage;
                     });
                   },
-                  children: [MainScreen(), LearnScreen(), RecordingsScreen(),  MeditationScreen(), TeachersManagement()],
-    
+                  children: [MainScreen(), LearnScreen(), MeditationScreen(), GameScreen()],
                   //MeditationScreen()
                 ),
               ),
@@ -310,6 +308,12 @@ class _MobileLayoutState extends State<MobileLayout> {
           ),
 
           /*
+          Positioned.fill(
+            child: TalkingMonk()
+          ) */
+          
+          /*
+          , ViewCourses()
           HAY QUE HACER QUE ESTO APAREZCA EN EL MOMENTO EN QUE SE SUBE DE ETAPA !!!
           Observer(builder: (context){
             bool showModal = _userstate.user.stageupdated != null && _userstate.user.stageupdated;
@@ -330,6 +334,26 @@ class _MobileLayoutState extends State<MobileLayout> {
       ),
     );
   }
+}
+
+DateTime currentBackPressTime;
+
+Future checkPop( context){
+  DateTime now = DateTime.now();
+  if (currentBackPressTime == null || now.difference(currentBackPressTime) > Duration(seconds: 5)) {
+    currentBackPressTime = now;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.fixed,
+        content: Container(
+          padding: EdgeInsets.all(12.0),
+          child: Text('Press back two times to exit the app', style: Configuration.text('small', Colors.white))
+        ),
+      ),
+    );
+    return Future.value(false);
+  }
+  return Future.value(true);
 }
 
 

@@ -1,29 +1,22 @@
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
+import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/beautiful_container.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/progress_bar.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
-
-
+import 'package:meditation_app/presentation/pages/commonWidget/week_list.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
-import 'package:meditation_app/presentation/pages/learn_screen.dart';
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
-import 'package:meditation_app/presentation/pages/stage/path.dart';
+import 'package:meditation_app/presentation/pages/profile_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../domain/entities/content_entity.dart';
-import 'commonWidget/radial_progress.dart';
-import 'commonWidget/stage_card.dart';
+import '../../domain/entities/request_entity.dart';
+import 'commonWidget/start_button.dart';
 
 class MainScreen extends StatefulWidget {
   MainScreen();
@@ -35,14 +28,14 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   UserState _userstate;
   LoginState _loginstate;
+  ProfileState _profileState;
 
   List<Content> newContent = new List.empty(growable:true);
 
   Color darken(Color c, [int percent = 0]) {
     assert(0 <= percent && percent <= 100);
     var f = 1 - percent / 100;
-    return Color.fromARGB(c.alpha, (c.red * f).round(), (c.green * f).round(),
-        (c.blue * f).round());
+    return Color.fromARGB(c.alpha, (c.red * f).round(), (c.green * f).round(), (c.blue * f).round());
   }
 
   @override 
@@ -50,417 +43,412 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
   }
 
+
   @override 
   void didChangeDependencies(){
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      
       // HAY QUE VER QUE PASA CON GUARDAR LOS DATOS !!
+      if(_userstate.user != null && !_userstate.user.settings.askedProgressionQuestions){
+        Future.delayed(Duration(milliseconds: 100),
+          ()=>{
+            showDialog(
+              context: context, 
+              barrierDismissible: false,
+              builder: (_){
+                return WelcomeMessage();
+            })
+          }
+        );
+      }
+      
+      /*
       if(_userstate.data != null && (_userstate.user.version == null || _userstate.user.version < _userstate.data.lastVersion.versionNumber)){
         _userstate.setVersion(_userstate.data.lastVersion.versionNumber);
-
-       showDialog(
+        
+        showDialog(
          context: context, 
          builder: (context){
-           return AbstractDialog(
-             content: Container(
-               decoration: BoxDecoration(
-                 color:Colors.white,
-                 borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
-               ),
-               child: Column(
-                 mainAxisSize: MainAxisSize.min,
-                 children: [
-                   Container(
-                     width:Configuration.width,
-                     decoration: BoxDecoration(
-                        color:Configuration.maincolor,
-                        borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius/2)) 
+          return AbstractDialog(
+            content: Container(
+              decoration: BoxDecoration(
+                color:Colors.white,
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width:Configuration.width,
+                    decoration: BoxDecoration(
+                      color:Configuration.maincolor,
+                      borderRadius: BorderRadius.vertical(top:Radius.circular(Configuration.borderRadius/2)) 
+                  ),
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Center(
+                      child: Text('Version ' + _userstate.data.lastVersion.versionNumber.toString(),  
+                      style:Configuration.text('medium',Colors.white)),
+                    )
+                  ),
+                  SizedBox(height:Configuration.verticalspacing),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                    child: Text(_userstate.data.lastVersion.description, style:Configuration.text('smallmedium',Colors.black), textAlign:TextAlign.center),
+                  ),
+                  SizedBox(height:Configuration.verticalspacing),
+                  Container(
+                    width:Configuration.width,
+                    color: Configuration.maincolor,
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Text('Functionalities',style:Configuration.text('smallmedium',Colors.white))
+                  ),
+                  SizedBox(height:Configuration.verticalspacing/2),
+                  Container(
+                    padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                    child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: 
+                    _userstate.data.lastVersion.content.map((e) {
+                      return Container(
+                        margin: EdgeInsets.only(top:Configuration.verticalspacing),
+                        child: Row(children: [
+                          Container(
+                            height: Configuration.verticalspacing,
+                            width: Configuration.verticalspacing,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color:Colors.black
+                            ),
+                          ),
+                          SizedBox(width: Configuration.verticalspacing),
+                          Expanded(child: 
+                          Text(e['text'],style:Configuration.text('small',Colors.black))
+                          )
+                        ]),
+                      );
+                    }).toList()
                     ),
-                     padding: EdgeInsets.all(Configuration.smpadding),
-                     child: Center(
-                       child: Text('Version ' + _userstate.data.lastVersion.versionNumber.toString(),  
-                       style:Configuration.text('medium',Colors.white)),
-                     )
-                   ),
-                   SizedBox(height:Configuration.verticalspacing),
-                   Padding(
-                     padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-                     child: Text(_userstate.data.lastVersion.description, style:Configuration.text('smallmedium',Colors.black), textAlign:TextAlign.center),
-                   ),
-                   SizedBox(height:Configuration.verticalspacing),
-                   Container(
-                     width:Configuration.width,
-                     color: Configuration.maincolor,
-                     padding: EdgeInsets.all(Configuration.smpadding),
-                     child: Text('Functionalities',style:Configuration.text('smallmedium',Colors.white))
-                   ),
-                   SizedBox(height:Configuration.verticalspacing/2),
-                   Container(
-                     padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: 
-                      _userstate.data.lastVersion.content.map((e) {
-                       return Container(
-                         margin: EdgeInsets.only(top:Configuration.verticalspacing),
-                         child: Row(children: [
-                           Container(
-                             height: Configuration.verticalspacing,
-                             width: Configuration.verticalspacing,
-                             decoration: BoxDecoration(
-                               shape: BoxShape.circle,
-                               color:Colors.black
-                             ),
-                           ),
-                           SizedBox(width: Configuration.verticalspacing),
-                           Expanded(child: 
-                            Text(e['text'],style:Configuration.text('small',Colors.black))
-                           )
-                         ]),
-                       );
-                     }).toList()
-                     ),
-                   ),
-                   SizedBox(height:Configuration.verticalspacing*2)
-                    /*
-                   Container(
-                     padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-                     child: Text('Make sure you have downloaded the last version from the store', style: Configuration.text('small',Colors.grey))
-                    ),*/
-                   //SizedBox(height:Configuration.verticalspacing),
-                 ],
-               ),
-             )
-           );
-         });
-    
-      }
+                  ),
+                  SizedBox(height:Configuration.verticalspacing*2)
+                  /*
+                  Container(
+                    padding:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                    child: Text('Make sure you have downloaded the last version from the store', style: Configuration.text('small',Colors.grey))
+                  ),*/
+                  //SizedBox(height:Configuration.verticalspacing),
+                ],
+              ),
+            )
+          );
+        });
+      }*/
     });
-  
   }
 
   void onBack(value){ setState(() {});}
 
   @override
   Widget build(BuildContext context) {
+    _profileState = Provider.of<ProfileState>(context);
+
     return ListView(
     physics: ClampingScrollPhysics(),
     children: [
       SizedBox(height: Configuration.verticalspacing),
-      Container(
-        margin:EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-        padding: EdgeInsets.all(Configuration.smpadding),
-        decoration: BoxDecoration(
-          color: Configuration.maincolor,
-          borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children:[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children:[
+          
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: Configuration.width*0.7,
-                  child: Column(
-                    crossAxisAlignment:CrossAxisAlignment.start,
-                    children: [
-                      Text('You are on stage ' + _userstate.user.stagenumber.toString(), style: Configuration.text('smallmedium',Colors.white),),
-                      SizedBox(height: Configuration.verticalspacing/2),
-                      Text(
-                        _userstate.user.stage.description, 
-                        style: Configuration.text('small',Colors.white,font:'Helvetica'),
-                        overflow: TextOverflow.clip,
-                      )
-                    ],
-                  ),
-                ),
-
-                RadialProgress(
-                  width: 4,
-                  goalCompleted: _userstate.user.percentage/100,
-                  progressColor: Colors.lightBlue,
-                  progressBackgroundColor: Colors.white,
-                  child: Padding(
-                    padding: EdgeInsets.all(Configuration.tinpadding),
-                    child: Center(
-                      child: Text(
-                        _userstate.user.percentage.toString() + '%',
-                        style: Configuration.text('tiny', Colors.white)
-                      ),
-                    ),
-                  ),
-                )
-
+                WeekView(),
+                SizedBox(height: Configuration.verticalspacing*2),
+                // horizontal list with the teachers
+                TeachersList(userstate: _userstate) 
               ],
             ),
-            SizedBox(height: Configuration.verticalspacing*2),
-            Container(
-              constraints: BoxConstraints(
-                minHeight: Configuration.height*0.12
+          ),
+          
+          SizedBox(height: Configuration.verticalspacing*2),
+          
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+            child: _Timeline()
+          ),
+
+
+          SizedBox(height: Configuration.verticalspacing*2)
+
+        ]  
+      )    
+    ]);
+  }
+}
+
+class TeachersList extends StatefulWidget {
+  TeachersList({
+    Key key,
+    @required UserState userstate,
+  }) : _userstate = userstate, super(key: key);
+
+  final UserState _userstate;
+
+  @override
+  State<TeachersList> createState() => _TeachersListState();
+}
+
+class _TeachersListState extends State<TeachersList> {
+  ScrollController _scrollController = new ScrollController();
+
+
+  void moveTeachers(){
+    if(_scrollController.hasClients){
+      _scrollController.animateTo(_scrollController.offset != 0 ? 0 : _scrollController.position.maxScrollExtent, 
+        duration: Duration(seconds: 10), 
+        curve: Curves.linear
+      ).then((value) => moveTeachers());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+
+     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+       //moveTeachers();
+     });
+    /*
+    Future.delayed(Duration(seconds: 1),() {
+      _scrollController.animateTo(0, duration: Duration(seconds: 10), curve: Curves.linear).then((value) => 
+      
+      _scrollController.animateTo(_scrollController.initialScrollOffset, duration: Duration(seconds: 10), curve: Curves.linear)
+      );
+    });*/
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+   
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
+        border: Border.all(
+          color: Colors.grey,
+          width: 0.5
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(Configuration.smpadding),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(Configuration.borderRadius/2),
+                topRight: Radius.circular(Configuration.borderRadius/2)
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: CachedNetworkImage(
-                        height: Configuration.height*0.12,
-                        errorWidget: (context, url, error) => Icon(Icons.error),
-                        placeholder: (context, url) => Container(
-                          color: Configuration.maincolor,
-                        ),
-                        imageUrl: _userstate.user.stage.shortimage,
-                        fit: BoxFit.cover
+              color: Colors.white,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.people, color: Colors.black, size: Configuration.smicon),
+                SizedBox(width: Configuration.verticalspacing),
+                Text('Find a teacher', 
+                  style: Configuration.text('subtitle',Colors.black),
+                ),
+              ],
+            ),
+          ),
+          
+          Container(
+            height: Configuration.height * 0.16,
+            width: Configuration.width,
+            child: ListView.builder(
+              controller: _scrollController,
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              itemCount: widget._userstate.data.teachers.length,
+              itemBuilder: (context, index) {
+                return GestureDetector(
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfileScreen(
+                          user: widget._userstate.data.teachers[index],
+                        )
                       ),
+                    )
+                  },
+                  child: Container(
+                    height: Configuration.height*0.2,
+                    margin: EdgeInsets.all(Configuration.verticalspacing),
+                    child: Column(
+                      children: [
+                        ProfileCircle(
+                          userImage: widget._userstate.data.teachers[index].image,
+                          width: Configuration.height*0.1,
+                        ),
+                        SizedBox(height: Configuration.verticalspacing/2),
+                        Flexible(child: Text(
+                          widget._userstate.data.teachers[index].nombre, 
+                          style: Configuration.text('small',Colors.black)))
+                      ],
+                    ),
+                  ),
+                );
+              }
+            ),
+          )
+        ]
+      )
+    );
+  }
+}
+
+class WelcomeMessage extends StatefulWidget {
+  const WelcomeMessage({Key key}) : super(key: key);
+
+  @override
+  State<WelcomeMessage> createState() => _WelcomeMessageState();
+}
+
+class _WelcomeMessageState extends State<WelcomeMessage> with SingleTickerProviderStateMixin {
+
+  AnimationController controller;
+  Animation<double> scaleAnimation;
+
+  String whoAmI  = "My name is Ernest and I wanted to thank you personally for downloading my app. I am not a meditation teacher, I just want to share my point of view.\n\n"
+  "That you don't need to escape, to be successful, to become better, to practice, in order to enjoy life. Life is much more simpler than we make it.";
+ 
+  @override
+  void initState() {
+    super.initState();
+
+    controller = 
+      AnimationController(vsync: this, duration: Duration(milliseconds: 900));
+    
+    scaleAnimation =
+      CurvedAnimation(parent: controller, curve: Curves.elasticInOut);
+
+
+    controller.addListener(() {
+      setState(() {});
+    });
+    
+    controller.forward();
+
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runAlignment: WrapAlignment.center,
+      children: [
+        Container(
+          alignment: Alignment.center,
+          child: Stack(
+            children: [
+            
+              Column(
+                children: [
+                  SizedBox(height: Configuration.width*0.15),
+
+                  Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: Configuration.verticalspacing
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                      color:Colors.white
+                    ),
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: Configuration.width*0.15),
+                        Text("Welcome to Inside",style: Configuration.text('subtitle',Colors.black)),
+                        SizedBox(height: Configuration.verticalspacing,),
+                        Text(whoAmI,style: Configuration.text('small',Colors.black,font:'Helvetica')),
+                        SizedBox(height: Configuration.verticalspacing),
+                        Center(
+                          child: Text('You are already whole\nJust look inside \n',
+                            textAlign: TextAlign.center,
+                            style: Configuration.text('smallmedium',Colors.black),
+                          ),
+                        ),
+                        SizedBox(height: Configuration.verticalspacing),
+                        BaseButton(
+                          color: Configuration.maincolor,
+                          noelevation: true,
+                          text: 'Start',
+                          onPressed:() {
+                            _userstate.user.settings.askedProgressionQuestions = true;
+                            //_userstate.user.settings.progression = 'unlockall';        
+                            _userstate.updateUser();                           
+                            Navigator.pop(context);
+                          }, 
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: Configuration.verticalspacing),
-            //StageProgressBar(user:_userstate.user),
-            //SizedBox(height: Configuration.verticalspacing),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Flexible(
-                  flex: 2,
+
+              Positioned(
+                top: 0,
+                right: 0,
+                left: 0,
+                child: Container(
+                  width: Configuration.width*0.3,
+                  height: Configuration.width*0.3,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2)
+                  ),
+                  padding: EdgeInsets.all(5),
                   child: Container(
-                    width: Configuration.width*0.25,
-                   
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Configuration.lightgrey,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)
-                        )
-                      ),
-                      onPressed: ()=>{
-                         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StageView(
-                              stage: _userstate.data.stages[_userstate.user.stagenumber-1],
-                            )
-                          ),
-                        ).then((value) =>
-                          setState(() {
-                            print('SETTING STATE');
-                          })
-                        )
-                      }, 
-                      child:Text('Learn',style: Configuration.text('tiny', Colors.black)),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: AssetImage('assets/myself.jpeg'),
+                        fit: BoxFit.contain
+                      )
                     ),
-                  ),
-                ),
-                Flexible(
-                  flex: 2,
-                  child: Container(
-                    width: Configuration.width*0.25,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Configuration.lightgrey,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)
-                        )
-                      ),
-                      onPressed: ()=>{Navigator.pushNamed(context, '/progress')}, 
-                      child:Text('Objectives',style: Configuration.text('tiny', Colors.black)),
-                    ),
-                  ),
-                ),
-                Flexible(
-                  flex: 2,
-                  child: Container(
-                    width: Configuration.width*0.25,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Configuration.lightgrey,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4)
-                        )
-                      ),
-                      onPressed: ()=>{
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ImagePath(stage: _userstate.user.stage)
-                          )
-                        )
-                      }, 
-                      child: Text('Path',style: Configuration.text('tiny', Colors.black),) 
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ]
-        ),
-      ),
-
-      /*
-      _userstate.data != null && _userstate.data.newContent.length > 0 ? 
-      Container(
-        margin: EdgeInsets.only(top: Configuration.verticalspacing*2),
-        decoration: BoxDecoration(
-         //color: Colors.blueGrey,
-          borderRadius: BorderRadius.circular(Configuration.borderRadius)
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: Configuration.smpadding),
-              child: Text('New content', style: Configuration.text('small',Colors.black))),
-            SizedBox(height: Configuration.verticalspacing),
-            Container(
-              height: Configuration.height*0.15,
-              width: Configuration.width,
-              constraints: BoxConstraints(
-                minWidth: Configuration.width
-              ),
-              child: ListView.builder(
-                padding:EdgeInsets.all(0),
-                physics: ClampingScrollPhysics(),
-                itemCount: _userstate.data.newContent.length,
-                scrollDirection: Axis.horizontal, 
-                itemBuilder: (BuildContext context, int index) {  
-                  Content c = _userstate.data.newContent[index];
-                  // HAY QUE CAMBIAR CLICKABLESQUARE POR CONTENTSQUARE !>!!
-                  return  Container(
-                    margin: EdgeInsets.only(
-                      right: index == _userstate.data.newContent.length-1 ? Configuration.smpadding:0,
-                      left: Configuration.smpadding),
-                    width: Configuration.width*0.33,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ClickableSquare(
-                        selected: true,
-                        border: true,
-                        text: c.title,
-                        blocked: _userstate.user.isContentBlocked(c),
-                        blockedtext: '',
-                        image: c.image,
-                        onTap:(){
-                          Navigator.push(context, 
-                            MaterialPageRoute(builder: (context){
-                              return ContentFrontPage(
-                                content: c,
-                                then:onBack
-                              );
-                            })
-                          );
-                        }    
-                      ),
-                    ),
-                  );
-                }, 
-              ),
-            ),
-          ],
-        ),
-      ): Container(),
-      */
-
-      /*
-      Center(
-        child: Text('You are currently on stage ' + ,
-          style: Configuration.text('smallmedium',Colors.black),
-        ),
-      ),*/
-
-
-     // SizedBox(height: Configuration.verticalspacing),
-      
-      /*ElevatedButton(onPressed: (){
-        scheduleNotification();
-      }, child: Text("NOtification")),
-      */
-      //StageCard(stage: _userstate.user.stage),
-      
-      SizedBox(height: Configuration.verticalspacing*2),
-      
-      Container(
-        padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-        child: Column(
-          children: [
-            Container(
-              child: AspectRatio(
-                aspectRatio: Configuration.buttonRatio,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-                    shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2)),
-                    primary: Colors.grey.withOpacity(0.6)
-                  ),
-                  onPressed: () { 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> Scaffold(
-                        appBar:AppBar(backgroundColor: Colors.white, leading: CloseButton(color:Colors.black), elevation:0),
-                        body:WebView(initialUrl:'https://www.amazon.de/-/en/John-Yates-Phd/dp/1781808201/ref=sr_1_1?adgrpid=82460957179&gclid=CjwKCAiAv_KMBhAzEiwAs-rX1Bo6Q8WImFMLs5t4p67OFcglUBMhHJkNp_cCg2N-GjbcYsLJ2UlynxoCYmoQAvD_BwE&hvadid=394592758731&hvdev=c&hvlocphy=20297&hvnetw=g&hvqmt=b&hvrand=2610658949964129015&hvtargid=kwd-488309045472&hydadcr=24491_1812059&keywords=the+mind+illuminated&qid=1637694427&sr=8-1' ,javascriptMode: JavascriptMode.unrestricted),
-                      ))
-                    ); 
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children:[
-                      Text('Get The Mind Illuminated',style:Configuration.text('small',Colors.white)),
-                      Image(image:AssetImage('assets/tenstages-book.png'),fit: BoxFit.cover)
-                    ]
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: Configuration.verticalspacing*2),
-            AspectRatio(
-              aspectRatio: Configuration.buttonRatio,
-              child: ElevatedButton(
-                onPressed:(){
-                  Navigator.pushNamed(context, '/teachers');
-                },
-                child: Row(
-                  mainAxisAlignment:MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Find a teacher',style:Configuration.text('small',Colors.white)
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.group,
-                          size: Configuration.smicon,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width:Configuration.verticalspacing/2),
-                        Icon(Icons.school,
-                          size:Configuration.smicon,
-                          color:Colors.white
-                        )
-                      ],
-                    )
-                  ],
-                ),
-                style:ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
-                  primary: Configuration.maincolor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2))
-                )
-              ),
-            ),
-            SizedBox(height:Configuration.verticalspacing*2),
-            _Timeline(),
-            SizedBox(height: Configuration.verticalspacing),
-
-          ],
+            ],
+          ),
         ),
-      ),
-      
-    ]);
+      ],
+    );
+
+
   }
+
+
+
 }
+
+
 
 class _Timeline extends StatefulWidget {
   bool isTablet;
@@ -477,23 +465,196 @@ class __TimelineState extends State<_Timeline> {
   List<User> users = new List.empty(growable: true);
   var states = ['Today','This week'];
   ScrollController _scrollController = new ScrollController();
-  ProfileState _profileState;
+  RequestState  _requestState;
+  String text = '';
+  final _formKey = GlobalKey<FormState>();
+
 
   @override
   void initState() {
     super.initState();
   }
 
+
+  void avatarChange(){
+
+    final TextEditingController _nameController = new TextEditingController();
+
+
+    Widget sendMessage(){
+      return Container(
+        margin: EdgeInsets.only(
+          bottom: Configuration.verticalspacing * 2
+        ),
+        child: TextField( 
+          textCapitalization: TextCapitalization.sentences,
+          maxLines:3,
+          maxLength: 50,
+          decoration: InputDecoration(
+            hintText: 'Maximum 50 characters',
+            hintStyle: Configuration.text('small', Colors.grey, font: 'Helvetica'),
+            fillColor: Colors.white,
+            filled:true,
+            border: OutlineInputBorder()
+          ),
+          onChanged: (value) => {
+            text = value
+          },
+        ),
+      );
+    }
+
+
+    Widget changeUserName(){
+      return Form(
+        key: _formKey,
+        child: Container(
+          margin: EdgeInsets.only(
+            bottom: Configuration.verticalspacing
+          ),
+          child: TextFormField(
+            autofocus: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter a valid username';
+              }else if(value.length < 3){
+                return 'Please enter a username longer than three characters';
+              }else if(value.length > 15){
+                return 'Please enter a username shorter than fifteen characters';
+              } else if(value.contains(' ')){
+                return 'Please enter a username without white spaces';
+              }
+              return null;
+            },
+      
+            decoration: InputDecoration(
+              errorStyle: Configuration.text('small', Colors.redAccent, font: 'Helvetica'),
+              errorBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent),
+              ),
+              hintText: 'superBuddha',
+              hintStyle: Configuration.text('small', Colors.grey, font: 'Helvetica'),
+              fillColor: Colors.white,
+              filled:true,
+              border: OutlineInputBorder()
+            ),
+            controller: _nameController, 
+            style: Configuration.text('small', Colors.black, font: 'Helvetica')
+          ),
+        ),
+      );
+    }
+
+
+    return showAlertDialog(
+      title:  _userstate.user.nombre == null ? 
+        "Write your username" :
+        "Share a message",
+      text: _userstate.user.nombre == null ? 
+      "This will be your username in the feed, you won't be able to change it later" :
+      "Share how you are feeling, how your practice is going or anything else you'd like to share with everyone",
+      
+      context: context,
+      customWidget:  _userstate.user.nombre == null || _userstate.user.nombre.isEmpty ? 
+        changeUserName() :
+        sendMessage(),
+      noText: 'Cancel',
+      yesText: _userstate.user.nombre == null ? 'Set':'Share',
+      noPop: true,
+      onYes: ()async {
+        if(_userstate.user.nombre == null || _userstate.user.nombre.isEmpty) {
+          if(_formKey.currentState.validate()){
+            bool success = await _userstate.changeName(_nameController.text);
+            /*
+            if(success){
+              _userstate.user.nombre = _nameController.text;
+            }*/
+          }
+
+        } else {
+          message = new Request(
+            coduser: _userstate.user.coduser,
+            content: text,
+            type: 'feed',
+            date: DateTime.now(),
+            username: _userstate.user.nombre,
+            userimage: _userstate.user.image
+          );
+
+          messages.add(message);
+
+          _requestState.uploadToFeed(r: message);
+
+        }
+      }
+    );
+  }
+
+
+  Request message;
+  List<Request> messages = new List.empty(growable: true);
+
   @override
   void didChangeDependencies()async {
     super.didChangeDependencies();
     _userstate = Provider.of<UserState>(context);
-    _profileState = Provider.of<ProfileState>(context);
+    
+    _userstate.getFeed().then((r){ 
+      if(r != null){
+        messages = r;
+      }
+      setState((){});
+    
+    });
+
+    _requestState = Provider.of<RequestState>(context);
   }
 
   //Pasar ESTO FUERA !!! HACERLO SOLO UNA VEZ !!
   List<Widget> getMessages() { 
-      List<UserAction> sortedlist = new List.empty(growable: true);
+
+    List<Widget> widgets = new List.empty(growable: true);
+
+    if(messages.length == 0) {
+      widgets.add(
+        Center(
+          child: Container(
+            margin: EdgeInsets.only(
+              top: Configuration.verticalspacing * 2
+            ),
+            child: Text('No messages have been added to the feed yet',
+              style: Configuration.text('small',Colors.black, font: 'Helvetica')
+            ),
+          ),
+        )
+      ); 
+    } else {
+      messages.sort((a,b) => b.date.compareTo(a.date));
+
+      for (var message in messages) {
+        widgets.add(
+          Container(
+            padding: EdgeInsets.symmetric(
+              vertical: Configuration.verticalspacing
+            ),
+            child: ListTile(
+              onTap: () => {
+                showUserProfile(usercod: message.coduser)
+              },
+              leading: ProfileCircle(
+                userImage: message.userimage
+              ),
+              title: Text(message.username, style: Configuration.text('small',Colors.black)),
+              subtitle: Text(message.content, style: Configuration.text('small',Colors.black, font: 'Helvetica')),
+            ),
+          )
+        );
+      }
+    }
+
+
+    return widgets;
+       /*List<UserAction> sortedlist = new List.empty(growable: true);
       
       mode == 'Today' ? sortedlist.addAll(_userstate.user.todayactions) : sortedlist.addAll(_userstate.user.thisweekactions);
       
@@ -564,11 +725,12 @@ class __TimelineState extends State<_Timeline> {
      // Timer(Duration(milliseconds: 1), () => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
 
       return widgets;
-    }
+      */
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    _userstate = Provider.of<UserState>(context);
 
     return Container(
         decoration: BoxDecoration(
@@ -580,63 +742,85 @@ class __TimelineState extends State<_Timeline> {
           Container(
             padding: EdgeInsets.all(Configuration.smpadding),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children:[ 
-                DropdownButton<String>(
-                      value: mode,
-                      elevation: 16,
-                      style: Configuration.text('small', Colors.black),
-                      underline: Container(
-                        height: 0,
-                        color: Colors.deepPurpleAccent,
+                  Row(
+                    children: [
+                      Icon(Icons.feed,
+                        size:Configuration.smicon
                       ),
-                      onChanged: (String newValue) {
-                        setState(() {
-                          mode = newValue;
-                        });
-                      },
-                      items: states.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList()
-                ),
-                RawMaterialButton(
-                      elevation: 3.0,
-                      fillColor: Colors.lightBlue,
-                      child: Container(
-                        child: Row(
-                          children: [
-                            Icon(Icons.leaderboard, color: Colors.white, size: widget.isTablet ? Configuration.tinpadding : Configuration.smicon),
-                            Icon(Icons.person, color: Colors.white,size:widget.isTablet ? Configuration.tinpadding : Configuration.smicon)
-                          ],
-                        ),
+                      SizedBox(width: Configuration.verticalspacing),
+                      Text('Feed', 
+                        style: Configuration.text('subtitle', Colors.black),
                       ),
-                      padding: EdgeInsets.all(Configuration.smpadding),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-                      onPressed: () {
-                        //HABRA QUE CAMBIAR ESTO
-                        widget.isTablet ? 
-                        Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
-                        Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
-                      },
+                    ],
+                  ),
+
+                  RawMaterialButton(
+                    elevation: 3.0,
+                    fillColor: Colors.lightBlue,
+                    child: Row(
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: Configuration.smicon),
+                       
+                      ],
                     ),
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+                    onPressed: () {
+                      avatarChange();
+                    },
+                  ),
+
+
+                  /*
+                  RawMaterialButton(
+                    elevation: 3.0,
+                    fillColor: Colors.lightBlue,
+                    child: Container(
+                      child: Row(
+                        children: [
+                          Icon(Icons.leaderboard, color: Colors.white, size: widget.isTablet ? Configuration.tinpadding : Configuration.smicon),
+                          Icon(Icons.person, color: Colors.white,size:widget.isTablet ? Configuration.tinpadding : Configuration.smicon)
+                        ],
+                      ),
+                    ),
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
+                    onPressed: () {
+                      //HABRA QUE CAMBIAR ESTO
+                      widget.isTablet ? 
+                      Navigator.pushNamed(context, '/tabletleaderboard').then((value) => setState(() => null)) :
+                      Navigator.pushNamed(context, '/leaderboard').then((value) => setState(() => null));
+                    },
+                  ),*/
+
+                  
               ]
             ),
           ),
+
           Container(
             width:Configuration.width,
             height: 0.15,
             color: Colors.grey,
           ),
+          
           Container(
             padding: EdgeInsets.symmetric(horizontal: 5),
             height:Configuration.height*0.4,
-            child: ListView(
-              physics: ClampingScrollPhysics(),
-              controller: _scrollController,
-              children: getMessages()))
+            child: Stack(
+              children: [
+                ListView(
+                  physics: ClampingScrollPhysics(),
+                  controller: _scrollController,
+                  children: getMessages(),
+                ),
+
+              ],
+            ))
         ]));
   }
 }
+
+

@@ -36,11 +36,12 @@ class _RadialProgressState extends State<RadialProgress>
 
   double progressDegrees = 0;
   var count = 0;
-
+  
   @override
   void initState() {
     super.initState();
     _radialProgressAnimationController = AnimationController(vsync: this, duration: fillDuration);
+    
     _progressAnimation = Tween(begin: 0.0, end: 360.0).animate(CurvedAnimation(
         parent: _radialProgressAnimationController, curve: Curves.easeIn))
       ..addListener(() {
@@ -100,11 +101,12 @@ class RadialPainter extends CustomPainter {
       ..strokeWidth = width;
 
     canvas.drawArc(
-        Rect.fromCircle(center: center, radius: size.width / 2),
-        math.radians(-90),
-        math.radians(progressInDegrees),
-        false,
-        progressPaint);
+      Rect.fromCircle(center: center, radius: size.width / 2),
+      math.radians(-90),
+      math.radians(progressInDegrees),
+      false,
+      progressPaint
+    );
   }
 
   @override

@@ -3,28 +3,23 @@ import 'dart:io';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
-import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
-import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
-import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:meditation_app/presentation/pages/meditation_screen.dart';
-import 'package:meditation_app/presentation/pages/messages_screen.dart';
 import 'package:meditation_app/presentation/pages/profile_widget.dart';
-import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../mobx/actions/messages_state.dart';
+import 'commonWidget/back_button.dart';
 import 'config/configuration.dart';
 
 class TeachersScreen extends StatefulWidget {
@@ -55,14 +50,23 @@ class _TeachersScreenState extends State<TeachersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Configuration.lightgrey,
       appBar: AppBar(
-        leading: BackButton(color:Colors.white),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: Configuration.maincolor, 
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.light, // For Android (dark icons)
+          statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+        ),
+        leading: ButtonBack(color:Colors.white),
         backgroundColor: Configuration.maincolor,
         elevation:0,
         actions: [
           IconButton(
             iconSize: Configuration.smicon,
             onPressed: (){
+              // REPASAR ESTO !!!!
               showDialog(context: context, builder: (context){
                 return AbstractDialog(
                   content: Container(
@@ -75,6 +79,8 @@ class _TeachersScreenState extends State<TeachersScreen> {
                     ),
                     child: Center(
                       child: Text(
+                        _userstate.data.settings.teachersText !=null ?
+                        _userstate.data.settings.teachersText :
                         "Tmi Teachers have participated in the training's course done by Culadasa",
                         style: Configuration.text('small', Colors.black,font: 'Helvetica'),
                       ),
@@ -83,11 +89,14 @@ class _TeachersScreenState extends State<TeachersScreen> {
                 );
               });
             }, 
+
+            color: Colors.white,
             icon: Icon(Icons.info)
           )
         ],
       ),
-      body: Column(
+      body: ListView(
+        physics: ClampingScrollPhysics(),
         children: [
           Container(
             width: Configuration.width,
@@ -96,28 +105,32 @@ class _TeachersScreenState extends State<TeachersScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('TMI TEACHERS', style:Configuration.text('big',Colors.white)),
+                Text('TMI TEACHERS', style:Configuration.text('subtitle',Colors.white)),
                 SizedBox(height: Configuration.verticalspacing/2),
                 Text('In order to reach advanced stages and clearing your doubts. Asking for help is the best option', style:Configuration.text('small',Colors.white))
               ],
             )
           ),
-          Expanded(
-            child: Container(
-              width: Configuration.width,
-              color:Configuration.lightgrey,
-              child: Observer(
+          Container(
+            width: Configuration.width,
+            color:Configuration.lightgrey,
+            child: Observer(
                 builder: (context) {
                   if(_userstate.loading){
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgress(),
+                        Container(
+                          margin: EdgeInsets.only(
+                            top: Configuration.verticalspacing*4
+                          ),
+                          child: CircularProgress()),
                       ],
                     );
                   }else{
                     return ListView.separated(
-                    physics: ClampingScrollPhysics(),
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
                     itemBuilder: (context,int){
                       User user = _userstate.teachers[int];
                       return TextButton(
@@ -135,15 +148,16 @@ class _TeachersScreenState extends State<TeachersScreen> {
                           padding: EdgeInsets.all(0)
                         ),
                         child: ListTile(
-                          subtitle: user.description != null && user.description.isNotEmpty ? Container(
-                            height: Configuration.verticalspacing*1.5,
-                            child: Text(user.description, 
+                          subtitle: user.teacherInfo.description != null && user.teacherInfo.description.isNotEmpty ? Container(
+                            padding: EdgeInsets.only(top:Configuration.verticalspacing/2),
+                            child: Text(user.teacherInfo.description, 
+                            maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style:Configuration.text('tiny',Colors.grey)
                             ),
                           ): Container(),
                           leading: ProfileCircle(
-                            width:30,
+                            width: Configuration.verticalspacing*3,
                             userImage: user.image,
                           ),
                           title: Text(
@@ -165,8 +179,9 @@ class _TeachersScreenState extends State<TeachersScreen> {
                   } 
                 }
               ),
-            ),
-          )
+          ),
+
+          SizedBox(height: Configuration.verticalspacing*2)
         ],
       ),
     );
@@ -278,9 +293,9 @@ class _TeachersManagementState extends State<TeachersManagement> {
             return ClickableSquare(
               text: content.title,
               onTap: (){
-                Navigator.push(context, 
-                MaterialPageRoute(builder:(context)=> ContentShow(content:content))
-                );
+                /*Navigator.push(context, 
+                 MaterialPageRoute(builder:(context)=> ContentShow(content:content))
+                );*/
               },
             );
           }
@@ -639,6 +654,8 @@ class _FilesGridState extends State<FilesGrid> {
   }
 }
 
+
+/*
 class AddContent extends StatefulWidget {
 
   AddContent() : super();
@@ -710,13 +727,13 @@ class _AddContentState extends State<AddContent> {
               ],
             ),
             SizedBox(height: Configuration.verticalspacing),
+            
             Row(
               children: [
                 Text('Title',style:Configuration.text('tiny',Colors.black)),
                 SizedBox(width:Configuration.verticalspacing),
                 Expanded(
                    child: TextField(
-                      
                       onChanged:(string){
                         toAdd.title = string;
                         setState(() {});
@@ -804,7 +821,7 @@ class _AddContentState extends State<AddContent> {
   }
 }
 
-
+*/
 
 
 // WIDGE

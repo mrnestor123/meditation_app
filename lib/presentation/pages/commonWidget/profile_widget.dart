@@ -1,6 +1,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/radial_progress.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
@@ -41,13 +42,16 @@ class ProfileCircle extends StatelessWidget {
               shape: BoxShape.circle
             ),
             child: CircleAvatar(
+              child: userImage != null && userImage.isNotEmpty && userImage.contains('<svg') ? 
+              SvgPicture.string(userImage) :
+              Container(),
               radius: width/2,
               backgroundColor: userImage == null || userImage.isEmpty
                   ? color != null ? color : Configuration.maincolor
                   : Colors.transparent,
-              backgroundImage: userImage == null || userImage.isEmpty
-                  ? null
-                  : CachedNetworkImageProvider(userImage) ,
+              backgroundImage: userImage == null || userImage.isEmpty || userImage.contains('<svg') 
+                  ? null :
+                  CachedNetworkImageProvider(userImage),
                   //: FileImage(File(_userstate.user.image)),
             )),
       ),

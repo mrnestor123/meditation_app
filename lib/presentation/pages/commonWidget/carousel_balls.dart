@@ -19,14 +19,16 @@ class CarouselBalls extends StatelessWidget {
       
       for(int i = 0; i < items; i++){
          res.add(Container(
+          
           width: Configuration.safeBlockHorizontal * 3,
           height: Configuration.safeBlockHorizontal * 3,
           margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
           decoration: BoxDecoration(
+            
             shape: BoxShape.circle,
             color: i == index
               ? activecolor
-              : Color.fromRGBO(0, 0, 0, 0.4),
+              : Color.fromRGBO(0, 0, 0, 0.3),
           ),
         ));
       }
@@ -51,7 +53,7 @@ class CarouselBalls extends StatelessWidget {
         
         showNext ? 
           Positioned(
-            right: 10,
+            right: Configuration.verticalspacing*2,
             bottom: Configuration.safeBlockHorizontal * 1.5,
             child: Container(
               child: GestureDetector(

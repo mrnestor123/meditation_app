@@ -84,10 +84,11 @@ abstract class _MessagesState with Store {
 
   @action
   Future getMessages({User user}) async{
+    /*
     if(messages.isEmpty){
       messages = new Map();
       isLoading = true;
-      Either<Failure, List<Chat>> messagesres = await repository.getMessages(user:user);
+      /Either<Failure, List<Chat>> messagesres = await repository.getMessages(user:user);
         
       foldResult(
         result: messagesres,
@@ -100,7 +101,7 @@ abstract class _MessagesState with Store {
           }
         }
       );
-    }
+    }*/
   }
 
 
@@ -109,7 +110,6 @@ abstract class _MessagesState with Store {
     user.messages.remove(message);
     repository.updateMessage(message: message);
   }
-
 
   @action 
   Future selectChat(User receiver, [User sender, Chat chat])async{ 
@@ -122,9 +122,9 @@ abstract class _MessagesState with Store {
 
     // es mensaje privado
     if(chat == null){
-      Either<Failure,Chat> chatres = await repository.getChat(sender: sender,receiver: receiver.coduser);
+      //Either<Failure,Chat> chatres = await repository.getChat(sender: sender,receiver: receiver.coduser);
 
-      chatres.fold((l) => null, (r) => chat = r);
+      //chatres.fold((l) => null, (r) => chat = r);
     }
 
 
@@ -161,12 +161,12 @@ abstract class _MessagesState with Store {
         me: {
           'coduser':sender.coduser,
           'userimage':sender.image,
-          'username':sender.nombre
+          'nombre':sender.nombre
         },
         notMe: {
           'coduser':receiver.coduser,
           'userimage':receiver.image,
-          'username':receiver.nombre
+          'nombre':receiver.nombre
         },
       );
       isLoading = false;

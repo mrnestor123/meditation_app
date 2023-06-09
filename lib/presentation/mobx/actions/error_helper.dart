@@ -10,25 +10,28 @@ void foldResult({Either<Failure,dynamic> result, dynamic onSuccess}){
   String header;
 
   String _mapFailureToMessage(Failure failure) {   
+    if(failure.error != null && failure.error.isNotEmpty){
+      errorMessage = failure.error;
+     }
     // Instead of a regular 'if (failure is ServerFailure)...'
     switch (failure.runtimeType) {
       case ServerFailure:
         header ='Server failure';
-        errorMessage = 'An unexpected error has ocurred';
+        if(errorMessage==null || errorMessage.isEmpty) errorMessage =  'Could not connect to the server';
         break;
       case CacheFailure:
         header = 'Cache failure';
-        errorMessage = 'An unexpected error has ocurred';
+        if(errorMessage==null || errorMessage.isEmpty) errorMessage = 'Could not connect to the server';
         break;
       case LoginFailure: 
-        errorMessage = failure.error != null ? failure.error : 'User not found in the database';
+        if(errorMessage==null || errorMessage.isEmpty) errorMessage = failure.error != null ? failure.error : 'User not found in the database';
         break;
       case ConnectionFailure: 
-        errorMessage = 'You are not connected to the internet. Please, connect to it and restart the application';
+        if(errorMessage==null || errorMessage.isEmpty) errorMessage = 'You are not connected to the internet. Please, connect to it to save the app data';
         header = 'Connection Failure';
         break;
       default:
-        errorMessage = 'Unexpected Error';
+        if(errorMessage==null || errorMessage.isEmpty) errorMessage = 'Unexpected Error';
         break;
     }
 
@@ -39,7 +42,7 @@ void foldResult({Either<Failure,dynamic> result, dynamic onSuccess}){
     (Failure l) { 
       _mapFailureToMessage(l);
       // SE PODRIA PONER AQUÍ !! 
-      showErrorDialog(header: header, description: errorMessage);
+      showInfoDialog(header: header, description: errorMessage);
       navigatorKey.currentState.setState(() {});
     }, 
     (r) { if(onSuccess !=null) onSuccess(r); }

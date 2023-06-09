@@ -1,22 +1,24 @@
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/bottom_input.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
 import 'package:provider/provider.dart';
 
-import 'commonWidget/image_upload_modal.dart';
+import '../../domain/entities/stage_entity.dart';
+import 'commonWidget/back_button.dart';
 import 'commonWidget/start_button.dart';
 import 'config/configuration.dart';
 
@@ -39,11 +41,19 @@ class _RequestsState extends State<Requests> {
 
   String selectedtype = 'Suggestion';
   String uploadedImage;
-
+  dynamic selectedStage;
   TextEditingController title = new TextEditingController();
   TextEditingController content = new TextEditingController();
-
   List<String> filters = ['Date', 'Votes'];
+  List<String> types = [];
+  List<String> tabs =  [];
+  List<dynamic> stages = ['View all', 'none', 1,2,3,4,5,6,7,8,9,10];
+  Stage stage;
+  bool showingStage = false;
+
+
+  bool pushedDialog = false;
+  
 
   @override 
   void didChangeDependencies(){
@@ -51,13 +61,58 @@ class _RequestsState extends State<Requests> {
     _userState = Provider.of<UserState>(context);
     _requestState = Provider.of<RequestState>(context);
     _requestState.setUser(_userState.user);
-    _requestState.getRequests();
+    
+    final arg = ModalRoute.of(context).settings.arguments as Map;
+    
+    if(arg != null && arg['stage'] != null){
+      stage = arg['stage'];
+      showingStage = true;
+      selectedtype = 'Question';
+      selectedStage = arg['type'] != null ? 'View all' : stage.stagenumber;
+      types = ['Question', 'Discussion'];
+      tabs = ['All', 'My posts'];
+      _requestState.getStageRequests();
+    }else{
+      types = ['Suggestion', 'Issue'];
+      tabs = ['Issues','Suggestions','My requests'];
+      _requestState.getRequests(coduser:_userState.user.coduser);
+    }
+  }
+
+  Widget stageSelector(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text('Stage', style: Configuration.text('small', Colors.grey)), 
+        SizedBox(width: Configuration.verticalspacing),
+        DropdownButton<dynamic>(
+          value: selectedStage,
+          elevation: 16,
+          style: Configuration.text('small',Colors.black),
+          underline: Container(
+            height: 0,
+            color: Colors.black,
+          ),
+          onChanged: (dynamic newValue) {
+            setState(() {
+              selectedStage = newValue;
+            });
+          },
+          items: stages.map<DropdownMenuItem<dynamic>>((dynamic value) {
+            return DropdownMenuItem<dynamic>(
+              value: value,
+              child: Text(value.toString(), style: Configuration.text('small', Colors.black)),
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 
   Widget addRequestModal(context){
     var stateSetter;
-    
- 
+    dynamic stageToAdd = selectedStage == 'View all' ? 'none': selectedStage;
+
     return StatefulBuilder(
       builder:(BuildContext context, StateSetter setState ) {
       stateSetter = setState;
@@ -70,6 +125,11 @@ class _RequestsState extends State<Requests> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                stage  != null ? 
+                Text("Feel free to ask any question or share any thoughts about meditation or spirituality.", 
+                  style: Configuration.text('small', Colors.black, font: 'Helvetica'),
+                  textAlign: TextAlign.center,
+                ): Container(),
                 SizedBox(height: Configuration.verticalspacing),
                 Text('Title', style:Configuration.text('small', Colors.black)),
                 SizedBox(height: Configuration.verticalspacing/2),
@@ -81,12 +141,13 @@ class _RequestsState extends State<Requests> {
                     hintMaxLines: 2,
                     border: new OutlineInputBorder(
                         borderSide: new BorderSide(color: Colors.black)
-                    ),),
+                    )),
                 ),
                 SizedBox(height:Configuration.verticalspacing),
                 Text('Content', style:Configuration.text('small', Colors.black)),
                 SizedBox(height: Configuration.verticalspacing/2),
                 TextField(
+                  textCapitalization: TextCapitalization.sentences,
                   controller: content,
                   maxLines: 5,
                   decoration: InputDecoration(
@@ -96,10 +157,40 @@ class _RequestsState extends State<Requests> {
                     ),),
                 ),
                 SizedBox(height: Configuration.verticalspacing),
+                
+                stage != null ?  Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('What stage is it in?', style: Configuration.text('small', Colors.black)), 
+                    DropdownButton<dynamic>(
+                      value: stageToAdd,
+                      elevation: 16,
+                      style: Configuration.text('small',Colors.black),
+                      underline: Container(
+                        height: 0,
+                        color: Colors.black,
+                      ),
+                      onChanged: (dynamic newValue) {
+                        setState(() {
+                          stageToAdd = newValue;
+                        });
+                      },
+                      items: stages.sublist(1).map<DropdownMenuItem<dynamic>>((dynamic value) {
+                        return DropdownMenuItem<dynamic>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ) :  Container(),
+
+                SizedBox(height: Configuration.verticalspacing),
+                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Type of request', style: Configuration.text('small', Colors.black)), 
+                    Text('Type', style: Configuration.text('small', Colors.black)), 
                     DropdownButton<String>(
                       value: selectedtype,
                       elevation: 16,
@@ -113,7 +204,7 @@ class _RequestsState extends State<Requests> {
                           selectedtype = newValue;
                         });
                       },
-                      items: <String>['Suggestion', 'Issue'].map<DropdownMenuItem<String>>((String value) {
+                      items: types.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -123,6 +214,7 @@ class _RequestsState extends State<Requests> {
                   ],
                 ),
                 SizedBox(height: Configuration.verticalspacing*2),
+                /*stage != null ? Container() :
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -151,9 +243,10 @@ class _RequestsState extends State<Requests> {
 
                             String imgstring = await _userState.uploadFile(image:image);
                             
-                            print(imgstring);
+                            print({'UPLoaded image',imgstring});
+
                             setState(() {
-                              uploading= false;
+                              uploading = false;
                               uploadedImage  = imgstring;  
                             });
                           }), 
@@ -162,23 +255,31 @@ class _RequestsState extends State<Requests> {
                   ],
                 ),
                 SizedBox(height: Configuration.verticalspacing),
+
+                */
+
                 Center(
                   child: BaseButton(
                     onPressed: () async { 
                       if(title.value.text.isNotEmpty && content.value.text.isNotEmpty){
-                        Request r = await _requestState.uploadRequest(title.value.text,content.value.text,uploadedImage, selectedtype.toLowerCase());
+                        // PODRÍAMOS  UTILIZAR RREQUEST AQUI !!!!
+                        Request r = await _requestState.uploadRequest(
+                          title.value.text,content.value.text,uploadedImage, selectedtype.toLowerCase(), stageToAdd
+                        );
                         
                         if(r != null){
                           title.clear();
                           content.clear();
+                          uploadedImage = null;
                           Navigator.pop(context);
+                          
                           _requestState.setRequest(r: r);
 
                           Navigator.push(context, 
                             MaterialPageRoute(builder: (context){
                               return RequestView();
                             })
-                          ).then((value) => setState((){}));
+                          );
                         }
                       }else{
                         showDialog(
@@ -201,11 +302,10 @@ class _RequestsState extends State<Requests> {
                                   ],
                                 ),
                               )
-                            
-                            ));
+                          ));
                       }
                     },
-                    text: 'Send Request'
+                    text: stage != null ?  'Start discussion': 'Send Request'
                   ),
                 ),
                 SizedBox(height: Configuration.verticalspacing*2)
@@ -216,31 +316,24 @@ class _RequestsState extends State<Requests> {
     });
   }
 
-  Widget requests([String tipo]){
-    List<Request> request = tipo == null ? 
+  Widget requests({String tipo, dynamic stagenumber}){
+    List<Request> request = tipo == null  && stagenumber == null ? 
     _requestState.requests.where((element) => element.coduser == _userState.user.coduser).toList() : 
+    stagenumber != null ?
+    _requestState.requests.where((element) => (stagenumber == 'View all' || element.stagenumber == stagenumber) && element.state != 'closed').toList() : 
     _requestState.requests.where((element) => element.type == tipo && element.state != 'closed').toList();
 
-    String tipostring = tipo != null ? tipo =='suggestion' ? 'suggestions' :'issues': 'Issues/Request';
+    String tipostring = stage != null ? 'discussions':  tipo != null ? tipo =='suggestion' ? 'suggestions' :'issues': 'Issues/Request';
 
     return request.length == 0 ? 
-     Center(
-       child: Text('There are no open $tipostring at the moment. You can add one pressing at the plus button', 
-          style: Configuration.text('small', Colors.black),
-          textAlign: TextAlign.center,
-        )
-      ) :
      Container(
-       margin: EdgeInsets.only(bottom:Configuration.height * 0.09),
-       child: ListView.builder(
-        physics:ClampingScrollPhysics(),
-        // ESTO eSTA HECHO MUY RARO !!!
-        itemCount:request.length + 1,
-        itemBuilder: (context,index) {
-          if(index == 0){
-            return Container(
-              padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-              child: Row(
+        padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+       child: Column(
+         children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
                   Text('Filter',style:Configuration.text('small',Colors.grey)),
                   SizedBox(width: Configuration.verticalspacing),
@@ -253,8 +346,9 @@ class _RequestsState extends State<Requests> {
                       color: Colors.deepPurpleAccent,
                     ),
                     onChanged: (String newValue) {
-                      _requestState.filterRequests(newValue);
-                      setState(() {});
+                      setState(() {
+                        _requestState.selectedfilter = newValue;
+                      });
                     },
                     items: _requestState.filters.map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
@@ -264,6 +358,64 @@ class _RequestsState extends State<Requests> {
                     }).toList()
                   )
               ]),
+              stage != null ? 
+              stageSelector() 
+              : Container(),
+            ],
+          ),
+          SizedBox(height: Configuration.verticalspacing*4),
+          Center(
+            child: Text('There are no open $tipostring at the moment. You can add one pressing at the bottom-page button', 
+              style: Configuration.text('small', Colors.black),
+              textAlign: TextAlign.center,
+            )
+          )
+         ],
+       ),
+     ) :
+     Container(
+       margin: EdgeInsets.only(bottom:Configuration.height * 0.09),
+       child: ListView.builder(
+        physics:ClampingScrollPhysics(),
+        // ESTO eSTA HECHO MUY RARO !!!
+        itemCount:request.length + 1,
+        itemBuilder: (context,index) {
+          if(index == 0){
+            return Container(
+              padding:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text('Filter',style:Configuration.text('small',Colors.grey)),
+                      SizedBox(width: Configuration.verticalspacing),
+                      DropdownButton<String>(
+                        value: _requestState.selectedfilter,
+                        elevation: 16,
+                        style: Configuration.text('small', Colors.black),
+                        underline: Container(
+                          height: 0,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (String newValue) {
+                          _requestState.filterRequests(newValue);
+                          setState(() {});
+                        },
+                        items: _requestState.filters.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList()
+                      )
+                  ]),
+
+                  stage != null ? 
+                  stageSelector() : Container()
+                  
+                ],
+              ),
             );
           }else{
             --index;
@@ -296,14 +448,26 @@ class _RequestsState extends State<Requests> {
                             Text(datetoString(request[index].date),style: Configuration.text('tiny',Colors.grey)) 
                             : Container(),
                         ]),
-                        StateChip(request: request[index])
+                        stage != null ? 
+                        Icon(
+                          request[index].type == 'question' ? Icons.question_mark: Icons.question_answer, 
+                          color: Colors.grey
+                        ) :  StateChip(request: request[index])
                       ],
                     ),
                     SizedBox(height: 5.0),
+                    
                     Container(
                       margin: EdgeInsets.only(left:5),
                       child: Text(request[index].title != null ? request[index].title : 'no title', style: Configuration.text('smallmedium', Colors.black))
                     ),
+
+                    stage != null && request[index].stagenumber != 'none' ?  
+                    Chip(
+                      label: Text('Stage ${request[index].stagenumber}', style: Configuration.text('tiny', Colors.grey)),
+                      backgroundColor: Colors.grey[200],
+                    ) : Container(),
+                    
                     SizedBox(height: 5.0),
                     Divider(),
                     Row(
@@ -413,26 +577,38 @@ class _RequestsState extends State<Requests> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        leading: BackButton(color: Colors.black),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: pushedDialog ? Colors.black.withOpacity(0.1): Configuration.lightgrey, 
+
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+          statusBarBrightness: Brightness.light, // For iOS (dark icons)
+        ),
+        leading: ButtonBack(color: Colors.black),
         actions: [
           Stack(
             children:[
               IconButton(
-                onPressed:()=> {
+                onPressed:(){
+                  // pushed dialog true 
+                  pushedDialog  = true;
+
                   showDialog(
                     context: context, 
                     builder: (context){
                       return notifications();
                     }
                   ).then((value) => setState((){
-                    print(_userState.user.notifications.where((element) => element.seen != true).length);
-                  }))
+                    pushedDialog  =  false;
+                    //print(_userState.user.notifications.where((element) => element.seen != true).length);
+                  }));
                 }, 
                 iconSize:Configuration.smicon,
                 icon: Icon(Icons.notifications,color: Colors.black)
               ),
+              
               _userState.user.notifications.where((element) => !element.seen).toList().length > 0 ?
               Positioned(
                 right: 5,
@@ -452,71 +628,76 @@ class _RequestsState extends State<Requests> {
         backgroundColor: Colors.transparent,
         elevation: 0.0,
       ),
-      bottomSheet: Material(
-        elevation: 10,
-        child: Container(        
-          width: Configuration.width,
-          height:Configuration.height * 0.09,
-          decoration: BoxDecoration(
-            border:   Border(top: BorderSide(color: Colors.grey, width: 1.0)),
-            color: Colors.white,
-          ),
-          child: Center(
-            child: Container(
-              width: Configuration.width *0.6,
-              child: AspectRatio(
-                aspectRatio:Configuration.buttonRatio,
-                child: ElevatedButton(
-                  onPressed: (){
-                    return showModalBottomSheet<void>(
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return addRequestModal(context);
-                      }
-                    ).then((value) => setState((){}));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    primary: Configuration.maincolor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Configuration.borderRadius)
-                    )
-                  ),
-                  child: Text(
-                    'Create Request',
-                    style: Configuration.text('smallmedium', Colors.white),
+      bottomSheet: Wrap(
+        children: [
+          Material(
+            elevation: 10,
+            child: Container(        
+              width: Configuration.width,
+              padding: EdgeInsets.all(Configuration.smpadding),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.grey, width: 1.0)),
+                color: Colors.white,
+              ),
+              child: Center(
+                child: Container(
+                  margin: EdgeInsets.only(bottom: Configuration.verticalspacing*2),
+                  width: Configuration.width * 0.6,
+                  child: AspectRatio(
+                    aspectRatio:Configuration.buttonRatio,
+                    child: ElevatedButton(
+                      onPressed: (){
+                        return showModalBottomSheet<void>(
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return addRequestModal(context);
+                          }
+                        ).then((value) => setState((){}));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Configuration.maincolor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                        )
+                      ),
+                      child: Text(
+                        'Create Request',
+                        style: Configuration.text('smallmedium', Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
       extendBody: false,
       body: DefaultTabController(
-        length: 3,
+        length: tabs.length,
         child: Column(
           children: [
             Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text('Here you can add issues and suggestions to the app', style: Configuration.text('small', Colors.black),),
+              child: Text(stage != null ?
+                'Share your doubts, start a new discussion or participate in one':
+                'Here you can add issues and suggestions to the app', 
+                textAlign: TextAlign.center,
+                style: Configuration.text('small', Colors.black),),
             ),
             SizedBox(height: 10),
             TabBar(
               indicatorSize: TabBarIndicatorSize.tab,
               indicatorWeight: 2.5,
               indicatorColor: Configuration.maincolor,
-              tabs: [
-                Tab(
-                  child: Text('Issues', style:Configuration.text('small', Colors.black)),
-                ),
-                Tab(
-                  child: Text('Suggestions',style: Configuration.text('small', Colors.black))
-                ),
-                Tab(
-                  child: Text('My Requests', style:Configuration.text('small', Colors.black)),
-                )
-            ]),
+              tabs: tabs.map((tab){
+
+                return Tab(
+                  child: Text(tab, style:Configuration.text('small', Colors.black)),
+                );
+              }).toList()
+            ),
             Expanded(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
@@ -539,11 +720,16 @@ class _RequestsState extends State<Requests> {
                   ) : 
                   TabBarView(
                     physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      requests('issue') ,
-                      requests('suggestion'),
+                    children: stage != null ? 
+                      [
+                        requests(stagenumber: selectedStage),
+                        requests(),
+                      ] :
+                      [
+                      requests(tipo: 'issue') ,
+                      requests(tipo: 'suggestion'),
                       requests()
-                  ]);
+                    ]);
                 })
               ),
             )
@@ -588,7 +774,26 @@ class _RequestViewState extends State<RequestView> {
               subtitle: Text(comment.date != null ? datetoString(comment.date): '',style: Configuration.text('small',Colors.grey,font: 'Helvetica')),
              ),
           ),
-          Text(comment.comment != null ? comment.comment :'xx'),
+          htmlToWidget(comment.comment != null ? comment.comment :'xx'),
+          comment.images.length > 0 ?
+          GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(0),
+            itemCount: comment.images.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 2.5), 
+            itemBuilder:  (context, index) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    child: ImageView(image:comment.images[index]),
+                  ),
+                ],
+              );
+            }
+          ):  Container()
+
         ],
       ),
     );
@@ -599,7 +804,6 @@ class _RequestViewState extends State<RequestView> {
     _userState = Provider.of<UserState>(context);
     RequestState _requestState = Provider.of<RequestState>(context);
 
-   
     return Scaffold(
       bottomSheet: Material(
         elevation: 10,
@@ -631,7 +835,7 @@ class _RequestViewState extends State<RequestView> {
       appBar: AppBar(
         elevation: 0.0,
         backgroundColor: Configuration.lightgrey,
-        leading: BackButton(color: Colors.black),
+        leading: ButtonBack(color: Colors.black),
         actions: [
            //Pasar esto a admin
            _userState.user.isAdmin() ?
@@ -709,19 +913,20 @@ class _RequestViewState extends State<RequestView> {
                   SizedBox(height: 10),
                   _requestState.selectedrequest.image != null ?
                   Container(
-                    width: Configuration.width*0.2,
-                    child:
-                      Image(image: CachedNetworkImageProvider(_requestState.selectedrequest.image))
+                    child: ImageView(
+                      image: _requestState.selectedrequest.image
+                      ),
+                      //Image(image: CachedNetworkImageProvider(_requestState.selectedrequest.image))
                   ) : Container()
                 ])
               ),
               SizedBox(height: 5),
+              
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(Configuration.smpadding),
                 child: Text('Comments', style: Configuration.text('medium', Colors.black)),
               ),
               SizedBox(height: 5),
-              
               Container(
                 width: Configuration.width,
                 decoration: BoxDecoration(color: Colors.white),
@@ -738,15 +943,20 @@ class _RequestViewState extends State<RequestView> {
                     separatorBuilder: (BuildContext context, int index) {  
                       return Container(
                         width: Configuration.width,
-                        height: 10,
+                        height: Configuration.verticalspacing,
                         color: Configuration.lightgrey,
                       );
                     }
                   )
                   :
                   Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: Text('There are no comments at the moment. You can add one at the bottom'),
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Text(
+                      'There are no comments at the moment. You can add one at the bottom',
+                      
+                      style: Configuration.text('small', Colors.black, font: 'Helvetica'),
+                      
+                      ),
                   ) 
               ),
               SizedBox(height: Configuration.verticalspacing*10)
@@ -754,6 +964,56 @@ class _RequestViewState extends State<RequestView> {
           );
         }
       ),
+    );
+  }
+}
+
+class ImageView extends StatelessWidget {
+  
+  ImageView({
+    Key key,
+    this.image
+  }): super(key: key);
+
+  String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.all(0)
+      ),
+      onPressed: (){
+        showGeneralDialog(
+          barrierColor: Colors.black12.withOpacity(0.93), // Background color
+          barrierLabel: 'Dialog',
+          transitionDuration: Duration(milliseconds: 400),
+          context: context, 
+          pageBuilder: (_,__,___){
+          return AbstractDialog(
+            content: Stack(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: Configuration.verticalspacing*2),
+                  child: Row(
+                    children: [
+                      CloseButton(
+                        color: Colors.white,
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
+                ),
+                Center(child: Image(image: CachedNetworkImageProvider(image))),
+              ],
+            )
+          );
+        });
+      },
+      child: Text('View Image', style: Configuration.text('small', Colors.lightBlue)),
+
     );
   }
 }
@@ -768,11 +1028,91 @@ class SendComment extends StatefulWidget {
 
 class _SendCommentState extends State<SendComment> {
   String addedComment = '';
+  Comment c = new Comment();
   TextEditingController _controller = new TextEditingController();
+
+  List<XFile> files = new List.empty(growable: true);
+
+  bool uploadingImages = false;
+  String linkName, linkDirection;
+
+  Widget insertLink(){
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          width: Configuration.width*0.9,
+          padding: EdgeInsets.all(Configuration.smpadding),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10)
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Insert a link', style: Configuration.text('smallmedium',Colors.black)),
+              SizedBox(height: Configuration.verticalspacing),
+              TextField(
+                onChanged: (str)=> setState(()=> { linkName = str}),
+                style: Configuration.text('small', Colors.black,font: 'Helvetica'),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Name'
+                ),
+              ),
+              SizedBox(height: Configuration.verticalspacing),
+              TextField(
+                onChanged: (str)=> setState(()=> { linkDirection = str}),
+                style: Configuration.text('small', Colors.black,font: 'Helvetica'),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  
+                  hintText: 'Direction'
+                ),
+              ),
+              SizedBox(height: Configuration.verticalspacing),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      padding: EdgeInsets.all(0)
+                    ),
+                    onPressed: (){
+                      Navigator.pop(context); 
+                     }, 
+                    child: Text('Cancel', style: Configuration.text('small', Colors.black))
+                  ),
+    
+                  SizedBox(width: Configuration.verticalspacing),
+    
+                  TextButton(
+                    onPressed: linkDirection != null && linkName != null ? (){
+                      setState(() {
+                        addedComment += '<a href=$linkDirection> $linkName </a>';
+                        _controller.text = addedComment;
+                        Navigator.pop(context);
+                      });
+                    }:null, 
+                    child: Text('Add link', style: Configuration.text('small', Colors.lightBlue))
+                  ),
+    
+                 
+                ],
+              )
+            ]
+          )
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     RequestState _requestState = Provider.of<RequestState>(context);
+    final _userstate =  Provider.of<UserState>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -796,27 +1136,85 @@ class _SendCommentState extends State<SendComment> {
             Divider(),
             SizedBox(height: Configuration.verticalspacing),
             Expanded(
-              child: TextField(
-                
-                onChanged: (str)=> setState(()=>{}),
-                controller: _controller,
-                style: Configuration.text('small', Colors.black,font: 'Helvetica'),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: 'Your comment here'
-                ),
-                expands: true,
-                maxLines: null,
-                minLines: null,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    textCapitalization: TextCapitalization.sentences,
+                    onChanged: (str)=> setState(()=> { c.comment = str}),
+                    controller: _controller,
+                    style: Configuration.text('small', Colors.black,font: 'Helvetica'),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Your comment here'
+                    ),
+                    maxLines: 10,
+                    minLines: 1,
+                  ),
+                  files.length > 0 ?
+                  Container(
+                    height: Configuration.height*0.3,
+                    child: GridView.builder(
+                      itemCount: files.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+                      shrinkWrap: true,
+                      itemBuilder: (context,index){
+                        return Container(
+                          margin: EdgeInsets.all(5),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(File(files[index].path))
+                          ),
+                        );
+                      }
+                    ),
+                  ) : Container(),
+                ],
               ),
             ),
+            /*
+            Divider(),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: ()=>{
+                    showPicker(onSelectImage: (file){
+                      if(file != null){
+                        files.add(file);
+                        setState(() {});
+                      }
+                    })
+                  }, 
+                  icon: Icon(Icons.image, color: Colors.lightBlue)
+                ),
+              ],
+            ),*/
+            
+            Divider(),
+
 
             BaseButton(
               text: 'Send Comment',
               color: Configuration.maincolor,
-              onPressed: _controller.text.isNotEmpty ? (){
-                _requestState.updateRequest(_requestState.selectedrequest, null,_controller.text);
-                Navigator.pop(context);
+              onPressed: _controller.text.isNotEmpty && !uploadingImages 
+              ? () async {
+                  setState(() {
+                    uploadingImages = true;
+                  });
+
+                  if(files.length > 0){
+                    for(var file in files){
+                      c.images.add(await _userstate.uploadFile(image: file));
+                    }
+                  }
+
+                  setState(() {
+                    uploadingImages = false;
+                  });
+
+                  _requestState.updateRequest(_requestState.selectedrequest, null,c);
+                  Navigator.pop(context);
+
               }: null,
             ),
             SizedBox(height: Configuration.verticalspacing)
@@ -826,14 +1224,6 @@ class _SendCommentState extends State<SendComment> {
     );
   }
 }
-
-
-
-
-
-
-
-
 
 class RequestHeader extends StatelessWidget {
   const RequestHeader() : super();
@@ -865,3 +1255,121 @@ class StateChip extends StatelessWidget {
 }
 
 
+/*
+class DiscussionScreen extends StatefulWidget {
+  const DiscussionScreen({Key key}) : super(key: key);
+
+  @override
+  State<DiscussionScreen> createState() => _DiscussionScreenState();
+}
+
+class _DiscussionScreenState extends State<DiscussionScreen> {
+  Stage stage;
+
+  @override 
+  void initState() {
+    super.initState();
+  }
+
+  //override didChangeDependencies
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //stage = ModalRoute.of(context).settings.arguments;
+    final arg = ModalRoute.of(context).settings.arguments as Map;
+    stage = arg['stage'];
+  }
+
+  Widget addQuestionModal(context){
+    return BottomSheetModal(
+      child: Container() 
+    );
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    final _userstate = Provider.of<UserState>(context);
+    
+    return Scaffold(
+      bottomSheet: Material(
+        elevation: 10,
+        child: Container(        
+          width: Configuration.width,
+          height:Configuration.height * 0.09,
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: Colors.grey, width: 1.0)),
+            color: Colors.white,
+          ),
+          child: Center(
+            child: Container(
+              width: Configuration.width *0.6,
+              child: AspectRatio(
+                aspectRatio:Configuration.buttonRatio,
+                child: ElevatedButton(
+                  onPressed: (){
+                    return showModalBottomSheet<void>(
+                      isScrollControlled: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return addQuestionModal(context);
+                      }
+                    ).then((value) => setState((){}));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Configuration.maincolor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                    )
+                  ),
+                  child: Text(
+                    'Add a topic',
+                    style: Configuration.text('smallmedium', Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        elevation: 0,
+        leading: ButtonBack(color: Colors.black),
+        backgroundColor: Colors.white,
+        title: Text('Stage ' +  stage.stagenumber.toString() + '  discussion' , 
+          style: Configuration.text('small',Colors.black)
+        ),
+      ),
+      body: Column(
+        children: [
+          Container(
+            height: Configuration.height * 0.15,
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Here you can ask questions about the stage or any particular meditation-related topic you may have ', 
+                  style: Configuration.text('small', Colors.black, font:'Helvetica')
+                ),
+                Text(stage.description, style: Configuration.text('small', Colors.black),),
+                /*
+                Container(
+                  height: Configuration.height * 0.2,
+                  width: Configuration.width,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/meditation.jpg'),
+                      fit: BoxFit.cover
+                    )
+                  ),
+                ),*/
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+*/

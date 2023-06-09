@@ -9,7 +9,8 @@ import 'package:uuid/uuid.dart';
 //  state = open, closed
 // states go from open, to in progress, to closed.
 class Request {
-  dynamic cod;
+  
+  dynamic cod, stagenumber;
   String username,type,content,coduser,state,title,image,userimage;
 
   DateTime date;
@@ -19,19 +20,23 @@ class Request {
 
   List<dynamic> shortcomments = new List.empty(growable: true);
 
-  Request(
-      {this.cod,
-      this.username,
-      this.type,
-      this.content,
-      this.date,
-      this.coduser,
-      this.state,
-      this.points = 0,
-      this.image,
-      this.userimage,
-      this.comentaries = 0,
-      this.title}){
+  List<Request> feed = new List.empty(growable: true);
+
+  Request({
+    this.cod,
+    this.username,
+    this.type,
+    this.content,
+    this.date,
+    this.coduser,
+    this.state,
+    this.points = 0,
+    this.image,
+    this.userimage,
+    this.comentaries = 0,
+    this.stagenumber,
+    this.title
+  }){
 
     if (cod == null) {
       var uuid = Uuid();
@@ -56,6 +61,7 @@ class Request {
     this.coduser = json['coduser'];
     this.userimage = json['userimage'];
     this.state = json['state'];
+    this.stagenumber = json['stagenumber'];
     this.date = json['date'] == null ? DateTime.now().subtract(Duration(days: 30)): 
       json['date']  is String ? DateTime.parse(json["date"]).toLocal() :
       DateTime.fromMillisecondsSinceEpoch(json['date']).toLocal();
@@ -66,6 +72,16 @@ class Request {
       json['comments'].forEach((v) {
         if(v['username'] != null){
           this.comments.add(new Comment.fromJson(v));
+        }else {
+        }
+      });
+    }
+
+
+    if(json['feed'] != null){
+      json['feed'].forEach((v) {
+        if(v['username'] != null){
+          this.feed.add(new Request.fromJson(v));
         }else {
         }
       });
@@ -89,6 +105,7 @@ class Request {
     data['state'] = this.state;
     data['image'] = this.image;
     data['date'] = this.date.toIso8601String();
+    data['stagenumber'] = this.stagenumber;
     
     if (this.comments != null) {
       data['shortComments'] = this.comments.map((v) => v.cod).toList();
@@ -108,6 +125,7 @@ class Request {
     
     data['title'] = this.title;
     data['userimage'] = this.userimage;
+    data['username'] = this.username;
     
     return data;
   }
@@ -216,6 +234,7 @@ class Comment{
   String userimage, cod, codrequest;
   User user;
   DateTime date;
+  List<String> images  = new List.empty(growable: true);
 
   Comment({this.cod,this.comment, this.username, this.coduser, this.userimage, this.user,this.codrequest,this.date}){
     if (cod == null) {
@@ -234,6 +253,11 @@ class Comment{
     this.codrequest = json['codrequest'];
     this.date = json['date'] != null ? json['date'] is String ? DateTime.parse(json['date']).toLocal() : DateTime.fromMillisecondsSinceEpoch(json['date'])  : null;
     this.user = json['user'] != null ? UserModel.fromJson(json['user']) : null;
+  
+    if(json['images'] != null){
+      this.images = json['images'].cast<String>();
+    }
+  
   }
 
   Map<String, dynamic> toJson() {
@@ -245,6 +269,10 @@ class Comment{
     data['coduser'] = this.coduser;
     data['cod'] = this.cod;
     data['date'] = this.date.millisecondsSinceEpoch;
+
+    if(this.images.length>0){
+      data['images'] = this.images;
+    }
 
     return data;
   }

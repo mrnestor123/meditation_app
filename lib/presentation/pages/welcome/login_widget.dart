@@ -2,17 +2,20 @@
 *  login_widget.dart
 * 
 */
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/back_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/web_view.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/main_screen.dart';
-import 'package:meditation_app/presentation/pages/requests_screen.dart';
+import 'package:meditation_app/presentation/pages/welcome/common_widgets.dart';
 import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -25,129 +28,307 @@ class _LoginWidgetState extends State<LoginWidget> {
   String your_client_id = "445064026505232";
   String your_redirect_url = "https://www.facebook.com/connect/login_success.html";
 
+  String email = "";
+
+
   @override
   Widget build(BuildContext context) {
     final _loginstate = Provider.of<LoginState>(context);
     final _userstate = Provider.of<UserState>(context);
     
     return Scaffold(
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
-        extendBodyBehindAppBar: false,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: BackButton()
-        ),
-        body: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Image.asset('assets/logo.png', width: Configuration.height*0.2),
-              Form(
-              key: _loginstate.formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InputField(
-                    controller: _loginstate.userController,
-                    labeltext:'Mail',
-                    icon: Icons.mail,
-                    validator: (value){
-                      if(value == null  || value.isEmpty){
-                        return 'Please enter the email';
-                      }else if(!_loginstate.validateMail(value)){
-                        return 'Please input a valid email';
-                      } 
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: Configuration.verticalspacing),
-                  InputField(
-                    controller: _loginstate.passwordController,
-                    labeltext: 'Password',
-                    icon: Icons.lock,
-                    obscuretext: true,
-                    validator: (value) { 
-                      if(value == null || value.isEmpty){
-                        return 'Please enter the password';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: Configuration.verticalspacing*2),
-                  LoginRegisterButton(
-                    onPressed: () async {
-                      if(!_loginstate.startedlogin){ 
-                        _loginstate.startlogin(context, 
-                        username: _loginstate.userController.text, 
-                        password: _loginstate.passwordController.text,
-                        type:'mail');
-                      }
-                    },
-                    content: Observer(builder: (context)  {
-                      if(_loginstate.startedmaillogin){
-                        return CircularProgress(color:Colors.white);
-                      }else{
-                        return Row(
-                          crossAxisAlignment:CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('LOG IN WITH EMAIL',
-                              style: Configuration.text('smallmedium', Colors.white),
-                            ),
-                            Icon(Icons.mail,size: Configuration.smicon)
-                          ],
-                        );
-                      }
-                    }),
-                  )
-                ],
-              )
-              ),
-              Spacer(),
-              GoogleButton(registerstate: _loginstate,register: false),
-              SizedBox(height: Configuration.verticalspacing*3),
-              /*
-              FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
-              SizedBox(height: 40
-              ,)*/
-            ],
+        
+        body: loginLayout(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Image.asset('assets/logo.png', width: Configuration.height*0.2),
+                Form(
+                key: _loginstate.formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InputField(
+                      controller: _loginstate.userController,
+                      labeltext:'email',
+                      icon: Icons.mail,
+                      validator: (value){
+                        if(value == null  || value.isEmpty){
+                          return 'Please enter the email';
+                        }else if(!_loginstate.validateMail(value)){
+                          return 'Please input a valid email';
+                        } 
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: Configuration.verticalspacing),
+                    InputField(
+                      controller: _loginstate.passwordController,
+                      labeltext: 'password',
+                      isPassword: true,
+                      icon: Icons.lock,
+                      validator: (value) { 
+                        if(value == null || value.isEmpty){
+                          return 'Please enter the password';
+                        }
+                        return null;
+                      },
+                    ),
+                    
+                    SizedBox(height: Configuration.verticalspacing),
+                    LoginRegisterButton(
+                      onPressed: () async {
+                        if(!_loginstate.startedlogin){ 
+                          _loginstate.startlogin(context, 
+                          username: _loginstate.userController.text, 
+                          password: _loginstate.passwordController.text,
+                          type:'mail');
+                        }
+                      },
+                      content: Observer(builder: (context)  {
+                        if(_loginstate.startedmaillogin){
+                          return CircularProgress(color:Colors.white);
+                        }else{
+                          return Row(
+                            crossAxisAlignment:CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text('Log in with email',
+                                  style: Configuration.text('subtitle', Colors.white,),
+                                ),
+                              ),
+                              Icon(Icons.mail,size: Configuration.smicon)
+                            ],
+                          );
+                        }
+                      }),
+                    ),
+                    SizedBox(height: Configuration.verticalspacing*2),
+                    TextButton(onPressed: ()=>{
+                      // add borderRadius top to bottomSheet
+                      showModalBottomSheet(
+                        context: context, 
+                        builder: (context){
+                          return ForgotPassword( );
+        
+                        })
+                    }, 
+                    child: Text('Forgot password?', style: Configuration.text('smallmedium', Colors.black,  font: 'Helvetica'))
+                    )
+                  ],
+                )
+                ),
+                Spacer(),
+                
+                //APPLE BUTTON  IN IOS PLATFORM
+                
+                
+
+                Platform.isIOS ? 
+                Container(
+                  margin: EdgeInsets.only(bottom: Configuration.verticalspacing),
+                  child: AppleButton(state: _loginstate, register: false),
+                ): Container(),
+
+
+
+
+                GoogleButton(registerstate: _loginstate,register: false),
+                //SizedBox(height: Configuration.verticalspacing*3),
+                /*
+                FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
+                SizedBox(height: 40
+                ,)*/
+              ],
+            ),
           ),
         ));
   }
 }
 
-class InputField extends StatelessWidget {
+class ForgotPassword extends StatefulWidget {
+
+
+  ForgotPassword({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  State<ForgotPassword> createState() => _ForgotPasswordState();
+}
+
+class _ForgotPasswordState extends State<ForgotPassword> {
+  TextEditingController recoverymailcontroller = new TextEditingController();
+
+  int asking_email = 0;
+
+  int sent_mail = 1;
+  int step = 0;
+
+  final _formKey = GlobalKey<FormState>();
+
+  bool sending = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final _loginstate  =  Provider.of<LoginState>(context);
+
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        constraints: BoxConstraints(
+          minHeight: Configuration.height*0.25,
+        ),
+        padding: EdgeInsets.all(Configuration.smpadding),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: 
+              step == asking_email ?
+              [
+                Text('Enter your email to recover your password', style: Configuration.text('smallmedium', Colors.black,  font: 'Helvetica')),
+                SizedBox(height: Configuration.verticalspacing*2),
+                InputField(
+                  controller: recoverymailcontroller,
+                  labeltext:'email',
+                  icon: Icons.mail,
+                  validator: (value){
+                    if(value == null  || value.isEmpty){
+                      return 'Please enter the email';
+                    }else if(!_loginstate.validateMail(value)){
+                      return 'Please input a valid email';
+                    } 
+                    return null;
+                  },
+                ),
+                SizedBox(height: Configuration.verticalspacing*2),
+                BaseButton(
+        
+                  onPressed: () async{
+                    if (_formKey.currentState.validate() && !sending) {
+                      sending = true;
+                      bool result = await _loginstate.forgotPassword(recoverymailcontroller.text);
+            
+                      if(result != null && result){
+                        step = sent_mail;
+                        setState((){});
+                      }else{
+                        sending = false;
+                        showInfoDialog(
+                          header: "Error",
+                          description: "This email is not registered in the database"
+                        );
+                        
+                      }
+                    }
+                  },
+                  text: 'Send recovery email',
+                ),
+                SizedBox(height:Configuration.verticalspacing*2)
+            ] : 
+            [
+              SizedBox(height: Configuration.verticalspacing),
+              Icon(Icons.mail, size: Configuration.medicon, color: Colors.green),
+              SizedBox(height: Configuration.verticalspacing*2),
+              Text('A message for recovering your password has been sent to your email address', 
+                textAlign: TextAlign.center,
+                style: Configuration.text('smallmedium', Colors.black,  font: 'Helvetica')
+              )
+              /*
+              InputField(
+                controller: recoverymailcontroller,
+                labeltext:'Code',
+                icon: Icons.mail,
+                validator: (value){
+                  if(value == null  || value.isEmpty){
+                    return 'Please enter the code';
+                  } 
+                  return null;
+                },
+              )*/
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class InputField extends StatefulWidget {
 
   dynamic validator;
-  bool obscuretext;
+  bool isPassword;
   
   InputField({
     Key key,
     this.validator,
     this.labeltext,
-    this.obscuretext,
+    this.isPassword = false,
     this.icon,
     this.controller,
   }) : super(key: key);
 
   final String labeltext;
-  final dynamic controller;
+  final TextEditingController controller;
   final IconData icon;  
+
+  @override
+  State<InputField> createState() => _InputFieldState();
+}
+
+class _InputFieldState extends State<InputField> {
+  bool obscuretext;
+
+
+  @override
+  void initState() {
+    super.initState();
+    obscuretext = widget.isPassword;
+
+    print({'OBSCURETEXT',obscuretext});
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: Configuration.width*0.9,
       child: TextFormField(
+        onChanged: ((value) => setState((){})),
         maxLines:1,
-        controller: controller,
+        controller: widget.controller,
         style: Configuration.text('small', Colors.black),
-        obscureText: obscuretext != null ? true: false,
+        obscureText: obscuretext != null && obscuretext ? true: false,
         decoration: InputDecoration(
             isDense: true,
             focusColor: Configuration.maincolor,
+            suffixIcon: widget.isPassword && widget.controller.text != '' ? 
+              IconButton(
+              icon: Icon(
+                // Based on passwordVisible state choose the icon
+                obscuretext ? Icons.visibility : Icons.visibility_off,
+               color: Colors.lightBlue,
+               size: Configuration.smicon,
+
+
+              ),
+              onPressed: () {
+                setState(() {
+                  obscuretext = !obscuretext;
+                  print({'OBSCURETEXT', obscuretext});
+                
+                });
+             },
+            ): null,
+
            // focusedBorder: new OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
             errorStyle: Configuration.text('small', Colors.red),
             contentPadding: EdgeInsets.symmetric(
@@ -156,18 +337,22 @@ class InputField extends StatelessWidget {
             ),
             filled: true,
             labelStyle:  Configuration.text('small',Colors.grey),
-            labelText: labeltext,
+            labelText: widget.labeltext,
             border: OutlineInputBorder(borderSide: new BorderSide(color: Configuration.maincolor),borderRadius: BorderRadius.circular(Configuration.borderRadius)),
             prefixIcon: Container(
               margin:EdgeInsets.symmetric(horizontal: Configuration.tinpadding), 
-              child: Icon(icon, size: Configuration.smicon)
+              child: Icon(widget.icon, size: Configuration.smicon)
             ),
         ),
-        validator: validator 
+        validator: widget.validator 
       ),
     );
   }
 }
+
+
+
+
 
 
 

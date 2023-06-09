@@ -23,13 +23,16 @@ class MeditationModel extends Meditation {
       followalong,
       createdBy,
       total,
-      isNew
+      isNew,
+      notes,
+      report
       })
-      : super(
+    : super(
       cod: cod,
       total:total,
       title: title,
       coduser: coduser,
+      notes: notes,
       duration: duration,
       content: content,
       description: description,
@@ -39,6 +42,7 @@ class MeditationModel extends Meditation {
       image: image,
       isNew:isNew,
       file: file,
+      report:  report,
       stagenumber: stagenumber,
       followalong: followalong,
       position: position
@@ -60,17 +64,27 @@ class MeditationModel extends Meditation {
       model = new MeditationModel();
     }
 
-    model.duration = json["duration"] == null ? null : json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) 
+    model.duration = json["duration"] == null ? null : json['duration'] is String 
+      ? Duration(minutes: int.parse(json['duration'])) 
       : Duration(minutes: json['duration']);
 
-    model.day = json["day"] == null ? null : json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
+    model.day = json["day"] == null ?  DateTime(1000, 1, 1,1): json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
       DateTime.fromMillisecondsSinceEpoch(json['day']).toLocal();
       
     model.coduser = json['coduser'] == null ? null : json['coduser'];
 
+    model.notes =  json['notes'] == null ? null: json['notes'];
+
+    // report
+    model.report = json['report'] == null ? null : MeditationReport.fromJson(json['report']);
+
+
+    model.title = json['title'] ==  null ? null : json['title'];
+
     return model;
   }
 
+  
   @override 
   Map<String,dynamic> toJson(){
     Map<String,dynamic> json = new Map();

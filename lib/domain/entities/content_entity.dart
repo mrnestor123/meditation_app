@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/userData.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:uuid/uuid.dart';
 
+
+// AQUI DEBERÍAN DE ESTAR TODAS LAS CLASES DE CONTENT !!
 class Content {
-  String cod, title, description, image, type,file, doneBy;
+  String cod, title, description, image, type, category;
   int stagenumber, position;
   bool blocked, isNew;
-  Map<String,dynamic>  createdBy = new Map<String,dynamic>();
-  
-  Duration done, total;
+  Map<String,dynamic> createdBy = new Map<String,dynamic>();
 
-  Content({cod, @required this.stagenumber,this.isNew, this.done, this.doneBy, this.total, this.title,this.createdBy, this.description, this.image, this.type, this.position, this.blocked, this.file}) {
+  Content({cod, @required this.stagenumber,this.isNew = false, this.title,
+    this.createdBy, this.description, this.image, this.type, this.position = 0, this.blocked,
+    this.category
+  }) {
     if (cod == null) {
       var uuid = Uuid();
       this.cod = uuid.v1();
@@ -33,7 +34,11 @@ class Content {
   }
   
   bool isLesson() {
-    return type =='lesson' || type == 'meditation';
+    return type =='lesson' || type == 'meditation' || type =='brain' || type == 'mind';
+  }
+
+  bool isTechnique(){
+    return type == 'technique';
   }
 
   Map<String,dynamic> toJson(){
@@ -43,10 +48,6 @@ class Content {
       'title':title,
       'description':description,
       'type':type,
-      // ESTO NO DEBERÍA DE ESTAR AQUI !!!
-      'done':done != null  ? done.inMinutes : 0,
-      'total':total != null ? total.inMinutes: 0,
-      'doneBy': doneBy
     };
   }
 
@@ -57,25 +58,25 @@ class Content {
       'title': title,
       'description': description,
       'type': type,
-      // ESTO NO DEBERÍA DE ESTAR AQUI !!! O
-      'done': done != null  ? done.inMinutes : 0,
-      'total': total != null ? total.inMinutes: 0,
-      "file": file != null ? file : '',
-      'doneBy': doneBy,
       "image": image != null ? image :''
     };
   }
 
   IconData getIcon(){
-    return isRecording() ? Icons.audiotrack :
+    return isRecording() ? Icons.multitrack_audio :
       isVideo() ? Icons.ondemand_video : 
       isMeditation() ? Icons.self_improvement
-      : Icons.book;
+      : this.type =='brain' ?
+      Icons.psychology : Icons.book;
   }
 
   String getText(){
-    if(this.file.isNotEmpty){
-      return isAudio(this.file) ? 'Audio' : 'Video';
+    if(isRecording()){
+      return 'Audio';
+    }else if(isVideo()){
+      return 'Video';
+    }else if(isMeditation()){
+      return 'Meditation';
     }else {
       return 'Text';
     }
@@ -90,15 +91,149 @@ class Content {
       description: json['description'],
       image: json['image'],
       type: json['type'],
-      done: json['done'] != null ? json['done'] is String ? Duration(minutes: int.parse(json['done'])) : Duration(minutes: json['done']) : null,
-      // ESTO NO DEBERÍA ESTAR AQUÍ!!!
-      total: json['duration'] != null ?  json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) : Duration(minutes: json['duration']): null,
-      file: json['file'] == null ? '' : json['file'],
-      position: json['position']
+      position: json['position'],
+      category: json['category']
     );
   }
 }
 
+
+
+//  A CONTENT DONE BY USER
+class DoneContent extends Content {
+  String doneBy;
+  Duration total, done;
+  DateTime date;
+  int timesFinished = 0;
+
+  DoneContent({
+    cod,
+    this.doneBy, 
+    this.total,
+    this.date,
+    this.done, 
+    this.timesFinished,
+    @required stagenumber,
+    isNew = false, 
+    title,
+    createdBy, 
+    description, 
+    image, 
+    type, 
+    position, 
+    blocked,
+    file
+  }) : super(
+    cod: cod, 
+    stagenumber: stagenumber, 
+    isNew: isNew, 
+    title: title,
+    createdBy: createdBy, 
+    description: description, 
+    image: image, 
+    type: type, 
+    position: position, 
+    blocked: blocked 
+  );
+
+  // TO JSON
+  Map<String,dynamic> toJson(){
+    return {
+      'cod': cod,
+      'stagenumber':stagenumber,
+      'date': DateTime.now().millisecondsSinceEpoch,
+      'type':type,
+      'doneBy':doneBy,
+      'total':total != null ? total.inSeconds: 0,
+      'done':done != null ? done.inSeconds  : 0,
+      'timesFinished':timesFinished
+    };
+  }
+
+  // FROM JSON
+  factory DoneContent.fromJson(json){
+    return DoneContent(
+      cod: json['cod'],
+      stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
+      title: json['title'],
+      createdBy: json['createdBy'] != null && json['createdBy'] is Map && json['createdBy'].entries.length > 0  ? json['createdBy'] : null,
+      description: json['description'],
+      image: json['image'],
+      type: json['type'],
+      file: json['file'] == null ? '' : json['file'],
+      position: json['position'],
+      doneBy: json['doneBy'],
+      total: json['total'] == null ? Duration(seconds: 0) : Duration(seconds: json['total']),
+      done: json['done'] == null ? Duration(seconds: 0) : Duration(seconds: json['done']),
+      date: json['date'] == null ? DateTime.now() : DateTime.fromMillisecondsSinceEpoch(json['date']),
+      timesFinished: json['timesFinished'] == null ? 0 : json['timesFinished']
+    );
+  }
+  
+}
+
+
+
+// FILECONTENT HAS A FILE, AND A DURATION !!
+class FileContent extends Content {
+  String file;
+  Duration total;
+
+  FileContent({
+    cod,
+    @required stagenumber,
+    isNew = false, 
+    title,
+    createdBy, 
+    description, 
+    image, 
+    type, 
+    position, 
+    blocked,
+    this.file,
+    this.total
+  }) : super(
+    cod: cod, 
+    stagenumber: stagenumber, 
+    isNew: isNew, 
+    title: title,
+    createdBy: createdBy, 
+    description: description, 
+    image: image, 
+    type: type, 
+    position: position, 
+    blocked: blocked 
+  );
+
+  // FROM JSON METHOD
+  factory FileContent.fromJson(json){ 
+    return FileContent(
+      cod: json['cod'],
+      stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
+      title: json['title'],
+      createdBy: json['createdBy'] != null && json['createdBy'] is Map && json['createdBy'].entries.length > 0  ? json['createdBy'] : null,
+      description: json['description'],
+      image: json['image'],
+      type: json['type'],
+      file: json['file'] == null ? '' : json['file'],
+      position: json['position'],
+      // GUARDAMOS MINUTOS!! DEBERÍAMOS GUARDAR SEGUNDOS
+      total: json['total'] == null ? 
+        json['duration'] != null ?
+          json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) 
+          : Duration(minutes: json['duration'])
+        : Duration(seconds: 0) 
+        : Duration(minutes: json['total'])
+    
+    
+    );
+  }
+
+
+
+
+
+}
 
 // HAY QUE CREAR LA CLASE RECORDING !!!!
 class Recording extends Content {

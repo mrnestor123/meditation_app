@@ -9,8 +9,8 @@ import 'package:mobx/mobx.dart';
 
 class StageModel extends Stage {
 
-  StageModel(
-      {int stagenumber,
+  StageModel({
+      int stagenumber,
       userscount,
       description,
       image,
@@ -21,23 +21,28 @@ class StageModel extends Stage {
       String longimage,
       String shortimage,
       String longdescription,
+      practiceSummary,
       shorttext,
-      stobjectives})
+      whenToAdvance,
+      stobjectives
+    })
       : super(
-            stagenumber: stagenumber,
-            userscount: userscount,
-            description: description,
-            image: image,
-            goals: goals,
-            obstacles: obstacles,
-            skills: skills,
-            mastery: mastery,
-            longimage: longimage,
-            shorttext: shorttext,
-            longdescription: longdescription,
-            stobjectives: stobjectives,
-            shortimage: shortimage
-            );
+    stagenumber: stagenumber,
+    userscount: userscount,
+    description: description,
+    practiceSummary: practiceSummary,
+    whenToAdvance: whenToAdvance,
+    image: image,
+    goals: goals,
+    obstacles: obstacles,
+    skills: skills,
+    mastery: mastery,
+    longimage: longimage,
+    shorttext: shorttext,
+    longdescription: longdescription,
+    stobjectives: stobjectives,
+    shortimage: shortimage
+  );
 
   factory StageModel.fromRawJson(String str) =>
       StageModel.fromJson(json.decode(str));
@@ -46,38 +51,42 @@ class StageModel extends Stage {
 
   factory StageModel.fromJson(Map<String, dynamic> json) {
     StageModel s = new StageModel(
-        stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
-        description: json["description"] == null ? null : json["description"],
-        userscount: json['userscount'] == null ? null : json['userscount'],
-        longimage: json['longimage']== null ? null : json['longimage'],
-        image: json["image"] == null ? null : json["image"],
-        goals: json["goals"] == null ? null : json["goals"],
-        shortimage: json["shortimage"] == null ? null : json["shortimage"],
-        longdescription: json['longdescription'] == null ? null : json['longdescription'],
-        obstacles: json["obstacles"] == null ? null : json["obstacles"],
-        stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
-        skills: json["skills"] == null ? null : json["skills"],
-        shorttext: json['shorttext'] == null ? null : json['shorttext'],
-        mastery: json["mastery"] == null ? null : json["mastery"]);
+      stagenumber: json["stagenumber"] == null ? null : json["stagenumber"],
+      description: json["description"] == null ? null : json["description"],
+      userscount: json['userscount'] == null ? null : json['userscount'],
+      longimage: json['longimage']== null ? null : json['longimage'],
+      image: json["image"] == null ? null : json["image"],
+      goals: json["goals"] == null ? null : json["goals"],
+      shortimage: json["shortimage"] == null ? null : json["shortimage"],
+      longdescription: json['longdescription'] == null ? null : json['longdescription'],
+      obstacles: json["obstacles"] == null ? null : json["obstacles"],
+      stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
+      skills: json["skills"] == null ? null : json["skills"],
+      shorttext: json['shorttext'] == null ? null : json['shorttext'],
+      practiceSummary: json['practiceSummary'] == null ? null : json['practiceSummary'],
+      whenToAdvance: json['whenToAdvance'] == null ? null : json['whenToAdvance'],
+      mastery: json["mastery"] == null ? null : json["mastery"]
+    );
 
-        if(json['lessons'] != null){
-          s.setLessons(json['lessons'].map((l) => new LessonModel.fromJson(l)).toList());
-        }
-        
-        if(json['meditations'] != null && json['meditations'] is List){
-          s.setMeditations(json['meditations'].map((m) => new MeditationModel.fromJson(m)).toList());
-        }
-        
-        if(json['games'] != null){
-          s.setGames(json['games'].map((g) => new GameModel.fromJson(g)).toList());
-        }
+    if(json['lessons'] != null){
+      s.setLessons(json['lessons'].map((l) => new LessonModel.fromJson(l)).toList());
+    }
+    
+    if(json['meditations'] != null && json['meditations'] is List){
+      s.setMeditations(json['meditations'].map((m) => new MeditationModel.fromJson(m)).toList());
+    }
+    
+    if(json['games'] != null){
+      s.setGames(json['games'].map((g) => new GameModel.fromJson(g)).toList());
+    }
 
-        if(json['videos'] != null && json['videos'].length > 0){
-          for(var video in json['videos']){
-            s.addVideo(Content.fromJson(video));
-          }
-        }
-
+    // ESTO SE AÑADE AL LESSONS  !!!!
+    if(json['videos'] != null && json['videos'].length > 0){
+      for(var video in json['videos']){
+        s.addLesson(FileContent.fromJson(video));
+      }
+    }
+    
     return s;
   }
 

@@ -191,7 +191,7 @@ mixin _$UserState on _UserState, Store {
   final _$takeLessonAsyncAction = AsyncAction('_UserState.takeLesson');
 
   @override
-  Future<bool> takeLesson(LessonModel l) {
+  Future<bool> takeLesson(Content l) {
     return _$takeLessonAsyncAction.run(() => super.takeLesson(l));
   }
 
@@ -204,10 +204,6 @@ mixin _$UserState on _UserState, Store {
 
   final _$followAsyncAction = AsyncAction('_UserState.follow');
 
-  @override
-  Future<dynamic> follow(User u, bool follow) {
-    return _$followAsyncAction.run(() => super.follow(u, follow));
-  }
 
   final _$changeNameAsyncAction = AsyncAction('_UserState.changeName');
 

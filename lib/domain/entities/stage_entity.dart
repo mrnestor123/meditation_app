@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';
+import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
 
 import 'game_entity.dart';
 import 'meditation_entity.dart';
 
 class Stage {
-  int stagenumber, userscount;
-  String description, image, goals, obstacles, skills, mastery, longimage,  shortimage, shorttext, longdescription;
+  int stagenumber, userscount, percentage;
+  String description, image, goals, obstacles, skills,
+    mastery, longimage,  shortimage, shorttext, 
+    longdescription, practiceSummary, whenToAdvance;
   // EN EL  FUTURO UNA LISTA SOLO CON CONTENT
+  // PATH SERÁ EL THEORY Y MEDITPATH EL DE  MEDITATIONS  !!
   ObservableList<Content> path = new ObservableList();
   ObservableList<Meditation> meditpath = new ObservableList();
   ObservableList<Game> games = new ObservableList();
   List<Content> videos = new List.empty(growable: true);
+
+
 
 
   //hay que empezar a utilizar stobjectives!!
@@ -21,24 +27,28 @@ class Stage {
   //PARA EL FUTURO !!! 
   bool locked;
 
-  Stage(
-      {@required this.stagenumber,
-      this.description,
-      this.shorttext,
-      @required this.image,
-      this.longimage,
-      this.goals,
-      this.obstacles,
-      this.skills,
-      this.shortimage,
-      this.mastery,
-      this.userscount,
-      this.stobjectives,
-      this.longdescription,
-      this.locked
-      });
+  Stage({
+    @required this.stagenumber,
+    this.description,
+    this.shorttext,
+    @required this.image,
+    this.longimage,
+    this.goals,
+    this.obstacles,
+    this.skills,
+    this.shortimage,
+    this.mastery,
+    this.userscount,
+    this.stobjectives,
+    this.longdescription,
+    this.locked,
+    this.whenToAdvance,
+    this.practiceSummary,
+    this.percentage
+  });
 
-  void addLesson(Lesson l){
+
+  void addLesson(Content l){
     if(stobjectives.lecciones == null){
       stobjectives.lecciones = 0;
     }
@@ -91,6 +101,24 @@ class Stage {
       }
     }
   }
+
+  int checkPercentage(User user){
+    List<Content> done = user.contentDone.where((element) => 
+      element.stagenumber == this.stagenumber && 
+      element.timesFinished != null 
+      && element.timesFinished >= 1
+    ).toList();
+
+
+    List<Content> allContent = path + meditpath;
+
+    // PERCENTAGE OF CONTENT DONE
+
+    double doublepercentage = (done.length / (allContent.length == 0 ? 1 : allContent.length)) * 100;
+
+    this.percentage = doublepercentage.toInt();
+    return doublepercentage.toInt();
+  }
 }
 
 
@@ -136,7 +164,6 @@ class StageObjectives {
   Map<String,dynamic> getObjectives() {
     Map<String,dynamic> objectives = {};
 
-    print(this);
     
     if(freemeditationlabel != null ) {
       objectives ['meditation'] = freemeditationlabel;
@@ -222,6 +249,7 @@ class StageObjectives {
   }
 }
 
+
 // un objetivo tiene un icono, un  label, un bool de pasado o no, un porcentaje
 // INTENTO DE REFACTORIZAR. DE MOMENTO MUY COMPLICADO PARA REFACTORIZAR !!!
 class Objective {
@@ -237,10 +265,7 @@ class Objective {
       
     Objective o  = Objective(
       name: json.keys.first,
-      value: json[json.keys.first],
-   
-   
-
+      value: json[json.keys.first]
     );  
 
 

@@ -16,7 +16,7 @@ String getMonth(DateTime d){
 
 
 String getHour(DateTime d){
-  return d.hour.toString() + ':' + d.minute.toString();
+  return  (d.hour < 10  ? '0':'')+ d.hour.toString() + ':' + (d.minute <  10 ? '0':'') +  d.minute.toString();
 }
 
 

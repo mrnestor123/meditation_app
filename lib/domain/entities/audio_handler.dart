@@ -113,13 +113,14 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler{
     // Release any audio decoders back to the system
     if(player != null &&  player.isPlaying.value){
       player.stop();
-      player.dispose();
 
       // Set the audio_service state to `idle` to deactivate the notification.
       playbackState.add(playbackState.value.copyWith(
         playing: false,
         processingState: AudioProcessingState.idle,
       ));
+
+      player.dispose();
     }
   }
 

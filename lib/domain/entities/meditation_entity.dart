@@ -5,15 +5,35 @@ import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart
 import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 
+
+List<IconData> faces = [
+  Icons.sentiment_very_dissatisfied,
+  Icons.sentiment_dissatisfied,
+  Icons.sentiment_neutral,
+  Icons.sentiment_satisfied_alt,
+  Icons.sentiment_very_satisfied
+];  
+
+List<String> moods =  [
+  'Very Bad',
+  'Bad',
+  'Neutral',
+  'Good',
+  'Very Good'
+];
+
+
 //HAY QUE CREAR CLASE GUIDEDMEDITATION
-class Meditation extends Content {
-  String coduser;
+class Meditation extends FileContent {
+  String coduser, notes;
   Duration duration;
   DateTime day;
 
   //PORQUE SE LLAMA CONTENT MAL NOMBRE !!!
   Map<dynamic, dynamic> content;
   Map<dynamic,dynamic> followalong;
+
+  MeditationReport report;
 
   MeditationSettings meditationSettings = new MeditationSettings();
 
@@ -36,8 +56,10 @@ class Meditation extends Content {
       position,
       this.meditationSettings,
       createdBy,
+      notes,
       isNew,
-      total
+      total,
+      report
       })
   : super(
       cod: cod,
@@ -59,7 +81,7 @@ class Meditation extends Content {
   void setDay(DateTime d) => this.day = d;
 
 
-  factory Meditation.fromContent(Content c){
+  factory Meditation.fromContent(FileContent c){
     Duration d;
     if(c.file != null){
       if(isAudio(c.file)){
@@ -79,16 +101,30 @@ class Meditation extends Content {
     );
   }
 
+  // ESOT DEBERÍA ESTAR EN MEDITATIONMODEL
+  Map<String, dynamic> shortMeditation(){
+    Map<String,dynamic> json = new Map();
 
-  Map<String, dynamic> shortMeditation() => { 
-    "coduser":this.coduser == null ? null : this.coduser,
-    "cod": this.cod  == null  ?  null : this.cod,
-    //"isUnlimited": this.meditationSettings.isUnlimited == null ? false : this.isUnlimited,
-    //"title": this.title == null ? null : this.title,
-    "duration": this.duration == null ? null : duration.inMinutes,
-    //"recording": this.recording == null ? null : this.recording,
-    "day": this.day == null ? null : day.millisecondsSinceEpoch
-  };
+    json['cod'] = this.cod;
+
+    json['coduser']= this.coduser;
+
+
+    json['duration'] = this.duration != null ? this.duration.inMinutes :  0;
+
+    // LO HACEMOS ASI ??????
+    json['day'] = this.day == null ? DateTime.now().millisecondsSinceEpoch : day.millisecondsSinceEpoch;
+
+    if(this.title != null){
+      json['title'] = this.title;
+    }
+
+    if(this.report != null){
+      json['report'] = this.report.toJson();
+    }
+
+    return json; 
+  }
 }
 
 
@@ -112,7 +148,6 @@ class MeditationPreset {
   double warmuptime;
   String name,cod, intervalBell;
   List<IntervalBell> bells = new List.empty(growable: true);
-  
 
   IntervalBell ambientsound;
 
@@ -169,15 +204,22 @@ class MeditationPreset {
 
 
 class MeditationSettings{
-  double warmuptime,ambientvolume,bellsvolume;
+  double warmuptime, ambientvolume, bellsvolume;
   IntervalBell ambientsound;
 
   // PARA CUANDO SE AÑADA
-  bool addSixStepPreparation, noDuration,isUnlimited;
+  bool addSixStepPreparation, noDuration, isUnlimited;
+
+  String startingBell, endingBell;
   
   List<IntervalBell> bells = new List.empty(growable: true);
   
-  MeditationSettings({this.warmuptime = 0, this.ambientvolume = 100,this.isUnlimited=false, this.bellsvolume= 100, this.ambientsound, this.addSixStepPreparation = false});
+  MeditationSettings({
+    this.warmuptime = 0, this.ambientvolume = 100,
+    this.startingBell  = 'None', this.endingBell = 'Gong',
+    this.isUnlimited=false, this.bellsvolume= 100, 
+    this.ambientsound, this.addSixStepPreparation = false
+  });
 
 
   Map<String,dynamic> toJson(){
@@ -187,6 +229,8 @@ class MeditationSettings{
       'bellsvolume':bellsvolume,
       'isUnlimited':isUnlimited,
       'ambientsound':ambientsound != null ? ambientsound.name : null,
+      'startingBell':startingBell,
+      'endingBell':endingBell,
       'addSixStepPreparation':addSixStepPreparation,
       'bells': bells.length > 0 ? bells.map((bell)=> bell.toJson()).toList() : null
     };
@@ -199,6 +243,10 @@ class MeditationSettings{
       ambientsound: json['ambientsound'] != null ? ambientSounds.firstWhere((element) => element.name ==  json['ambientsound'],orElse: ()=> null)  : null,
       addSixStepPreparation: json['addSixStepPreparation'] !=  null ? json['addSixStepPreparation']: false,
       ambientvolume:json['bellsvolume']!= null ? json['bellsvolume'].toDouble(): 100,
+      startingBell: json['startingBell'] != null ? json['startingBell'] : 'None',
+      endingBell: json['endingBell'] != null ? json['endingBell'] : 'Gong',
+
+
       bellsvolume:json['bellsvolume']!= null ? json['bellsvolume'].toDouble(): 100,
     );
 
@@ -224,9 +272,9 @@ class IntervalBell{
   int playAt;
   String name;
   String image;
-  bool repeat;
+  bool repeat, disabled;
 
-  IntervalBell({this.sound,this.playAt, this.name, this.image,this.repeat = false});
+  IntervalBell({this.sound,this.playAt, this.name, this.image,this.repeat = false, this.disabled = false});
 
   //  GUARDAR LA IMAGEN ???
   Map<String,dynamic> toJson(){
@@ -246,4 +294,62 @@ class IntervalBell{
       repeat: json['repeat']
     );
   }
+}
+
+
+class MeditationReport{
+
+  String text; 
+  int mindWandering, forgetting, overallSatisfaction, stage;
+
+  List<String> feelings = new List.empty(growable: true);
+  List<String> distractions = new  List.empty(growable: true);
+
+  MeditationReport({
+    this.text = '', 
+    this.mindWandering, 
+    this.forgetting, 
+    this.overallSatisfaction,
+    this.stage,
+    this.feelings,
+    this.distractions
+  });
+
+
+
+  Map<String,dynamic> toJson(){
+    Map<String,dynamic> json = new Map();
+
+    json['feelings'] = feelings;
+
+    if(text != null && text != ''){
+      json['text'] = text;
+    }
+
+    if(stage != null){
+      json['stage'] = stage;
+    }
+
+    if(distractions!= null && distractions.length > 0){
+      json['distractions'] = distractions;
+    }
+
+    return json;
+  }
+
+
+  factory MeditationReport.fromJson(json){
+    return MeditationReport(
+      text: json['notes'] != null ?  json['notes'] : json['text'],
+      mindWandering: json['mindWandering'],
+      forgetting: json['forgetting'],
+      feelings: json['feelings'] != null ? json['feelings'].cast<String>() : null,
+
+
+      stage: json['stage'],
+      overallSatisfaction: json['overallSatisfaction'],
+    );
+  }
+
+
 }

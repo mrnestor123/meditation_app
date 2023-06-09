@@ -49,7 +49,6 @@ class LessonModel extends Lesson {
   factory LessonModel.fromJson(Map<String, dynamic> json) {
    // LessonModel model = Content.fromJson(json);
     LessonModel model =  medorLessfromJson(json, false);
-    model.text = json['text'] == null ? null : json['text'];
     return model;
   }
 

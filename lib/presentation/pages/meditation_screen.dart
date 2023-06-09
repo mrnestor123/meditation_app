@@ -5,33 +5,46 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_circular_slider/flutter_circular_slider.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:meditation_app/domain/entities/game_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/back_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/carousel_balls.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
+import 'package:meditation_app/presentation/pages/contentWidgets/content_card.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/meditation_screens.dart';
-import 'package:meditation_app/presentation/pages/more_screen.dart';
+import 'package:meditation_app/presentation/pages/explore_screen.dart';
 import 'package:provider/provider.dart';
 
-import '../../domain/entities/local_notifications.dart';
-import 'commonWidget/animated_toggle.dart';
+import '../../domain/entities/technique_entity.dart';
+import 'commonWidget/horizontal_list.dart';
 import 'commonWidget/horizontal_picker.dart';
-import 'commonWidget/progress_dialog.dart';
+import 'commonWidget/page_title.dart';
 import 'config/configuration.dart';
 import 'contentWidgets/meditation_widgets.dart';
 
+ List<IntervalBell> bells = [
+  IntervalBell(sound: 'assets/audios/bowl-sound.mp3',name:'Bowl sound',image:'assets/audios/bowl.png'),
+  IntervalBell(sound: 'assets/audios/gong.mp3',name:'Gong', image:'assets/audios/gong.mp3'),
+  IntervalBell(sound: 'assets/audios/high-gong.wav',name:'High gong',image:'assets/audios/high-gong.png'),
+  IntervalBell(sound: 'assets/audios/church-bell.mp3',name: 'Church bell', image:'assets/audios/church-bell.png'),
+  IntervalBell(sound: 'assets/audios/bronze-bell.wav',name: 'Bronze bell', image:'assets/audios/bronze-bell.png'),
+];
 
 class MeditationScreen extends StatefulWidget {
+  bool  offline;
+
+  MeditationScreen({this.offline = false}) : super();
+
   @override
   _MeditationScreenState createState() => _MeditationScreenState();
 }
@@ -51,25 +64,11 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
 
-  // LISTA DE BELLS
-  List<IntervalBell> bells = [
-    IntervalBell(sound: 'assets/audios/bowl-sound.mp3',name:'Bowl sound',image:'assets/audios/bowl.png'),
-    IntervalBell(sound: 'assets/audios/high-gong.wav',name:'High gong',image:'assets/audios/high-gong.png'),
-    IntervalBell(sound: 'assets/audios/church-bell.mp3',name: 'Church bell', image:'assets/audios/church-bell.png'),
-    IntervalBell(sound: 'assets/audios/bronze-bell.wav',name: 'Bronze bell', image:'assets/audios/bronze-bell.png'),
-  ];
-
-  // LISTA DE SONIDOS AMBIENTALES
-  List<IntervalBell> ambientSounds = [
-    IntervalBell(sound: 'assets/ambient_sounds/bonfire.mp3',name:'Bonfire',image:'assets/ambient_sounds/bonfire.jpg'),
-    IntervalBell(sound: 'assets/ambient_sounds/ocean.mp3',name:'Ocean Waves ',image:'assets/ambient_sounds/ocean.jpg'),
-    IntervalBell(sound: 'assets/ambient_sounds/rain.mp3',name: 'Rain', image:'assets/ambient_sounds/rain.jpg'),
-    IntervalBell(sound: 'assets/ambient_sounds/thunderStorm.m4a',name: 'Thunder Storm', image:'assets/ambient_sounds/thunder.jpg'),
-  ];
+  bool pushedDialog = false;
 
   Widget buttonModal(child, text, selected,[scroll = false,then]){
     return AspectRatio(
-      aspectRatio: 11/2,
+      aspectRatio: Configuration.width>500 ? Configuration.buttonRatio : 11/2,
       child: ElevatedButton(
         style: OutlinedButton.styleFrom(
           primary: Configuration.maincolor,
@@ -109,18 +108,18 @@ class _MeditationScreenState extends State<MeditationScreen> {
     );
   }
 
-  String getBellString({List<IntervalBell> bells}){
-    String bellsString= '';
-
-      for(IntervalBell b in  bells != null ? bells : _meditationstate.bells){
-        bellsString += b.name != null  && b.name.isNotEmpty ? b.name + ' ' : '';
-      };
-
-      return bellsString;
-  }
-
+  // ESTO TIENE QUE SER UN STATELESS WIDGET !!!
   Widget freeMeditation() {
     String whatIsplaying;
+    
+    // LISTA DE SONIDOS AMBIENTALES
+    List<IntervalBell> ambientSounds = [
+      IntervalBell(sound: 'assets/ambient_sounds/bonfire.mp3',name:'Bonfire',image:'assets/ambient_sounds/bonfire.jpg'),
+      IntervalBell(sound: 'assets/ambient_sounds/ocean.mp3',name:'Ocean Waves ',image:'assets/ambient_sounds/ocean.jpg'),
+      IntervalBell(sound: 'assets/ambient_sounds/rain.mp3',name: 'Rain', image:'assets/ambient_sounds/rain.jpg'),
+      IntervalBell(sound: 'assets/ambient_sounds/thunderStorm.m4a',name: 'Thunder Storm', image:'assets/ambient_sounds/thunder.jpg'),
+    ];
+
 
     Widget presets(){
       bool isEditingPresets = false;
@@ -145,9 +144,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                     if(!isEditingPresets){
                       _meditationstate.selectPreset(p);
                       Navigator.pop(context);
-                      setState(() {
-                        print('SET STATE');
-                      });
+                      setState(() {});
                     }
                   },
                   trailing: Container(
@@ -158,7 +155,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.timer,size: Configuration.tinicon),
-                          Text('${p.duration} min', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                          Text(p.settings.isUnlimited ? 'Unlimited': '${p.duration} min', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
                                                     
                           p.intervalBell != null && p.intervalBell.isNotEmpty ?
                           Expanded(
@@ -176,49 +173,49 @@ class _MeditationScreenState extends State<MeditationScreen> {
                           ): Container(),
 
 
-                        p.settings.ambientsound != null && p.settings.ambientsound.name.isNotEmpty ? 
-                        Container(
+                          p.settings.ambientsound != null && p.settings.ambientsound.name.isNotEmpty ? 
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth: Configuration.width*0.2
+                            ),
+                            child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.audiotrack,size: Configuration.tinicon),
+                                  Flexible(
+                                    child: Text(p.settings.ambientsound.name,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                                  ),
+                                ],
+                            ),
+                          ) : Container(),
+
+                          p.settings.bells != null && p.settings.bells.length > 0 ?
+                          Container(
                           constraints: BoxConstraints(
-                            maxWidth: Configuration.width*0.2
+                            maxWidth: Configuration.width*0.25
                           ),
                           child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.audiotrack,size: Configuration.tinicon),
-                                Flexible(
-                                  child: Text(p.settings.ambientsound.name,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
-                                ),
-                              ],
-                          ),
-                        ) : Container(),
-
-                      p.settings.bells != null && p.settings.bells.length > 0 ?
-                      Container(
-                        constraints: BoxConstraints(
-                          maxWidth: Configuration.width*0.25
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.notifications,size: Configuration.tinicon),
-                            Flexible(
-                              child: Text(getBellString(bells:p.settings.bells), 
-                              overflow: TextOverflow.ellipsis,
-                              style: Configuration.text('tiny', Colors.black, font:'Helvetica'))
-                            ),
-                          ],
-                        )): Container(),
-                        
-                        p.settings.warmuptime > 0 ?  
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.local_fire_department, size:  Configuration.tinicon),
-                            Text('${p.settings.warmuptime.floor().toString()} s', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
-                          ],
-                        ): Container()
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.notifications,size: Configuration.tinicon),
+                              Flexible(
+                                child: Text(getBellString(bells:p.settings.bells), 
+                                overflow: TextOverflow.ellipsis,
+                                style: Configuration.text('tiny', Colors.black, font:'Helvetica'))
+                              ),
+                            ],
+                          )): Container(),
+                          
+                          p.settings.warmuptime > 0 ?  
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.local_fire_department, size:  Configuration.tinicon),
+                              Text('${p.settings.warmuptime.floor().toString()} s', style: Configuration.text('tiny', Colors.black, font:'Helvetica')),
+                            ],
+                          ) : Container()
                         ],
                       ),
                   ), 
@@ -258,7 +255,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                         ),
                         ),
                       )
-                    ):Container()
+                    ): Container()
                 ],
               ));
           },
@@ -286,7 +283,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
                 children: [
                   Text('My sessions', style: Configuration.text('medium',Colors.black)),
                   _userstate.user.presets.length > 0 ?
-                  Container(
+                   widget.offline ? Container():
+                   Container(
                     margin: EdgeInsets.symmetric(vertical: Configuration.verticalspacing),
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
@@ -316,7 +314,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
     Widget savePreset(){
       String presetName = '';
 
-
       Widget item(left, right){
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -325,7 +322,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
             Text(right, style: Configuration.text('small', Colors.black, font: 'Helvetica')),
           ],
         );
-
       }
   
       return StatefulBuilder(
@@ -372,7 +368,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   SizedBox(height: Configuration.verticalspacing),
                   item('Warm up time', _meditationstate.selmeditation.meditationSettings.warmuptime.floor().toString() + ' s'),
                   SizedBox(height: Configuration.verticalspacing),
-                  item('Interval', _meditationstate.bells.length > 0 ? getBellString() : 'No interval'),
+                  item('Interval', _meditationstate.bells.length > 0 ? getBellString(bells: _meditationstate.bells) : 'No interval'),
                   SizedBox(height: Configuration.verticalspacing),
                   item('Ambient sound', _meditationstate.selmeditation.meditationSettings.ambientsound != null ? _meditationstate.selmeditation.meditationSettings.ambientsound.name : 'None'),
                   SizedBox(height: Configuration.verticalspacing),
@@ -396,7 +392,6 @@ class _MeditationScreenState extends State<MeditationScreen> {
                       _userstate.updateUser();
 
                       Navigator.pop(context);
-
                     } : null,
                     color: Colors.lightBlue,
                     text: 'Save session',
@@ -409,748 +404,695 @@ class _MeditationScreenState extends State<MeditationScreen> {
         }
       );
     }
+    
+    Widget volumeSlider({String text, String audio, onPressed, double value, onChanged, setState}){
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(text,style: Configuration.text('small',Colors.white)),
+                  SizedBox(width: Configuration.verticalspacing),
+                  Text(value.floor().toString() + '%',
+                    style: Configuration.text('small',Colors.white.withOpacity(0.8),font: 'Helvetica'),
+                  )
+                ],
+              ),
 
-    dynamic addModifyBell({IntervalBell b, int i}){
-      int selectedIndex = b != null ? bells.indexWhere((element) => element.image == b.image) : 0;
-      String selectedMode =  b == null || b.repeat ? 'Repeat': 'Once';
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  shape: CircleBorder(),
+                  minimumSize: Size(0,0),
+                  surfaceTintColor: Colors.white,
+                  padding: EdgeInsets.all(6),
+                  side: BorderSide(color: Colors.white)
+                ),
+                onPressed: (){
+                  if(assetsAudioPlayer.isPlaying.value){
+                    assetsAudioPlayer.stop().then((value) => setState((){})); 
+                  }else{
+                    whatIsplaying = text;
+                    assetsAudioPlayer.open(
+                      Audio(audio),
+                      volume: value /  100
+                    ).then((value) => setState((){}));
+                  }
+              }, child: Icon(
+                assetsAudioPlayer.isPlaying.value  && whatIsplaying == text ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+                size: Configuration.tinicon
+              ))
+            ],
+          ),
 
-      int selectedTime = b != null ? b.playAt : 1;
+          // CAMBIAR TODOS LOS SLIDERS A UN SLIDER COMÚN !!!
+          SizedBox(
+            height: Configuration.verticalspacing*2,
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackShape: CustomTrackShape(),
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: Configuration.verticalspacing*1),
+                minThumbSeparation: 5
+              ),
+              child: Slider(
+                max: 100,
+                activeColor: Colors.white,
+                inactiveColor: Colors.grey,
+                label: value.floor().toString() + '%',
+                value: value, 
+                divisions: 100,
+                onChanged: (e){
+                  assetsAudioPlayer.setVolume(e/100);
+                  onChanged(e);
+                }
+              ),
+            ),
+          ),
+        ]
+      );
+    }
 
-      CarouselController c;
+    Widget settingsPage(){
 
-      return showModalBottomSheet(
-        isScrollControlled: true,
-        barrierColor: Colors.black.withOpacity(0.5),
-          shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
-        ),
-        context: context, 
-        builder: (context){
+      Widget bellSelector({String value, String text, Function onchange}){
+        
+        Widget bellSelectorDialog(){
+          List<IntervalBell> currentbells = List.from(bells);
+
+          if(text == 'Starting bell'){
+            currentbells.insert(0, IntervalBell(name: 'None'));
+          }
+
           return StatefulBuilder(
-            builder: (context,setState) {
-              return Container(
-                constraints: BoxConstraints(maxHeight: Configuration.height*0.7),
-                padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text('Interval bell',  style: Configuration.text('smallmedium',Colors.black)),
-                    SizedBox(height: Configuration.verticalspacing),
-                    CarouselSlider.builder(
-                      itemCount: bells.length,
-                      
-                      itemBuilder: (context,i,selected){
-                        IntervalBell b = bells[i];
-                        
-                        return GestureDetector(
-                          onTap: (){
-                            assetsAudioPlayer.stop().then((s){
-                              assetsAudioPlayer.open(Audio(bells[i].sound));
-                            });
-                          },
-                          child: Container(
-                            decoration:BoxDecoration(
-                              color: selectedIndex == i ? Configuration.lightgrey : Colors.white,
-                              borderRadius: BorderRadius.circular(Configuration.borderRadius)
+            builder: (context, setState) {
+              return AbstractDialog(
+                content: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius/4),
+                    color: Configuration.lightgrey
+                  ),
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Select a bell',
+                        style: Configuration.text('medium',Colors.black),
+                      ),
+                      Divider(color: Colors.black,thickness: 2),
+                      SizedBox(height: Configuration.verticalspacing),
+                      ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: currentbells.length,
+                        itemBuilder: (context,index){
+                          return RadioListTile(
+                            activeColor: Colors.lightBlue,
+                            groupValue: value,
+                            value: currentbells[index].name,
+                            title: Text(currentbells[index].name,
+                              style: Configuration.text('small',Colors.black),
                             ),
-                            padding: EdgeInsets.all(Configuration.smpadding),
-                            margin:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(b.image,fit: BoxFit.cover),
-                                SizedBox(height: Configuration.verticalspacing),
-                                Text(b.name, style: Configuration.text('small',Colors.black))
-                            ])
-                          ),
-                        );
-                      },
-                      options: CarouselOptions(
-                        scrollPhysics: ClampingScrollPhysics(),
-                        viewportFraction:0.5,
-                        aspectRatio: 4/2,
-                        initialPage: selectedIndex,
-                        enableInfiniteScroll: false,
-                        onPageChanged: (int i, d){
-                          assetsAudioPlayer.stop().then((s){
-                            assetsAudioPlayer.open(Audio(bells[i].sound));
-                          });
+                            onChanged: (String name){
+                              assetsAudioPlayer.stop();
+                              if(name != 'None'){
+                                // hear the bell sound 
+                                assetsAudioPlayer.open(
+                                  Audio(currentbells[index].sound),
+                                  volume: 1
+                                );
+                              }
+                              setState(() {
+                                value = name;
+                              });
 
-                          setState(() {
-                            selectedIndex =  i;
-                          });
-                        }
-                      )
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal:20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          DropdownButton<String>(
-                            underline: Container(),
-                            style: Configuration.text('small',Colors.black,font:'Helvetica'),
-                            items: ["Repeat","Once"].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value.toString()),
-                              );
-                            }).toList(),
-                            value:selectedMode,
-                            onChanged: (newValue){
-                              setState((){selectedMode = newValue;});
-                          }),
-                        ],
+                              onchange(name);
+                             // Navigator.pop(context);
+                            },
+                          );
+                        },
                       ),
-                    ),
-                    
-                    SliderTheme(
-                      data:SliderThemeData(
-                        activeTickMarkColor: Colors.transparent,
-                        trackShape: RectangularSliderTrackShape(),
+                      SizedBox(height: Configuration.verticalspacing),
+                      BaseButton(
+                        onPressed: (){
+                          // se updateará cuando meditemos!! jejeje
+                          _userstate.user.settings.meditation = _meditationstate.selmeditation.meditationSettings;
+                          Navigator.pop(context);
+                        },
+                        text: 'Close',
                       ),
-                      child:Slider(
-                        label: selectedTime.toString() + ' min',
-                        activeColor: Colors.lightBlue,
-                        thumbColor: Colors.white,
-                        inactiveColor: Colors.white,
-                        min: 1,
-                        max: _meditationstate.selmeditation.meditationSettings.isUnlimited ? 60 :  _meditationstate.selmeditation.duration.inMinutes.toDouble() - 1,
-                        divisions:_meditationstate.selmeditation.meditationSettings.isUnlimited ? 59 : _meditationstate.selmeditation.duration.inMinutes -2,
-                        onChanged: (a){
-                          setState((){selectedTime = a.toInt();});
-                        }, 
-                        value: selectedTime.toDouble(),
-                      ),
-                    ),
-                    
-                    Text(selectedMode =='Repeat' ? 
-                    'The bell will ring every $selectedTime minute' + (selectedTime!=1 ? 's':''):
-                    'The bell will ring at minute $selectedTime  ', 
-                    style: Configuration.text('small',Colors.grey,font:'Helvetica')),
-                   
-                    Spacer(),
-                    BaseButton(
-                      aspectRatio: Configuration.buttonRatio*1.5,
-                      text: 'Confirm',
-                      onPressed:(){
-                        IntervalBell bell = new IntervalBell(
-                          playAt: selectedTime,
-                          repeat: selectedMode == 'Repeat',
-                          name: bells[selectedIndex].name,
-                          image: bells[selectedIndex].image,
-                          sound:bells[selectedIndex].sound
-                        ); 
-
-                        // hay que pasar esto a meditation settings !!
-                        if(b != null){
-                          _meditationstate.bells[i] = bell;
-                        }else{
-                          _meditationstate.bells.add(bell);
-                        }
-                        Navigator.pop(context);
-                      },
-                      color: Configuration.maincolor
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    BaseButton(
-                      text:'Cancel',
-                      aspectRatio: Configuration.buttonRatio * 1.5,
-                      border: true,
-                      bordercolor:Colors.red,
-                      color:Colors.white,
-                      onPressed:(){
-                        Navigator.pop(context);
-                      },
-                      textcolor: Colors.red,
-                    ),
-                    SizedBox(height: Configuration.verticalspacing*1.5),
-                  ],
-                )
+                      SizedBox(height: Configuration.verticalspacing*2)
+                    ],
+                  ),
+                ),
               );
             }
           );
-        });
-    }
-    
-    Widget bell(IntervalBell b, setState, int i){
-      return ListTile(
-        key: Key(i.toString()),
-        title: Text(b.name, style: Configuration.text('small',Colors.black)),
-        subtitle: Text((b.repeat ? 'Every ': 'At ') + b.playAt.toString() + ' min',  style:Configuration.text('small',Colors.grey,font: 'Helvetica')),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            OutlinedButton(
-              onPressed: (){
-                addModifyBell(b:b, i:i).then((d){setState((){});});
-              },
-              child: Icon(Icons.edit, color: Colors.blue, size: Configuration.smicon-5),
-              style: OutlinedButton.styleFrom(
-                primary: Colors.white,
-                side:BorderSide(color: Colors.blue),
-                padding:EdgeInsets.all(8),
-                shape: CircleBorder()
-              ),
-            ),
-            OutlinedButton(
-              onPressed: (){
-                _meditationstate.bells.remove(b);
-                setState((){});
-              },
-              child: Icon(Icons.remove,color:Colors.red, size:Configuration.smicon-5),
-              style: OutlinedButton.styleFrom(
-                primary: Colors.white,
-                side:BorderSide(color: Colors.red),
-                padding:EdgeInsets.all(8),
-                shape: CircleBorder()
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+        }
 
-    Widget volumeSlider({String text, String audio, onPressed, double value, onChanged, setState}){
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text(text,style: Configuration.text('small',Colors.white)),
-                    SizedBox(width: Configuration.verticalspacing),
-                    Text(value.floor().toString() + '%',
-                      style: Configuration.text('small',Colors.white.withOpacity(0.8),font: 'Helvetica'),
-                    )
-                  ],
-                ),
-
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    shape: CircleBorder(),
-                    minimumSize: Size(0,0),
-                    surfaceTintColor: Colors.white,
-                    padding: EdgeInsets.all(6),
-                    side: BorderSide(color: Colors.white)
-                  ),
-                  onPressed: (){
-                    if(assetsAudioPlayer.isPlaying.value){
-                      assetsAudioPlayer.stop().then((value) => setState((){})); 
-                    }else{
-                      whatIsplaying = text;
-                      assetsAudioPlayer.open(
-                        Audio(audio),
-                        volume: value /  100
-                      ).then((value) => setState((){}));
-                    }
-                }, child: Icon(
-                  assetsAudioPlayer.isPlaying.value  && whatIsplaying == text ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: Configuration.tinicon
-                ))
-              ],
-            ),
-
-            // CAMBIAR TODOS LOS SLIDERS A UN SLIDER COMÚN !!!
-            SizedBox(
-              height: Configuration.verticalspacing*2,
-              child: SliderTheme(
-                data: SliderThemeData(
-                  trackShape: CustomTrackShape(),
-                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: Configuration.verticalspacing*1),
-                  minThumbSeparation: 5
-                ),
-                child: Slider(
-                  max: 100,
-                  activeColor: Colors.white,
-                  inactiveColor: Colors.grey,
-                  label: value.floor().toString() + '%',
-                  value: value, 
-                  divisions: 100,
-                  onChanged: (e){
-                    assetsAudioPlayer.setVolume(e/100);
-                    onChanged(e);
-                  }
-                ),
-              ),
-            ),
-          ]
+        return TextButton(
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: Configuration.verticalspacing)
+          ),
+          onPressed: (){
+            // open a dialog and show a list of available bells
+            showDialog(
+              context: context,
+              builder: (context) => bellSelectorDialog()
+            );              
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(text,style: Configuration.text('small',Colors.white)),
+              value !=null && value != 'None' ?  
+              Text(value, style: Configuration.text('small',Colors.white.withOpacity(0.8),font: 'Helvetica')) :
+              Icon(Icons.add_circle_outline,color: Colors.white,size: Configuration.smicon),
+            ],
+          ),
         );
-
       }
 
-   
-    return layout(
-      Container(
-        margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-        child: Column(
-        children: [
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              shape: CircleBorder()
-            ),
-            onPressed: (){
-              showGeneralDialog(
-                context: context,
-                barrierColor: Colors.black12.withOpacity(0.93), // Background color
-                barrierDismissible: false,
-                barrierLabel: 'Dialog',
-                transitionDuration: Duration(milliseconds: 400),
-                pageBuilder: (_, __, ___) {
-                  return StatefulBuilder(
-                    builder: (context,setState) {
-                     
-                      return AbstractDialog(
-                        content: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Column(
-                              children: [
-                                Text('Meditation settings',
-                                  style: Configuration.text('medium',Colors.white),
-                                ),
-                                Divider(color: Colors.white,thickness: 2),
-                              ],
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: Configuration.smpadding
-                              ),
-                              child: Column(
-                                children: [
-                                  TextButton(
-                                    style: TextButton.styleFrom(
-                                      padding: EdgeInsets.all(0)
-                                    ),
-                                    onPressed: (){
-                                      setState((){
-                                        _meditationstate.selmeditation.meditationSettings.addSixStepPreparation  = !_meditationstate.selmeditation.meditationSettings.addSixStepPreparation;
-                                      });
-                                    },
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text('Add six step preparation',
-                                                style: Configuration.text('small',Colors.white),
-                                              ),
-                                              SizedBox(height: Configuration.verticalspacing/2),
-                                              Text('An audio guiding the six step preparation will be introduced at the beginning of the meditation',
-                                                style: Configuration.text('tiny',Colors.white,font: 'Helvetica'),
-                                              ),
-                                              SizedBox(height: Configuration.verticalspacing/2),
-                                              Text('5 extra minutes will be added',
-                                                style: Configuration.text('tiny',Colors.white.withOpacity(0.7),font: 'Helvetica'),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                  
-                                        Container(
-                                          width: Configuration.width*0.2,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            children: [
-                                              Text(_meditationstate.selmeditation.meditationSettings.addSixStepPreparation ? 'Yes': 'No',
-                                                style: Configuration.text('small',Colors.white,font:'Helvetica'),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                  
-                                      ],
-                                    ),
-                                  ),
-                                
-                                  SizedBox(height: Configuration.verticalspacing*2),
-
-                                  volumeSlider(
-                                    text: 'Ambient volume',
-                                    value: _meditationstate.selmeditation.meditationSettings.ambientvolume,
-                                    audio: ambientSounds[0].sound,
-                                    onChanged:(e)=>{
-                                      setState((){
-                                        _meditationstate.selmeditation.meditationSettings.ambientvolume = e;
-                                      })
-                                    },
-                                    setState: setState
-                                  ),
-                                  
-                                  SizedBox(height: Configuration.verticalspacing*2),
-
-                                  volumeSlider(
-                                    text: 'Bells volume',
-                                    value: _meditationstate.selmeditation.meditationSettings.bellsvolume,
-                                    audio: bells[0].sound,
-                                    onChanged:(e)=>{
-                                      setState((){
-                                        _meditationstate.selmeditation.meditationSettings.bellsvolume = e;
-                                      })
-                                    },
-                                    setState: setState
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: Configuration.verticalspacing*3),
-                            BaseButton(
-                              color: Colors.red,
-                              text: 'Close',
-                              border: true,
-                              bordercolor: Colors.red,
-                              textcolor: Colors.white,
-                              onPressed: (){
-                                assetsAudioPlayer.stop();
-                                Navigator.pop(context);
-                              }
-                            )
-                          ],
-                        ),
-                      );
-                    }
-                  );
-                },
-              );
-          }, child: Icon(Icons.settings,size: Configuration.smicon,color: Colors.black), 
-          ),
-
-          SizedBox(height: Configuration.verticalspacing),
-          buttonModal(
-            MeditationDuration(),
-            'Duration', 
-            Observer(
-                builder: (context) {
-                  return Text(
-                    _meditationstate.selmeditation.meditationSettings.isUnlimited ? ' Unlimited':
-                    _meditationstate.selmeditation.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black, font:'Helvetica'));
-                }
-              ),
-              true
-          ),
-          SizedBox(height: Configuration.verticalspacing*2),
-          buttonModal(
-            StatefulBuilder(
-              builder: (context,setState) {
-                return  GridView.builder(
-                  itemCount: ambientSounds.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context,index){
-                    IntervalBell ambientsound = ambientSounds[index];
-                    bool isSelected =_meditationstate.selmeditation.meditationSettings.ambientsound != null && _meditationstate.selmeditation.meditationSettings.ambientsound.name == ambientsound.name;
-                    
-                    return ClickableSquare(
-                      fit: BoxFit.cover,
-                      isAsset:true,
-                      onTap: (){
-                        _meditationstate.selmeditation.meditationSettings.ambientsound = isSelected ? null : ambientsound;
-                        
-                        assetsAudioPlayer.stop().then((s){
-                          if(!isSelected){
-                            assetsAudioPlayer.open(Audio(ambientsound.sound));
-                          }
-                        });
-
-                        setState(() {});
-                      },
-                      selected: isSelected,
-                      image: ambientsound.image,
-                      text: ambientsound.name,
-                    );
-                  },
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: Configuration.crossAxisCount
-                  )
-                );
-              }
-            ), 
-            "Ambient Sound", 
-            Text(_meditationstate.selmeditation.meditationSettings.ambientsound != null ?
-              _meditationstate.selmeditation.meditationSettings.ambientsound.name : 'None',
-              style: Configuration.text('small', Colors.black, font:'Helvetica')),
-            true,
-            ()=> assetsAudioPlayer.stop()
-          ),
-          SizedBox(height: Configuration.verticalspacing*2),
-          buttonModal(
-            StatefulBuilder(
-              builder: (context,setState) {
-                int i = 0;
-
-                return Column(
-                  mainAxisSize:MainAxisSize.min,
-                  children: [
-                    SizedBox(height: Configuration.verticalspacing*2),
-
-                    _meditationstate.bells.length == 0 ? 
-                    Text('Press add to set up a new bell for the meditation',  style:Configuration.text('small',Colors.black,font: 'Helvetica')):
-                    Column(children:_meditationstate.bells.map((IntervalBell b){
-                      return bell(b,setState,i++);
-                    }).toList()),
-                    SizedBox(height: Configuration.verticalspacing*2),
-                    OutlinedButton(
-                      onPressed: (){
-                        addModifyBell().then((d){setState((){});});
-                      },
-                      child: Row(
-                        mainAxisSize:MainAxisSize.min,
-                        children: [
-                          Text('Add new interval bell',style: Configuration.text('tiny', Colors.green),),
-
-                          Icon(Icons.add, color: Colors.green,size: Configuration.smicon-5),
-                        ],
+      return StatefulBuilder(
+        builder: (context,setState) {
+          return AbstractDialog(
+            content: SafeArea(
+              top:true,
+              child: ListView(
+                physics: ClampingScrollPhysics(),
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Meditation settings',
+                        style: Configuration.text('medium',Colors.white),
                       ),
-                      style: OutlinedButton.styleFrom(
-                        primary: Colors.white,
-                        side:BorderSide(color: Colors.green),
-                        padding:EdgeInsets.all(Configuration.tinpadding),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Configuration.borderRadius),
-                          side: BorderSide(color: Colors.black)
-                        )
-                      ),
-                    ),
-                    SizedBox(height: Configuration.verticalspacing*5)
-                  ],
-                );
-              }
-            ), 
-            "Interval Bell", 
-            // NO HACE FALTA OBSERVER
-            Container(
-              
-              constraints: BoxConstraints(
-                maxWidth: Configuration.width*0.5
-              ),
-              child: OverflowBox(
-                child: Row(
-                  mainAxisAlignment:MainAxisAlignment.end,
-                  children:_meditationstate.bells.length > 0 ?
-                    [
-                      Flexible(child: Text(getBellString(),
-                      overflow: TextOverflow.ellipsis, 
-                      style:Configuration.text('small',Colors.black,font: 'Helvetica'))
-                      )
-                    ]
-                  : [Text('None', style:Configuration.text('small',Colors.black,font: 'Helvetica'))]
-                ),
-              ),
-            ),
-            true
-          ),
-
-          SizedBox(height: Configuration.verticalspacing*2),
-        
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              OutlinedButton(
-              onPressed:(){
-                showModalBottomSheet(
-                  isScrollControlled: true,
-                  barrierColor: Colors.black.withOpacity(0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                      Divider(color: Colors.white,thickness: 2),
+                    ],
                   ),
-                  context: context, 
-                  builder: (context){
-                    return savePreset();
-                  }
-                );
-              },
-              child:Text('Save this session', 
-                style: Configuration.text('small', Colors.lightBlue)
-              ),
-              style: OutlinedButton.styleFrom(
-                side:BorderSide(color: Colors.lightBlue, width: 1),
-                foregroundColor: Colors.lightBlue,
-                elevation: 0
+                  Container(
+                    constraints: BoxConstraints(
+                      minHeight: Configuration.height * 0.8
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: Configuration.smpadding
+                    ),
+                    child: Column(
+                      children: [
+                        
+                        bellSelector(
+                          value: _meditationstate.selmeditation.meditationSettings.startingBell, 
+                          onchange:(value)=>{
+                            setState((){
+                              _meditationstate.selmeditation.meditationSettings.startingBell = value;
+                            })
+                          },
+                          text:'Starting bell'
+                        ),
+            
+                        SizedBox(height: Configuration.verticalspacing*2),
+            
+                        bellSelector(
+                          value:_meditationstate.selmeditation.meditationSettings.endingBell != null ? 
+                          _meditationstate.selmeditation.meditationSettings.endingBell : 'Gong'
+                          , 
+                          onchange:(value)=>{
+                            setState((){
+                              _meditationstate.selmeditation.meditationSettings.endingBell = value;
+                            })
+                          },
+                          text:'Ending bell'
+                        ),
+            
+            
+                        SizedBox(height: Configuration.verticalspacing*2),
+            
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.all(0)
+                          ),
+                          onPressed: (){
+                            setState((){
+                              _meditationstate.selmeditation.meditationSettings.addSixStepPreparation  = !_meditationstate.selmeditation.meditationSettings.addSixStepPreparation;
+                            });
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              // starting and ending bell
+                              
+            
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Add six step preparation',
+                                      style: Configuration.text('small',Colors.white),
+                                    ),
+                                    SizedBox(height: Configuration.verticalspacing/2),
+                                    Text('An audio guiding the six step preparation will be introduced at the beginning of the meditation',
+                                      style: Configuration.text('tiny',Colors.white,font: 'Helvetica'),
+                                    ),
+                                    SizedBox(height: Configuration.verticalspacing/2),
+                                    Text('5 extra minutes will be added',
+                                      style: Configuration.text('tiny',Colors.white.withOpacity(0.7),font: 'Helvetica'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        
+                              Container(
+                                width: Configuration.width*0.2,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(_meditationstate.selmeditation.meditationSettings.addSixStepPreparation 
+                                      ? 'Yes': 'No',
+                                      style: Configuration.text('small',Colors.white,font:'Helvetica'),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      
+                        SizedBox(height: Configuration.verticalspacing*2),
+            
+                        // ESTO ES DEL USUARIO MÁS QUE DE LA  MEDITACIÓN
+                        volumeSlider(
+                          text: 'Ambient volume',
+                          value: _meditationstate.selmeditation.meditationSettings.ambientvolume,
+                          audio: ambientSounds[0].sound,
+                          onChanged:(e)=>{
+                            setState((){
+                              _meditationstate.selmeditation.meditationSettings.ambientvolume = e;
+                            })
+                          },
+                          setState: setState
+                        ),
+                        
+                        SizedBox(height: Configuration.verticalspacing*2),
+            
+                        volumeSlider(
+                          text: 'Bells volume',
+                          value: _meditationstate.selmeditation.meditationSettings.bellsvolume,
+                          audio: bells[0].sound,
+                          onChanged:(e)=>{
+                            setState((){
+                              _meditationstate.selmeditation.meditationSettings.bellsvolume = e;
+                            })
+                          },
+                          setState: setState
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  
+                  SizedBox(height: Configuration.verticalspacing*2),
+                  BaseButton(
+                    text: 'Close',
+                    textcolor: Colors.white,
+                    onPressed: (){
+                      assetsAudioPlayer.stop();
+                      Navigator.pop(context);
+                    }
+                  )
+                ],
               ),
             ),
-
-              // HAY QUE HACER ESTO RESIZABLE !!!
-              OutlinedButton(
-            onPressed:(){
-              showModalBottomSheet(
-                isScrollControlled: true,
-                barrierColor: Colors.black.withOpacity(0.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
-                ),
-                context: context, 
-                builder: (context){
-                  return presets();  
-                });
-            },
-            child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue)),
-            style: OutlinedButton.styleFrom(
-              side:BorderSide(color: Colors.lightBlue, width: 1),
-              foregroundColor: Colors.lightBlue,
-              elevation:0
-            ))
-            ],
-          )
-        ]),
-      ), 
-      () {
-         //ESTO LO PODRÍAMOS HACER EN OTRO SITIO !!!
-        _meditationstate.createIntervalBells();
-        
-        // METER ESTO DENTRO !!!
-        if(_meditationstate.selmeditation.meditationSettings.warmuptime > 0){
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WarmUpScreen(m:_meditationstate.selmeditation)
-            )
-          );
-        }else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CountDownScreen(
-                content: _meditationstate.selmeditation,
-              )
-            )
           );
         }
-      }, _meditationstate.selmeditation.duration.inMinutes > 0 || _meditationstate.selmeditation.meditationSettings.isUnlimited,
-        'Set the timer for a free meditation' 
       );
+    }
+
+    Widget iconButton({IconData icon, Function onPressed, Color color = Colors.white, String text, width}){
+      return OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size( width != null ? width:  Configuration.width*0.4,0),
+          padding: EdgeInsets.all(Configuration.tinpadding)
+        ),
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon,size: Configuration.smicon,color: Colors.black),
+            SizedBox(width: Configuration.verticalspacing*2),
+            Text(text, style: Configuration.text('small', Colors.black, font:'Helvetica'))
+          ],
+        ), 
+      );
+    }
+
+
+    return SingleChildScrollView(
+      physics: ClampingScrollPhysics(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          SizedBox(height: Configuration.verticalspacing*2.5),
+          
+          pageTitle(
+            'Free meditation',
+            'Set a timer and meditate on your own',
+            Icons.timer
+          ),
+          
+          SizedBox(height: Configuration.verticalspacing),
+          
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: iconButton(
+                    icon: Icons.settings,
+                    onPressed: (){
+                      setState(() {
+                        pushedDialog = true;
+                      });
+                      showGeneralDialog(
+                        context: context,
+                        barrierColor: Colors.black12.withOpacity(0.93), // Background color
+                        barrierDismissible: false,
+                        barrierLabel: 'Dialog',
+                        transitionDuration: Duration(milliseconds: 400),
+                        pageBuilder: (_, __, ___) {
+                          return settingsPage();
+                        },
+                      );
+                    },
+                    text: 'Settings'
+                  ),
+                ),
+                /*
+                SizedBox(width: Configuration.verticalspacing*2),
+    
+                
+                iconButton(
+                  icon: Icons.self_improvement,
+                  onPressed: ()=>{
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: ((context) => PracticeSummary()))
+                    )
+                  },
+                  text: 'Practice summary'
+                ) */  
+              ],
+            ),
+          ),
+          Container(
+                margin: EdgeInsets.only(right: Configuration.smpadding),
+                child: Column(
+                  children: [
+                    
+                  ],
+                ),
+              ),
+    
+          
+          SizedBox(height: Configuration.verticalspacing), 
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+            child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                ],
+              ),
+              
+              SizedBox(height: Configuration.verticalspacing),
+    
+    
+              buttonModal(
+                MeditationDuration(),
+                'Duration', 
+                Observer(
+                    builder: (context) {
+                      return Text(
+                        _meditationstate.selmeditation.meditationSettings.isUnlimited ? ' Unlimited':
+                        _meditationstate.selmeditation.duration.inMinutes.toString() + ' min ', style: Configuration.text('small', Colors.black, font:'Helvetica'));
+                    }
+                  ),
+                  true
+              ),
+              SizedBox(height: Configuration.verticalspacing*2),
+              buttonModal(
+                StatefulBuilder(
+                  builder: (context,setState) {
+                    return  GridView.builder(
+                      itemCount: ambientSounds.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context,index){
+                        IntervalBell ambientsound = ambientSounds[index];
+                        bool isSelected =_meditationstate.selmeditation.meditationSettings.ambientsound != null && _meditationstate.selmeditation.meditationSettings.ambientsound.name == ambientsound.name;
+                        
+                        return ClickableSquare(
+                          fit: BoxFit.cover,
+                          isAsset:true,
+                          onTap: (){
+                            _meditationstate.selmeditation.meditationSettings.ambientsound = isSelected ? null : ambientsound;
+                            
+                            assetsAudioPlayer.stop().then((s){
+                              if(!isSelected){
+                                assetsAudioPlayer.open(Audio(ambientsound.sound));
+                              }
+                            });
+    
+                            setState(() {});
+                          },
+                          selected: isSelected,
+                          image: ambientsound.image,
+                          text: ambientsound.name,
+                        );
+                      },
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: Configuration.crossAxisCount
+                      )
+                    );
+                  }
+                ), 
+                "Ambient Sound", 
+                Text(_meditationstate.selmeditation.meditationSettings.ambientsound != null ?
+                  _meditationstate.selmeditation.meditationSettings.ambientsound.name : 'None',
+                  style: Configuration.text('small', Colors.black, font:'Helvetica')),
+                true,
+                ()=> assetsAudioPlayer.stop()
+              ),
+              SizedBox(height: Configuration.verticalspacing*2),
+              buttonModal(
+                IntervalBells(),
+                "Interval Bell", 
+                
+                // NO HACE FALTA OBSERVER
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: Configuration.width*0.4
+                  ),
+                  child:  _meditationstate.bells.length > 0 ?
+                    OverflowBox(
+                    child: Row(
+                      mainAxisAlignment:MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children:[
+                          Flexible(child: Text(getBellString(bells: _meditationstate.bells),
+                          overflow: TextOverflow.ellipsis, 
+                          style:Configuration.text('small',Colors.black,font: 'Helvetica'))
+                          )
+                      ]
+                    ),
+                  ) :
+                  
+                   Text('None', 
+                      overflow: TextOverflow.ellipsis,
+                      style:Configuration.text('small',Colors.black,font: 'Helvetica')
+                    )
+                ),
+                true
+              ),
+    
+              SizedBox(height: Configuration.verticalspacing*2),
+            
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: 
+                  widget.offline ? 
+                  [
+                  // ESTO  SE REPITE !!!
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: Configuration.width*0.4
+                    ),
+                    child: OutlinedButton(
+                      onPressed:(){
+                        showModalBottomSheet(
+                          isScrollControlled: true,
+                          barrierColor: Colors.black.withOpacity(0.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                          ),
+                          context: context, 
+                          builder: (context){
+                            return presets();  
+                          }
+                        );
+                      },
+                      child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue), textAlign: TextAlign.center),
+                      style: OutlinedButton.styleFrom(
+                      side:BorderSide(color: Colors.lightBlue, width: 1),
+                      foregroundColor: Colors.lightBlue,
+                      elevation:0
+                    )),
+                  )
+                  ]:
+                  [
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: Configuration.width*0.4
+                    ),
+                    child: OutlinedButton(
+                    onPressed:(){
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        barrierColor: Colors.black.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                        ),
+                        context: context, 
+                        builder: (context){
+                          return savePreset();
+                        }
+                      );
+                    },
+                    child:Text('Save this session', 
+                      style: Configuration.text('small', Colors.lightBlue),
+                      textAlign: TextAlign.center
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      side:BorderSide(color: Colors.lightBlue, width: 1),
+                      foregroundColor: Colors.lightBlue,
+                      elevation: 0
+                    ),
+                                  ),
+                  ),
+    
+                  // HAY QUE HACER ESTO RESIZABLE !!!
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: Configuration.width*0.4
+                    ),
+                    child: OutlinedButton(
+                      
+                    onPressed:(){
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        barrierColor: Colors.black.withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+                        ),
+                        context: context, 
+                        builder: (context){
+                          return presets();  
+                        });
+                    },
+                    child:Text('Use saved session', style: Configuration.text('small', Colors.lightBlue), textAlign: TextAlign.center),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      side:BorderSide(color: Colors.lightBlue, width: 1),
+                      foregroundColor: Colors.lightBlue,
+                      elevation:0
+                    )
+                                  ),
+                  )
+              ])
+            ]),
+          ),
+
+          SizedBox(height: Configuration.verticalspacing*2.5),
+          
+          BaseButton(
+            margin:true,
+            onPressed:
+            _meditationstate.selmeditation.duration.inMinutes >= 5 || 
+            _meditationstate.selmeditation.meditationSettings.isUnlimited ? 
+            () {
+              Iterable<Meditation> freeMeditations = 
+              _userstate.user.totalMeditations.where((element) => element.title == null);
+              if(freeMeditations.length == 0 ){
+                showInfoDialog(
+                  type: 'info',
+                  description: "Timer doesn't work in the background, the screen will darken automatically as if the phone was locked.",
+                  header: "Please, don't lock the phone",
+                ).then((value) => startMeditation());
+              }else{
+                startMeditation();
+              }
+            } : null,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget games() {
+
     Widget gamelist(){
+
       return Container(
         margin: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
         child: GridView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          itemCount: _userstate.data.stages[0].games.length,
+          itemCount: _userstate.data.games.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: Configuration.crossAxisCount
           ), 
           itemBuilder: (context,index) {
-            var game = _userstate.data.stages[0].games[index];
+            Game game = _userstate.data.games[index];
             var _blocked = _userstate.user.isGameBlocked(game);
-            var gamebefore = _userstate.data.stages[0].games[game.position == 0 ? 0 : game.position-1];
+            var gamebefore = _userstate.data.games[game.position == 0 ? 0 : game.position-1];
 
             return ClickableSquare(
-              /*
-              rightlabel: Chip(
-                _userstate.user.answeredquestions[game.cod] ? 
-                
-              ),*/
               text: game.title,
               image: game.image,
               onTap: (){
                 _gamestate.selectgame(game);
-                setState(() {});
+                _gamestate.startgame();
+                Navigator.pushNamed(context,'/gamestarted').then((value) => setState(()=>{}));
               },
-              selected: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod,
               blocked: _blocked,
               blockedtext: 'Complete '+ gamebefore.title,
-            );
-            /*
-            return GestureDetector(
-              onTap: ()=> setState((){
-                
-              }),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16.0),
-                  color:    ? Colors.grey.withOpacity(0.1) : Colors.transparent,
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 5),
-                    Container(
-                      width: Configuration.width*0.35,
-                      height: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?  
-                      Configuration.width*0.3: Configuration.width * 0.26,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(image: NetworkImage(game.image)),
-                      ),
-                     child:
-                      _blocked ? 
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.7)
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.lock),
-                            Text('Complete ' +  gamebefore.title , style: Configuration.text('verytiny', Colors.black), textAlign: TextAlign.center,)
-                          ],
-                        ),
-                      )  :
-                      Stack(
-                       children: [
-                         _gamestate.selectedgame != null && _gamestate.selectedgame.cod == game.cod ?
-                         Positioned(
-                           top: -5,
-                           right: 25,
-                           child:
-                           Chip(
-                             side: BorderSide.none,
-                             label: Text( 
-                               (_userstate.user.answeredGame(game.cod) ? _userstate.user.answeredquestions[game.cod].toString(): '0' )
-                               + '/' + game.questions.length.toString(), 
-                                style: Configuration.text('mini', Colors.white)
-                              )
-                            )
-                         ) : Container()
-                       ],
-                     ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(game.title, style: Configuration.text('small', _blocked ?  Colors.grey:  Colors.black),)
-                  ]
-                ),
-              ),
-            );*/
+            );            
           }),
       );
     }
 
-    return layout(
-      gamelist(), 
-      () {
-         _gamestate.startgame();
-        Navigator.pushNamed(context,'/gamestarted').then((value) => setState(()=>{}));
-      },
-      _gamestate.selectedgame != null,
-      'Concentration games'
-    );
-  }
-
-  Widget layout(child, onPressed, condition,[title]){
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         SizedBox(height: Configuration.verticalspacing*2.5),
-        title != null ? Center(
-          child: Text(title, overflow: TextOverflow.clip,style: Configuration.text('smallmedium', Colors.black),textAlign: TextAlign.center)): Container(),
-        SizedBox(height: Configuration.verticalspacing), 
-        Expanded(child: 
-          child,
+        pageTitle(
+          'Concentration games',
+          'Test your awareness and concentration', 
+          Icons.games
         ),
-        BaseButton(
-          margin:true,
-          onPressed:condition ? ()=> onPressed() : null,
-        ),
-      ],
+        
+        SizedBox(height: Configuration.verticalspacing),
+
+        SizedBox(height: Configuration.verticalspacing),
+        Expanded(
+          child: gamelist(),
+        )
+      ]
     );
   }
 
@@ -1165,7 +1107,18 @@ class _MeditationScreenState extends State<MeditationScreen> {
     _userstate = Provider.of<UserState>(context);
     _meditationstate = Provider.of<MeditationState>(context);
     _meditationstate.practice = PageController(initialPage: _meditationstate.currentpage);
+
+    _meditationstate.selmeditation  = new Meditation(
+      duration: Duration(minutes: 
+        _userstate.user.settings.lastMeditDuration != null 
+        && _userstate.user.settings.lastMeditDuration > 0
+        ? _userstate.user.settings.lastMeditDuration  
+        : 5 
+      ),
+      meditationSettings: _userstate.user.settings.meditation
+    );
     selectedstage = _userstate.user.stagenumber;
+    print('DIDCHANGEDEPENDENCIES');
   }
 
   @override
@@ -1173,20 +1126,47 @@ class _MeditationScreenState extends State<MeditationScreen> {
     super.dispose();
   }
 
+  void startMeditation(){
+    //ESTO LO PODRÍAMOS HACER EN OTRO SITIO !!!
+    _meditationstate.createIntervalBells();
+    // METER ESTO DENTRO !!!
+    if(_meditationstate.selmeditation.meditationSettings.warmuptime > 0){
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WarmUpScreen(m:_meditationstate.selmeditation)
+        )
+      );
+    }else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CountDownScreen(
+            content: _meditationstate.selmeditation,
+          )
+        )
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _gamestate = Provider.of<GameState>(context);
 
-    return PageView(
-      physics: ClampingScrollPhysics(),
-      controller: _meditationstate.practice,
-      onPageChanged: (newPage) {
-        setState(() {
-          _meditationstate.switchpage(newPage, true);
-        });
-      },
-      children: [freeMeditation(), games()],
-    );
+    if(widget.offline){
+      return freeMeditation();
+    }else{
+      return PageView(  
+        physics: ClampingScrollPhysics(),
+        controller: _meditationstate.practice,
+        onPageChanged: (newPage) {
+          setState(() {
+            _meditationstate.switchpage(newPage, true);
+          });
+        },
+        children: [ExploreScreen(), freeMeditation(), games()],
+      );
+    }
   }
 }
 
@@ -1212,7 +1192,7 @@ class _MeditationDurationState extends State<MeditationDuration> {
       children: [
         _meditationstate.selmeditation.meditationSettings.isUnlimited ? 
         Container() :
-        CirclePicker(),
+        Center(child: CirclePicker()),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1229,7 +1209,8 @@ class _MeditationDurationState extends State<MeditationDuration> {
                 });
               }),
             ),
-            Text('Meditate without a given duration', style: Configuration.text('small',Colors.black,font: 'Helvetica'),)
+            Flexible(
+              child: Text('Meditate without a given duration', style: Configuration.text('small',Colors.black,font: 'Helvetica'),))
           ],
         ),
         SizedBox(height: Configuration.verticalspacing*1.5),
@@ -1237,8 +1218,8 @@ class _MeditationDurationState extends State<MeditationDuration> {
         SizedBox(height: Configuration.verticalspacing),
         HorizontalPicker(
           minValue: 0,
-          maxValue: 90,
-          divisions: 18,
+          maxValue: 180,
+          divisions: 12,
           selectedValue: _meditationstate.selmeditation.meditationSettings.warmuptime ,
           onChanged:(value){
             _meditationstate.selmeditation.meditationSettings.warmuptime = value;
@@ -1406,6 +1387,7 @@ class ClickableSquare extends StatelessWidget {
         ),
         child: Stack(
           children: [
+            
             Positioned.fill(child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Container(color: Colors.white))
@@ -1416,7 +1398,8 @@ class ClickableSquare extends StatelessWidget {
               child: image != null && image != '' ? 
               Image(
                 fit: fit,
-                image: isAsset ?  AssetImage(image):CachedNetworkImageProvider(image)) : Container(),
+                image: isAsset ?  AssetImage(image): 
+                CachedNetworkImageProvider(image)) : Container(),
             )),
               
             Positioned(
@@ -1442,8 +1425,6 @@ class ClickableSquare extends StatelessWidget {
               )
             ),
 
-
-
             Positioned.fill(
               child: AnimatedContainer(
                   padding: EdgeInsets.all(0),
@@ -1468,15 +1449,14 @@ class ClickableSquare extends StatelessWidget {
                 ),
             ),
 
-              
             rightlabel != null ?
-              Align(
-                alignment: Alignment.topRight,
-                child: Container(
-                  padding: EdgeInsets.only(right:4, top:4),
-                  child: rightlabel,
-                ),
-              ): Container(),
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                padding: EdgeInsets.only(right:4, top:4),
+                child: rightlabel,
+              ),
+            ): Container(),
           ],
         ),
       )
@@ -1510,6 +1490,48 @@ class _CountdownState extends State<Countdown> {
   bool shadow = false;
   bool delaying = false;
 
+
+  Widget addNotes(context){
+    return Container(
+      padding: EdgeInsets.all(Configuration.tinpadding),
+      child: Column(
+        children: [
+          Text('Add notes', style: Configuration.text('smallmedium', Colors.black)),
+          SizedBox(height: Configuration.verticalspacing),
+          TextField(
+            maxLines: 5,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Write your notes here',
+            ),
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Cancel', style: Configuration.text('smallmedium', Colors.black)),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Save', style: Configuration.text('smallmedium', Colors.black)),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+
+
+  }
+
+
   Widget finish(context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -1540,8 +1562,8 @@ class _CountdownState extends State<Countdown> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: _index == index
-                ? Colors.white
-                : Color.fromRGBO(0, 0, 0, 0.4),
+              ? Colors.white
+              : Color.fromRGBO(0, 0, 0, 0.4),
           ),
         ));
       });
@@ -1626,7 +1648,9 @@ class _CountdownState extends State<Countdown> {
       );
     }*/
 
-    return Stack(children: [
+    return Stack(
+      
+      children: [
       CarouselSlider.builder(
           itemCount: _meditationstate.selmeditation.content.entries.length,
           itemBuilder: (context, index,o) {
@@ -1919,8 +1943,7 @@ class _CountdownState extends State<Countdown> {
           elevation: 0,
           leading: Observer(
             builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.close),
+              return ButtonClose(
                 color: _meditationstate.shadow ? Colors.black : Colors.white,
                 onPressed: () {
                   exit(context);
@@ -1998,527 +2021,333 @@ class NoTrackShape extends RoundedRectSliderTrackShape {
 
 
 
+class PracticeSummary extends StatefulWidget {
 
-// VISTA DE TABLETS !!!!
-/*
-class TabletMeditationScreen extends StatefulWidget {
+  PracticeSummary({Key key}) : super(key: key);
+
   @override
-  _TabletMeditationScreenState createState() => _TabletMeditationScreenState();
+  State<PracticeSummary> createState() => _PracticeSummaryState();
 }
 
-class _TabletMeditationScreenState extends State<TabletMeditationScreen> {
+class _PracticeSummaryState extends State<PracticeSummary> {
+  Stage selectedStage;
+  int _index = 0;
+
   UserState _userstate;
-  MeditationState _meditationstate;
-  GameState _gamestate;
 
-  int _index;
+  List<Stage> stageSummaries =  new List.empty(growable: true);
 
-  //podriamos utilizar meditationstate de arriba
-  var meditationtype = 'free';
-  var selectedstage = 1;
-  var selectedtype = 'Meditation';
-  var finished = false;
+  List<Technique>  techniques = new List.empty(growable: true);
 
-  Widget freeMeditation() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TimePicker(),
-        SizedBox(height: Configuration.height * 0.1),
-        TabletStartButton(
-          onPressed: () => {
-            _meditationstate.setMeditation(MeditationModel(duration: Duration(minutes: seltime), type:"free") , _userstate.user, _userstate.data),
-            Navigator.pushNamed(context, '/tabletcountdown').then((value) => setState(()=>{
-            })),
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget guidedMeditation() {
-    List<Widget> meditations() {
-      List<Widget> meditations = new List.empty(growable:true);
-      for (var meditation in _userstate.data.stages[selectedstage - 1].meditpath) {
-        var _blocked = _userstate.user.meditposition < meditation.position && _userstate.user.stagenumber == meditation.stagenumber || _userstate.user.stagenumber < meditation.stagenumber;
-        meditations.add(GestureDetector(
-            onTap: () => !_blocked ? setState(() => _meditationstate.selmeditation = meditation) : null,
-            child: Container(
-              decoration: BoxDecoration(
-                border: _meditationstate.selmeditation != null && _meditationstate.selmeditation.cod == meditation.cod ? 
-                Border.all(color: Configuration.maincolor) : null),
-              child: Column(children: [
-                Container(
-                  width: Configuration.width* 0.06,
-                  height:Configuration.width* 0.06,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.0),
-                    image: DecorationImage(
-                        image: NetworkImage(meditation.image)))),
-                Text(
-                  meditation.title,
-                  style: Configuration.tabletText('mini', _blocked ? Colors.grey : Colors.black),
-                  textAlign: TextAlign.center,
-                )
-              ]),
-            )
-            )
-          );
-      }
-
-      return meditations;
-    }
-
-    Widget stages() {
-      var stages = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      var types = ['Meditation', 'Game'];
-
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(children: [
-              Text('Stage',
-                style: Configuration.tabletText('verytiny', Colors.black),
-              ),
-              SizedBox(width: Configuration.blockSizeVertical * 1),
-              DropdownButton<int>(
-                  value: selectedstage,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.black),
-                  underline: Container(
-                    height: 0,
-                    color: Colors.deepPurpleAccent,
-                  ),
-                  onChanged: (int newValue) {
-                    setState(() {
-                      selectedstage = newValue;
-                    });
-                  },
-                  items: stages.map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList())
-            ]),
-            Row(children: [
-              Text(
-                'Type',
-                style: Configuration.tabletText('verytiny', Colors.black),
-              ),
-              SizedBox(width: Configuration.blockSizeVertical * 1),
-              DropdownButton<String>(
-                  value: selectedtype,
-                  elevation: 16,
-                  style: TextStyle(color: Colors.black),
-                  underline: Container(
-                    height: 0,
-                    color: Colors.deepPurpleAccent,
-                  ),
-                  onChanged: (String newValue) {
-                    setState(() {
-                      selectedtype = newValue;
-                    });
-                  },
-                  items: types.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList())
-            ]),
-          ]);
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-            height: Configuration.height * 0.45,
-            width: Configuration.height*0.45,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.0)),
-            child: Column(children: [
-              Container(
-                height: Configuration.height * 0.05,
-                child: stages(),
-              ),
-              Expanded(
-                child: GridView(
-                    padding: EdgeInsets.all(12.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3),
-                    children: meditations()),
-              )
-            ])
-        ),
-        SizedBox(height: 20),
-        TabletStartButton(
-          onPressed: () => {
-            _meditationstate.state ='pre_guided', 
-            Navigator.pushNamed(context, '/tabletcountdown').then(
-              (value) => setState(()=>{
-                _userstate.user.progress != null ? 
-                autocloseDialog(context, _userstate.user, isTablet: true) : null
-              })), 
-          },
-        )
-      ],
-    );
-  }
-
-  Widget games() {
-    List<Widget> gamelist(){
-        List<Widget> g = new List.empty(growable: true);
-        for(var element in _userstate.data.stages[0].games){
-          g.add(
-            Column(
-              children: [
-                GestureDetector(
-                    onTap: ()=> setState(()=> _gamestate.selectgame(element)),
-                    child: Container(
-                    decoration: BoxDecoration(border: _gamestate.selectedgame != null && _gamestate.selectedgame.cod == element.cod ? Border.all(color: Configuration.maincolor): Border()),
-                    width: Configuration.width*0.12,
-                    child: AspectRatio(
-                      aspectRatio: 1/1,
-                      child: Container( 
-                        margin: EdgeInsets.all(Configuration.tinpadding),
-                        decoration: BoxDecoration(color: Colors.grey))),
-                  ),
-                ),
-                Text(element.title, style: Configuration.tabletText('tiny',Colors.black),)
-              ],
-            )
-        );
-
-      return g;
-      }
-    }
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Container(
-            height: Configuration.height * 0.4,
-            child: Column(
-              children: gamelist(),
-              ), 
-          ),
-          TabletStartButton(
-            onPressed: () { 
-              _gamestate.startgame();
-              Navigator.pushNamed(context,'/gamestarted');
-            },
-          )
-      ]),
-    );
-  }
-
-  Widget chiporText(String text, bool chip){
-      Widget g;
-
-      var types = {'Guided':'guided','Free':'free','Games':'games'};
-
-      if (chip){
-        g = Chip(padding: EdgeInsets.all(12), label: Text(text, style: Configuration.tabletText('tiny', Colors.black)));
-      } else {
-        g = Text(text, style: Configuration.tabletText('tiny', Colors.black));
-      }
-
-      return GestureDetector(
-        onTap: () {
-          setState(() {
-            _meditationstate.switchtype(types[text]);
-          });
-        },
-        child: Container(padding: EdgeInsets.all(14.0), child: g)
-      );
-    }
+  List<Technique> distractions = new List.empty(growable: true);
 
   @override
-  void dispose() {
-    super.dispose();
-  }
+  void didChangeDependencies(){
+    super.didChangeDependencies();
 
+    _userstate = Provider.of<UserState>(context); 
+
+    techniques = _userstate.data.techniques.where((element) => !element.isDistraction).toList();
+    distractions = _userstate.data.techniques.where((element) => element.isDistraction).toList();
+
+    techniques.sort((a,b) => a.startingStage == b.startingStage ? 
+      a.position.compareTo(b.position) : 
+      a.startingStage.compareTo(b.startingStage)
+      
+    );
+
+    distractions.sort((a,b) => a.startingStage == b.startingStage   
+      ? a.position.compareTo(b.position) 
+      : -a.startingStage.compareTo(b.startingStage)
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    _meditationstate = Provider.of<MeditationState>(context);
-    _gamestate = Provider.of<GameState>(context);
-    _userstate = Provider.of<UserState>(context);
 
-    return Column(
-     children: [
-      SizedBox(height: Configuration.height*0.1),
-      Container(
-          child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Observer(builder: (BuildContext context) {  
-              return chiporText('Free', _meditationstate.currentpage == 0);
-            }),
-            
-            Observer(builder: (BuildContext context) {  
-              return chiporText('Guided', _meditationstate.currentpage == 1);
-            }),
-            
-            Observer(builder: (BuildContext context) {  
-              return chiporText('Games', _meditationstate.currentpage == 2);
-            })
-          ]
-        ),
-      ),
-      SizedBox(height: Configuration.height*0.05),
-      Container(
-        height: Configuration.height*0.6,
-        child:PageView(
-          controller: _meditationstate.practice,
-          onPageChanged: (newPage) {
-            setState(() {
-              _meditationstate.switchpage(newPage);
-            });
-          },
-            children: [freeMeditation(), guidedMeditation(),games()],
-          ) 
-        )
-      ]
-    );
-  }
-}
+    bool changedState = false;
+    int lastStage = null;
 
-class TabletCountdown extends StatefulWidget {
-  TabletCountdown({
-    Key key
-  }) :  super(key: key);
-
-  @override
-  _TabletCountdownState createState() => _TabletCountdownState();
-}
-
-class _TabletCountdownState extends State<TabletCountdown> {
-  var started = false;
-  MeditationState _meditationstate;
-  UserState _userstate;
-  int _index;
-
-  //podriamos utilizar meditationstate de arriba
-  var meditationtype = 'free';
-  var selectedstage = 1;
-  var selectedtype = 'Meditation';
-  var finished = false;
-
-  Widget finish(context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          height: Configuration.height,
-          width: Configuration.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              WeekList(),
-              SizedBox(height: Configuration.height * 0.05),
-              Text('Total meditations: ' + (_userstate.user.totalMeditations.length).toString(),
-                style: Configuration.tabletText('tiny', Colors.black))
-            ],
-          ),
-        )
-      ],
-    );
-  }
-
-  Widget guided(context) {
-    List<Widget> getBalls() {
-      List<Widget> res = new List.empty(growable: true);
-      _meditationstate.selmeditation.content.forEach((key, value) {
-        int index = int.parse(key);
-        res.add(Container(
-          width: Configuration.safeBlockHorizontal * 2,
-          height: Configuration.safeBlockHorizontal * 2,
-          margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _index == index
-                ? Color.fromRGBO(0, 0, 0, 0.9)
-                : Color.fromRGBO(0, 0, 0, 0.4),
-          ),
-        ));
-      });
-      return res;
-    }
-
-    Widget getContent(slide) {
-
+    Widget containerTitle(String title){
       return Container(
-        padding: EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            slide['title'] != null ? Text(slide['title'],style: Configuration.tabletText('small', Colors.black, font: 'Helvetica')) : Container(),
-            slide['image'] != null ? Image(image: NetworkImage(slide['image'])) : Container(),
-            slide['text'] != null ?  Text(slide['text'], style: Configuration.tabletText('tiny', Colors.white,font:'Helvetica')) : Container(),
-            SizedBox(height: Configuration.height*0.02),
-            AnimatedOpacity(
-            duration: Duration(seconds: 5),
-            opacity: finished ? 1 : 0,
-            child: TabletStartButton(
-              onPressed: ()=> {_meditationstate.setMeditation(_meditationstate.selmeditation, _userstate.user, _userstate.data)},
-              ),
-            )
-        ]),
+        width: Configuration.width,
+        padding: EdgeInsets.all(Configuration.smpadding),
+        decoration: BoxDecoration(
+          border: Border.symmetric(
+            horizontal: BorderSide(
+              color: Colors.grey,
+              width: 1,
+            ),
+          ),
+          color: Colors.white
+        ),
+        child: Text(title, style: Configuration.text('smallmedium',Colors.black)),
       );
     }
 
-    return Stack(children: [
-      CarouselSlider.builder(
-          itemCount: _meditationstate.selmeditation.content.entries.length,
-          itemBuilder: (context, index) {
-            return getContent(_meditationstate.selmeditation.content[index.toString()]);
-          },
-          options: CarouselOptions(
-              height: Configuration.height,
-              viewportFraction: 1,
-              initialPage: 0,
-              enableInfiniteScroll: false,
-              reverse: false,
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _index = index;
-                  if (_index == _meditationstate.selmeditation.content.entries.length - 1) {
-                    finished = true;
-                  }
-                });
-              })
-      ),
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: getBalls(),
-        ),
-      ),
-    ]);
-  }
-
-  Widget countdown(context){
-    return Stack(
-        children: [
-        Align(
-          alignment: Alignment.center,
-          child: _meditationstate.selmeditation.type != 'free' ? 
-            Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: Configuration.height*0.1,
-                width: Configuration.height*0.1,
-                child: Image(image: NetworkImage(_meditationstate.selmeditation.image),fit: BoxFit.cover),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
-              ),
-              SizedBox(height: Configuration.blockSizeVertical*3),
-              Text(_meditationstate.selmeditation.title,style: Configuration.tabletText('tiny',Colors.white))
-            ],
-          ) :    
-          Container(
-            height: Configuration.blockSizeHorizontal * 30,
-            width: Configuration.blockSizeHorizontal * 30,
-            decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
-            child: Center(child: Text('free meditation', style:Configuration.tabletText('tiny', Colors.white))),
-          ),
-        ),
-        Positioned(
-          bottom: 50,
-          right:10,
-          left:10,
-          child: Column(children: [
-            Slider(
-              activeColor: Configuration.maincolor,
-              inactiveColor: Colors.white,
-              min: 0.0,
-              max: _meditationstate.selmeditation.duration.inMinutes.toDouble(),
-              onChanged: (a)=> null, 
-              value:_meditationstate.totalduration.inSeconds/60 - _meditationstate.duration.inSeconds/60 ,
-              label:  _meditationstate.duration.inHours > 0
-                    ? _meditationstate.duration.toString().substring(0, 7)
-                    : _meditationstate.duration.toString().substring(2, 7)
-            ),
-            Observer(builder: (context) {
-            if (_meditationstate.state == 'started') {
-              return FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  onPressed: () => _meditationstate.pause(),
-                  child: Icon(Icons.pause, color: Colors.black));
-            } else {
-              return FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  onPressed: () => _meditationstate.startTimer(),
-                  child: Icon(Icons.play_arrow, color: Colors.black));
-            }
-          })
-          ]),
-        )
-      ]);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _meditationstate = Provider.of<MeditationState>(context);
-    _userstate = Provider.of<UserState>(context);
 
     return Scaffold(
-        appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-            icon: Icon(Icons.close),
-            color: Colors.black,
-            onPressed: () {
-              _meditationstate.pause();
-              Navigator.pop(context);
-            },
-          ),
-      ),
       extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor:Colors.transparent,
+        leading: CloseButton(color: Colors.black)
+      ),
       body: Container(
-        decoration:  BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [
-                Color.fromRGBO(23,23,23,100),
-                Configuration.maincolor,
-              ],
-            )
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Configuration.maincolor.withOpacity(0.9),
+              Colors.black.withOpacity(0.8),
+              Configuration.maincolor,
+            ],
           ),
-        child: Observer(
-              builder: (BuildContext context) {
-                if (_meditationstate.state == 'pre_guided') {
-                  return guided(context);
-                } else if (_meditationstate.state == 'started' || _meditationstate.state == 'paused') {
-                  return countdown(context);
-                } else {
-                  return finish(context);
-                }
-              }
-            ),
-          )
-        );
+        ),
+        child: ListView(
+          physics: ClampingScrollPhysics(),
+          children: [
+              Container(
+                padding: EdgeInsets.all(Configuration.smpadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+
+                    Material(
+                      elevation: 2,
+                      borderRadius: BorderRadius.circular(
+                        Configuration.borderRadius/3
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.all(
+                          Configuration.smpadding
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255,236,225,197),
+                          borderRadius: BorderRadius.circular(
+                            Configuration.borderRadius/3
+                          )
+                        ),
+
+                        child: Text('Meditation is only improved with a calm and relaxed attitude.\n\nUse your heart, we are not machines',
+                        textAlign: TextAlign.center,
+                          style: Configuration.text('smallmedium',Colors.black),
+                        ),
+                      )
+                    ),
+
+                  ],
+                ),
+              ),
+              
+              SizedBox(height: Configuration.verticalspacing*1.5),
+
+              
+              Container(
+                padding: EdgeInsets.all(
+                  Configuration.smpadding
+                ),
+                decoration: BoxDecoration(
+                  border: Border.symmetric(
+                    horizontal: BorderSide(
+                      color: Colors.black,
+                      width: 1
+                    )
+                  ),
+                  color: Color.fromARGB(255,236,225,197),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.self_improvement,
+                      color: Colors.black,
+                      size: Configuration.smicon,
+                    ),
+                    SizedBox(width: Configuration.verticalspacing),
+
+                    Text(
+                      'Meditation techniques'.toUpperCase(),
+                      style: Configuration.text('smallmedium',Colors.black),
+                    ),
+                  ],
+                ),
+              ),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Configuration.lightgrey
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      child: Text('''Work through the steps but don't overemphasize it, the most important thing is to be relaxed and aware. Whenever you find tension, remember to relax.\n\nStart your practice always with the first step and then gradually build up your practice. Some techniques can be mixed''',
+                        style: Configuration.text('small',Colors.black, font:'Helvetica'),
+                        textAlign: TextAlign.justify
+                      ),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: techniques.length,
+                      itemBuilder: ((context, index){
+                        bool changedStage = lastStage != techniques[index].startingStage;
+                        lastStage = techniques[index].startingStage;
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            changedStage ? 
+                              containerTitle(
+                                lastStage == 0 ? "Preliminary techniques" :
+                                'Stage ' + lastStage.toString()
+                              ) 
+                              : Container(),
+
+                            ListTile(
+                              onTap:() {
+                                selectContent(content:techniques[index]);
+                              },
+                              //IMAGE OF THE TECHNIQUE
+                              leading: Container(
+                                height: Configuration.verticalspacing*4,
+                                width: Configuration.verticalspacing*4,
+                                decoration:  BoxDecoration(
+                                  shape: BoxShape.circle,
+                                ),
+                                child:techniques[index].image != null && techniques[index].image.isNotEmpty ? 
+                                CachedNetworkImage(
+                                  imageUrl: techniques[index].image,
+                                  fit: BoxFit.cover
+                                ): Container(),
+                              ),
+                              title: Text(techniques[index].title, style: Configuration.text('smallmedium',Colors.black)),
+                              subtitle: Text(techniques[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
+                              trailing: Icon(
+                                Icons.info,
+                                color:Colors.black,
+                                size: Configuration.smicon
+                              ),
+
+                            ),
+                          ],
+                        );
+                      })
+                    ),
+                  ],
+                ),
+              ),
+              
+
+              // DISTRACTIONS  !!!
+              Container(
+                padding: EdgeInsets.all(
+                  Configuration.smpadding
+                ),
+                decoration: BoxDecoration(
+                  border: Border.symmetric(
+                    horizontal: BorderSide(
+                      color: Colors.black,
+                      width: 1
+                    )
+                  ),
+                  color: Color.fromARGB(255,236,225,197),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.psychology,
+                      color: Colors.black,
+                      size: Configuration.smicon,
+                    ),
+                    SizedBox(width: Configuration.verticalspacing),
+
+                    Text(
+                      'Distractions'.toUpperCase(),
+                      style: Configuration.text('smallmedium',Colors.black),
+                    ),
+                  ],
+                ),
+                ),
+                // SAME AS TECHNIQUES
+
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Configuration.lightgrey
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      child: Text('''Distractions are part of the practice. The most important skill to build, is to learn to accept this fact and enjoy the moment we wake up. The more you enjoy this, the sooner you'll realize next time. Smile. \n\n All distractions follow the same path, in reverse order, starting from the upper stage to the lowest one. ''', 
+                        textAlign: TextAlign.justify,
+                        style: Configuration.text('small', Colors.black, font: 'Helvetica'),
+                      )
+                    ),
+
+                    //listview with distractions
+
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: distractions.length,
+                      itemBuilder: ((context, index){
+                        bool changedStage = lastStage != distractions[index].startingStage;
+                        lastStage = distractions[index].startingStage;
+
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            changedStage ? 
+                              containerTitle(
+                                lastStage == 0 ? "Preliminary distractions" :
+                                'Stage ' + lastStage.toString()
+                              ) 
+                              : Container(),
+
+                            ListTile(
+                              onTap:() {
+                                selectContent(content:distractions[index]);
+                              },
+                              //IMAGE OF THE TECHNIQUE
+                              leading: Container(
+                                height: Configuration.verticalspacing*4,
+                                width: Configuration.verticalspacing*4,
+                                decoration:  BoxDecoration(
+                                  shape: BoxShape.circle,
+                                ),
+                                child:distractions[index].image != null && distractions[index].image.isNotEmpty ? 
+                                CachedNetworkImage(
+                                  imageUrl: distractions[index].image,
+                                  fit: BoxFit.cover
+                                ): Container(),
+                              ),
+                              title: Text(distractions[index].title, style: Configuration.text('smallmedium',Colors.black)),
+                              subtitle: Text(distractions[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
+                              trailing: Icon(
+                                Icons.info,
+                                color:Colors.black,
+                                size: Configuration.smicon
+                              ),
+
+                            ),
+                          ],
+                        );
+                      })
+                    ),
+                    
+                  ]
+                )
+              ),    
+                     
+
+
+          ],
+        ),
+      ),
+    );
   }
 }
 
-
-
-
-
-
-
-
-
-*/
 

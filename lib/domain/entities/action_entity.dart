@@ -1,6 +1,5 @@
 
 // Para las acciones que hace el usuario
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -42,6 +41,7 @@ class UserAction {
         "unfollow": () => "unfollowed " + getAction(action),
         "meditation": () => 'meditated for ' + action[0].toString() + ' min',
         "guided_meditation": () => "took " + action[0].toString() + ' for ' + action[1].toString() + ' min',
+        "video" : () => 'watched ' + getAction(action),
         "updatestage": () => "climbed up one stage to " + action,
         "recording": ()=> "listened to " + action[0].toString() +  ', ' + action[1].toString(),
         'game': () => 'played ',
@@ -73,6 +73,7 @@ class UserAction {
       'updatestage': Icons.landscape,
       'game': Icons.games,
       'lesson' : Icons.book,
+      "video": Icons.video_library,
       'recording': Icons.audiotrack
     };
     

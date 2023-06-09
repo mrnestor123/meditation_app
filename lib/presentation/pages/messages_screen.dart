@@ -2,6 +2,7 @@
 
 import 'package:collection/algorithms.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -17,6 +18,7 @@ import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialo
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/main.dart';
 import 'package:provider/provider.dart';
+import 'commonWidget/back_button.dart';
 import 'commonWidget/date_tostring.dart';
 import 'config/configuration.dart';
 
@@ -43,8 +45,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
         ],
       ),
       //trailing: ,
-      subtitle: Text(
-        m.date.toString().substring(0,16),style: Configuration.text('small',Colors.grey)),
+      subtitle: Text(m.date.toString().substring(0,16),style: Configuration.text('small',Colors.grey)),
       trailing:m.type == 'classrequest' ?
       Row(
         mainAxisSize:MainAxisSize.min,
@@ -87,7 +88,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
       Message lastMessage = c.lastMessage;
 
       if(lastMessage != null){
-          List<dynamic> unreadMessages =  c.me['unreadMessages']!= null && c.me['unreadMessages'].length ? 
+          List<dynamic> unreadMessages = c.me['unreadMessages']!= null && c.me['unreadMessages'].length ? 
           c.me['unreadMessages']:[];
         // HAY QUE LLEVAR LA CUENTA DE LOS MENSAJES SIN LEER ??????
 
@@ -117,10 +118,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 )
               ).then((value) => setState((){}));
             },
-            title: Text(c.notMe['username'], style: Configuration.text('smallmedium',  unreadMessages.length > 0 ? Colors.black : Colors.black.withOpacity(0.5))),
+            title: Text(c.notMe['nombre'], style: Configuration.text('smallmedium',  unreadMessages.length > 0 ? Colors.black : Colors.black.withOpacity(0.5))),
             subtitle: Text(
-              lastMessage.text
-              ,style: Configuration.text('small',unreadMessages.length > 0 ? Colors.black : Colors.grey, font: 'Helvetica')),
+              lastMessage.text,style: Configuration.text('small',unreadMessages.length > 0 ? Colors.black : Colors.grey, font: 'Helvetica')),
           )
         );
 
@@ -151,6 +151,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
         child: Icon(Icons.add),
       ),*/
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: Configuration.maincolor, 
+
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+          statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+        ),
         elevation:0,
         centerTitle:true,
         backgroundColor: Configuration.maincolor,
@@ -161,7 +169,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
             SizedBox(width: Configuration.verticalspacing),
             Text('Messages',style:Configuration.text('medium',Colors.white))
           ]),
-        leading: BackButton(color: Colors.white),
+        leading: ButtonBack(color: Colors.white),
         actions:[
          
          /* IconButton(
@@ -237,7 +245,6 @@ class MessagesIcon extends StatefulWidget {
   @override
   State<MessagesIcon> createState() => _MessagesIconState();
 }
-
 
 class _MessagesIconState extends State<MessagesIcon> {
 
@@ -407,7 +414,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     userImage: _messagesState.selectedChat.notMe['userimage'],
                   ),
                   SizedBox(width: Configuration.verticalspacing),
-                  Text(_messagesState.selectedChat.notMe['username'],style: Configuration.text('medium', Colors.black)),
+                  Text(_messagesState.selectedChat.notMe['nombre'],style: Configuration.text('medium', Colors.black)),
                   ]);
               }
             }
@@ -531,6 +538,7 @@ void sendMessage({MessagesState state, User to, User from, then, context}){
               SizedBox(height: Configuration.verticalspacing),
               Expanded(
                 child: TextField(
+                  textCapitalization: TextCapitalization.sentences,
                   controller:controller,
                   maxLines:null,
                   decoration: InputDecoration(

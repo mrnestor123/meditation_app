@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/game_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/domain/usecases/user/answer_question.dart';
 import 'package:mobx/mobx.dart';
 import 'package:video_player/video_player.dart';
 
@@ -64,13 +63,8 @@ abstract class _GameState with Store {
 
   @action
   void selectgame(Game g){
-    if(selectedgame ==  g){
-      selectedgame = null;
-    }else{
-      started = false;
-      selectedgame = g;
-    }
-
+    started = false;
+    selectedgame = g;
     state = before_video;
   }
 
@@ -100,8 +94,8 @@ abstract class _GameState with Store {
       user.answeredquestions[selectedgame.cod] = answeredquestions.length;
       max = true;
       
-      if(user.answeredquestions[selectedgame.cod] == selectedgame.questions.length && user.gameposition == selectedgame.position){
-        user.gameposition++;
+      if(user.answeredquestions[selectedgame.cod] == selectedgame.questions.length && user.userProgression.gameposition == selectedgame.position){
+        user.userProgression.gameposition++;
       }
 
       repository.updateUser(user:user);

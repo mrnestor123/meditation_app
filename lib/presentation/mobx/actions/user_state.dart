@@ -5,22 +5,19 @@ import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/game_entity.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
-import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/domain/usecases/meditation/take_meditation.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
+
+import 'package:meditation_app/presentation/pages/meditation_screen.dart';
 import 'package:mindful_minutes/mindful_minutes.dart';
 import 'package:mobx/mobx.dart';
 
+import '../../../domain/entities/retreat_entity.dart';
 import 'error_helper.dart';
 
 part 'user_state.g.dart';
@@ -31,19 +28,16 @@ class UserState extends _UserState with _$UserState {
 
 abstract class _UserState with Store {
   UserRepository repository;
-
   bool perm;
-
   final _plugin = MindfulMinutesPlugin();
 
-
-
   _UserState({this.repository}){
-     if(Platform.isIOS){
-      _plugin.checkPermission().then((hasPermission){
-        if (!hasPermission) _plugin.requestPermission();
-      });
-     }
+    data = DataBase();
+    if(Platform.isIOS){
+    _plugin.checkPermission().then((hasPermission){
+      if (!hasPermission) _plugin.requestPermission();
+    });
+    }
   }
 
   @observable
@@ -79,8 +73,13 @@ abstract class _UserState with Store {
   @observable 
   List<User> teachers = new List.empty(growable: true);
 
+ 
+
   @observable
   Map lessondata;
+
+  // PARA QUE NO SE ESPERE A SACAR LOS DATOS !!!!
+  Future gettingData;
 
 
   @action
@@ -117,18 +116,27 @@ abstract class _UserState with Store {
   }
 
   @action
-  Future<bool> takeLesson(LessonModel l) async {
+  Future<bool> takeLesson(Content l) async {
     user.progress = null;
     int currentposition = user.stagenumber;
 
     user.takeLesson(l, data);
-    repository.updateUser(user:user);
-    repository.takeLesson(u: user, l: l);
-    uploadActions(user, repository);
 
+    // SE HACE DOBLE !!
+    if(l.isLesson()){
+      DoneContent done = user.finishContent(l);
+
+      if(done != null){
+        repository.updateUser(user: user, done:done, type: 'content');
+      }
+    }
+
+    
+    //uploadActions(user, repository);
+    repository.updateUser(user:user, type:'user');
 
     // SI HA SUBIDO DE ETAPA !!!! 
-    //CHECKEAR EL UPLOADSTAGE !!!
+    // CHECKEAR EL UPLOADSTAGE !!!
     if (currentposition < user.stagenumber) {
       return true;
     } else {
@@ -139,13 +147,15 @@ abstract class _UserState with Store {
   //We get all the necessary data for displaying the app from the database and the
   @action
   Future getData() async {
+    gettingData = repository.getData();
     foldResult(
-      result: await repository.getData(),  
+      result: await gettingData,  
       onSuccess: (DataBase d) { data = d;}
     );
   }
 
-  //!!COMPROBAR ERRORES
+  //!!COMPROBAR ERRORES ESTO SOBRA !!
+  /*
   @action
   Future follow(User u, bool follow) async {
      if (follow) {
@@ -159,39 +169,66 @@ abstract class _UserState with Store {
     // Updateamos también los datos del usuario val que se sigue
    // repository.updateUser(user: u);
    // repository.updateUser(user:user);
-  }
+  }*/
 
+
+  Future getFeed() async {
+    Either<Failure, List<Request>> query = await repository.getFeed();
+    
+    if(query.isRight()){
+      List<Request> feed = new List.empty(growable: true);
+      query.fold((l) => null, (r) => feed = r);
+      return feed;
+    }
+  }
   
   @action
   Future changeName(String username) async {
     user.nombre = username;
-    return repository.updateUser(user: user);
+    
+    var fold = await repository.setUserName(username: username, coduser: user.coduser);
+
+    if(fold.isRight()){
+      return true;
+    }else{
+
+      foldResult(
+        result: fold,
+      );
+
+      return false;
+    }
   }
 
   @action 
   Future updateUser({User u})async{
+    // NO COMPRUEBA ERRORES !!!
     return repository.updateUser(user: u != null ? u : user);
   }
 
 
-  Future finishRecording(Content c, Duration done, Duration total) async{
-    if(user.finishRecording(c, done, total)){
-      repository.updateUser(user: user, toAdd: [c],type: 'recording');
+  Future finishContent(Content c, Duration done, Duration total) async{
+    //if(user.finishRecording(c, done, total)){
+    DoneContent d = user.finishContent(c, done, total);
+
+    if(d !=  null){
+      repository.updateUser(user: user, done: d, type: 'content');
     }
 
-    uploadActions(user, repository);
+   // uploadActions(user, repository);
   }
 
   //UTILIZAR UPLOADIMAGE EN ESTE!!
   @action 
-  Future changeImage(dynamic image) async {
+  Future changeImage(String image) async {
     
     /// ESTO HABRA QUE DEVOLVER ERROR
-    String imgString = await uploadFile(image:image);
-   
-    user.setImage(imgString);
+    //String imgString = await uploadFile(image:image);
 
-    foldResult(result: await repository.updateUserProfile(u:user, image: imgString));
+    user.setImage(image);
+
+    foldResult(result: await repository.updateUser(user: user, type: 'user'));
+
   }
 
   @action 
@@ -203,7 +240,7 @@ abstract class _UserState with Store {
     foldResult(
       result: fileupload,
       onSuccess: (r){
-        user.files.add(File.fromUri(Uri.file(r)));
+        //user.files.add(File.fromUri(Uri.file(r)));
         imgstring = r;
       }
     );
@@ -222,30 +259,59 @@ abstract class _UserState with Store {
 
   @action 
   Future connect() async {
-    var loggedresult = await repository.islogged();
-    var dataresult = await repository.getData();
     
-    // MUY COMPLEJO LO DEL HASFAILED
-    loggedresult.fold(
-      (l) => hasFailed = false, 
-      (r) { 
-        user = r; 
-        loggedin = true;
-    });
+    var loggedresult = await repository.islogged();
 
-    foldResult(
-      result: dataresult, 
-      onSuccess: (DataBase d) {
-        data = d;
-        if(user != null){
-          getUsers();
-          hasFailed= false;
+    loggedresult.fold((l) => null, (r) => user =  r);
+    
+    if(loggedresult.isRight()){
+
+      gettingData = repository.getData();
+
+      Either<Failure,dynamic> result = await gettingData;
+  
+      if(result.isLeft()){
+        Failure f;
+        
+        result.fold((l) => f = l, (r) => null);
+        
+        if(f is ServerFailure){
+          errorMessage =  'ERROR';
         }
       }
-    );
+      
+      foldResult(
+        result: await gettingData,
+        onSuccess: (DataBase d) { data = d;}
+      );
+    }
+
+
+   // var dataresult = futures[0];
+
+    /*
+    if(dataresult.isLeft()){
+      // SI NO HAY CONEXIÓN CON LA BASE DE DATOS
+      // SE CARGA LA BASE DE DATOS LOCAL
+      foldResult(
+        result: dataresult,
+        onSuccess: (r){
+          data = r;
+        }
+      );
+
+
+      print('WE DIDNT GET DATA');
+
+    }else{
+      dataresult.fold((l) => null, (r) => data = r);
+    }
+
+
+    await Future.delayed(Duration(seconds: 2));
+    */
 
     return;
-    
   }
 
 
@@ -265,16 +331,6 @@ abstract class _UserState with Store {
     loading = false;
   }
 
-  Future uploadContent({Content c}) async{
-    //c.createdBy = user;
-    
-    user.uploadContent(c:c);
-    Either<Failure,void> upload = await repository.uploadContent(c:c);
-
-    foldResult(
-      result: upload
-    );
-  }
 
   // PASAR A MESSAGES_STATE
   void seeMessages(){
@@ -331,18 +387,30 @@ abstract class _UserState with Store {
     return repository.updateUser(user:user);
   }
 
+
+
+  // uploadActions(user, repository);
+  // HAY QUE HACER UN FOLD CON ESTO !!!
   @action
-  Future finishMeditation({Meditation m}) async {
-    user.takeMeditation(m, data);
+  Future finishMeditation({Meditation m, bool earlyFinish = false}) async {
+    user.settings.lastMeditDuration = m.duration.inMinutes;
 
-    uploadActions(user, repository);
-
-    //HAY QUE HACER UN FOLD CON ESTO !!!
-    repository.updateUser(user: user,d:data, toAdd: [m],type: 'meditate');
+    if(!user.offline){
+      user.takeMeditation(m, data);
+      repository.updateUser(user: user,d:data, toAdd: [m],type: 'meditate');
+    }else {
+      user.takeMeditation(m, data, true);
+      repository.cacheMeditation(m:m,u:user);
+    }
 
     AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
-    assetsAudioPlayer.open(Audio("assets/audios/gong.mp3"));
+    
+    assetsAudioPlayer.open(
+      Audio(bells.firstWhere((element) => element.name  == user.settings.meditation.endingBell).sound)
+    );
 
+    // HACER ESTO PARA ANDROID TAMBIÉN !!
+    // IMPORTANTE !!!!!!!!
     if(Platform.isIOS){
       _plugin.writeMindfulMinutes(DateTime.now().subtract(m.duration), DateTime.now());
     }
@@ -352,4 +420,26 @@ abstract class _UserState with Store {
   Future closeStageUpdate(){
     user.stageupdated = false;
   }
+
+  @action
+  Future createRetreat({Retreat r}){
+    user.retreats.add(r);
+   // repository.createRetreat(r:r);
+    
+    return repository.updateUser(user: user, toAdd: [r],type: 'retreat');
+  }
+
+  void addReport({String str, MeditationReport report}) async{
+    Meditation m = user.totalMeditations.last;
+    m.report = report;
+
+    foldResult(
+      result: await repository.addMeditationReport(m: m, report: report,  user:user)
+    );
+  }
+
+  Future sendQuestion(String text){
+    return repository.sendQuestion(coduser: user.coduser, question: text);
+  }
+
 }

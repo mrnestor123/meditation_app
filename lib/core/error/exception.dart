@@ -1,14 +1,42 @@
-class ServerException implements Exception {}
+class RegularException implements Exception {
+  // List properties;
+  final String error;
+  RegularException({this.error});
+}
 
-class CacheException implements Exception {}
 
-class UserException implements Exception{}
+class ServerException extends RegularException {
+  ServerException({String error}) : super(error:error);
 
-class LoginException implements Exception{}
 
-class LessonException implements Exception{}
+  @override
+  String toString(){
+    
+    return '$error';
+  }
+}
 
-class DataException implements Exception{}
+class CacheException extends RegularException {
+  CacheException({String error}) : super(error:error);
+}
 
-class MeditationException implements Exception{}
+class UserException extends RegularException {
+  UserException({String error}) : super(error:error);
+}
+
+class LoginException extends RegularException {
+  LoginException({String error}) : super(error:error);
+}
+
+class LessonException extends RegularException {
+  LessonException({String error}) : super(error:error);
+}
+
+class DataException extends RegularException {
+  DataException({String error}) : super(error:error);
+}
+
+class MeditationException extends RegularException {
+  MeditationException({String error}) : super(error:error);
+}
 

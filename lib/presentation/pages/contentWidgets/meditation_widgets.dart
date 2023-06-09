@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +12,7 @@ import '../../../domain/entities/meditation_entity.dart';
 import '../../mobx/actions/meditation_state.dart';
 import '../../mobx/actions/user_state.dart';
 import '../commonWidget/alert_dialog.dart';
+import '../commonWidget/start_button.dart';
 import '../config/configuration.dart';
 
 class WeekList extends StatefulWidget {
@@ -42,7 +47,7 @@ class _WeekListState extends State<WeekList> {
     ).toList();
 
 
-     for (var item in weekDays) {
+    for (var item in weekDays) {
       bool hasMeditated = filteredmeditations.where((meditation)=>
         meditation.day.weekday == item['index']
       ).isNotEmpty;
@@ -104,7 +109,10 @@ class _WeekItemState extends State<WeekItem> {
       var timer = Timer(Duration(seconds: 1), () => setState(() => changed = true));
     }
 
+    bool showColor = widget.meditated && !widget.animate || widget.animate && changed;
+
     return AnimatedContainer(
+      padding: EdgeInsets.all(3),
       width: Configuration.width * 0.1,
       height: Configuration.width * 0.1,
       duration: Duration(seconds: 3),
@@ -115,13 +123,29 @@ class _WeekItemState extends State<WeekItem> {
             : Configuration.grey,
         shape: BoxShape.circle,
       ),
-      child: Center(
-          child: Text(widget.day,
-              style: TextStyle(
-                  color: widget.meditated && !widget.animate ||
-                          widget.animate && changed
-                      ? Colors.black
-                      : Colors.white))),
+      child: AnimatedContainer(
+        duration: Duration(seconds:3),
+        curve: Curves.easeIn,
+        decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+                color: widget.meditated && !widget.animate || widget.animate && changed ? 
+                Colors.white  :  Colors.grey,
+                width: 2)
+
+        ),
+        child: Center(
+            child: Text(widget.day,
+                style: Configuration.text(
+                  'small', 
+                  showColor ?
+                  Colors.black :
+                  Colors.black.withOpacity(0.4)
+                  
+                  )
+                ),
+        ),
+      )
     );
   }
 }
@@ -141,7 +165,7 @@ class _CirclePickerState extends State<CirclePicker> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SingleCircularSlider(
-          95,
+          120,
           _meditationstate.selmeditation.duration.inMinutes,
           baseColor: Colors.grey.withOpacity(0.6),
           handlerColor: Colors.transparent,
@@ -191,4 +215,326 @@ void wantToExitDialog(context){
       }*/
     }
   );
+}
+
+
+
+
+class IntervalBells extends StatefulWidget {
+
+  Duration time;
+  
+  IntervalBells({Key key, this.time}) : super(key: key);
+
+  @override
+  State<IntervalBells> createState() => _IntervalBellsState();
+}
+
+class _IntervalBellsState extends State<IntervalBells> {
+
+  List<IntervalBell> bells = [
+    IntervalBell(sound: 'assets/audios/bowl-new.wav',name:'Bowl sound',image:'assets/audios/bowl.png'),
+    IntervalBell(sound: 'assets/audios/high-gong.wav',name:'High gong',image:'assets/audios/high-gong.png'),
+    IntervalBell(sound: 'assets/audios/church-new.mp3',name: 'Church bell', image:'assets/audios/church-bell.png'),
+    IntervalBell(sound: 'assets/audios/bronze-bell.wav',name: 'Bronze bell', image:'assets/audios/bronze-bell.png'),
+    IntervalBell(sound: 'assets/audios/bowl-sound.mp3',name:'Bowl sound',image:'assets/audios/bowl.png', disabled:true),
+    IntervalBell(sound: 'assets/audios/church-bell.mp3',name: 'Church bell', image:'assets/audios/church-bell.png', disabled:true),
+  ];
+
+  int i = 0;
+  AssetsAudioPlayer assetsAudioPlayer = new AssetsAudioPlayer();
+  MeditationState  _meditationstate;
+
+  dynamic addModifyBell({IntervalBell b, int i}){
+      int selectedIndex = b != null ? bells.indexWhere((element) => element.image == b.image) : 0;
+      String selectedMode =  b == null || b.repeat ? 'Repeat': 'Once';
+
+      int selectedTime = b != null ? b.playAt : 1;
+
+      CarouselController c;
+
+      return showModalBottomSheet(
+        isScrollControlled: true,
+        barrierColor: Colors.black.withOpacity(0.5),
+          shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius/2)),
+        ),
+        context: context, 
+        builder: (context){
+
+          double time =  widget.time !=null ?
+            widget.time.inMinutes.toDouble() 
+            :  _meditationstate.selmeditation.meditationSettings.isUnlimited ? 61 
+            :  _meditationstate.selmeditation.duration.inMinutes.toDouble();
+          
+          return StatefulBuilder(
+            builder: (context,setState) {
+              return SafeArea(
+                child: Wrap(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical:Configuration.smpadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Interval bell',  style: Configuration.text('smallmedium',Colors.black)),
+                          SizedBox(height: Configuration.verticalspacing),
+              
+                          CarouselSlider.builder(
+                            itemCount: bells.where((element) => !element.disabled).length,
+                            
+                            itemBuilder: (context,i,selected){
+                              IntervalBell b = bells[i];
+                              
+                              return GestureDetector(
+                                onTap: (){
+                                  assetsAudioPlayer.stop().then((s){
+                                    assetsAudioPlayer.open(Audio(bells[i].sound));
+                                  });
+                                },
+                                child: Container(
+                                  decoration:BoxDecoration(
+                                    color: selectedIndex == i ? Configuration.lightgrey : Colors.white,
+                                    borderRadius: BorderRadius.circular(Configuration.borderRadius)
+                                  ),
+                                  padding: EdgeInsets.all(Configuration.smpadding),
+                                  margin:EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Image.asset(b.image,fit: BoxFit.contain,
+                                        
+                                        ),
+                                      ),
+                                      SizedBox(height: Configuration.verticalspacing),
+                                      Text(b.name, style: Configuration.text('small',Colors.black))
+                                  ])
+                                ),
+                              );
+                            },
+                            options: CarouselOptions(
+                              scrollPhysics: ClampingScrollPhysics(),
+                              viewportFraction:0.5,
+                              aspectRatio: Configuration.width > 500 ?
+                              5/2: 4/2,
+                              initialPage: selectedIndex,
+                              enableInfiniteScroll: false,
+                              onPageChanged: (int i, d){
+                                assetsAudioPlayer.stop().then((s){
+                                  assetsAudioPlayer.open(Audio(bells[i].sound));
+                                });
+              
+                                setState(() {
+                                  selectedIndex =  i;
+                                });
+                              }
+                            )
+                          ),
+                          
+                          SizedBox(height: Configuration.verticalspacing),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal:20.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                DropdownButton<String>(
+                                  underline: Container(),
+                                  style: Configuration.text('smallmedium',Colors.black,font:'Helvetica'),
+                                  items: ["Repeat","Once", 'Halfway'].map<DropdownMenuItem<String>>((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value.toString()),
+                                    );
+                                  }).toList(),
+                                  value:selectedMode,
+                                  onChanged: (newValue){
+                                    print('NEW VALUE: $newValue');
+                                    if(newValue == 'Halfway'){
+                                      selectedTime = time ~/ 2;
+                                    }
+                                    setState((){selectedMode = newValue;});
+                                }),
+                              ],
+                            ),
+                          ),
+                          
+                          SliderTheme(
+                            data:SliderThemeData(
+                              activeTickMarkColor: Colors.transparent,
+                              trackShape: RectangularSliderTrackShape(),
+                            ),
+                            child:Slider(
+                              label: selectedTime.toString() + ' min',
+                              activeColor: Colors.lightBlue,
+                              thumbColor: Colors.white,
+                              inactiveColor: Colors.white,
+                              min: 1,
+                              max:time -1,
+                              divisions:  time.floor() - 2,
+                              onChanged: (a){
+                                setState((){selectedTime = a.toInt();});
+                              }, 
+                              value: selectedTime.toDouble(),
+                            ),
+                          ),
+                          
+                          Text(selectedMode == 'Repeat' ? 
+                          'The bell will ring every $selectedTime minute' + (selectedTime!=1 ? 's':''):
+                          'The bell will ring at minute $selectedTime  ', 
+                          style: Configuration.text('small',Colors.grey,font:'Helvetica')),
+              
+                          SizedBox(height: Configuration.verticalspacing*2),
+              
+                          BaseButton(
+                            aspectRatio: Configuration.buttonRatio*1.2,
+                            text: 'Confirm',
+                            onPressed:(){
+                              IntervalBell bell = new IntervalBell(
+                                playAt: selectedTime,
+                                repeat: selectedMode == 'Repeat',
+                                name: bells[selectedIndex].name,
+                                image: bells[selectedIndex].image,
+                                sound:bells[selectedIndex].sound
+                              ); 
+              
+                              // hay que pasar esto a meditation settings !!
+                              if(b != null){
+                                _meditationstate.bells[i] = bell;
+                              }else{
+                                _meditationstate.bells.add(bell);
+                              }
+                              Navigator.pop(context);
+                            },
+                            color: Configuration.maincolor
+                          ),
+                          SizedBox(height: Configuration.verticalspacing),
+                          BaseButton(
+                            text:'Cancel',
+                            aspectRatio: Configuration.buttonRatio * 1.2,
+                            border: true,
+                            bordercolor:Colors.red,
+                            color:Colors.white,
+                            onPressed:(){
+                              Navigator.pop(context);
+                            },
+                            textcolor: Colors.red,
+                          ),
+                          SizedBox(height: Configuration.verticalspacing*3),
+                        ],
+                      )
+                    ),
+                  ],
+                ),
+              );
+            }
+          );
+        });
+    }
+    
+
+  Widget bell(IntervalBell b, setState, int i){
+      return ListTile(
+        key: Key(i.toString()),
+        title: Text(b.name, style: Configuration.text('small',Colors.black)),
+        subtitle: Text((b.repeat ? 'Every ': 'At ') + b.playAt.toString() + ' min',  style:Configuration.text('small',Colors.grey,font: 'Helvetica')),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedButton(
+              onPressed: (){
+                addModifyBell(b:b, i:i).then((d){setState((){});});
+              },
+              child: Icon(Icons.edit, color: Colors.blue, size: Configuration.smicon-5),
+              style: OutlinedButton.styleFrom(
+                primary: Colors.white,
+                side:BorderSide(color: Colors.blue),
+                padding:EdgeInsets.all(8),
+                shape: CircleBorder()
+              ),
+            ),
+            OutlinedButton(
+              onPressed: (){
+                _meditationstate.bells.remove(b);
+                setState((){});
+              },
+              child: Icon(Icons.remove,color:Colors.red, size:Configuration.smicon-5),
+              style: OutlinedButton.styleFrom(
+                primary: Colors.white,
+                side:BorderSide(color: Colors.red),
+                padding:EdgeInsets.all(8),
+                shape: CircleBorder()
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+  @override
+  Widget build(BuildContext context) {
+    _meditationstate = Provider.of<MeditationState>(context);
+    i = 0;
+
+    bool canAddBell = 
+    
+    
+    _meditationstate.selmeditation.meditationSettings.isUnlimited  ||  
+      widget.time != null && widget.time.inMinutes > 5 ||
+     _meditationstate.selmeditation.duration.inMinutes > 5;
+
+    return Column(
+        mainAxisSize:MainAxisSize.min,
+        children: [
+          SizedBox(height: Configuration.verticalspacing*2),
+
+          _meditationstate.bells.length == 0 ? 
+          Text('Press add to set up a new bell for the meditation',  style:Configuration.text('small',Colors.black,font: 'Helvetica')):
+          Column(children:_meditationstate.bells.map((IntervalBell b){
+            return bell(b,setState,i++);
+          }).toList()),
+          SizedBox(height: Configuration.verticalspacing*2),
+          OutlinedButton(
+            onPressed: canAddBell ? (){
+              addModifyBell().then((d){setState((){});});
+            } : null,
+            child: Row(
+              mainAxisSize:MainAxisSize.min,
+              children: [
+                Text('Add new interval bell',style: Configuration.text('tiny', Colors.green)),
+                Icon(Icons.add, color: Colors.green,size: Configuration.smicon-5),
+              ],
+            ),
+            style: OutlinedButton.styleFrom(
+              side:BorderSide(color: Colors.green),
+              padding:EdgeInsets.all(Configuration.tinpadding),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                side: BorderSide(color: Colors.black)
+              )
+            ),
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+
+          !canAddBell ? 
+          Text('The meditation duration should be more than 5 minutes to set a bell',
+            style:Configuration.text('small',Colors.grey,font: 'Helvetica'))
+          :  Container(),
+          SizedBox(height: Configuration.verticalspacing*5)
+        ],
+      );
+  }
+}
+
+
+
+String getBellString({List<IntervalBell> bells}){
+
+  String bellsString= '';
+
+  for(IntervalBell b in  bells ){
+    bellsString += b.name != null  && b.name.isNotEmpty ? b.name + ' ' : '';
+  };
+
+  return bellsString;
 }

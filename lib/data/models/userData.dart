@@ -18,57 +18,49 @@ import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/user_settings_entity.dart';
 
+import '../../domain/entities/retreat_entity.dart';
+
 class UserModel extends User {
-  UserModel(
-      {String coduser,
-      @required int stagenumber,
-      user,
-      String nombre,
-      String image,
-      Stage stage,
-      String role,
-      int position,
-      int meditposition,
-      int gameposition,
-      String userimage,
-      UserStats userStats,
-      answeredquestions,
-      followed,
-      settings,
-      description,
-      teachinghours,
-      location,
-      website,
-      int stagelessonsnumber,
-      int version,
-      unreadmessages,
-      seenIntroCarousel,
-      meditationTime,
-      stats})
+  UserModel({
+    String coduser,
+    @required int stagenumber,
+    user,
+    String nombre,
+    String image,
+    Stage stage,
+    String role,
+    String userimage,
+    UserStats userStats,
+    answeredquestions,
+    settings,
+    int version,
+    unreadmessages,
+    meditationTime,
+    offline,
+    lastmeditduration,
+    userProgression,
+    reminderTime,
+    teacherInfo,
+    stats
+  })
       : super(
         meditationTime:meditationTime,
         coduser: coduser,
         user: user,
-        gameposition: gameposition,
         image: image,
         version:version,
         unreadmessages: unreadmessages,
         settings: settings,
-        description:description,
-        teachinghours: teachinghours,
-        location: location,
-        website:website,
         role: role,
         stagenumber: stagenumber,
         nombre: nombre,
-        position: position,
-        meditposition: meditposition,
         stage: stage,
-        followed:followed,
         answeredquestions: answeredquestions,
         userStats: userStats,
-        seenIntroCarousel: seenIntroCarousel,
-        stagelessonsnumber: stagelessonsnumber
+        // ESTO ESTARÁ EN SETTINGS ???
+        userProgression: userProgression,
+        teacherInfo: teacherInfo,
+        offline:offline
       );
 
   factory UserModel.fromRawJson(String str) => UserModel.fromJson(json.decode(str),true);
@@ -78,37 +70,65 @@ class UserModel extends User {
   factory UserModel.fromJson(Map<String, dynamic> json, [bool expand =false]) {
 
     UserModel u = UserModel(
-        coduser: json["coduser"],
-        nombre: json['nombre'],
-        seenIntroCarousel: json["seenIntroCarousel"] == null ? false : json['seenIntroCarousel'],
-        position: json['position'] == null ? 0 : json['position'],
-        gameposition: json['gameposition'] == null ? 0 : json['gameposition'],
-        meditposition: json['meditposition'] == null ? 0 : json['meditposition'],
-        image: json['image'],
-        version: json['version'] == null ? 0  : json['version'],
-        settings: json['settings'] == null ? UserSettings.empty() : UserSettings.fromJson(json['settings']),
-        //ESTO HACE FALTA??
-        followed: json['followed'],
-        stagelessonsnumber: json['stagelessonsnumber'] == null ? json['stagenumber'] == null ? 1 : json['stagenumber'] : json['stagelessonsnumber'],
-        stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
-        stagenumber: json["stagenumber"] == null ? 1 : json["stagenumber"],
-        role: json["role"] == null ? null : json["role"],
-        description: json['description'],
-        unreadmessages:json['unreadmessages'] == null ? new List.empty(growable:true) : json['unreadmessages'].cast<String>(),
-        teachinghours:json['teachinghours'],
-        location: json['location'],
-        website: json['website'],
-        meditationTime: json['meditationtime'] != null ? DateTime.parse(json['meditationtime']):null,
-        answeredquestions: json['answeredquestions'] == null ? new Map() : json['answeredquestions'],
-        userStats:json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
-      ); 
+      coduser: json["codUser"] == null ? json['coduser'] : json["coduser"],
+      offline: json['offline'] != null ? json['offline']: false,
+      nombre: json['userName'] !=  null ? json['userName']: json['nombre'],
+      //seenIntroCarousel: json["seenIntroCarousel"] == null ? false : json['seenIntroCarousel'],
+      image: json['image'],
+      // VERSIÓN IRÁ EN SETTINGS !!!
+      version: json['version'] == null ? 0  : json['version'],
+      stage:json['stage'] == null ? null : new StageModel.fromJson(json['stage']),
+      stagenumber: json["stagenumber"] == null ? json['stageNumber'] != null ? json['stageNumber']: 1 : json["stagenumber"],
+      role: json["role"] == null ? null : json["role"],
+      //description: json['description'],
+      unreadmessages: json['unreadmessages'] == null ? new List.empty(growable:true) : json['unreadmessages'].cast<String>(),
+      meditationTime: json['meditationtime'] != null ? DateTime.parse(json['meditationtime']) : null,
+      answeredquestions: json['answeredquestions'] == null ? new Map() : json['answeredquestions'],
+     // lastmeditduration: json['lastmeditduration'] == null ? 0 : json['lastmeditduration'],
+     // reminderTime: json['reminderTime'] == null ? null : json['reminderTime'],
 
+      settings: json['settings'] == null 
+        ? UserSettings.empty() : 
+        json['settings']['new'] != null ? 
+        UserSettings.fromJson(json['settings']) :
+        UserSettings.fromJson({
+          'progression':json['settings']['progression'],
+          'lastMeditDuration': json['lastMeditDuration'],
+          'seenIntroCarousel': json['seenIntroCarousel'],
+          'reminderTime': json['reminderTime']
+        }),
+
+      teacherInfo: json['teacherInfo'] != null ?
+        TeacherInfo.fromJson(json['teacherInfo']) :
+        json['role'] == 'teacher' ? 
+        TeacherInfo.fromJson({
+          'description':json['description'],
+          'teachinghours': json['teachinghours'],
+          'location': json['location'],
+          'website': json['website'],
+        }) : null,
+      
+      userProgression: json['userProgression'] != null  ? 
+        UserProgression.fromJson(json['userProgression']): 
+        UserProgression.fromJson({
+          'stagenumber' : json["stagenumber"] == null ? json['stageNumber'] != null ? json['stageNumber'] :json['stagenumber'] : 1,
+          'position': json['position'],
+          'meditposition': json['meditposition'],
+          'gameposition': json['gameposition'],
+          'stagelessonsnumber': json['stagelessonsnumber'],
+        }),
+      
+      userStats: json['stats'] == null ? UserStats.empty() : UserStats.fromJson(json['stats'])
+    ); 
       
     if(expand){
-      if(json['readlessons'] != null && json['readlessons'].length > 0){
-        u.setReadLessons(json['readlessons']);
+      if(json['readLessons'] !=  null &&json['readLessons'].length > 0 ||  json['readlessons'] != null && json['readlessons'].length > 0){
+        for(var cod in json['readLessons'] != null ? json['readLessons']: json['readlessons']){
+          u.contentDone.add(DoneContent(stagenumber: 1, cod: cod, type: 'lesson'));
+        }
       }
 
+      // solo  con expand !!!
       if(json['presets']!= null){
         for(var preset in json['presets'] ){
           u.presets.add(MeditationPreset.fromJson(preset));
@@ -117,22 +137,22 @@ class UserModel extends User {
 
       if(json['doneContent'] != null){
         for(var doneContent in json['doneContent']){
-          u.contentDone.add(Content.fromJson(doneContent));
+          u.contentDone.add(DoneContent.fromJson(doneContent));
         }
       }
 
       
-      if(json['meditations'] != null) {
-        
-        for(var med in json['meditations'] ){
+      if(json['meditations'] != null && json['meditations'].length > 0) {
+        for(var med in json ['meditations'] ){
           u.totalMeditations.add(MeditationModel.fromJson(med,true));
         }
 
         //esto porque lo hacemos aquii!!!
-        u.totalMeditations.sort((a,b)=> a.day.compareTo(b.day));
-        u.userStats.total.meditations = u.totalMeditations.length;
+        u.totalMeditations.sort((a,b) => a.day != null && b.day != null ? a.day.compareTo(b.day) : -1);
+        u.userStats.doneMeditations = u.totalMeditations.length;
       }
 
+      
       // MIRAR SI UN PROFESOR QUIERE SEGUIR Y QUE LE SIGAN !!
       if(u.isTeacher()){
         if(json['students']!= null){
@@ -164,22 +184,21 @@ class UserModel extends User {
           }
         }
 
-
-        /*
         if(json['addedcourses']!= null){
           for(var course in json['addedcourses']){
             u.addedcourses.add(Course.fromJson(course));
           }
-        }*/
-      }else{
+        }
+      }
+      /*else{
         // SE PUEDE SEGUIR A UN PROFESOR !!! YO DIRÍA QUE SIII
+        
         if(json['following']!=null){
           for(var user in json['following']){
             //MEJORABLE !!
             u.following.add(UserModel.fromJson(user));
           }
         }
-
           
         if(json['followsyou']!=null){
           for(var user in json['followsyou']){
@@ -187,7 +206,7 @@ class UserModel extends User {
             u.followers.add(UserModel.fromJson(user));
           }
         }
-      }
+      }*/
 
       
       if(json['notifications']!=null){
@@ -202,14 +221,15 @@ class UserModel extends User {
           u.messages.add(Message.fromJson(msg));
         }
       }
-
-
-      /*
-      if(json['joinedcourses']!= null){
-        for(var course in json['joinedcourses']){
-          u.joinedcourses.add(Course.fromJson(course));
+      
+      if(json['retreats']!= null){
+        for(var retreat in json['retreats']){
+          u.retreats.add(Retreat.fromJson(retreat));
         }
-      }*/
+      }
+
+      u.checkStreak(true);
+
     }
 
     //  u.setMeditations(json['meditations'] != null ? json['meditations'] : []);
@@ -223,18 +243,13 @@ class UserModel extends User {
     "coduser": coduser == null ? null : coduser,
     "role": role == null ? null : role,
     "stagenumber": stagenumber == null ? 1 : stagenumber,
-    "position": position == null ? 0 : position,
-    "meditposition": meditposition == null ? 0 : meditposition,
-    "gameposition": gameposition == null ? 0 : gameposition,
     "nombre": nombre == null ? null : nombre,
+    "username": nombre == null ? null :  nombre,
     'stats': userStats == null ? null : userStats.toJson(),
     'image': image == null ? '' : image,
-    "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
-    'description': description,
-    'teachinghours':teachinghours, 
-    'location':location,
-    "seenIntroCarousel":seenIntroCarousel,
-    'website': website,
+    "userProgression": userProgression == null ? null : userProgression.toJson(),
+    //"seenIntroCarousel":seenIntroCarousel,
+    "teacherInfo": teacherInfo == null ? null : teacherInfo.toJson(),
     "settings": settings == null ? null: settings.toJson(),
     "following": following.map((user) => user.coduser).toList(),
     "unreadmessages":unreadmessages.map((e)=> e).toList(),
@@ -247,26 +262,37 @@ class UserModel extends User {
     "version": version
   };
 
+  Map<String, dynamic> updateFields(){
+    Map<String,dynamic>  json = new Map();
 
-  Map<String, dynamic> updateFields() => {
-    "stagenumber": stagenumber == null ? 1 : stagenumber,
-    "position": position == null ? 0 : position,
-    "meditposition": meditposition == null ? 0 : meditposition,
-    "gameposition": gameposition == null ? 0 : gameposition,
-    "nombre": nombre == null ? null : nombre,
-    'stats': userStats == null ? null : userStats.toJson(),
-    'image': image == null ? '' : image,
-    "stagelessonsnumber": stagelessonsnumber == null ? 1 : stagelessonsnumber,
-    'description': description,
-    'teachinghours':teachinghours, 
-    'location':location,
-    "seenIntroCarousel":seenIntroCarousel,
-    "students": students.map((stud)=> stud.coduser).toList(),
-    "joinedcourses": joinedcourses.map((course)=> course.cod).toList(),
-    'website': website,
-    "settings": settings == null ? null : settings.toJson(),
-    "presets": presets == null ? null : presets.map((e) => e.toJson()).toList(),
-    "answeredquestions": answeredquestions,
-    "version": version
-  };
+    json["stagenumber"] = stagenumber == null ? 1 : stagenumber;
+
+    json["nombre"] = nombre == null ? null : nombre;
+
+
+    json['stats'] = userStats == null ? null : userStats.toJson();
+
+    json['image'] = image == null ? '' : image;
+
+    json["userProgression"] = userProgression == null ? null : userProgression.toJson();
+
+    json['settings'] = settings == null ? null : settings.toJson();
+
+    json['version'] = version;
+
+
+    if(teacherInfo != null){
+      json["teacherInfo"] = teacherInfo.toJson();
+    }
+
+    if(answeredquestions != null && answeredquestions.length > 0){
+      json["answeredquestions"] = answeredquestions;
+    }
+
+    if(presets != null){
+      json['presets'] = presets.map((preset)=> preset.toJson()).toList();
+    }
+
+    return json;
+  }
 }

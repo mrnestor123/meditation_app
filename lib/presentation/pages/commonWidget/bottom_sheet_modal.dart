@@ -16,7 +16,6 @@ Widget BottomSheetModal({Widget child}){
       borderRadius: BorderRadius.vertical(top: Radius.circular(Configuration.borderRadius))
     ),
     child: Stack(
-      fit: StackFit.expand,
       children: [
         Align(
           alignment: Alignment.topRight,

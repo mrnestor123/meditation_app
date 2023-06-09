@@ -1,6 +1,8 @@
 
 // NOTIFICACIONES DE MENSAJES DE FIREBASE !!!
 
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -108,10 +110,21 @@ class LocalNotifications {
       criticalAlert: false,
       provisional: false,
       sound: true,
-    );
+    );  
+
+    if(Platform.isIOS){
+      final bool result = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+      );
+    }
+
 
     //TO DO : COMPROBAR SI EL USUARIO TIENE PERMISOS PARA RECIBIR NOTIFICACIONES
-
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       print('User granted permission');
     // TODO: handle the received notifications
@@ -129,6 +142,7 @@ class LocalNotifications {
       sound: true,
     );
 
+
    // showMessage(duration: Duration(seconds: 10), playSound: true);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async{ 
@@ -145,10 +159,6 @@ class LocalNotifications {
   }
 
 
-
-  /// Define a top-level named handler which background/terminated messages will
-  /// call.
-  ///
   static Future<void>  _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     // If you're going to use other Firebase services in the background, such as Firestore,
     // make sure you call `initializeApp` before using other Firebase services.
@@ -158,13 +168,11 @@ class LocalNotifications {
 
   }
 
-
   void testShow(){
 
 
 
   }
-
 
   static showMessage({String title = 'test', String body = 'prueba',bool playSound = false,  int id = 1, Duration duration, dynamic onFinished}) async{
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -184,8 +192,8 @@ class LocalNotifications {
     );
     
     var platformChannelSpecifics = NotificationDetails(
-      android:androidPlatformChannelSpecifics, 
-      iOS:iOSChannelSpecifics
+      android: androidPlatformChannelSpecifics, 
+      iOS: iOSChannelSpecifics
     );
 
 
@@ -219,4 +227,48 @@ class LocalNotifications {
   static cancelNotification({int id}){
     flutterLocalNotificationsPlugin.cancel(id);
   }
+
+  static askForPermissions(){
+
+  }
+
+  static setReminder({TimeOfDay reminder})async{
+
+    DateTime now = DateTime.now();
+    TimeOfDay time = reminder;
+    DateTime date = DateTime(now.year, now.month, now.day, time.hour, time.minute, 0);
+
+    var androidChannel = AndroidNotificationDetails(
+      channel.id, channel.name, 
+      importance: Importance.high,
+      priority: Priority.defaultPriority,
+      playSound: false
+    );
+
+    var iosChannel = IOSNotificationDetails(
+      presentSound: false
+    );
+
+    var platformChannel = NotificationDetails(android:androidChannel , iOS: iosChannel);
+
+    // CANCELAMOS LA  ANTERIOR Y PONEMOS LA NUEVA
+    flutterLocalNotificationsPlugin.cancel(10);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      10, 
+      'Meditation Reminder',
+      "It's time to meditate!",
+      tz.TZDateTime.from(date, tz.local),
+      platformChannel,
+      androidAllowWhileIdle: true,
+      matchDateTimeComponents: DateTimeComponents.time,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime
+    );
+  }
+
+
+  static cancelReminder() async{
+    await flutterLocalNotificationsPlugin.cancel(10);
+  }
+
 }

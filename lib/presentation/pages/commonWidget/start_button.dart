@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 
+import '../../../domain/entities/stage_entity.dart';
+
 class BaseButton extends StatelessWidget {
   dynamic onPressed;
   String text;
@@ -14,7 +16,9 @@ class BaseButton extends StatelessWidget {
   double aspectRatio;
   double width;
 
-  BaseButton({this.onPressed, this.text,this.bordercolor, this.width, this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
+  Widget child;
+
+  BaseButton({this.onPressed,this.child, this.text,this.bordercolor, this.width, this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
   
   @override
   Widget build(BuildContext context) {
@@ -39,10 +43,13 @@ class BaseButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(Configuration.borderRadius)
           )
         ),
-        child: Text(
-          text != null ? text : 'Start',
-          style: Configuration.text('smallmedium',textcolor != null ? textcolor : Colors.white),
-        ),
+        child: this.child != null ?
+          this.child :
+          Text(
+            text != null ? text : 'Start',
+            textAlign: TextAlign.center,
+            style: Configuration.text('subtitle',textcolor != null ? textcolor : Colors.white),
+          ),
           ),
       ),
     );
@@ -80,4 +87,40 @@ class TabletStartButton extends StatelessWidget {
       ),
     );
   }
+}
+
+
+
+
+
+Widget discussionButton(context,Stage stage, [type]){
+  return AspectRatio(
+    aspectRatio: Configuration.buttonRatio,
+    child: OutlinedButton(
+      onPressed:(){
+        Navigator.pushNamed(context, '/requests', arguments: {'stage': stage, 'type': type});
+      },
+      child: Row(
+        mainAxisAlignment:MainAxisAlignment.spaceBetween,
+        children: [
+          Text('Join the discussion',style:Configuration.text('small',Colors.lightBlue)
+          ),
+          Row(
+            children: [
+              Icon(Icons.question_answer,
+                size:Configuration.smicon,
+                color:Colors.lightBlue
+              )
+            ],
+          )
+        ],
+      ),
+      style:OutlinedButton.styleFrom(
+        side: BorderSide(color:Colors.lightBlue),
+        padding: EdgeInsets.symmetric(horizontal: Configuration.medpadding),
+        //primary: Configuration.maincolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius/2))
+      )
+    ),
+  );
 }

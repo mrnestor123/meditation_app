@@ -6,31 +6,32 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 class Lesson extends Content {
   List<dynamic> text;
  
-  Lesson(
-      {cod,
-      @required title,
-      image,
-      stagenumber,
-      type,
-      position,
-      createdBy,
-      file,
-      blocked,
-      isNew,
-      @required description,
-      @required this.text})
-      : super(
-          isNew:isNew,
-          cod: cod,
-          title: title,
-          blocked:blocked,
-          type: type,
-          image: image,
-          stagenumber: stagenumber,
-          description: description,
-          createdBy:createdBy,
-          position: position,
-          file: file);
+  Lesson({
+    cod,
+    @required title,
+    image,
+    stagenumber,
+    type,
+    position,
+    createdBy,
+    file,
+    blocked,
+    isNew,
+    @required description,
+    @required this.text
+  }) : 
+  super(
+    isNew:isNew,
+    cod: cod,
+    title: title,
+    blocked:blocked,
+    type: type,
+    image: image,
+    stagenumber: stagenumber,
+    description: description,
+    createdBy:createdBy,
+    position: position
+  );
 
 //  @override
   //List<Object> get props =>
