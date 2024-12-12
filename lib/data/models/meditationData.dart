@@ -16,6 +16,7 @@ class MeditationModel extends Meditation {
       image,
       description,
       int stagenumber,
+      group,
       String coduser,
       content,
       int position,
@@ -29,6 +30,7 @@ class MeditationModel extends Meditation {
       })
     : super(
       cod: cod,
+      group:group,
       total:total,
       title: title,
       coduser: coduser,
@@ -58,9 +60,13 @@ class MeditationModel extends Meditation {
     MeditationModel model = medorLessfromJson(json, true);
       
     if(!isShort){ 
-      model.content =  json['content'] == null ? null : json['content'];
+      model.content =  json['text'] != null ? json['text'] :
+      json['content'] == null ? {} : 
+      json['content'] ;
+
+
       model.followalong = json['followalong'] == null ? null : json['followalong'];
-    }else{
+    } else {
       model = new MeditationModel();
     }
 
@@ -68,7 +74,8 @@ class MeditationModel extends Meditation {
       ? Duration(minutes: int.parse(json['duration'])) 
       : Duration(minutes: json['duration']);
 
-    model.day = json["day"] == null ?  DateTime(1000, 1, 1,1): json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
+    model.day = json["day"] == null ?  DateTime(1000, 1, 1,1): 
+      json['day'] is String ?  DateTime.parse(json["day"]).toLocal() :
       DateTime.fromMillisecondsSinceEpoch(json['day']).toLocal();
       
     model.coduser = json['coduser'] == null ? null : json['coduser'];

@@ -76,13 +76,22 @@ mixin _$RequestState on _RequestState, Store {
     return _$getRequestsAsyncAction.run(() => super.getRequests());
   }
 
+
+  final _$getFeedAsyncAction = AsyncAction('_RequestState.getFeed');
+
+  @override
+  Future<dynamic> getFeed({String coduser}) {
+    return _$getFeedAsyncAction.run(() => super.getFeed());
+  }
+
+
   final _$uploadRequestAsyncAction = AsyncAction('_RequestState.uploadRequest');
 
   @override
   Future<Request> uploadRequest(
-      String title, String content, String image, String type, [dynamic  stage]) {
+      String title, String content, String image, String type, [dynamic stage]) {
     return _$uploadRequestAsyncAction
-        .run(() => super.uploadRequest(title, content, image, type, stage));
+        .run(() => super.uploadRequest(title, content, image, type, [stage]));
   }
 
   final _$setRequestAsyncAction = AsyncAction('_RequestState.setRequest');

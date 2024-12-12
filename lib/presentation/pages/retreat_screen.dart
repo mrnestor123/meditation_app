@@ -395,10 +395,7 @@ class _CreateRetreatScreenState extends State<CreateRetreatScreen> {
               setState(() => _index--)
             },
             color: Colors.white,
-            bordercolor: Colors.black,
             textcolor: Colors.black,
-            border: true,
-            noelevation: true,
           ),
 
           SizedBox(height: Configuration.verticalspacing),
@@ -536,7 +533,6 @@ class _CreateRetreatScreenState extends State<CreateRetreatScreen> {
           bordercolor: Colors.black,
           textcolor: Colors.black,
           border: true,
-          noelevation: true,
         ),
 
         SizedBox(height: Configuration.verticalspacing),

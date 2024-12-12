@@ -30,22 +30,6 @@ class _SetUserDataState extends State<SetUserData> {
       Configuration c = new Configuration();
       c.init(context);
     }
-
-    
-    var _userState = Provider.of<UserState>(context);
-
-
-    if(_userState.data != null){
-      /// SLIDES FROM APP  SETTINGS
-      int index = 0;
-      _userState.data.settings.introSlides.forEach((IntroSlide element) {
-       
-
-        if(element.image != null && element.image.isNotEmpty){
-          precacheImage(NetworkImage(element.image),context);
-        }
-      });
-    }
   }
 
 
@@ -82,18 +66,16 @@ class _SetUserDataState extends State<SetUserData> {
                     autofocus: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a valid username';
+                        return 'Please, enter a valid username';
                       }else if(value.length < 3){
-                        return 'Please enter a username longer than three characters';
+                        return 'Please, enter a username longer than three characters';
                       }else if(value.length > 15){
-                        return 'Please enter a username shorter than fifteen characters';
-                      } else if(value.contains(' ')){
-                        return 'Please enter a username without white spaces';
-                      }
+                        return 'Username should be longer than fifteen characters';
+                      } 
                       return null;
                     },
                     decoration: InputDecoration(
-                      
+                      errorMaxLines: 2,
                       errorStyle: Configuration.text('small', Colors.redAccent),
                       errorBorder: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.redAccent),
@@ -105,7 +87,7 @@ class _SetUserDataState extends State<SetUserData> {
                   SizedBox(height: Configuration.verticalspacing * 2),
                   BaseButton(
                     text: 'Set',
-                    textcolor: Colors.black,
+                    textcolor: Colors.white,
                     child: settingUserName ? CircularProgressIndicator() : null,
                     color: Colors.white,
                     onPressed:() async {

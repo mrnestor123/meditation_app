@@ -26,17 +26,14 @@ class _WelcomeWidgetState extends State<WelcomeWidget> {
     if(_userState.data != null && _userState.data.settings != null && _userState.data.settings.introSlides != null){
       /// SLIDES FROM APP  SETTINGS
       int index = 0;
-      
+
+      // TAMBIÉN CACHEAR  LA  IMAGEN DE 
       _userState.data.settings.introSlides.forEach((IntroSlide element) {
-     
-        if(element.image != null && element.image.isNotEmpty){
-          precacheImage(NetworkImage(element.image),context);
+        if(element.image != null){
+          precacheImage(element.image,context);
         }
       });
-
-      precacheImage(AssetImage('assets/logo.png'), context);
     }
-
   }
 
   @override
@@ -56,21 +53,20 @@ class _WelcomeWidgetState extends State<WelcomeWidget> {
       ),
       body: containerGradient(
         child: Container(
+          height: Configuration.height,  
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/camino.png'),
-              
-              fit: BoxFit.cover
+              image: AssetImage('assets/fondo.png'),
+              fit: BoxFit.cover,
             )
           ),
           padding: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
-         // margin: EdgeInsets.symmetric(vertical: Configuration.smpadding, horizontal: Configuration.smpadding),
           child: Stack(
             children: <Widget>[
               Align(
                 alignment: Alignment.topCenter,
                 child: Container(
-                  margin: EdgeInsets.only(top: Configuration.verticalspacing*2.5),
+                  margin: EdgeInsets.only(top: AppBar().preferredSize.height-5),
                   padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding/2),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -88,17 +84,9 @@ class _WelcomeWidgetState extends State<WelcomeWidget> {
               Align(
                 alignment: Alignment.center,
                 child: Container(
-                  /*
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color.fromRGBO(251,248,236,0.6),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                        offset: Offset(0, 1), // changes position of shadow 
-                      )
-                    ]
-                  ),*/
+                    borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                  ),
                   padding: EdgeInsets.all(Configuration.smpadding),
                   child: Text('A journey inside yourself',
                     textAlign: TextAlign.center,
@@ -112,32 +100,36 @@ class _WelcomeWidgetState extends State<WelcomeWidget> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BaseButton(
-                      text: 'Start',
-                      onPressed: (){
-                        Navigator.pushNamed(context, '/carousel');
-                      },
+                    Container(
+                      width: Configuration.width*0.9,                    
+                      child: BaseButton(
+                        filled: true,
+                        textcolor: Colors.white,
+                        text: 'Start my journey',
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/carousel');
+                        },
+                      ),
                     ),
-              
+
                     SizedBox(height: Configuration.verticalspacing*2),
-              
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-
-                        BaseButton(
-                          text: 'Log in',
-                          onPressed: (){
-                            Navigator.pushNamed(context, '/login');
-                          },
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: Configuration.verticalspacing*2)
-
                     
+                    Container(
+                      width: Configuration.width*0.9,                    
+                      child: BaseButton(
+                        filled: true,
+                        color: Colors.blueGrey,
+                        textcolor: Colors.white,
+                        bordercolor: Colors.black,
+                        border: true,
+                        text: 'I already have an account',
+                        onPressed: (){
+                          Navigator.pushNamed(context, '/login');
+                        },
+                      ),
+                    ),
+                    
+                    SizedBox(height: Configuration.verticalspacing)
                   ],
                 ),
               ),

@@ -13,7 +13,7 @@ import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/meditation_screen.dart';
 import 'package:mindful_minutes/mindful_minutes.dart';
 import 'package:mobx/mobx.dart';
 
@@ -73,6 +73,15 @@ abstract class _UserState with Store {
   @observable 
   List<User> teachers = new List.empty(growable: true);
 
+
+
+  // ESTO PODRÍA SER TODO UNA MISMA LISTA!!
+  List<User> thisWeekMeditators = new List.empty(growable: true);
+  List<User> thisMonthMeditators = new List.empty(growable: true);
+  List<User> streakMeditators = new List.empty(growable: true);
+
+  bool isOffline = false;
+
  
 
   @observable
@@ -117,12 +126,11 @@ abstract class _UserState with Store {
 
   @action
   Future<bool> takeLesson(Content l) async {
-    user.progress = null;
     int currentposition = user.stagenumber;
-
     user.takeLesson(l, data);
 
     // SE HACE DOBLE !!
+    // esto se hace  en otro sitio con las recordings y los videos !!
     if(l.isLesson()){
       DoneContent done = user.finishContent(l);
 
@@ -131,7 +139,6 @@ abstract class _UserState with Store {
       }
     }
 
-    
     //uploadActions(user, repository);
     repository.updateUser(user:user, type:'user');
 
@@ -154,33 +161,8 @@ abstract class _UserState with Store {
     );
   }
 
-  //!!COMPROBAR ERRORES ESTO SOBRA !!
-  /*
-  @action
-  Future follow(User u, bool follow) async {
-     if (follow) {
-      user.follow(u);
-    } else {
-      user.unfollow(u);
-    } 
-
-    repository.follow(u: user, followed:u, follows: follow);
-
-    // Updateamos también los datos del usuario val que se sigue
-   // repository.updateUser(user: u);
-   // repository.updateUser(user:user);
-  }*/
-
-
-  Future getFeed() async {
-    Either<Failure, List<Request>> query = await repository.getFeed();
-    
-    if(query.isRight()){
-      List<Request> feed = new List.empty(growable: true);
-      query.fold((l) => null, (r) => feed = r);
-      return feed;
-    }
-  }
+  
+  
   
   @action
   Future changeName(String username) async {
@@ -248,29 +230,25 @@ abstract class _UserState with Store {
     return imgstring;
   }
 
-  @action
-  // PARA SUBIR UNA ETAPA
-  Future updateStage() async {
-    //updateamos la stage
-    user.updateStage(data);
-    return repository.updateUser(user: user);
-  }
-
+ 
 
   @action 
   Future connect() async {
-    
     var loggedresult = await repository.islogged();
 
-    loggedresult.fold((l) => null, (r) => user =  r);
+    loggedresult.fold(
+      (l) {
+        if(l is ConnectionFailure){
+          isOffline = true;
+        } 
+      },
+      (r) => user =  r
+    );
     
-    if(loggedresult.isRight()){
-
+    if(loggedresult.isRight() ){
       gettingData = repository.getData();
-
-      Either<Failure,dynamic> result = await gettingData;
   
-      if(result.isLeft()){
+      /*if(result.isLeft()){
         Failure f;
         
         result.fold((l) => f = l, (r) => null);
@@ -278,7 +256,7 @@ abstract class _UserState with Store {
         if(f is ServerFailure){
           errorMessage =  'ERROR';
         }
-      }
+      }*/
       
       foldResult(
         result: await gettingData,
@@ -323,27 +301,42 @@ abstract class _UserState with Store {
     foldResult(
       result:userlist,
       onSuccess: (r){
-        users = r;
-        filteredusers = r;
+        filteredusers = r.where((User u)=>
+          u.settings.hideInLeaderboard == false  
+        ).toList();
+
+        users = filteredusers;
+
+        /*
+        thisWeekMeditators = users.where((element) =>  
+          element.userStats.meditatedThisWeek >  0 
+        ).toList();*/
+
+        DateTime now = DateTime.now();
+        DateTime thismonth = DateTime(now.year, now.month, 0);
+        DateTime thisweek = now.subtract(Duration(days: now.weekday - 1));
+
+
+        thisMonthMeditators = users.where((element) =>  
+          element.userStats.meditatedThisMonth >  0 
+          && element.userStats.lastmeditated != null  
+          && element.userStats.lastmeditated.isAfter(
+            thismonth
+          ) 
+        ).toList();
+
+        streakMeditators  = users.where((element) =>  
+          element.userStats.streak >  0 
+        ).toList();
+
+        //thisWeekMeditators.sort((a,b) => b.userStats.meditatedThisWeek.compareTo(a.userStats.meditatedThisWeek));
+        thisMonthMeditators.sort((a,b) => b.userStats.meditatedThisMonth.compareTo(a.userStats.meditatedThisMonth));
+        streakMeditators.sort((a,b) => b.userStats.maxStreak.compareTo(a.userStats.maxStreak));
+        users.sort((a, b) => b.userStats.timeMeditated.compareTo(a.userStats.timeMeditated));
       }
     );  
     
     loading = false;
-  }
-
-
-  // PASAR A MESSAGES_STATE
-  void seeMessages(){
-    List<Message> messagestoUpdate = new List.empty();
-
-    if(user.messages.where((element) => !element.read).length>0){
-      for(Message m in user.messages){
-        if(!m.read){
-          repository.updateMessage(message: m);
-          m.read = true;
-        }
-      }
-    }
   }
 
 
@@ -395,11 +388,11 @@ abstract class _UserState with Store {
   Future finishMeditation({Meditation m, bool earlyFinish = false}) async {
     user.settings.lastMeditDuration = m.duration.inMinutes;
 
-    if(!user.offline){
-      user.takeMeditation(m, data);
+    if(user != null && !user.offline && !isOffline){
+      user.takeMeditation(m, data, earlyFinish);
       repository.updateUser(user: user,d:data, toAdd: [m],type: 'meditate');
     }else {
-      user.takeMeditation(m, data, true);
+      user.takeMeditation(m, data, true, earlyFinish, );
       repository.cacheMeditation(m:m,u:user);
     }
 
@@ -421,13 +414,28 @@ abstract class _UserState with Store {
     user.stageupdated = false;
   }
 
+
+  Future sendMessage({User to,  String text}){
+    Message m = Message(
+      sender: user.email,
+      receiver: to.email,
+      body: text,
+      date: DateTime.now()
+    );
+
+    return repository.sendMessage(message: m);
+  }
+
+
+  /*
   @action
   Future createRetreat({Retreat r}){
     user.retreats.add(r);
    // repository.createRetreat(r:r);
     
     return repository.updateUser(user: user, toAdd: [r],type: 'retreat');
-  }
+  }*/
+
 
   void addReport({String str, MeditationReport report}) async{
     Meditation m = user.totalMeditations.last;
@@ -435,6 +443,13 @@ abstract class _UserState with Store {
 
     foldResult(
       result: await repository.addMeditationReport(m: m, report: report,  user:user)
+    );
+  }
+
+  void deleteUser()async {
+
+    foldResult(
+      result: await repository.deleteUser(user: user)
     );
   }
 

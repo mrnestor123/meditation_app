@@ -1,5 +1,5 @@
 
-
+ /*
 
 import 'package:dartz/dartz.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -47,7 +47,7 @@ abstract class _MessagesState with Store {
   Stream<List<Message>> messagesStream;
 
   _MessagesState({this.repository});
-
+ 
   @action
   Future sendMessage({String type, String text, User from}) async {
     Message m = from.sendMessage(selectedChat.notMe['coduser'],type, text);
@@ -173,3 +173,5 @@ abstract class _MessagesState with Store {
     }
   }
 }
+
+*/

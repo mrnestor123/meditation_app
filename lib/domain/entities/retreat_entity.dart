@@ -1,9 +1,12 @@
 
+/*
+DE MOMENTO NO !!!
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:uuid/uuid.dart';
 
+//  TENEMOS QUE AÑADIR ESTO !!
 class Retreat {
   DateTime startDate,endDate;
   TimeOfDay startTime,endTime;
@@ -95,6 +98,7 @@ class Activity {
 
 String timeToString(TimeOfDay time){
 
+
   String hour = time.hour.toString();
   String minute = time.minute.toString();
 
@@ -108,3 +112,4 @@ String timeToString(TimeOfDay time){
 
   return hour + ':' + minute;
 }
+*/

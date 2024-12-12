@@ -4,20 +4,15 @@ import 'package:get_it/get_it.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
-import 'package:meditation_app/data/repositories/meditation_repository.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
 import 'package:meditation_app/domain/entities/audio_handler.dart';
-import 'package:meditation_app/domain/repositories/meditation_repository.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
-import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'data/repositories/lesson_repository.dart';
-import 'domain/repositories/lesson_repository.dart';
 import 'presentation/mobx/actions/game_state.dart';
 import 'presentation/mobx/actions/user_state.dart';
 
@@ -25,17 +20,6 @@ final sl = GetIt.instance;
 
 Future<void> init() async {
   await Firebase.initializeApp();
-
-  /* if (kDebugMode) {    
-    await FirebaseAppCheck.instance.activate(    
-      // CAmbiar esto a release  cuando se suba !!!
-      androidProvider: AndroidProvider.debug,
-      appleProvider: AppleProvider.debug
-    );
-  }else{
-    await FirebaseAppCheck.instance.activate();
-  }*/
-
   
   //Mobx
   sl.registerFactory(
@@ -46,7 +30,6 @@ Future<void> init() async {
   sl.registerFactory(
     () => MeditationState(),
   );
-
 
   /// A lo mejor userstate hace demasiado ??
   sl.registerFactory(
@@ -65,33 +48,10 @@ Future<void> init() async {
     () => RequestState(repository: sl()),
   );
 
-  sl.registerFactory(
-    () => MessagesState(repository: sl()),
-  );
-
- // sl.registerLazySingleton(() => LoginUseCase(sl()));
- // sl.registerLazySingleton(() => RegisterUseCase(sl()));
- // sl.registerLazySingleton(()=> CachedUserUseCase(sl()));
- // sl.registerLazySingleton(()=> MeditateUseCase(sl(),sl()));
- // sl.registerLazySingleton(()=> GetDataUseCase(sl()));
- // sl.registerLazySingleton(() => LogOutUseCase(sl()));
- // sl.registerLazySingleton(()=> TakeLessonUseCase(sl(),sl()));
- // sl.registerLazySingleton(() => FollowUseCase(sl()));
- // sl.registerLazySingleton(()=> ChangeDataUseCase(sl()));
- // sl.registerLazySingleton(()=> UpdateStageUseCase(sl()));
- // sl.registerLazySingleton(()=> UpdateImageUseCase(sl()));
-  //sl.registerLazySingleton(()=> GetRequestsUseCase(sl()));
-//  sl.registerLazySingleton(()=> UpdateRequestUseCase(sl()));
 
   //Repositories
   sl.registerLazySingleton<UserRepository>(() => UserRepositoryImpl(
-      remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
-
-   sl.registerLazySingleton<LessonRepository>(() => LessonRepositoryImpl(
-      remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
-
-   sl.registerLazySingleton<MeditationRepository>(() => MeditationRepositoryImpl(
-     localDataSource: sl(), remoteDataSource: sl(), networkInfo: sl())); 
+    remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
 
 
   //Network info

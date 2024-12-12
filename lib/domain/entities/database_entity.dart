@@ -2,70 +2,155 @@
 
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/helpers.dart';
 import 'package:meditation_app/data/models/stageData.dart';
 import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/course_entity.dart';
+import 'package:meditation_app/domain/entities/milestone_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
-import 'package:meditation_app/domain/entities/technique_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/entities/version_entity.dart';
 import 'package:mobx/mobx.dart';
 
-import 'category_entity.dart';
+
+import '../../data/models/meditationData.dart';
 import 'content_entity.dart';
-import 'game_entity.dart';
-import 'lesson_entity.dart';
 import 'meditation_entity.dart';
+
+
+List<Milestone> allMilestones = [
+  Milestone(
+    title: 'Continuous attention to the breath',
+    name:'continuousattention',
+    description: 'The first milestone is to be able to sustain attention on the breath for a continuous period of time. This is the first step towards developing a stable attention.',
+    passedPercentage: 0,
+    objectives: [
+      Objective(
+        title: 'Establish a practice',
+        description: 'Complete 21 consecutive meditations.',
+        toComplete: 21,
+        type: 'streak'
+      ),
+
+      Objective(
+        title: 'Long meditations',
+        description: 'Complete 4 meditations of 30 minutes or more.',
+        toComplete: 4,
+        metricValue: 30,
+        type:'timeMetric',
+        name:'longmeditations'
+      ),
+
+      Objective(
+        type:'reportMetric',
+        name:'mindwandering',
+        reportType: 'percentage',
+        title:'Overcome mind-wandering',
+        metricValue: 70,
+        description: 'Complete ten sessions with 70% of focused attention.',
+        hint: 'What percentage were you focused on what you intended to?',
+        metricName:'Focused attention',
+        toComplete: 10
+      ),
+
+      Objective(
+        type:'reportMetric',
+        reportType: 'units',
+        name:'forgetting',
+        title:'Overcome forgetting',
+        metricName:'Aha moments',
+        hint:'How much times did you come back to the intended focus?',
+        description: 'Complete ten sessions without forgetting our focus of attention more than 10 times.',
+        metricValue: 10,
+        toComplete: 10
+      ),
+    ],
+    firstStage: 1,
+    lastStage: 3,
+    position: 1
+  ),
+
+  Milestone(
+    title: 'Sustained Exclusive Focus of attention',
+    name:'sustainedfocus',
+    description: 'xx',
+    firstStage: 4,
+    lastStage: 6,
+    position: 2
+  ),
+
+  Milestone(
+    title: 'Effortless stability of attention',
+    name:'effortless',
+    description: 'xxxy',
+    firstStage: 7,
+    lastStage: 7,
+    position: 3
+  ),
+
+  Milestone(
+    title: 'Combining effort and effortlessness.  ',
+    name:'persistence',
+    description: 'xyxy',
+    firstStage: 8,
+    lastStage: 10,
+    position: 4,
+    objectives: [
+      Objective(
+        title: 'Master the skill of meditation',
+        description: 'Complete 10000 hours of total practice',
+        toComplete: 100000,
+        type: 'totaltime'
+      )
+    ],
+  )
+];
+
+Map<String,String> metricNames = {};
+
+
 
 //habrá que ir añadiéndole datos
 class DataBase {
-  //PODRIAN SER LISTS?? NO CAMBIAN  CREO !!
   ObservableList<Stage> stages = new ObservableList();
   ObservableList<User> users = new ObservableList();
   ObservableList<Request> requests = new ObservableList();
   ObservableList<Meditation> nostagemeditations = new ObservableList();
-  ObservableList<Lesson> nostagelessons = new ObservableList();
+  ObservableList<Content> introductoryContent = new ObservableList();
 
   List<Section> sections =  new List.empty(growable: true);
-
   // textos para los settings !!
   AppSettings settings  = new AppSettings();
 
-  // DEBERÍA SER ASÍ !!!
-  List<Technique> techniques = new List.empty(growable: true);
-
-  List<Course> courses = new  List.empty(growable: true);
+ // List<Course> courses = new  List.empty(growable: true);
 
   List<Content> newContent = new List.empty(growable: true);
-
-  List<Content> newLessons = new List.empty(growable: true);
 
   List<User> teachers = new List.empty(growable: true);
 
   List<Game> games  = new List.empty(growable: true);
 
-  // PARA QUITAR !!!
-  List<Phase> phases = new List.empty(growable: true);
+  List<Milestone> milestones = new List.empty(growable: true);
 
-  // HACER MERGE CON COURSES
-  List<Course> paths = new List.empty(growable: true);
 
   List<Version> versions = new List.empty(growable: true);
 
+  UpdatePatch lastUpdate;
 
-  List<Week> weeks = new List.empty(growable: true);
 
 
-  List<AppCategory> categories = new List.empty(growable: true);
+  Meditation weeklyMeditation;
+
 
   
   Version lastVersion;
 
   DataBase(){
     settings = new AppSettings();
+  //  milestones = allMilestones;
   }
 
   void addVersion(Version v){
@@ -111,18 +196,6 @@ class DataBase {
       d.getLastVersion();
     }
 
-    if(json['courses'] !=  null && json['courses'].length > 0){
-      for(var course in json['courses']){
-        d.courses.add(Course.fromJson(course));
-      }
-    }
-
-    if(json['weeks'] != null && json['weeks'].length > 0){
-      for(var week in json['weeks']){
-        d.weeks.add(Week.fromJson(week));
-      }
-    }
-
     if(json['games'] != null && json['games'].length > 0){
       for(var game in json['games']){
         d.games.add(GameModel.fromJson(game));
@@ -131,30 +204,31 @@ class DataBase {
       d.games.sort((a, b) => a.position.compareTo(b.position));
     }
 
+    
+    if(json['milestones'] != null){
+      for(var milestone in json['milestones']){
+        d.milestones.add(Milestone.fromJson(milestone));
+      }
+
+      d.milestones.sort((a,b) => a.position.compareTo(b.position));
+
+      d.milestones.forEach((element) {
+        metricNames[element.name] = element.title;
+      });
+    }else{
+      d.milestones = allMilestones;
+    }
+
+    if(json['weeklyMeditation'] != null){
+      d.weeklyMeditation = MeditationModel.fromJson(json['weeklyMeditation']);
+    }
+
     if(json['teachers'] != null && json['teachers'].length > 0){
       for(var teacher in json['teachers']){
         d.teachers.add(UserModel.fromJson(teacher));
       }
       
       d.teachers.sort((a, b) => a.image == null || a.image.isEmpty ? 1 : -1);
-    }
-
-
-    if(json['newLessons'] != null){
-      for(var lesson in json['newLessons']){
-        d.newLessons.add(Content.fromJson(lesson));
-      }
-
-
-      d.newLessons.sort((a, b) => 
-        a.position != null && b.position != null ? a.position.compareTo(b.position) : 0);
-    }
-
-
-    if(json['categories'] != null){
-      for(var category in json['categories']){
-        d.categories.add(AppCategory.fromJson(category));
-      }
     }
 
     // same with settings
@@ -167,28 +241,29 @@ class DataBase {
         d.sections.add(Section.fromJson(section));
       }
     }
-    
-    if(json['techniques'] != null && json['techniques'].length > 0){
-      for(var technique in  json['techniques']){
-        d.techniques.add(Technique.fromJson(technique));
-      }
 
-      if(d.techniques.length >  0){
-        d.techniques.sort((a, b) => a.position.compareTo(b.position));
+    if(json['introductoryContent'] != null && json['introductoryContent'].length > 0){
+      for(var content in json['introductoryContent']){
+        d.introductoryContent.add(Content.fromJson(content));
       }
     }
-
+    
+  
     return d;
+ 
   }
 
 
   //habrá que implementar un método update, etc etc.
 }
 
+
 class Section {
   String cod, title, description,image;
 
   List<Content> content = new List.empty(growable: true);
+
+  List<ContentGroup> contentGroups = new List.empty(growable: true);
 
   Color gradientStart,gradientEnd;
 
@@ -219,12 +294,39 @@ class Section {
     
     gradientEnd = json['gradientEnd'] != null ? Color(_getColorFromHex(json['gradientEnd'])) : null;
     gradientStart = json['gradientStart'] != null ? Color(_getColorFromHex(json['gradientStart'])) : null;
-
+    
+    
     if(json['content'] != null && json['content'].length > 0){
-      for(var c in json['content']){
-        content.add(medorLessfromJson(c));
+      
+      if(json['content'][0] is String){
+      }else{
+        for(var c in json['content']){
+          content.add(medorLessfromJson(c));
+        }
+
+        if(json['groups'] != null && json['groups'].length > 0){
+          
+          for(var group in json['groups']){
+            group['content'] = content.where((element) => element.group == group['name']);
+
+
+            contentGroups.add(ContentGroup.fromJson(group));
+          }
+        }else{
+          ContentGroup generalGroup = new ContentGroup(
+            title:'General',
+            name:'general'
+          );
+          generalGroup.content = content;
+
+          contentGroups.add(generalGroup);
+          
+        }
       }
+
     }
+
+    
   }
 
   Map<String, dynamic> toJson() {
@@ -239,6 +341,90 @@ class Section {
 }
 
 
+class ContentGroup {
+
+
+  String title, name;
+  int position;
+
+  List<Content> content = new List.empty(growable: true);
+
+  ContentGroup({this.title, this.name, this.position});
+
+  // from json  and to json methods
+
+
+  ContentGroup.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    
+    name = json['name'];
+    position = json['position'];
+
+    if(json['content'] != null){
+      for(var c in json['content']){
+        content.add(c);
+      }
+
+      content.sort((a,b)=>  a.position- b.position);
+    }  
+  }
+
+
+
+
+}
+
+
+
+class UpdatePatch {
+  int lastUpdate, lastVersion;
+  List<Slide> slides = new List.empty(growable: true);
+
+  UpdatePatch({this.lastUpdate, this.lastVersion});
+
+
+  UpdatePatch.fromJson(Map<String, dynamic> json) {
+    lastUpdate = json['lastUpdate'];
+    lastVersion = json['lastVersion'];
+
+    if(json['slides'] != null){
+      for(var slide in json['slides']){
+        slides.add(Slide.fromJson(slide));
+      }
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lastUpdate'] = this.lastUpdate;
+    data['lastVersion'] = this.lastVersion;
+    data['slides'] = this.slides.map((v) => v.toJson()).toList();
+    return data;
+  }
+
+}
+
+
+class Slide {
+  String title, description, image;
+
+  Slide({this.title, this.description, this.image});
+
+  Slide.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    description = json['description'];
+    image = json['image'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['title'] = this.title != null ? this.title : "";
+    data['description'] = this.description != null ? this.description : "";
+    data['image'] = this.image != null ? this.image : "";
+    return data;
+  }
+
+}
 
 class AppSettings {
   List<String> settingsItems;
@@ -249,39 +435,44 @@ class AppSettings {
   List<MenuItem> menu = new List.empty(growable: true);
 
   List<IntroSlide> introSlides = [
-      IntroSlide(
-        title: "Welcome to TenStages",
-        description: "This is not your regular meditation app, we want you to understand what meditation really is about and how you can apply it in your daily life.<br><br>"
-        "Our content is inspired by the book The Mind Illuminated, written by John Yates. It is a meditation manual that integrates neuroscience with buddhist wisdom.<br><br>"
-        "<i> We recommend reading the book along with the application</i>",
-        image: "https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/teacherFiles%2Ffirst_slide.png?alt=media&token=c12e7c3c-cd72-4f1a-8a89-9c992f915129"
-      ),
 
-      IntroSlide(
-        image: "https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/teacherFiles%2Fsecond_slide.png?alt=media&token=912b294e-c8a7-4ad4-8e39-ef2dd8efdd4b",
+    IntroSlide(
+      title: "Welcome to TenStages",
+      description: 
+      """<p>We'd like to warn you before you enter, this is not your regular meditation app. This is not a quick fix, nor any stress-releasing app. </p> 
+      <p>It is for those who are curious enough to look within and be honest with themselves. For those that want to go deep, for those that want to really understand themselves.</p>""",
+      image: AssetImage("assets/carousel1.png")
+    ),
 
-        description: "The process of training the mind is divided into ten different stages. All building up into the next one. <br><br>"
-        "In each stage, you will master certain goals, learn new information about how your mind works and practice meditation techniques." 
-        
-        "<br><br><b>Keep in mind that progress is not linear </b>",
-        title: "Learn to train the mind"
-      ),
+    IntroSlide(
+      image: AssetImage("assets/carousel2.png"),
+      description: """
+      <p> Our content has been deeply inspired by the work of John Yates, the book <i>The Mind Illuminated</i>. </p>
+      <p> It creates a meditative path that combines psychology and neuroscience with buddhist and eastern wisdom.  </p>
+      <p> Filling the gaps between science and spirituality. </p>
+      """,
+      title: 'Backed by science'
+    ),
+    
+    IntroSlide(
+      description: """
+      <p> On this path, we divide our content into ten different stages, where in each one you'll practice new meditation techniques and learn more information about the mind. </p>
+      <p> Be aware that this path is not about going or reaching anywhere, it is a path inside.</p>\n
+      """,
+      image: AssetImage("assets/carousel3.png"),
+      title: 'Progressive guidance'
+    ),
 
-
-      IntroSlide(
-        description: "The meditations have been created by certified TMI Teachers. The teacher's course consists of 4 years of training in the methodology.<br><br>"
-        "You can also contact them if you'd like to clarify any doubts<br><br>", 
-        image:  "https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/teacherFiles%2Ffourth_slide.png?alt=media&token=cc59c239-4471-4a87-a03f-390321e7a43e",
-        title: 'Practice with a teacher'
-      ),
-
-      IntroSlide(
-        image: "https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/teacherFiles%2Ffifth_slide.png?alt=media&token=a119f61c-11ab-4f7a-bc0e-71fc2f4db16e",
-        title: "Test for yourself",
-        description: "It's important to know that we don't preach any absolute truth. Keep an open mind and accept only what is skillful for you. <br><br>As the buddha said:  <br> <br><div style='text-align:center;font-style:italic'> Don't blindly believe me <br>Find out for yourself <br>what is true and virtuous </div><br><br><b font-size='1.2em'>Good luck!</b>",
-
-      )
-    ];
+    IntroSlide(
+      image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/stage%201%2FD0E50587-688B-4F94-8051-D180A388FE47.png?alt=media&token=17cab94e-2971-4f2e-9baf-08beb1db6043'),
+      title: 'Find a community',
+      description: """
+        <p>And if you feel lost or in doubt. Feel free to share and clear your doubts with the community. </p>
+        <p>Check in and talk with a teacher or share your thoughts with other like-minded people. </p>
+        <p> We are here to support you. </p>
+      """
+    ),
+  ];
 
   AppSettings({
     this.aboutMe, 
@@ -291,12 +482,7 @@ class AppSettings {
     this.teachersText,
     this.iosVersion,
     this.version
-  }){
-
-   
-
-
-  }
+  });
 
   AppSettings.fromJson(Map<String, dynamic> json) {
     aboutMe = json['aboutMe'];
@@ -312,8 +498,10 @@ class AppSettings {
     if(json['iosVersion'] != null){
       iosVersion = json['iosVersion'];
     }
+    
 
-    /*if(json['introSlides'] != null){
+    /*
+    if(json['introSlides'] != null){
       json['introSlides'].forEach((v) {
         introSlides.add(new IntroSlide.fromJson(v));
       });
@@ -355,41 +543,10 @@ class MenuItem {
 }
 
 
-class Week {
-  String cod, title, description, image;
-  int position;
-  List<Content> content = new List.empty(growable: true);
-
-  Week({this.cod, this.title, this.description, this.image, this.position});
-
-  Week.fromJson(Map<String, dynamic> json) {
-    cod = json['cod'];
-    title = json['title'];
-    description = json['description'];
-    position = json['position'];
-    image = json['image'];
-    if(json['content'] != null && json['content'].length > 0){
-      for(var c in json['content']){
-        content.add(medorLessfromJson(c));
-      }
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['cod'] = this.cod;
-    data['title'] = this.title;
-    data['description'] = this.description;
-    data['image'] = this.image;
-    data['content'] = this.content.map((v) => v.toJson()).toList();
-    return data;
-  }
-
-}
-
-
 class IntroSlide {
-  String title, description, image;
+  String title, description;
+
+  ImageProvider image;
 
   IntroSlide({this.title, this.description, this.image});
 

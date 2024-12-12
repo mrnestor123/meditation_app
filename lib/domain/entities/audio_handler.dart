@@ -5,6 +5,9 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audio_service/audio_service.dart';
 
 
+
+// DEBERÍA ESTAR EN ENTITIES?? YO CREO QUE NO !!!
+// AÑADIR A DONDE SE GESTIONAN LOS AUDIOS
 Future<AudioHandler> initAudioService() async {
   return await AudioService.init(
     builder: () => MyAudioHandler(),
@@ -89,13 +92,11 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler{
     ));
 
     player.play();
-
   }
 
 
   @override
   Future<void> pause() {
-    
     playbackState.add(playbackState.value.copyWith(
       controls:[ MediaControl.play]
     ));
@@ -111,15 +112,14 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler{
   @override
   Future<void> stop() async {
     // Release any audio decoders back to the system
-    if(player != null &&  player.isPlaying.value){
+    // Set the audio_service state to `idle` to deactivate the notification.
+    playbackState.add(playbackState.value.copyWith(
+      playing: false,
+      processingState: AudioProcessingState.idle,
+    ));
+
+    if(player != null ){
       player.stop();
-
-      // Set the audio_service state to `idle` to deactivate the notification.
-      playbackState.add(playbackState.value.copyWith(
-        playing: false,
-        processingState: AudioProcessingState.idle,
-      ));
-
       player.dispose();
     }
   }
@@ -157,5 +157,18 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler{
   @override
   Future<void> seek(Duration position) => player.seek(position);
 
-  // TODO: Override needed methods
+  
+  @override
+  Future<void> onTaskRemoved(){ 
+    super.onTaskRemoved();
+    print('TASK REMOVED');
+    stop();
+  }
+
+  @override
+  Future<void> onNotificationDeleted(){ 
+    super.onNotificationDeleted();
+    print('TASK REMOVED');
+    stop();
+  }
 }

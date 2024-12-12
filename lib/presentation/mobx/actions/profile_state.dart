@@ -48,7 +48,7 @@ abstract class _ProfileState with Store {
         result: await repository.getUser(selected.coduser, true),
         onSuccess: (r){
           selected = r;
-          selected.checkStreak(true);
+          selected.inituser(checkingStreak: true);
 
           if(selected.isTeacher() && selected.addedcontent.length > 0){
             selected.addedcontent.sort((a,b)=> a.stagenumber  - b.stagenumber);

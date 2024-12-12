@@ -11,7 +11,7 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.5+43
+version: 2.0.0+49
 
 environment:
   sdk: '>=2.3.3 <3.0.0'
@@ -55,7 +55,6 @@ dependencies:
   flutter_native_timezone: ^2.0.0
   firebase_messaging: ^14.4.1
   flutter_local_notifications: ^9.4.0
-  firebase_app_check: ^0.1.2
   #in_app_update: ^3.0.0
   mindful_minutes: ^1.0.2
   fl_chart: ^0.55.1
@@ -122,6 +121,10 @@ flutter:
     - family: OpenSans
       fonts:
         - asset: fonts/OpenSans-Medium.ttf
+ 
+    - family: HandWritten
+      fonts:
+        - asset: fonts/Magnolia Script.otf
 
 
 

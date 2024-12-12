@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../domain/entities/meditation_entity.dart';
 import '../../mobx/actions/meditation_state.dart';
 import '../../mobx/actions/user_state.dart';
-import '../commonWidget/alert_dialog.dart';
+import '../commonWidget/dialogs.dart';
 import '../commonWidget/start_button.dart';
 import '../config/configuration.dart';
 
@@ -103,6 +103,7 @@ class WeekItem extends StatefulWidget {
 
 class _WeekItemState extends State<WeekItem> {
   bool changed = false;
+  
   @override
   Widget build(BuildContext context) {
     if (widget.animate && !changed) {
@@ -349,7 +350,6 @@ class _IntervalBellsState extends State<IntervalBells> {
                                   }).toList(),
                                   value:selectedMode,
                                   onChanged: (newValue){
-                                    print('NEW VALUE: $newValue');
                                     if(newValue == 'Halfway'){
                                       selectedTime = time ~/ 2;
                                     }
@@ -386,39 +386,45 @@ class _IntervalBellsState extends State<IntervalBells> {
               
                           SizedBox(height: Configuration.verticalspacing*2),
               
-                          BaseButton(
-                            aspectRatio: Configuration.buttonRatio*1.2,
-                            text: 'Confirm',
-                            onPressed:(){
-                              IntervalBell bell = new IntervalBell(
-                                playAt: selectedTime,
-                                repeat: selectedMode == 'Repeat',
-                                name: bells[selectedIndex].name,
-                                image: bells[selectedIndex].image,
-                                sound:bells[selectedIndex].sound
-                              ); 
-              
-                              // hay que pasar esto a meditation settings !!
-                              if(b != null){
-                                _meditationstate.bells[i] = bell;
-                              }else{
-                                _meditationstate.bells.add(bell);
-                              }
-                              Navigator.pop(context);
-                            },
-                            color: Configuration.maincolor
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                            child: BaseButton(
+                              aspectRatio: Configuration.buttonRatio*1.2,
+                              text: 'Confirm',
+                              onPressed:(){
+                                IntervalBell bell = new IntervalBell(
+                                  playAt: selectedTime,
+                                  repeat: selectedMode == 'Repeat',
+                                  name: bells[selectedIndex].name,
+                                  image: bells[selectedIndex].image,
+                                  sound:bells[selectedIndex].sound
+                                ); 
+                                        
+                                // hay que pasar esto a meditation settings !!
+                                if(b != null){
+                                  _meditationstate.bells[i] = bell;
+                                }else{
+                                  _meditationstate.bells.add(bell);
+                                }
+                                Navigator.pop(context);
+                              },
+                              color: Configuration.maincolor
+                            ),
                           ),
                           SizedBox(height: Configuration.verticalspacing),
-                          BaseButton(
-                            text:'Cancel',
-                            aspectRatio: Configuration.buttonRatio * 1.2,
-                            border: true,
-                            bordercolor:Colors.red,
-                            color:Colors.white,
-                            onPressed:(){
-                              Navigator.pop(context);
-                            },
-                            textcolor: Colors.red,
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                            child: BaseButton(
+                              text:'Cancel',
+                              aspectRatio: Configuration.buttonRatio * 1.2,
+                              border: true,
+                              bordercolor:Colors.red,
+                              color:Colors.red,
+                              onPressed:(){
+                                Navigator.pop(context);
+                              },
+                              textcolor: Colors.red,
+                            ),
                           ),
                           SizedBox(height: Configuration.verticalspacing*3),
                         ],
@@ -470,6 +476,7 @@ class _IntervalBellsState extends State<IntervalBells> {
         ),
       );
     }
+
 
   @override
   Widget build(BuildContext context) {

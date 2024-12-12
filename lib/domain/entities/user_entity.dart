@@ -1,21 +1,12 @@
-
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
+import 'package:meditation_app/domain/entities/milestone_entity.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
-import 'package:meditation_app/domain/entities/course_entity.dart';
-import 'package:meditation_app/domain/entities/progress_entity.dart';
-import 'package:meditation_app/domain/entities/retreat_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_settings_entity.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
-import 'game_entity.dart';
-import 'lesson_entity.dart';
 import 'meditation_entity.dart';
 import 'action_entity.dart';
 
@@ -24,16 +15,18 @@ import 'action_entity.dart';
 // TEACHER , ADMIN , MEDITATOR , BASEUSER = usuario del que no sacamos ninguna información
 
 class User {
-  String coduser, nombre, role, image, timemeditated;
+  String coduser, nombre, role, image, timemeditated, email, timeMeditatedMonth;
 
   //USUARIO DE FIREBASE
   var user;
-  int stagenumber, percentage, version;
+  int stagenumber, percentage, version, milestonenumber;
 
 
   Stage stage;
   TeacherInfo teacherInfo;
   TeacherSettings teacherSettings;
+
+  Milestone milestone;
   UserProgression userProgression;
   UserSettings settings;
   //estadísticas
@@ -42,70 +35,45 @@ class User {
   //follows es cuando un usuario TE SIGUE!!
   bool offline, stageupdated;
 
-  //para el modal de progreso
-  Progress progress;
-
-  // ESTO QUE ES ????
-  DateTime meditationTime;
-
-  List<User> students = new List.empty(growable: true);
-  List<Content> addedcontent =  new List.empty(growable:true);
-  List<Course> addedcourses = new List.empty(growable: true);
-
-  List<dynamic> unreadmessages = new List.empty(growable: true);
-  List<Message> messages = new List.empty(growable:true);
-
-  List<Course> joinedcourses = new  List.empty(growable: true);
-
-  //passed objectives también deberia estar en stats
-  Map<String, dynamic> passedObjectives = new Map();
+  List<Content> addedcontent = new List.empty(growable:true);
+  List<Section> addedsections = new List.empty(growable:true);
 
   // HAY MUCHAS LISTAS !!! :( MIRAR DE REFACTORIZAR ESTO !!!
-  List<UserAction> todayactions = new ObservableList();
-  List<UserAction> thisweekactions = new ObservableList() ;
-  List<UserAction> lastactions = new ObservableList();
+  // LAS ACCIONES LAS AÑADIMOS  ??
+  List<UserAction> actions = new ObservableList();
+  List<UserAction> actionsToUpload = new ObservableList();
 
   //LISTA DE CÓDIGOS DE USUARIOS
-  List<User> following = new List.empty(growable: true);
-
-  List<User> followers = new List.empty(growable: true);
   List<Notify> notifications = new List.empty(growable:true);
-
   List<MeditationPreset> presets = new List.empty(growable:true);
-
-  List<File> files = new List.empty(growable:true);
-
   List<DoneContent> contentDone =  new List.empty(growable:true);
 
-  List<Retreat> retreats  = new List.empty(growable: true);
-
-
-  //MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
+  // MIRAR DE QUITAR ESTAS LISTAS TAMBIEN
   final ObservableList<Meditation> totalMeditations = new ObservableList();
   //hacemos week meditations??? 
 
-  //List with the lessons that the user has learned
-  final ObservableList<dynamic> readlessons = new ObservableList();
   //HACE FALTA ESTO ???
   Map<dynamic,dynamic> answeredquestions = new Map();
   
   User({
     this.coduser, this.nombre, this.user,  
-    this.image, this.stagenumber = 1,this.stage, this.offline = false,
-    this.role, this.userStats, 
-    this.answeredquestions , this.settings, this.version = 0,
-    this.unreadmessages, this.meditationTime, 
-    this.teacherInfo, this.userProgression
+    this.image, this.stagenumber = 1,this.stage, 
+    this.role, this.userStats, this.offline = false,
+    this.answeredquestions , this.settings, 
+    this.teacherInfo, this.userProgression,
+    this.email, this.milestonenumber
   }) {
       
     if(userStats != null){
-      getTimeMeditatedString();
-    }else{
-      this.userStats = UserStats.empty();
-    }
+      timemeditated  = getTimeMeditatedString(
+        time: this.userStats.timeMeditated != null ? this.userStats.timeMeditated : 0
+      );
+      timeMeditatedMonth = getTimeMeditatedString(
+        time: this.userStats.meditatedThisMonth != null  ? this.userStats.meditatedThisMonth : 0
+      );
 
-    if(unreadmessages == null){
-      this.unreadmessages = new List.empty(growable: true);
+    } else {
+      this.userStats = UserStats.empty();
     }
         
     if (coduser == null) {
@@ -126,10 +94,14 @@ class User {
     if(userStats == null){
       userStats = UserStats.empty();
     }
-      
+
+    if(milestonenumber == null){
+      milestonenumber = 0;    
+    }
+
   }
 
-  int checkStreak(changeData){
+  int checkStreak(){
     int daysBetween(DateTime from, DateTime to) {
       from = DateTime(from.year, from.month, from.day);
       to = DateTime(to.year, to.month, to.day);
@@ -161,71 +133,61 @@ class User {
         }
       }
 
-      if(changeData){
-        this.userStats.streak = streak;
-      }else{
-        return streak;
-      }
+      return streak;
     } 
   }
 
   //Para comprobar que la racha de meditaciones funcione bien. En el futuro hará más cosas
-  void inituser() {
-   
-    // SOLO LA COMPROBAMOS SI ERES EL USUARIO DE LA APP
-    if(this.stage != null){
+  void inituser({bool checkingStreak = false}) {
+    // SOLO LA COMPROBAMOS SI ERES EL USUARIO DE LA APP ??
+    if(this.stage != null && this.userStats.streak > 0 || checkingStreak){
       //setPercentage();
-      checkStreak(true);
+      this.userStats.streak = checkStreak();
+
+      //checkStage();
     }
   }
 
+  void checkStage({Stage stage}){
+    if(this.stage != null){
+      if(stage.checkPercentage(this) >= 100 && this.stagenumber == stage.stagenumber){
+        this.stagenumber++;
+      }
+    }
+  }
   /* 
     @override List<Object> get props => [coduser, nombre, mail, usuario, password, stagenumber];
   */
 
   //HAY QUE QUITAR COSAS DE AQUÍII!!!!!
-  ObservableList<Lesson> getLessonsLearned() => readlessons;
   int getStageNumber() => this.stagenumber;
 
   //checks if user answered the question
-  bool answeredGame(String cod){
-    return this.answeredquestions.length > 0 && this.answeredquestions[cod] != null;
-  }
-
-  //En el futuro sería  si contains la lista de lessons
-  //returns if user has read a lesson
-  bool readLesson(Content  c){
-    return this.readlessons.contains(c.cod);
-  }
+  bool answeredGame(String cod) => this.answeredquestions.length > 0 && this.answeredquestions[cod] != null;
+  
 
   bool isBlocked(Meditation meditation){
     return !this.settings.unlocksMeditation() && 
     (
       meditation.position != null &&  
-      this.userProgression.meditposition[meditation.stagenumber-1] < meditation.position &&  
+      this.userProgression.meditposition[meditation.stagenumber] < meditation.position &&  
       this.stagenumber <= meditation.stagenumber 
     );
   }
 
-  bool isNormalProgression(){
-    return settings.getProgression() == 'casual';
-  }
+  bool isNormalProgression()=> settings.getProgression() == 'casual';
   
-  bool isGameBlocked(Game g){
-    return this.userProgression.gameposition < g.position;
-  }
-
+  bool isGameBlocked(Game g) =>  this.userProgression.gameposition < g.position;
+  
   bool isLessonBlocked(Content l){
     return !settings.unlocksLesson() 
     && (
-      this.userProgression.lessonposition[l.stagenumber-1] < l.position 
+      this.userProgression.lessonposition[l.stagenumber] < l.position 
       && this.userProgression.stageshown <= l.stagenumber 
     );
   }
 
-  bool isStageBlocked(Stage s){
-    return !settings.unlocksLesson() && ((this.userProgression.stageshown +2) < s.stagenumber && this.stagenumber < s.stagenumber);
-  }
+  bool isStageBlocked(Stage s) => s.blocked;
 
   // UNIFICAR
   bool isContentBlocked(Content c){
@@ -240,229 +202,71 @@ class User {
     }
   }
 
-  bool isAdmin(){
-    return this.role == 'admin';
-  }
-
-  bool isTeacher(){
-    return this.role =='teacher';
-  }
-  
+  bool isAdmin()=> this.role == 'admin';
+  bool isTeacher() => this.role =='teacher';
   void setVersion(int version) => this.version = version;
   void setImage(String image) => this.image = image;
 
-  void setReadLessons(List<dynamic> lessons) {
-    this.readlessons.clear();
-    this.readlessons.addAll(lessons);
-  }
+  void setMilestone(Milestone m) => this.milestone = m;
 
   //ESTOS METODOS SON BUENOS ?????
   void setAction(String type, {dynamic attribute}) {
     UserAction a = new UserAction(type: type, action: attribute, username: this.nombre, time: DateTime.now().toLocal(), coduser: this.coduser);
     a.userimage = this.image;
     a.user = this;
-    this.todayactions.add(a);
-    this.lastactions.add(a);
 
+    actions.add(a);
+    actionsToUpload.add(a);
 
+    
     // YO HARÍA ALGO AQUÍ !!!!!!
     // SUBIRÍA LAS ACTIONS AQUI
     // ????
   }
   
+
   void setActions(json, isToday) {
     for(var action in json){ 
       if(action['userimage'] == null){
         action['userimage'] = this.image;
       }
 
+      actions.add(UserAction.fromJson(action));
 
-      if(isToday) {
-        todayactions.add(UserAction.fromJson(action));
-      }else{
-        thisweekactions.add(UserAction.fromJson(action));   
-      }
     }
   }
 
-  void uploadContent({Content c}){
-    this.addedcontent.add(c);
-  }
 
-  Message sendMessage(String to, String type,[String msg]){
-    var msgtypes= {
-      'classrequest': nombre + ' wants to be your student', 
-      'text': msg,
-      'broadcast':msg
-    };
-
-    return Message(
-      sender: this.coduser,
-      receiver: to == null ? this.students : to,
-      date: DateTime.now(),
-      username: nombre, 
-      text: msgtypes[type],
-      type: type,
-    );
-  }
-
-  //ACTUALIZAMOS EN LOS DOS SITIOS
-  /*
-    void follow(User u) {
-    u.followed = true;
-
-    if(following.where((element) => element.coduser == u.coduser).length == 0){
-      // QUE la accion de seguir solo notifique a los que les han seguido!!
-      //setAction("follow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      following.add(u);
-    }
-
-    u.followers.add(this);
-  }
-
-  void unfollow(User u) {   
-    u.followed = false;
-
-    int index =  this.following.indexWhere((element) => element.coduser == u.coduser);
-
-    if(index != -1){
-     // setAction("unfollow", attribute: [u.nombre != null ? u.nombre : 'Anónimo']);
-      this.following.removeAt(index);
-    }
-
-    int index2 =  u.followers.indexWhere((element) => element.coduser == this.coduser);
-
-    if(index2 != -1){
-      u.followers.removeAt(index2);
-    }
-  }*/
-
-  void updateStage(DataBase data) {
-    this.stagenumber +=1;    
-
-    data.stages.forEach((element) {
-      if (element.stagenumber == this.stagenumber) {
-        this.stage = element;
-      }
-    });
-
-    this.percentage = 0;
-    /*
-    if(this.stagenumber  > this.userProgression.stageshown){
-      this.position = 0;
-    }*/
-    
-    //this.meditposition = 0;
-    userStats.reset();
-
-    if(this.readlessons != null && this.readlessons.length > 0){
-      this.stage.path.where((l)=> l.stagenumber == this.stagenumber).toList().forEach((element) {
-        if (this.readlessons.contains(element.cod)) {
-          this.userStats.readLessons++;
-        }
-      });
-    }
-
-    this.stageupdated = true;
-
-    this.progress = Progress(
-      done: this.stagenumber,
-      what: 'stage',
-      stage: this.stage
-    );
-
-    setAction("updatestage", attribute: this.stagenumber.toString());
-  }
-
-  bool lessoninStage(Lesson l) {
-    for (Content c in this.stage.path) {
-      if (c.cod == l.cod) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-
-
-  //CAMBIAR LOS MAPS A CLASES !!!!
+  // CAMBIAR LOS MAPS A CLASES !!!!
   // HACER ESTO MÁS SENCILLO !!!
-  /*
-  void setPercentage() {
+  void checkMileStone({Milestone milestone}) {
+    int passedCount = 0;
+    int totalCount = 0;
 
-
-
-    /*var objectiveCheck = {
-      'totaltime': userStats.stage.timemeditated ,
-      'meditation': userStats.stage.timemeditations ,
-      'streak': userStats.stage.maxstreak,
-      'lecciones': userStats.stage.lessons,
-      'meditguiadas': userStats.stage.guidedmeditations 
-    };
-
-    // 0 / x == 0? 
-    var percentageCheck = {
-      'Total time': () => userStats.stage.timemeditated / s.stobjectives.totaltime ,
-      s.stobjectives.freemeditationlabel : () => userStats.stage.timemeditations / s.stobjectives.meditationcount,
-      'Streak': () => userStats.stage.maxstreak / s.stobjectives.streak,
-      'Lessons': () => userStats.stage.lessons / s.stobjectives.lecciones,
-      'Guided meditations': () => userStats.stage.guidedmeditations / s.stobjectives.meditguiadas
-    };
-   
-
-    var objectives = s.stobjectives.getObjectives();
-    
-    if(objectives.length > 0){
-      passedObjectives = new Map();
-
-      // HAY QUE VER DE GUARDARSE SI EL USUARIO SE LO HA PASADO O NO EN EL PROPIO STAGEOBJECTIVES
-      objectives.forEach((key,value) { 
-        passedObjectives[value] = s.stobjectives.checkPassedObjective(objectiveCheck[key], key);
-      });
-
-      double passedcount = 0;
-
-      passedObjectives.forEach((key, value) { 
-        if(value ==  1 ) {
-          passedcount += 1;
-        } else {
-          var passed = percentageCheck[key]();
-          passedcount += passed < 1 ? passed : 0;
-        }
-      });
-    
-
-      this.percentage = ((passedcount / objectives.length) * 100).floor();
-    }else{
-       */
-      this.percentage = 60;
-    
-  }*/
-
-  Message acceptStudent(Message m, confirm){
-    this.messages.removeWhere((element) => element.sender == m.sender);
-    m.deleted = true;
-
-    Message reply = new Message(
-      username: this.nombre,
-      sender: this.coduser,
-      receiver: m.sender,
-      date:DateTime.now(),
-      type:'message',
-    );
-
-    if(m.user != null){
-      if(confirm){
-        this.students.add(m.user);
-        reply.text = 'Your class request has been accepted';
-        m.user.messages.add(reply);
-      }else{
-        reply.text = 'Your class request has been denied';
-        m.user.messages.add(reply);
+    for(Objective o in milestone.objectives){
+      if(o.type == 'streak'){
+        o.completed = this.userStats.maxStreak;
+      } else if(o.type == 'reportMetric' || o.type == 'timeMetric'){
+        o.completed = this.userStats.metricsPassed[o.name] != null ? this.userStats.metricsPassed[o.name] : 0;
+      }else if(o.type == 'totaltime'){
+        // TIME MEDITATED SON MINUTOS !!
+        o.completed = this.userStats.timeMeditated;
       }
+
+      if(o.completed == null){ 
+        o.completed = 0;
+      }
+
+      passedCount += o.completed;
+      totalCount += o.toComplete;
     }
 
-    return reply;
+    milestone.passedPercentage = passedCount == 0 && totalCount == 0 ? 0 : (passedCount / totalCount * 100).round();
+
+    if(milestone.passedPercentage >= 100){
+      // ESTO NO FUNCIONARÁ CUANDO SE PASE A SERVER
+      this.milestonenumber += 1;
+    }
   }
 
   // CUANDO UN USUARIO TERMINA UN CONTENIDO !!!
@@ -471,30 +275,10 @@ class User {
     if(l.stagenumber != null) {
       if(this.contentDone.where((element)=> l.cod == element.cod && element.timesFinished != null).isEmpty){
 
-        this.userProgression.lessonposition[l.stagenumber-1] += 1;
-
-        // FALTARÁ COMPROBAR EL PORCENTAJE !!
-
-        /*if(l.stagenumber == this.stagenumber && this.userStats.stage.lessons < this.stage.stobjectives.lecciones){
-         
-
-          setPercentage();
-        
-          if (this.percentage >= 100) {
-            this.updateStage(d);
-          }
-        }*/
-
+        this.userProgression.lessonposition[l.stagenumber] += 1;
         this.userStats.lastread.clear();
-        
-
-        // IF YOU READ  ALL THE CONTENT OF STAGE 1 YOU UNLOCK STAGE 2
-        if(d.stages[l.stagenumber-1].checkPercentage(this) >= 100 && l.stagenumber < d.stages.length){
-          this.userProgression.stageshown ++;
-        }
-
         this.userStats.takeLesson();
-
+      
       }
     }
 
@@ -502,13 +286,16 @@ class User {
   }
 
 
-  void getTimeMeditatedString({int time}){
-    // SE PUEDE SACAR DEL TOTAL DE  MEDITACIONES
-    var time = this.userStats.timeMeditated  != null ? this.userStats.timeMeditated : 0;
-    int hours = time ~/ 60; 
 
+  String getTimeMeditatedString({int time}){
+    // SE PUEDE SACAR DEL TOTAL DE  MEDITACIONES
+    var t = time != null ?  time  : this.userStats.timeMeditated  != null ? this.userStats.timeMeditated : 0;
+    int hours = t ~/ 60; 
+    String timemeditated ='';
 
     if(hours > 24){
+      print('HOURS: $hours');
+
       int days = hours ~/ 24;
       int remaininghours = hours % 24;
 
@@ -520,18 +307,21 @@ class User {
       }else{
         timemeditated = days.toString() + 'd ' + remaininghours.toString() + 'h';
       }
-    }else{
+    } else {
       if(hours >= 1){
         timemeditated = hours.toString() + 'h';
-      }else{
-        int minutes = time % 60;
+      } else {
+        int minutes = t % 60;
         timemeditated = minutes.toString() + 'm';
       }
     }
+    return timemeditated;
   }
 
+  
   // cambiar content por recording !!
   // LO AÑADE  A LA LISTA DE CONTENTDONE !!
+  // ESTO FUERA????
   DoneContent finishContent(Content c, [Duration done, Duration totalDuration]){
 
     //  ESTO LO DEBERÍAMOS DE GUARDAR ??????
@@ -595,19 +385,42 @@ class User {
 
 
   //se puede refactorizar esto !!! COMPROBAR SI EL MODELO DE DATOS ESTÁ DE LA MEJOR FORMA
+  // hay que hacer esta función más sencilla !!!
   bool takeMeditation(Meditation m,[DataBase d, bool offline = false, earlyFinish = false, bool onlyActions = false]) {
     
+    // PORQUE HAY ONLYACTIONS, ES  NECESARIO ???
     if(!onlyActions){
       m.coduser = this.coduser;
       m.day = DateTime.now().subtract(m.duration);
       
       // esto en offline no funcionará 
       if(!earlyFinish && m.stagenumber != null && !totalMeditations.contains(m)){
-        this.userProgression.meditposition[m.stagenumber-1]++;
+        
+        int currentposition = this.userProgression.meditposition[m.stagenumber];
+
+        if(m.position == null || currentposition == m.position){
+          this.userProgression.meditposition[m.stagenumber] += 1;
+        }
       }
 
-      this.totalMeditations.add(m);
+      // check if user has meditated this month and then add to his time
+      if(this.userStats.lastmeditated != null && this.userStats.lastmeditated.month == DateTime.now().month){
+        this.userStats.meditatedThisMonth += m.duration.inMinutes;
+      } else {
+        this.userStats.meditatedThisMonth = m.duration.inMinutes;
+      }
 
+      // check if user has meditated this week and then add to his time
+      DateTime monday = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1 ));
+
+      if(this.userStats.lastmeditated != null && this.userStats.lastmeditated.isAfter(monday)){
+        this.userStats.meditatedThisWeek += m.duration.inMinutes;
+      } else {
+        this.userStats.meditatedThisWeek = m.duration.inMinutes;
+      }
+      
+      this.totalMeditations.add(m);
+      
       if (this.userStats.streak > 0 && this.userStats.lastmeditated != null) {
         final lastday = DateTime(
           this.userStats.lastmeditated.year, 
@@ -625,25 +438,37 @@ class User {
         this.userStats.streakUp();
       }
 
-
       // ESTO EN EL MODO OFFLINE NO ESTÁ CLARO !!
-      int auxstreak = checkStreak(false);
+      // RECHEQUEAMOS LA RACHA, POR SI FALLA !!
+      int auxstreak = checkStreak();
 
       if(auxstreak != this.userStats.streak && auxstreak > this.userStats.streak){
         this.userStats.streak = auxstreak;
       }
 
-
       this.userStats.meditate(m);
+      timemeditated = getTimeMeditatedString();
+      timeMeditatedMonth = getTimeMeditatedString(time: this.userStats.meditatedThisMonth);
 
-      getTimeMeditatedString();
-      
-
+      // PARA MOSTRAR OTRA ETAPA AL USUARIO !!
       if(!offline && this.stagenumber == m.stagenumber){
-        this.percentage = d.stages[this.stagenumber-1].checkPercentage(this);
+        this.percentage = d.stages.firstWhere((element) => element.stagenumber == this.stagenumber).checkPercentage(this);
 
         if (this.percentage >= 100) {
           this.userProgression.stageshown++;
+        }
+      }
+
+      // we check milestone objectives
+      if(!offline){
+        for(Objective o in milestone.objectives){
+          if(o.type == 'timeMetric' && o.metricValue <= m.duration.inMinutes){
+            if(this.userStats.metricsPassed[o.name] == null){
+              this.userStats.metricsPassed[o.name] = 0;
+            }
+
+            this.userStats.metricsPassed[o.name] += 1;
+          }
         }
       }
     }
@@ -654,11 +479,14 @@ class User {
       setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);
     }
 
+   
     //  PORQUE DEVOLVEMOS ALGO ???
     return false;
   }
   
 }
+
+
 // settings de cada profesor
 class TeacherSettings {
   String description, website, location, teachinghours;
@@ -698,6 +526,8 @@ class Teacher extends User {
 // THE NORMAL USER
 class Meditator extends User{
 
+
+
 }
 
 
@@ -706,7 +536,18 @@ class Admin extends User {
 }
 
 
-class TeacherInfo{
+
+
+
+
+
+
+
+
+
+
+
+class TeacherInfo {
   // INFORMACIÓN DEL PROFESOR !!!!
   String description, website, location, teachinghours;
 
@@ -752,8 +593,8 @@ class UserProgression {
       gameposition: json['gamePosition'] != null ? json['gamePosition'] : 0
     );
 
-    u.lessonposition = new List.filled(10, 0);
-    u.meditposition = new List.filled(10, 0);
+    u.lessonposition = new List.filled(11, 0);
+    u.meditposition = new List.filled(11, 0);
 
 
     if(json['lessonPosition'] !=  null){

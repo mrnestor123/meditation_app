@@ -1,5 +1,6 @@
 
 
+/*
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -8,6 +9,8 @@ import 'content_entity.dart';
 
 
 /// CAMBIAR EL NOMBRE DE PATH !!!!!
+
+
 class Course  {
   String cod,title,description,longdescription, image, createdBy;
   int price;
@@ -89,3 +92,4 @@ class Announcement {
     return e;
   }
 }
+*/

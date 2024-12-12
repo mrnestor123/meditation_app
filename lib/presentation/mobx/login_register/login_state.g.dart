@@ -11,7 +11,7 @@ part of 'login_state.dart';
 mixin _$LoginState on _LoginState, Store {
   final _$logAtom = Atom(name: '_LoginState.log');
 
-  @override
+  @override 
   Either<Failure, dynamic> get log {
     _$logAtom.reportRead();
     return super.log;
@@ -84,71 +84,71 @@ mixin _$LoginState on _LoginState, Store {
     });
   }
 
-  final _$startedgoogleloginAtom = Atom(name: '_LoginState.startedgooglelogin');
+  final _$startedloginAtom = Atom(name: '_LoginState.startedlogin');
+
+  @override
+  bool get startedlogin {
+    _$startedloginAtom.reportRead();
+    return super.startedlogin;
+  }
+
+  @override
+  set startedlogin(bool value) {
+    _$startedloginAtom.reportWrite(value, super.startedlogin, () {
+      super.startedlogin = value;
+    });
+  }
+
+
+  final _$startedgoogleloginAtom = Atom(name: '_LoginState.startedlogin');
 
   @override
   bool get startedgooglelogin {
     _$startedgoogleloginAtom.reportRead();
-    return super.startedgooglelogin;
+    return super.startedlogin;
   }
 
   @override
   set startedgooglelogin(bool value) {
-    _$startedgoogleloginAtom.reportWrite(value, super.startedgooglelogin, () {
-      super.startedgooglelogin = value;
+    _$startedgoogleloginAtom.reportWrite(value, super.startedlogin, () {
+      super.startedlogin = value;
     });
   }
 
-  final _$startedfaceloginAtom = Atom(name: '_LoginState.startedfacelogin');
+
+  final _$startediosloginAtom = Atom(name: '_LoginState.startedlogin');
 
   @override
-  bool get startedfacelogin {
-    _$startedfaceloginAtom.reportRead();
-    return super.startedfacelogin;
+  bool get startedioslogin {
+    _$startediosloginAtom.reportRead();
+    return super.startedlogin;
   }
 
   @override
-  set startedfacelogin(bool value) {
-    _$startedfaceloginAtom.reportWrite(value, super.startedfacelogin, () {
-      super.startedfacelogin = value;
+  set startedioslogin(bool value) {
+    _$startediosloginAtom.reportWrite(value, super.startedlogin, () {
+      super.startedlogin = value;
     });
   }
 
-  final _$startedmailloginAtom = Atom(name: '_LoginState.startedmaillogin');
+
+
+  final _$startedmaillogin = Atom(name: '_LoginState.startedlogin');
 
   @override
   bool get startedmaillogin {
-    _$startedmailloginAtom.reportRead();
-    return super.startedmaillogin;
+    _$startedmaillogin.reportRead();
+    return super.startedlogin;
   }
 
   @override
   set startedmaillogin(bool value) {
-    _$startedmailloginAtom.reportWrite(value, super.startedmaillogin, () {
-      super.startedmaillogin = value;
+    _$startedmaillogin.reportWrite(value, super.startedlogin, () {
+      super.startedlogin = value;
     });
   }
 
-  final _$startloginAsyncAction = AsyncAction('_LoginState.startlogin');
 
-  @override
-  Future<dynamic> startlogin(dynamic context,
-      {dynamic username,
-      dynamic password,
-      dynamic type,
-      dynamic token,
-      dynamic mail,
-      dynamic isTablet = false,
-      dynamic register = false}) {
-    return _$startloginAsyncAction.run(() => super.startlogin(context,
-        username: username,
-        password: password,
-        type: type,
-        token: token,
-        mail: mail,
-        isTablet: isTablet,
-        register: register));
-  }
 
   final _$logoutAsyncAction = AsyncAction('_LoginState.logout');
 
@@ -164,9 +164,7 @@ log: ${log},
 loggeduser: ${loggeduser},
 formKey: ${formKey},
 errorMessage: ${errorMessage},
-startedgooglelogin: ${startedgooglelogin},
-startedfacelogin: ${startedfacelogin},
-startedmaillogin: ${startedmaillogin}
+startedlogin: ${startedlogin}
     ''';
   }
 }

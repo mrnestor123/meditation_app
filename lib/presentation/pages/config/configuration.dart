@@ -28,6 +28,8 @@ class Configuration {
   static Color darkpurple = Colors.deepPurple;
   static Color lightpurple = Colors.deepPurpleAccent.withOpacity(0.65);
 
+  static Color pathBackground = Color.fromRGBO(220,208,186,1);
+
   static  Color boxBackground =  Color.fromARGB(255,236,225,197);
 
   static Color white = !nightmode ? Colors.white : Colors.black;
@@ -35,6 +37,9 @@ class Configuration {
 
   //lighter purple
   static Color secondarycolor = Color.fromRGBO(3, 169, 244, 1);
+
+  static Color stageColor = Color.fromRGBO(225,214,193,1);
+  
   //pink
   static Color accentcolor = Color.fromRGBO(241, 212, 240, 1.0);
 
@@ -88,6 +93,8 @@ class Configuration {
     var weight = fontWeight != null ? fontWeight  : FontWeight.normal;
     double letterspacing = 0;
 
+    FontStyle fontStyle = FontStyle.normal;
+
 
     String fontfamily = 'Gotham-rounded';
 
@@ -95,12 +102,17 @@ class Configuration {
       weight = FontWeight.bold;
     }
 
+
+    if(style =='italic'){
+      fontStyle = FontStyle.italic;
+    }
+
     if (spacing != null) {
       letterspacing = spacing;
     }
 
     if(font != null){
-      fontfamily = 'OpenSans';
+      fontfamily = font;
     }
 
     if(size == 'title'){
@@ -123,7 +135,7 @@ class Configuration {
           px = 16.0;
           break;
         case "medium":
-          px = 18.0;
+          px = 19.0;
           break;
         case "big":
           px = 20.0;
@@ -179,6 +191,7 @@ class Configuration {
     return TextStyle(
       fontFamily: fontfamily,
       fontSize: px,
+      fontStyle: fontStyle,
       color: color,
       fontWeight: weight,
       height: height != null ? height : 1.2,
@@ -283,8 +296,8 @@ class Configuration {
       strokewidth = 6;
       bigicon = safeBlockHorizontal * 5;
       crossAxisCount = 3;
-      lessonratio = 11/3;
-      buttonRatio = 7/1;
+      lessonratio = 12/3;
+      buttonRatio = 8/1;
     }else {
       tinpadding = 10;
       verticalspacing = 10;
@@ -294,8 +307,7 @@ class Configuration {
       medpadding = 20;
       bigpadding = 30;
       crossAxisCount = 2;
-      lessonratio = 8/3;
-      buttonRatio = 8/3;
+      lessonratio = 7/3;
       tinicon = 15;
       smicon = 24;
       leading = 24;

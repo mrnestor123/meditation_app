@@ -34,7 +34,7 @@ class ProfileCircle extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(Configuration.strokewidth/3),
           decoration: BoxDecoration(
-              color:  Colors.transparent,
+              color:   userImage != null && userImage.isNotEmpty && userImage.contains('<svg') ? Colors.white :Colors.transparent,
               border: Border.all(
                 color: bordercolor!= null ? bordercolor : Configuration.maincolor,
                 width: Configuration.strokewidth/2

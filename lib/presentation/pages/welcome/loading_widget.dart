@@ -1,14 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/main.dart';
 import 'package:meditation_app/presentation/pages/offline_screen.dart';
-import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
-import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:mobx/mobx.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -24,7 +20,7 @@ class Loading extends StatefulWidget {
 
 class _LoadingState extends State<Loading> {
   final List<ReactionDisposer> _disposers = [];
-  UserState _user;
+  UserState _userstate;
   List<double> itemsize = [50, 150];
   double size = 50;
   int count = 0;
@@ -39,11 +35,7 @@ class _LoadingState extends State<Loading> {
   bool hasPushed = false;
   bool hasUpdate = true;
   PackageInfo packageInfo;
-
-
   Future finishedAnimation;
-  int currentVersion = 5;
-
   bool animationFinish = false;
 
   @override
@@ -57,45 +49,32 @@ class _LoadingState extends State<Loading> {
     });
   }
 
+ 
   //METER CAROUSEL AQUI ??????
   void pushPage(){
     hasPushed = true;
 
-    /*
-    if(_user.errorMessage != null){
-      return;
-    } */
-
-    if((_user.data != null  && _user.data.settings != null && _user.data.settings.requiredUpdate != null && _user.data.settings.requiredUpdate
-      && _user.data.settings.version > currentVersion)
-    ){
+    if(_userstate.isOffline || _userstate.user != null &&  _userstate.user.offline ){
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => UpdatePage()),
+        MaterialPageRoute(builder: (context) => OfflinePage()),
         (Route<dynamic> route) => false,
       );
-    }else if(_user.user != null){
-        if(_user.user.offline){
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => OfflinePage()),
-            (Route<dynamic> route) => false,
-          );
-        }else {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Layout()),
-            (Route<dynamic> route) => false,
-          );
-        }
-    }else {
+    } else if(_userstate.user != null) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => WelcomeWidget()),
+        MaterialPageRoute(builder: (context) => Layout()),
         (Route<dynamic> route) => false,
       );
+    } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => WelcomeWidget()),
+          (Route<dynamic> route) => false,
+        );
     }
   }
+  
 
   
   @override 
@@ -110,10 +89,13 @@ class _LoadingState extends State<Loading> {
       })
     });
     
-    _user = Provider.of<UserState>(context);
+    precacheImage(AssetImage('assets/logo.png'), context);
 
-    precacheImage(AssetImage('assets/camino.png'), context);
+    _userstate = Provider.of<UserState>(context);
+
+    precacheImage(AssetImage('assets/fondo.png'), context);
     precacheImage(new AssetImage("assets/update_app.jpg"), context);
+    
 
     Configuration().init(context);
 
@@ -131,7 +113,7 @@ class _LoadingState extends State<Loading> {
   }
 
   void userisLogged(context) async {
-    await _user.connect();
+    await _userstate.connect();
     finishedloading = true;
 
     if(!animationFinish && !hasPushed){
@@ -224,7 +206,7 @@ class _UpdatePageState extends State<UpdatePage> {
             SizedBox(height: Configuration.verticalspacing*3),
 
             Center(
-              child: Text('There is a new update. Please update the app to the latest version',
+              child: Text('There is a new update in the store. Please update the app to the latest version',
                 style: Configuration.text('medium',Colors.black),
                 textAlign: TextAlign.center,
               ),

@@ -5,21 +5,27 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/back_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/login_register_buttons.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/welcome/common_widgets.dart';
-import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+import '../commonWidget/dialogs.dart';
+import '../contentWidgets/meditation_screens.dart';
 
 class LoginWidget extends StatefulWidget {
+  bool showAppBar;
+
+  LoginWidget({
+    Key key,
+    this.showAppBar = false
+  }) : super(key: key);
+
   @override
   _LoginWidgetState createState() => _LoginWidgetState();
 }
@@ -30,6 +36,8 @@ class _LoginWidgetState extends State<LoginWidget> {
 
   String email = "";
 
+  int selected = 0;
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,115 +47,203 @@ class _LoginWidgetState extends State<LoginWidget> {
     return Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
-        
+        appBar: AppBar(
+          backgroundColor: Configuration.maincolor,
+          elevation: 0,
+          leading:  BackButton(color:  Colors.white)
+        ),
         body: loginLayout(
           child: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Image.asset('assets/logo.png', width: Configuration.height*0.2),
-                Form(
-                key: _loginstate.formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InputField(
-                      controller: _loginstate.userController,
-                      labeltext:'email',
-                      icon: Icons.mail,
-                      validator: (value){
-                        if(value == null  || value.isEmpty){
-                          return 'Please enter the email';
-                        }else if(!_loginstate.validateMail(value)){
-                          return 'Please input a valid email';
-                        } 
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: Configuration.verticalspacing),
-                    InputField(
-                      controller: _loginstate.passwordController,
-                      labeltext: 'password',
-                      isPassword: true,
-                      icon: Icons.lock,
-                      validator: (value) { 
-                        if(value == null || value.isEmpty){
-                          return 'Please enter the password';
-                        }
-                        return null;
-                      },
-                    ),
+            child: Stack(
+              children: [
+                
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Image.asset('assets/logo.png', width: Configuration.height*0.15),
                     
-                    SizedBox(height: Configuration.verticalspacing),
-                    LoginRegisterButton(
-                      onPressed: () async {
-                        if(!_loginstate.startedlogin){ 
-                          _loginstate.startlogin(context, 
-                          username: _loginstate.userController.text, 
-                          password: _loginstate.passwordController.text,
-                          type:'mail');
-                        }
-                      },
-                      content: Observer(builder: (context)  {
-                        if(_loginstate.startedmaillogin){
-                          return CircularProgress(color:Colors.white);
-                        }else{
-                          return Row(
-                            crossAxisAlignment:CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Flexible(
-                                child: Text('Log in with email',
-                                  style: Configuration.text('subtitle', Colors.white,),
-                                ),
-                              ),
-                              Icon(Icons.mail,size: Configuration.smicon)
-                            ],
-                          );
-                        }
-                      }),
-                    ),
-                    SizedBox(height: Configuration.verticalspacing*2),
-                    TextButton(onPressed: ()=>{
-                      // add borderRadius top to bottomSheet
-                      showModalBottomSheet(
-                        context: context, 
-                        builder: (context){
-                          return ForgotPassword( );
-        
-                        })
-                    }, 
-                    child: Text('Forgot password?', style: Configuration.text('smallmedium', Colors.black,  font: 'Helvetica'))
-                    )
+                    
+                    
+                    LoginForm(loginstate: _loginstate),
+                   
+                    
+                    Spacer(),
+                    
+                    Platform.isIOS ? 
+                    Container(
+                      margin: EdgeInsets.only(bottom: Configuration.verticalspacing),
+                      child: AppleButton(state: _loginstate, register: false),
+                    ): Container(),
+
+                    GoogleButton(registerstate: _loginstate, register: false),
+                    //SizedBox(height: Configuration.verticalspacing*3),
+                    /*
+                    FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
+                    SizedBox(height: 40
+                    ,)*/
                   ],
-                )
                 ),
-                Spacer(),
-                
-                //APPLE BUTTON  IN IOS PLATFORM
-                
-                
+              
 
-                Platform.isIOS ? 
-                Container(
-                  margin: EdgeInsets.only(bottom: Configuration.verticalspacing),
-                  child: AppleButton(state: _loginstate, register: false),
-                ): Container(),
-
-
-
-
-                GoogleButton(registerstate: _loginstate,register: false),
-                //SizedBox(height: Configuration.verticalspacing*3),
-                /*
-                FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
-                SizedBox(height: 40
-                ,)*/
               ],
             ),
           ),
         ));
+  }
+}
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({Key key}) : super(key: key);
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final  _loginstate = Provider.of<LoginState>(context);
+    
+    return Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: Configuration.maincolor,
+          elevation: 0,
+          leading:  BackButton(color:  Colors.white)
+        ),
+        body: loginLayout(
+          child: Center(
+            child: Stack(
+              children: [
+                
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Image.asset('assets/logo.png', width: Configuration.height*0.15),
+                    
+                    
+                    
+                    RegisterForm(),
+                   
+                    
+                    Spacer(),
+                    
+                    Platform.isIOS ? 
+                    Container(
+                      margin: EdgeInsets.only(bottom: Configuration.verticalspacing),
+                      child: AppleButton(state: _loginstate, register: true),
+                    ): Container(),
+
+                    GoogleButton(registerstate: _loginstate, register: true),
+                    //SizedBox(height: Configuration.verticalspacing*3),
+                    /*
+                    FacebookButton(your_client_id: your_client_id, your_redirect_url: your_redirect_url, registerstate: _loginstate, register: false),
+                    SizedBox(height: 40
+                    ,)*/
+                  ],
+                ),
+              
+
+              ],
+            ),
+          ),
+        ));
+  }
+}
+
+
+class LoginForm extends StatelessWidget {
+  const LoginForm({
+    Key key,
+    @required LoginState loginstate,
+  }) : _loginstate = loginstate, super(key: key);
+
+  final LoginState _loginstate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+    key: _loginstate.formKey,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InputField(
+          controller: _loginstate.userController,
+          labeltext:'email',
+          icon: Icons.mail,
+          
+          validator: (value){
+            if(value == null  || value.isEmpty){
+              return 'Please enter the email';
+            }else if(!_loginstate.validateMail(value)){
+              return 'Please input a valid email';
+            } 
+            return null;
+          },
+        ),
+        SizedBox(height: Configuration.verticalspacing),
+        InputField(
+      controller: _loginstate.passwordController,
+      labeltext: 'password',
+      isPassword: true,
+      icon: Icons.lock,
+      validator: (value) { 
+        if(value == null || value.isEmpty){
+          return 'Please enter the password';
+        }
+        return null;
+      },
+    ),
+        
+        SizedBox(height: Configuration.verticalspacing),
+        BaseButton(
+          filled: true,
+          onPressed: () async {
+            if(!_loginstate.startedlogin){
+              _loginstate.startlogin(context,
+                username: _loginstate.userController.text, 
+                password: _loginstate.passwordController.text,
+                type:'mail'
+              );
+            }
+          },
+          child: Observer(builder: (context)  {
+            if(_loginstate.startedmaillogin){
+              return CircularProgress(color:Colors.white);
+            }else{
+              return Row(
+                crossAxisAlignment:CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text('Log in with email',
+                      style: Configuration.text('subtitle', Colors.white),
+                    ),
+                  ),
+                  Icon(Icons.mail,size: Configuration.smicon, color: Colors.white)
+                ],
+              );
+            }
+          }),
+        ),
+
+        TextButton(
+          onPressed: ()=>{
+            // add borderRadius top to bottomSheet
+            showModalBottomSheet(
+              context: context, 
+              builder: (context){
+                return ForgotPassword();
+              })
+          }, 
+          child: Text('Forgot password?', style: Configuration.text('smallmedium', Colors.black,  font: 'Helvetica'))
+        )
+      ],
+    )
+    );
   }
 }
 
@@ -350,9 +446,30 @@ class _InputFieldState extends State<InputField> {
   }
 }
 
+Widget loginLayout({Widget child}){
 
-
-
+  return containerGradient(
+    child: Container(
+      padding: EdgeInsets.only(right:Configuration.smpadding,left:Configuration.smpadding,bottom:Configuration.smpadding),
+      child: Container(
+        padding: EdgeInsets.all(Configuration.smpadding),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(Configuration.borderRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+          color: Color.fromRGBO(251, 248, 236, 1)
+        ),
+       child: child, 
+      )
+    )
+  );
+}
 
 
 
@@ -496,3 +613,205 @@ class TabletLoginWidget extends StatelessWidget {
         ));
   }
 }*/
+
+
+
+class RegisterForm extends StatelessWidget {
+  RegisterForm({
+    Key key,
+    }) : super(key: key);
+
+
+  final TextEditingController _userController = new TextEditingController();
+  final TextEditingController _passwordController = new TextEditingController();
+  final TextEditingController _confirmController = new TextEditingController();
+
+
+  @override
+  Widget build(BuildContext context) {
+    final _registerstate = Provider.of<LoginState>(context);
+    return Form(
+      key: _registerstate.formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          InputField(
+            controller: _userController,
+            labeltext: 'email',
+            icon: Icons.email,
+            validator: (value){
+              if(value == null  || value.isEmpty){
+                return 'Please enter the email';
+              }else if(!_registerstate.validateMail(value)){
+                return 'Please input a valid email';
+              } 
+              return null;
+            },
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+          InputField(
+            controller: _passwordController,
+            labeltext: 'password',
+            isPassword: true,
+            icon: Icons.lock,
+            validator: (value){
+              if(value == null  || value.isEmpty){
+                return 'Please enter the password';
+              }else if(value.contains(' ')){
+                return 'Password must not contain spaces';
+              }
+              return null;
+            }
+          ),
+          SizedBox(height: Configuration.verticalspacing),
+          InputField(
+            controller: _confirmController,
+            labeltext: 'confirm password',
+            icon: Icons.lock,
+            isPassword: true,
+            validator: (value){
+                if(value == null  || value.isEmpty){
+                  return 'Please enter the password';
+                }else if(_confirmController.text != _passwordController.text) {
+                  return 'Passwords must be equal';
+                }
+                return null;
+            }
+          ),
+          SizedBox(height: Configuration.verticalspacing ),
+          BaseButton(
+            filled: true,
+            onPressed: () async{
+              if(!_registerstate.startedlogin){
+                await _registerstate.startlogin(
+                  context,
+                  register: true,
+                  mail:_userController.text,
+                  password: _passwordController.text,
+                  type: 'mail');
+              }
+            },
+            child: Observer(builder: (context)  {
+            if(_registerstate.startedmaillogin){
+              return CircularProgressIndicator(color: Colors.white);
+            }else{
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Sign up with email',
+                      style: Configuration.text('subtitle', Colors.white),
+                    ),
+                  ),
+                  Icon(
+                    Icons.mail,
+                    color: Colors.white,
+                    size: Configuration.smicon,
+                  )
+                ],
+              );
+            }
+            })
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class AppleButton extends StatelessWidget {
+   const AppleButton({
+    this.register,
+    Key key,
+    @required LoginState state,
+  }) : state = state, super(key: key);
+
+  final bool register;
+  final LoginState state;
+  final bool appleAvailable = false;
+  
+  void isAvailable(){
+    SignInWithApple.isAvailable().then((value) => print('isAVailable $value'));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    isAvailable();
+
+    // copy googlebutton with apple icon
+    return Container(
+      width:Configuration.width*0.9,
+      child: BaseButton(
+        onPressed: () async{
+          if(!state.startedlogin){
+            await  state.startlogin(
+              context,
+              type: 'apple',
+              register:register
+            );
+          }
+        },
+        filled: true,
+        color: Colors.black,
+        child: Observer(
+          builder: (context) {
+            if(state.startedioslogin){
+              return CircularProgress(color:Colors.white);
+            }else {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(child:  Text((register ? 'Sign up' :'Log in') + ' with apple', style: Configuration.text('subtitle', Colors.white ))),
+                  Icon(FontAwesomeIcons.apple,color: Colors.white,size: Configuration.smicon)
+                ]);
+            }
+          }
+        ),
+        ),
+    );
+  }
+}
+
+
+class GoogleButton extends StatelessWidget {
+  const GoogleButton({
+    this.register,
+    Key key,
+    @required LoginState registerstate,
+  }) : _registerstate = registerstate, super(key: key);
+
+  final bool register;
+  final LoginState _registerstate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width:Configuration.width*0.9,
+      child: BaseButton(
+        onPressed: () async{
+          if(!_registerstate.startedlogin){
+            await _registerstate.startlogin(context, type: 'google', register:register);
+          }
+        },
+        color: Colors.redAccent,
+        filled: true,
+        child: Observer(builder: (context){
+          if(_registerstate.startedgooglelogin){
+            return CircularProgress(color:Colors.white);
+          } else {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Flexible(child: Text((register ? 'Sign up' :'Log in') + ' with google', style: Configuration.text('subtitle', Colors.white ))),
+                Icon(FontAwesomeIcons.google,color: Colors.white,size: Configuration.smicon)
+              ]);
+          }
+        })
+        ),
+   );
+  }
+}

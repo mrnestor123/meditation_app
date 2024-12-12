@@ -2,16 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 
-// AQUI DEBERÍAN DE ESTAR TODAS LAS CLASES DE CONTENT !!
+
+
+/*
+*
+* ALL THE CLASSES CONTENT IN THE APP IS IN THIS FILE
+*
+*/
 class Content {
-  String cod, title, description, image, type, category;
+  String cod, title, description, image, type, category, group;
   int stagenumber, position;
   bool blocked, isNew;
   Map<String,dynamic> createdBy = new Map<String,dynamic>();
 
   Content({cod, @required this.stagenumber,this.isNew = false, this.title,
     this.createdBy, this.description, this.image, this.type, this.position = 0, this.blocked,
-    this.category
+    this.category, this.group
   }) {
     if (cod == null) {
       var uuid = Uuid();
@@ -68,6 +74,17 @@ class Content {
       isMeditation() ? Icons.self_improvement
       : this.type =='brain' ?
       Icons.psychology : Icons.book;
+  }
+
+  IconData getCategoryIcon(){
+    if(category == 'mind'){
+      return Icons.psychology;
+    } else if(category == 'philosophy'){
+      return Icons.history_edu;
+    } else if(category == 'meditation'){
+      return Icons.self_improvement;
+    }
+  
   }
 
   String getText(){
@@ -172,8 +189,6 @@ class DoneContent extends Content {
   
 }
 
-
-
 // FILECONTENT HAS A FILE, AND A DURATION !!
 class FileContent extends Content {
   String file;
@@ -190,10 +205,12 @@ class FileContent extends Content {
     type, 
     position, 
     blocked,
+    group,
     this.file,
     this.total
   }) : super(
     cod: cod, 
+    group: group,
     stagenumber: stagenumber, 
     isNew: isNew, 
     title: title,
@@ -217,6 +234,7 @@ class FileContent extends Content {
       type: json['type'],
       file: json['file'] == null ? '' : json['file'],
       position: json['position'],
+      group: json['group'],
       // GUARDAMOS MINUTOS!! DEBERÍAMOS GUARDAR SEGUNDOS
       total: json['total'] == null ? 
         json['duration'] != null ?
@@ -235,9 +253,109 @@ class FileContent extends Content {
 
 }
 
+
+// AÑADIMOS AQUÍ MEDITACIONES, JUEGOS Y LECCIONES
+
+
 // HAY QUE CREAR LA CLASE RECORDING !!!!
 class Recording extends Content {
 
+
+}
+
+
+/*
+*
+* LESSON
+*
+*/
+
+class Lesson extends Content {
+  List<dynamic> text;
+ 
+  Lesson({
+    cod,
+    @required title,
+    image,
+    stagenumber,
+    type,
+    position,
+    createdBy,
+    file,
+    blocked,
+    isNew,
+    category,
+    group,
+    @required description,
+    @required this.text
+  }) : 
+  super(
+    isNew:isNew,
+    group: group,
+    category: category,
+    cod: cod,
+    title: title,
+    blocked:blocked,
+    type: type,
+    image: image,
+    stagenumber: stagenumber,
+    description: description,
+    createdBy:createdBy,
+    position: position
+  );
+}
+
+
+
+
+/*
+*
+* GAMES
+*
+*/
+class Game extends Content {
+  final List<Question> questions = new List.empty(growable: true);
+
+  String video;
+
+  Game({cod, @required title, image, stagenumber,
+    type, position, @required description, this.video }) : 
+    super(cod: cod, title: title, type: type, image: image,
+      stagenumber: stagenumber, description: description, position: position);
+
+
+  void setQuestions(json) {
+    for(var question in json){
+      questions.add(Question.fromJson(question));
+    }
+  }
+}
+
+class Question {
+  String question, key;
+  
+  List<dynamic> options;
+  int answer;
+
+  Question({this.question,this.options,this.answer, this.key});
+
+  bool isValid(int ans){
+    return ans == this.answer;
+  }  
+
+  factory Question.fromJson(Map<String, dynamic> json) => Question(
+      answer: json["answer"] == null ? 0 : json['answer'] is String ? int.parse(json["answer"]) : json['answer'],
+      options: json['options'] == null ? [] : json['options'],
+      question: json['question'] == null ? null : json['question'],
+      key: json['key'] == null ?null : json['key']
+    );
+
+  Map<String, dynamic> toJson() => {
+      "answer": answer == null ? null : answer,
+      "options":options == null ? null : options,
+      "question": question == null ? null : question,
+      'key': key == null ? null : key
+  };
 
 }
 

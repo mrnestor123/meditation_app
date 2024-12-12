@@ -6,14 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:meditation_app/domain/entities/local_notifications.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialogs.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
-import 'package:meditation_app/presentation/pages/requests_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'commonWidget/back_button.dart';
-import 'commonWidget/error_dialog.dart';
 import 'commonWidget/remind_time.dart';
 import 'config/configuration.dart';
 
@@ -23,6 +21,34 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+
+  
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          // Status bar color
+          statusBarColor: Configuration.lightgrey,            // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+          statusBarBrightness: Brightness.light, // For iOS (dark icons)
+        ),
+        title: Text('Settings',style: Configuration.text('subtitle', Colors.black)),
+        backgroundColor: Configuration.lightgrey,
+        elevation: 1,
+        centerTitle: true,
+        leading:   ButtonBack(color: Colors.black)
+      ),
+      body: SettingsMenu()    
+    );
+  }
+}
+
+
+
+class SettingsMenu extends StatelessWidget {
 
   Widget containerSettings({String text, onPressed, isTitle = false}){
 
@@ -36,6 +62,7 @@ class _SettingsState extends State<Settings> {
       ),
       child: TextButton(
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
           padding: EdgeInsets.all(Configuration.smpadding)
         ),
         onPressed: onPressed, 
@@ -51,216 +78,192 @@ class _SettingsState extends State<Settings> {
       ),
     );
   }
-
+  
+  SettingsMenu({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
     final _userstate = Provider.of<UserState>(context);
     final _loginstate = Provider.of<LoginState>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle(
-          // Status bar color
-          statusBarColor: Configuration.lightgrey,            // Status bar brightness (optional)
-          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
-          statusBarBrightness: Brightness.light, // For iOS (dark icons)
-        ),
-        title: Text('Settings',style: Configuration.text('subtitle', Colors.black)),
-        backgroundColor: Configuration.lightgrey,
-        elevation: 1,
-        centerTitle: true,
-        leading:   ButtonBack(color: Colors.black)
-      ),
-      body: Container(
+    return Container(
         color: Configuration.lightgrey,
         width: Configuration.width,
-        child: ListView(
-          physics: ClampingScrollPhysics(),
+        child: Column(
           children: [
 
-            containerSettings(
-              text: 'GENERAL',
-              isTitle: true
-            ),       
-                 
-            containerSettings(
-              text:'Stage Progression',
-              onPressed:()=>{
-                Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  
-                  StageProgression(
-                  title:'Stage Progression',
-                  description: 'Choose how you want to follow the progression in the app',
-                  condition: (name)=> _userstate.user.settings.progression == name,
-                  action: (name){
-                    _userstate.user.settings.setProgression(name);
-                    _userstate.updateUser();
-                    setState((){});
-                  },
-                  options: [
-                    {'text':'casual','name':'casual','description':'Follows the usual routine'},
-                    {'text':'Unlock meditations','name':'unlockmeditations', 'description':'unlocks all meditations'},
-                    {'text':'Unlock lessons','name':'unlocklesson', 'description': 'Unlocks all lessons'},
-                    {'text':'Unlock all','name':'unlockall', 'description' : 'Unlocks all content in the app'}
-                  ]
-                )))
-              }
-            ),
-            
-            containerSettings(
-              text: 'Ask a teacher',
-              onPressed: ()=>{
-                Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  
-                  AskTeacherScreen()
-                ))
-              },
-            ),
+          containerSettings(
+            text: 'GENERAL',
+            isTitle: true
+          ),       
+                
+          containerSettings(
+            text:'Stage Progression',
+            onPressed:()=>{
+              Navigator.push(context,
+              MaterialPageRoute(builder: (context) =>  
+                StageProgression(
+                title:'Stage Progression',
+                description: 'Choose how you want to follow the progression in the app',
+                condition: (name)=> _userstate.user.settings.progression == name,
+                action: (name){
+                  _userstate.user.settings.setProgression(name);
+                  _userstate.updateUser();
+                  //setState((){});
+                },
+                options: [
+                  {'text':'casual','name':'casual','description':'Follows the usual routine'},
+                  {'text':'Unlock meditations','name':'unlockmeditations', 'description':'unlocks all meditations'},
+                  {'text':'Unlock lessons','name':'unlocklesson', 'description': 'Unlocks all lessons'},
+                  {'text':'Unlock all','name':'unlockall', 'description' : 'Unlocks all content in the app'}
+                ]
+              )))
+            }
+          ),
+          
+          containerSettings(
+            text: 'Ask a teacher',
+            onPressed: ()=>{
+              Navigator.push(context,
+              MaterialPageRoute(builder: (context) =>  
+                AskTeacherScreen()
+              ))
+            },
+          ),
 
-    
+  
 
-            containerSettings(
-              text:'Request a feature / report a bug',
-              onPressed:()=>{
-                Navigator.pushNamed(context, '/requests')
-              }
-            ),
-
-
-            containerSettings(
-              text: 'Set a time reminder',
-              onPressed: ()=>{
-                Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  
-                  TimeReminder()
-                ))
-              },
-            ),
-
-            /*
-            containerSettings(
-              text: Platform.isIOS ? 'Apple health' : 'Google fit',
-              onPressed: ()=>{
-              },
-            ),*/
-
-            containerSettings(
-              text: 'INFO',
-              isTitle: true
-            ), 
-
-            
-
-            containerSettings(
-              text: 'About the app',
-              onPressed: ()=>{
-                Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  
-                  AboutPage(
-                    title: 'About the app',
-                    text: _userstate.data.settings.aboutApp,
-                  )
-                ))
-              },
-            ),
-
-            containerSettings(
-              text: 'About the author',
-              onPressed: ()=>{
-                Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  
-                  AboutPage(
-                    title: 'About the author',
-                    text: _userstate.data.settings.aboutMe,
-                  )
-                ))
-              },
-            ),
+          containerSettings(
+            text:'Request a feature / report a bug',
+            onPressed:()=>{
+              Navigator.pushNamed(context, '/requests')
+            }
+          ),
 
 
-            _userstate.data.settings != null && _userstate.data.settings.menu != null ?
-            Column(
-              children: _userstate.data.settings.menu.map((e) => 
-                containerSettings(
-                  text: e.title,
-                  onPressed: ()=>{
-                    Navigator.push(context,
-                    MaterialPageRoute(builder: (context) =>  
-                      AboutPage(
-                        title: e.title,
-                        text: e.text,
-                      )
-                    ))
-                  },
+          containerSettings(
+            text: 'Set a time reminder',
+            onPressed: ()=>{
+              Navigator.push(context,
+              MaterialPageRoute(builder: (context) =>  
+                TimeReminder()
+              ))
+            },
+          ),
+
+          /*
+          containerSettings(
+            text: Platform.isIOS ? 'Apple health' : 'Google fit',
+            onPressed: ()=>{
+            },
+          ),*/
+
+          containerSettings(
+            text: 'INFO',
+            isTitle: true
+          ), 
+
+          
+
+          containerSettings(
+            text: 'About the app',
+            onPressed: ()=>{
+              Navigator.push(context,
+              MaterialPageRoute(builder: (context) =>  
+                AboutPage(
+                  title: 'About the app',
+                  text: _userstate.data.settings.aboutApp,
                 )
-              ).toList()
-            ) : Container(),
+              ))
+            },
+          ),
+
+          containerSettings(
+            text: 'About the author',
+            onPressed: ()=>{
+              Navigator.push(context,
+              MaterialPageRoute(builder: (context) =>  
+                AboutPage(
+                  title: 'About the author',
+                  text: _userstate.data.settings.aboutMe,
+                )
+              ))
+            },
+          ),
 
 
+          _userstate.data.settings != null && _userstate.data.settings.menu != null ?
+          Column(
+            children: _userstate.data.settings.menu.map((e) => 
+              containerSettings(
+                text: e.title,
+                onPressed: ()=>{
+                  Navigator.push(context,
+                  MaterialPageRoute(builder: (context) =>  
+                    AboutPage(
+                      title: e.title,
+                      text: e.text,
+                    )
+                  ))
+                },
+              )
+            ).toList()
+          ) : Container(),
 
-            SizedBox(height: Configuration.verticalspacing*2),
-            Container(
-              width: Configuration.width,
-              padding: EdgeInsets.all(Configuration.smpadding),
-              child: OutlinedButton(
-                style: ElevatedButton.styleFrom(
-                  onSurface: Colors.black,
-                  shape: 
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
-                    ),
-                  side: BorderSide(
-                    width: 1.0,
-                    color: Colors.red,
-                    style: BorderStyle.solid,
-                  ),
-                  padding: EdgeInsets.all(Configuration.smpadding)
-                ),
-                onPressed: () { 
-                  _userstate.user=null;
-                  _loginstate.logout();
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-                },             
-                child: Text('Log in with another account',style: Configuration.text('subtitle', Colors.red) )
-              ),
+          containerSettings(
+            text: 'Delete my account',
+
+            onPressed: (){
+              showAlertDialog(
+                context: context,
+                title: 'Are you sure?',
+                text: 'This will delete your account and all your data',
+                onYes: () {
+                  // CONFIRM DIALOG AGAIN
+                  print('YES');
+                  showAlertDialog(
+                    context: context,
+                    title: 'I confirm I want to delete my account',
+                    text: 'All data will be lost',
+                    yesText: 'DELETE ACCOUNT',
+                    noText: 'CANCEL',
+                    onYes: ()=> {
+                      _userstate.deleteUser(),
+                      _loginstate.logout(),
+                      
+                      Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false)
+                    },
+                    noPop: true
+                  );
+                },
+                noPop: true
+                
+              );
+
+            }
+
+          ),
+
+          SizedBox(height: Configuration.verticalspacing*2),
+          
+          Container(
+            width: Configuration.width*0.9,
+            child: BaseButton(
+              text: 'Log in with another account',
+              color: Colors.red,
+              textcolor: Colors.red,
+              onPressed: () { 
+                _userstate.user=null;
+                _loginstate.logout();
+                Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
+              },             
             ),
-
-
-            /*
-            SizedBox(height: 20),
-            Text('This app is based on The Mind Illuminated, written by John Yates',style: Configuration.text('small', Colors.black), textAlign: TextAlign.center),
-            SizedBox(height: 5),
-            Image(
-              image: AssetImage('assets/tenstages-book.png'),
-              width: Configuration.width*0.5,
-            ),
-            Spacer(),
-            AspectRatio(
-              aspectRatio: Configuration.buttonRatio,
-              child: Container(
-                width: Configuration.width,
-                child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)),
-                      padding: EdgeInsets.all(12)
-                    ),
-                    onPressed: () { 
-                    _userstate.user=null;
-                    _loginstate.logout();
-                    Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (route) => false);
-                  }, child: Text('LOG OUT',style: Configuration.text('small', Colors.white),)),
-              ),
-            ),
-            SizedBox(height: Configuration.verticalspacing*2),*/
-          ],
-        ),
-      ),    
+          ),
+        ],
+      ),
     );
   }
 }
-
 
 
 class AboutApp extends StatelessWidget {
@@ -319,7 +322,7 @@ class IncreaseScreenDialog extends StatelessWidget {
               ElevatedButton(
                   onPressed: (){
                     print('pressed button');
-                    _userstate.updateStage(); 
+                    //_userstate.updateStage(); 
                     Navigator.pop(context);
                   },
                   child: Padding(
@@ -551,7 +554,6 @@ class _TimeReminderState extends State<TimeReminder> {
               color: Configuration.lightgrey,
               border: true,
               textcolor:_userstate.user.settings.reminderTime == null ?  Colors.grey : Colors.red,
-              noelevation: true,
               onPressed: _userstate.user.settings.reminderTime != null ? (){
                 _userstate.user.settings.reminderTime = null;
                 setState(() {});

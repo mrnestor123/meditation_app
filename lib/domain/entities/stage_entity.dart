@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mobx/mobx.dart';
 
-import 'game_entity.dart';
 import 'meditation_entity.dart';
 
 class Stage {
-  int stagenumber, userscount, percentage;
-  String description, image, goals, obstacles, skills,
+  int stagenumber, userscount, percentage, prevmilestone;
+  String description, image, goals, obstacles, skills, title,
     mastery, longimage,  shortimage, shorttext, 
     longdescription, practiceSummary, whenToAdvance;
+
+  bool blocked;
   // EN EL  FUTURO UNA LISTA SOLO CON CONTENT
   // PATH SERÁ EL THEORY Y MEDITPATH EL DE  MEDITATIONS  !!
   ObservableList<Content> path = new ObservableList();
@@ -20,28 +20,22 @@ class Stage {
   List<Content> videos = new List.empty(growable: true);
 
 
-
-
-  //hay que empezar a utilizar stobjectives!!
-  StageObjectives stobjectives;
-  //PARA EL FUTURO !!! 
-  bool locked;
-
   Stage({
     @required this.stagenumber,
     this.description,
+    this.title,
     this.shorttext,
     @required this.image,
     this.longimage,
     this.goals,
+    this.blocked = false,
+    this.prevmilestone = 0,
     this.obstacles,
     this.skills,
     this.shortimage,
     this.mastery,
     this.userscount,
-    this.stobjectives,
     this.longdescription,
-    this.locked,
     this.whenToAdvance,
     this.practiceSummary,
     this.percentage
@@ -49,20 +43,11 @@ class Stage {
 
 
   void addLesson(Content l){
-    if(stobjectives.lecciones == null){
-      stobjectives.lecciones = 0;
-    }
-    stobjectives.lecciones++;
     path.add(l);
     path.sort((a, b) => a.position - b.position);
   }
 
   void addMeditation(Meditation m){
-    if(stobjectives.meditguiadas == null){
-      stobjectives.meditguiadas = 0;
-    }
-    
-    stobjectives.meditguiadas++;
     meditpath.add(m);
     meditpath.sort((a, b) => a.position - b.position);
   }
@@ -113,177 +98,9 @@ class Stage {
     List<Content> allContent = path + meditpath;
 
     // PERCENTAGE OF CONTENT DONE
-
     double doublepercentage = (done.length / (allContent.length == 0 ? 1 : allContent.length)) * 100;
 
     this.percentage = doublepercentage.toInt();
     return doublepercentage.toInt();
   }
-}
-
-
-class StageObjectives {
-  int totaltime, streak, lecciones, meditguiadas, meditationcount, meditationfreetime;
-  String freemeditationlabel;
-
-  StageObjectives({this.totaltime,this.meditationcount,this.streak,this.lecciones,this.meditguiadas, this.meditationfreetime, this.freemeditationlabel});
-
-  factory StageObjectives.fromJson(Map<String, dynamic> json) =>
-    StageObjectives(
-      totaltime: json['totaltime'] == null ? 0 : json['totaltime'],
-      streak: json['streak'] == null ? 0 : json['streak'],
-      meditationcount: json['meditation'] == null ? 0 : json['meditation']['count'] == null ? 0 : json['meditation']['count'],
-      freemeditationlabel: json['meditation'] == null  ? null :  json['meditation']['time'] == null || json['meditation']['time'] == 0   ? null : json['meditation']['time'].toString() + ' min free meditations ',
-      meditationfreetime: json['meditation'] == null   ? 0 :  json['meditation']['time']  == null ? 0 :json['meditation']['time'],
-      meditguiadas: json['meditguiadas'] == null ? 0 : json['meditguiadas'],
-      lecciones: json['lessons'] == null ? 0 : json['lessons']
-    );  
-  
-  factory StageObjectives.empty() => 
-    StageObjectives(
-      totaltime: 0 ,
-      streak: 0 ,
-      meditationcount:  0,
-      freemeditationlabel: '0 min',
-      meditationfreetime:  0 ,
-      meditguiadas:  0 ,
-      lecciones: 0);
-  
-
-  Map<String, dynamic> toJson() => {
-    "totaltime": totaltime == null ? null : totaltime,
-    "streak": streak == null ? 0 : streak,
-    'meditation': {'count': meditationcount, 'time': meditationfreetime},
-    "meditguiadas": meditguiadas == null ? null : meditguiadas,
-    "lecciones": lecciones == null ? [] : lecciones
-  };
-
-
-  //HAY QUE AÑADIR EL STREAK !!!
-  
-  Map<String,dynamic> getObjectives() {
-    Map<String,dynamic> objectives = {};
-
-    
-    if(freemeditationlabel != null ) {
-      objectives ['meditation'] = freemeditationlabel;
-    }
-
-    if(totaltime != null  && totaltime != 0) {
-      objectives['totaltime'] = 'Total time';
-    }
-
-    if(streak != null && streak != 0){
-      objectives['streak'] = 'Streak';
-    }
-
-    if(lecciones != null && lecciones != 0){
-      objectives['lecciones'] = 'Lessons';
-    }
-
-    if(meditguiadas != null && meditguiadas != 0){
-      objectives['meditguiadas'] = 'Guided meditations';
-    }
-
-    return objectives;
-  }
-
-
-  List<Map<String,IconData>> printObjectives() {
-    
-    List<Map<String,IconData>> l = new  List.empty(growable: true);
-
-    print(this);
-    
-    if(freemeditationlabel != null ) {
-      l.add({freemeditationlabel : Icons.self_improvement});
-    }
-
-    if(totaltime != null  && totaltime != 0) {
-      l.add({'Total time' : Icons.timer});
-
-    }
-
-    if(streak != null && streak != 0){
-      l.add({'Streak' : Icons.calendar_month});
-
-    }
-
-    if(lecciones != null && lecciones != 0){
-      l.add({'Lessons' : Icons.book});
-    }
-
-    if(meditguiadas != null && meditguiadas != 0){
-      l.add({'Guided meditations' : Icons.timer});
-    }
-
-    return l;
-  }
-
-
-
-
-
-
-
-
-  // HAY QUE DEVOLVER EL PORCENTAJE EN 1
-  dynamic checkPassedObjective(int value, String objective){
-     var labels = {
-      'totaltime':totaltime,
-      'streak':streak,
-      'meditation':meditationcount,
-      'meditguiadas':meditguiadas,
-      'lecciones': lecciones
-    };
-
-    if(value >= labels[objective]){
-      return 1;
-    }else{
-      return value.toString() + '/' + labels[objective].toString();
-    }
-    
-    //  ESTO ES PARA SACAR EL PORCENTAJE !!!
-    //return value >= labels[objective] ? 1 :  value /labels[objective];
-
-  }
-}
-
-
-// un objetivo tiene un icono, un  label, un bool de pasado o no, un porcentaje
-// INTENTO DE REFACTORIZAR. DE MOMENTO MUY COMPLICADO PARA REFACTORIZAR !!!
-class Objective {
-  IconData icon;
-  String label,name;
-  bool passed;
-  int percentage,value;
-
-  Objective({this.icon,this.label,this.passed,this.name, this.percentage,this.value});
-
-
-  factory Objective.fromJson(Map<String, dynamic> json) {
-      
-    Objective o  = Objective(
-      name: json.keys.first,
-      value: json[json.keys.first]
-    );  
-
-
-    return o;
-  }
-
-}
-
-
-
-// DE MOMENTO LO DEJAMOS POR HACER !!!!
-
-// HABRÁ QUE PODER AÑADIRLE UNA IMAGEN Y UN TÍTULO
-class Phase {
-  String title, description;
-    
-  List<Content> content = new List.empty(growable: true);
-
-  Phase({this.title,this.description});
-
 }

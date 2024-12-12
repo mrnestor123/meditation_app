@@ -13,25 +13,26 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meditation_app/login_injection_container.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/back_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/meditation_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock/wakelock.dart';
 
+
 import '../../../domain/entities/audio_handler.dart';
 import '../../../domain/entities/content_entity.dart';
-import '../../../domain/entities/local_notifications.dart';
+import '../../../domain/entities/database_entity.dart';
 import '../../../domain/entities/meditation_entity.dart';
+import '../../../domain/entities/milestone_entity.dart';
 import '../../mobx/actions/meditation_state.dart';
 import '../../mobx/actions/user_state.dart';
 import '../commonWidget/carousel_balls.dart';
+import '../commonWidget/dialogs.dart';
 import '../commonWidget/html_towidget.dart';
 import '../commonWidget/start_button.dart';
 import '../config/configuration.dart';
-import '../meditation_screen.dart';
+import '../mainpages/meditation_screen.dart';
 
 // HAY Q UE QUITAR LOS  SYSTEMCHROME DE AQUI
 
@@ -175,37 +176,41 @@ class _MeditationEndedScreenState extends State<MeditationEndedScreen> {
                
                 
                 widget.meditation.report == null ?
-                BaseButton(
-                  text: 'Write a meditation report',
-                  color: Configuration.maincolor,
-                  bordercolor: Colors.white,
-                  textcolor: Colors.white,
-                  onPressed: ()=>{
-                    // set preferred layout
-                    SystemChrome.setEnabledSystemUIMode(
-                      SystemUiMode.manual, 
-                      overlays: [
-                        SystemUiOverlay.bottom,
-                        SystemUiOverlay.top
-                      ]
-                    ),
-
-                    Navigator.push(
-                      context, 
-                      PageRouteBuilder(
-                      transitionDuration: Duration.zero,
-                      reverseTransitionDuration: Duration.zero,
-                      pageBuilder: (context,_,__) => AddReport(
-                        guided: widget.meditation.title != null
-
-                      ))
-                      
-                    ).then((value) => 
-                      setState(() {  
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Configuration.smpadding
+                  ),
+                  child: BaseButton(
+                    text: 'Write a meditation report',
+                    color: Colors.white,
+                    textcolor: Colors.white,
+                    onPressed: ()=>{
+                      // set preferred layout
+                      SystemChrome.setEnabledSystemUIMode(
+                        SystemUiMode.manual, 
+                        overlays: [
+                          SystemUiOverlay.bottom,
+                          SystemUiOverlay.top
+                        ]
+                      ),
+                
+                      Navigator.push(
+                        context, 
+                        PageRouteBuilder(
+                        transitionDuration: Duration.zero,
+                        reverseTransitionDuration: Duration.zero,
+                        pageBuilder: (context,_,__) => AddReport(
+                          guided: widget.meditation.title != null
+                
+                        ))
                         
-                      })
-                    )
-                  }
+                      ).then((value) => 
+                        setState(() {  
+                          
+                        })
+                      )
+                    }
+                  ),
                 ) : 
                 Padding(
                   padding: EdgeInsets.all(Configuration.smpadding),
@@ -236,14 +241,14 @@ class MeditationReportWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            flex: 2,
+            flex:1,
             child: Text(title, 
               style: Configuration.text('small', Colors.black),
             ),
           ),
           SizedBox(width: Configuration.verticalspacing),
           Flexible(
-            flex: 3,
+            flex: 4,
             child: Text(text, 
               style: Configuration.text('small', Colors.black, font: 'Helvetica'),
             ),
@@ -251,7 +256,6 @@ class MeditationReportWidget extends StatelessWidget {
         ],
       );
     }
-
 
     return Container(
       padding: EdgeInsets.all(Configuration.smpadding),
@@ -282,55 +286,21 @@ class MeditationReportWidget extends StatelessWidget {
           Divider(),
           
           SizedBox(height: Configuration.verticalspacing),
-          m.overallSatisfaction !=  null?
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text('How were you feeling after ? ', 
-                  style: Configuration.text('small', Colors.black),
-                ),
-              ),
-              SizedBox(width: Configuration.verticalspacing),
-              Column(
-                children: [
-                  Icon(faces[m.overallSatisfaction], color: Colors.black.withOpacity(0.6)),
-                  Text(moods[m.overallSatisfaction],
-                    style: Configuration.text('tiny', Colors.black,  font: 'Helvetica'),
-                  )
-                ],
-              ),
-            ],
-          ) : m.feelings != null && m.feelings.isNotEmpty ?
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text('How were you feeling after ? ', 
-                  style: Configuration.text('small', Colors.black),
-                ),
-              ),
-              SizedBox(width: Configuration.verticalspacing),
-              Expanded(
-                child: Text(
-                  m.feelings.join(' '),
-                  textAlign: TextAlign.end,
-                  style: Configuration.text('small', Colors.black,  font: 'Helvetica'),
-                )
-              ) 
-            ],
-          ): Container(),
-
-          SizedBox(height: Configuration.verticalspacing),
-          
           m.stage != null ?
           textComponent('Stage reached', m.stage.toString()) 
           : Container(),
 
-          SizedBox(height: Configuration.verticalspacing),
+          m.metrics!= null && m.metrics.length > 0 ?
+          Column(
+            children: m.metrics.map((e) => 
+              textComponent(e.name, e.value.toString())
+            ).toList()
+          ) : Container(),
 
+          SizedBox(height: Configuration.verticalspacing),
+          
           m.text != null && m.text.isNotEmpty ?
-          textComponent('Meditation note', m.text)
+          textComponent('Note', m.text)
           : Container(),
         ],
       ),
@@ -348,355 +318,640 @@ class AddReport extends StatefulWidget {
   State<AddReport> createState() => _AddReportState();
 }
 
+List<Metric> expertMetrics = [
+ /* NumericMetric(
+    name: 'Stage reached',
+    type: 'numeric',
+    icon: Icons.terrain,
+    min:1,
+    max:10
+  ),*/
+
+  OptionsMetric(
+    name:'Effort put in',
+    icon: Icons.fitness_center,
+    options: [
+      'Effortless',
+      'Low',
+      'Medium',
+      'High',
+      'Very High'
+    ]
+  ),
+
+  NumericMetric(
+    name: 'Stage reached',
+    type: 'numeric',
+    icon: Icons.terrain,
+    min:1,
+    max:10
+  ),
+  
+  OptionsMetric(
+    name:'Energy',
+    icon:Icons.flash_on,
+    options: [
+      'Low',
+      'Medium',
+      'High',
+      'Very High'
+    ]
+  ),
+  
+  TextMetric(
+    name: 'Insights or valuable thoughts',
+    hint: 'Any insights, feelings or helpful thoughts',
+    type: 'text',  
+    icon: Icons.lightbulb,
+  ),
+
+  TextMetric(
+    name: 'Distractions',
+    hint: 'What distracted you, how did you deal with it?',
+    type: 'text',
+    icon: Icons.psychology,
+  ),
+
+  TextMetric(
+    name: 'Practice Notes',
+    type:'text',
+    hint: 'What to improve, what to keep, what to change',
+    icon: Icons.note,
+  ),
+];
+
+List<Metric> basicMetrics = [
+  OptionsMetric(
+    name:'Focus',
+    icon:Icons.adjust,
+    options: [
+      'Distracted',
+      'Low',
+      'Medium',
+      'High',
+      'Very High'
+    ]
+  ),
+
+  
+
+  //MOOD 
+  OptionsMetric(
+    name:'Feeling',
+    icon: Icons.mood,
+    options: [
+      //ADD MOODS
+      'Sad',
+      'Sluggish',
+      'Spaced out',
+      'Neutral',
+      'Calm',
+      'Focused',
+      'Happy'
+    ]
+  ),
+
+  //  A metric for text and one for stage
+  TextMetric(
+    name: 'Note',
+    hint: 'How was your meditation?. Distraction, thoughts, what to improve...',
+    type: 'text',
+    icon: Icons.note,
+  )
+];
+
+
 class _AddReportState extends State<AddReport> {
   MeditationReport m = new  MeditationReport();
+
+  UserState _userstate;
 
   @override 
   void initState(){
     super.initState();
-    feelings.sort((a,b)=> a.compareTo(b));
+    
   }
 
-  List<String> feelings = [
-    'Relaxed','Alert','Happy',
-    'Sad', 'Sleepy', 'Angry', 'Tired',
-    'Upset'
-  ];
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    _userstate = Provider.of<UserState>(context);
+    
+   
+    if(_userstate.user.settings.meditation.metricsType == 'basic'){
+      m.metrics = basicMetrics;
+    } else if(_userstate.user.settings.meditation.metricsType == 'expert') {
+      m.metrics = expertMetrics;
+    } else if(_userstate.user.settings.meditation.metricsType == 'custom'){
+      m.metrics = _userstate.user.settings.meditation.metrics;
+    }
+  }
 
-  List<String> distractions = [
-    'Thoughts', 'Physical pain', '',
-    'Emotions',  'Other'
-  ];
+  Widget metric({Metric m}){
+    // if metric is type text we show notes
+    // else  we  show a numeric dropdown from min  to max using step
+    
+    Widget textMetric(TextMetric m){
+      return TextField(
+        maxLines: 9,
+        minLines: 3,
+        textCapitalization: TextCapitalization.sentences,
+        onChanged: (value) {
+          m.value = value;
+          setState((){});
+        },
+        style: Configuration.text('small', Colors.black, font:'Helvetica'),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderSide: BorderSide( color: Colors.grey, width: 2),
+            borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+          ),
+          alignLabelWithHint: true,
+          hintMaxLines: 3,
+          errorMaxLines: 3,
+          hintText:m.hint,
+          floatingLabelBehavior: FloatingLabelBehavior.never,
+          //labelText: '',
+        ),
+      );
 
+    }
+
+    Widget numericMetric(NumericMetric m){
+
+      //numeric dropdown from m.min to m.max using step
+      return DropdownButton<int>(
+        value: m.value,
+        items: List.generate(m.max, (index) => m.min +index*m.step).map((e) => 
+          DropdownMenuItem(
+            child: Text(e.toString(), style: Configuration.text('small', Colors.black)),
+            value: e
+          )
+        ).toList(),
+        onChanged: (value){
+          m.value = value;
+          setState(() {});
+        },
+      );
+    }
+
+    Widget optionsMetric(OptionsMetric m){
+      return DropdownButton<String>(
+        value: m.value,
+        items: m.options.map((e) => 
+          DropdownMenuItem(
+            child: Text(e, style: Configuration.text('small', Colors.black)),
+            value: e
+          )
+        ).toList(),
+        onChanged: (value){
+          m.value = value;
+          setState(() {});
+        },
+      );
+    }
+
+    Widget headerText(){
+      return Row(
+        children: [
+          m.icon != null ?
+          Icon(m.icon, color: Colors.black, size: Configuration.smicon) : Container(),
+
+          SizedBox(width: Configuration.verticalspacing/2),
+
+          Text(m.name,
+            style: Configuration.text('small', Colors.black),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      margin: EdgeInsets.only(top: Configuration.verticalspacing),
+      child:  m.type == 'text'? 
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            headerText(),
+            SizedBox(height: Configuration.verticalspacing),
+            textMetric(m)
+          ],
+        ) :
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            headerText(),
+
+            m.type == 'options' ?
+            optionsMetric(m) : numericMetric(m)
+          ],
+        )
+    );
+  }
+
+
+  Future<dynamic> openMetricsDialog(){
+
+    Metric editingMetric;
+
+    Widget numericEditing(NumericMetric m){
+
+      return Row(
+        children: [
+          TextField(
+            onChanged: (value){
+              m.min = int.parse(value);
+              setState((){});
+            },
+            decoration: InputDecoration(
+              hintText: 'Min',
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 2
+                ),
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+              )
+            ),
+          ),
+
+          TextField(
+            onChanged: (value){
+              m.max = int.parse(value);
+              setState((){});
+            },
+            decoration: InputDecoration(
+              hintText: 'Max',
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 2
+                ),
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+              )
+            ),
+          ),
+
+          
+        ],
+      );
+    }
+
+    Widget optionsEditing(OptionsMetric o){
+      return Column(
+        children: [
+          TextField(
+            onChanged: (value){
+              o.options = value.split(',');
+              setState((){});
+            },
+            decoration: InputDecoration(
+              hintText: 'Options',
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 2
+                ),
+                borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+              )
+            ),
+          ),
+        ],
+      );
+    }
+
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AbstractDialog(
+                    content: Container(
+                      padding: EdgeInsets.all( Configuration.smpadding ),
+                      decoration: BoxDecoration( 
+                        borderRadius: BorderRadius.circular(
+                          Configuration.borderRadius
+                        ),
+                        color: Colors.white 
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            child: Text('Personalize your metrics',
+                              style: Configuration.text('subtitle', Colors.black),
+                            )
+                          ),
+                          
+                          SizedBox(height: Configuration.verticalspacing),
+                          //THREE ITEM SELECTOR FOR METRICS
+                          SegmentedButton(
+                            segments:<ButtonSegment<String>>[
+                              ButtonSegment(
+                                label: Text(
+                                  'Basic',
+                                  style: Configuration.text('small', Colors.black)
+                                ),
+                                value: 'basic'
+                              ),
+                              ButtonSegment(
+                                label: Text(
+                                  'Advanced',
+                                  style: Configuration.text('small', Colors.black)
+                                ),
+                                value: 'expert'
+                              ),
+                              ButtonSegment(
+                                label: Text(
+                                  'Custom',
+                                  style: Configuration.text('small', Colors.black)
+                                ),
+                                value: 'custom'
+                              )
+                            ], 
+                            selected:  <String>{_userstate.user.settings.meditation.metricsType},
+                            onSelectionChanged: (value){
+                              _userstate.user.settings.meditation.metricsType = value.first;
+
+                              if(value.first == 'basic'){
+                                m.metrics = basicMetrics;
+                              } else if(value.first == 'expert'){
+                                m.metrics = expertMetrics;
+                              } else if(value.first == 'custom'){
+                                m.metrics = _userstate.user.settings.meditation.metrics;
+                              }
+
+                              setState(() {});
+                            }
+                          ),
+
+                          SizedBox(height: Configuration.verticalspacing*1.5),
+
+                          m.metrics != null && m.metrics.length > 0 ?
+                          GridView.builder(
+                            itemCount: m.metrics.length,
+                            shrinkWrap: true,
+                            physics: ClampingScrollPhysics(),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: Configuration.crossAxisCount +1,
+                              childAspectRatio: 3,
+                              crossAxisSpacing: Configuration.verticalspacing,
+                              mainAxisSpacing: Configuration.verticalspacing
+                            ),
+                            itemBuilder: (context, index){
+                              return Chip(
+                                avatar: Icon(
+                                  m.metrics[index].type == 'text'  ? 
+                                  Icons.text_fields :
+                                  m.metrics[index].type == 'numeric' ?
+                                  Icons.format_list_numbered :
+                                  Icons.list,
+                                  color: Colors.black,
+                                  size: Configuration.smicon
+                                ),
+                                label: Text(m.metrics[index].name, 
+                                  style: Configuration.text('small', Colors.black)
+                                )
+                              );
+                            },
+                          )
+                          : Container(),
+
+
+                          // Textfield with inputs for  adding data  in editing metric
+                          editingMetric != null ? 
+                          Container(
+                            margin: EdgeInsets.only(top: Configuration.verticalspacing),
+                            padding: EdgeInsets.all(Configuration.tinpadding),
+                            decoration: BoxDecoration(
+                              color: Configuration.lightgrey,
+                              
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  children: [
+                                    TextField(
+                                      onChanged: (value){
+                                        editingMetric.name = value;
+                                        setState((){});
+                                      },
+                                      decoration: InputDecoration(
+                                        hintText: 'Metric name',
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: Colors.grey,
+                                            width: 2
+                                          ),
+                                          borderRadius: BorderRadius.circular(Configuration.borderRadius/3)
+                                        )
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          
+                                //dropdown to  select  metric type
+                                Column(
+                                  children: [
+                                    Text('Type', style: Configuration.text('small', Colors.black)),
+                                    SizedBox(height: Configuration.verticalspacing/2),
+                                    DropdownButton<String>(
+                                      value: editingMetric.type,
+                                      items: [
+                                        DropdownMenuItem(
+                                          child: Text('Text', style: Configuration.text('small', Colors.black)),
+                                          value: 'text'
+                                        ),
+                                        DropdownMenuItem(
+                                          child: Text('Numeric', style: Configuration.text('small', Colors.black)),
+                                          value: 'numeric'
+                                        ),
+                                        DropdownMenuItem(
+                                          child: Text('Options', style: Configuration.text('small', Colors.black)),
+                                          value: 'options'
+                                        )
+                                      ],
+                                      onChanged: (value){
+                                        editingMetric.type = value;
+                                        
+                                        if(editingMetric.type =='options'){
+                                          editingMetric = OptionsMetric(
+                                            name: editingMetric.name,
+                                            options: [],
+                                            type: 'options'
+                                          );
+                                        } else if(editingMetric.type == 'numeric'){
+                                          editingMetric = NumericMetric(
+                                            name: editingMetric.name,
+                                            type: 'numeric',
+                                            min: 0,
+                                            max: 10,
+                                            step: 1
+                                          );
+                                        } else {
+                                          editingMetric = TextMetric(
+                                            name: editingMetric.name,
+                                            type: 'text',
+                                            hint: 'New metric hint'
+                                          );
+                                        }
+                                        setState(() {});
+                                      },
+                                    ),
+                                  ],
+                                ),
+                          
+                                //numeric dropdown for min and max
+                                editingMetric.type == 'numeric' ?
+                                numericEditing(editingMetric): Container(),
+                                
+                                //dropdown for options
+                                editingMetric.type == 'options' ?
+                                optionsEditing(editingMetric): Container(),
+                          
+                          
+                              ],
+                            ),
+                          ) : Container(),
+
+
+
+                          _userstate.user.settings.meditation.metricsType == 'custom' ?
+                          IconButton(
+                            icon: Icon(Icons.add, color: Colors.black),
+                            onPressed: (){
+                              if(_userstate.user.settings.meditation.metrics == null){
+                                _userstate.user.settings.meditation.metrics = [];
+                              }
+
+                              editingMetric = TextMetric(
+                                name: 'New metric',
+                                hint: 'New metric hint',
+                                type: 'text',
+                                icon: Icons.text_fields
+                              );
+
+
+                              _userstate.user.settings.meditation.metrics.add(
+                                editingMetric
+                              );
+
+                              setState((){});
+
+                              //openAddMetricDialog();
+                            },
+                          ) : Container(),
+
+                          SizedBox(height: Configuration.verticalspacing*1.5),
+                        
+
+                          BaseButton(
+                            color: Colors.red,
+                            text: 'Close',
+                            onPressed: (){
+                              Navigator.pop(context);
+                            },
+                          ),
+
+                        ],
+                      ),
+                    )
+                  );
+            }
+          );
+        }
+      );
+  }
+
+
+ 
   @override
   Widget build(BuildContext context) {
-    final _userstate =  Provider.of<UserState>(context);
+    _userstate =  Provider.of<UserState>(context);
     final _meditationstate = Provider.of<MeditationState>(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         elevation: 0,
-        leading: CloseButton(
-          color: Colors.black,
-        ),
-        backgroundColor: Colors.transparent,
-        title: Text('Add a report', style: Configuration.text('subtitle', Colors.black)),
+        leading: CloseButton(color: Colors.white),
+        backgroundColor: Configuration.maincolor,
+        title: Text('Add a report', style: Configuration.text('subtitle', Colors.white)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.white),
+            onPressed: (){
+              openMetricsDialog().then((value) => {
+                setState((){})
+              });
+            },
+          )
+        ],
       ),
       body: Container(
-        color: Configuration.lightgrey,
         child: ListView(
-           physics: ClampingScrollPhysics(),           
-              children: [
-                Container(
-                  padding: EdgeInsets.all(Configuration.smpadding),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    border: Border.all(color: Colors.black.withOpacity(0.1)),
-                  ),
-                  child: Text('Write a report about your meditation. This will help you track your progress, reflect on your meditations and improve your practice.',
-                    textAlign: TextAlign.justify,
-                    style: Configuration.text('small', Colors.black, font: 'Helvetica'),
-                  ),
-                ),
-                SizedBox(height: Configuration.verticalspacing),
-                Container(
-                  padding: EdgeInsets.all(Configuration.smpadding),
-                  child: Center(
-                    child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                      children: [
-                      Text('How are you feeling?',
-                        style: Configuration.text('small', Colors.black),
-                      ),
-                      SizedBox(height: Configuration.verticalspacing),
-                      GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 100,
-                          childAspectRatio: 2,
-                          crossAxisSpacing: Configuration.verticalspacing,
-                          mainAxisSpacing: Configuration.verticalspacing
-                        ),
-                        itemCount: feelings.length, 
-                        itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  if(m.feelings == null){
-                                    m.feelings = [];
-                                  }
-                                    if(m.feelings.contains(feelings[index])){
-                                      m.feelings.remove(feelings[index]);
-                                    }else if(m.feelings.length < 2){
-                                      m.feelings.add(feelings[index]);
-                                    }else{
-                                      showAlertDialog(
-                                        context: context,
-                                        title: 'You can only select 2 feelings',
-                                        yesText: 'Close',
-                                        noPop: true,
-                                        hideNoButton:true,
-                                      );
-                                    }
-                                });
-                              },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: m.feelings != null && m.feelings.contains(feelings[index]) ? Colors.lightBlue : Colors.white,
-                                borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
-                                border: Border.all(color: Colors.grey)
-                              ),
-                              child: Center(
-                                child: Text(feelings[index],
-                                  style: Configuration.text('small', m.feelings != null && m.feelings.contains(feelings[index]) ? Colors.white : Colors.black, font: 'Helvetica'),
-                                ),
-                              ),
-                            ),
-                        );
-                      }),
+          physics: ClampingScrollPhysics(),
+          children: [
+            
+            SizedBox(height: Configuration.verticalspacing),
+            Container(
+              padding: EdgeInsets.all(Configuration.smpadding),
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+                children: [
+                  
+                  m.metrics != null && m.metrics.length > 0 ?
+                  Column(
+                    children: m.metrics.map((e) => metric(m:e)).toList()
+                  ) : Container(),
 
 
-
-                      SizedBox(height: Configuration.verticalspacing*2),
-/*
-                      Text('What were your distractions ?',
-                        style: Configuration.text('small', Colors.black),
-                      ),
-
-                      SizedBox(height: Configuration.verticalspacing),
-
-                      GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 100,
-                          childAspectRatio: 2,
-                          crossAxisSpacing: Configuration.verticalspacing,
-                          mainAxisSpacing: Configuration.verticalspacing
-                        ),
-                        itemCount: distractions.length, 
-                        itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: (){
-                                setState(() {
-                                  if(m.distractions == null){
-                                    m.distractions = [];
-                                  }
-                                    if(m.distractions.contains(distractions[index])){
-                                      m.distractions.remove(distractions[index]);
-                                    }else if(m.distractions.length < 3){
-                                      m.distractions.add(distractions[index]);
-                                    }else{
-                                      showAlertDialog(
-                                        context: context,
-                                        title: 'You can only select 3 distractions',
-                                        noText: true,
-                                        buttonText: 'Close',
-
-                                        hideYesButton: true
-                                      );
-                                    }
-                                });
-                              },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: m.distractions != null && m.distractions.contains(distractions[index]) ? Configuration.maincolor : Colors.white,
-                                borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
-                                border: Border.all(color: Configuration.maincolor)
-                              ),
-                              child: Center(
-                                child: Text(distractions[index],
-                                  style: Configuration.text('small', m.distractions != null && m.distractions.contains(distractions[index]) ? Colors.white : Colors.black, font: 'Helvetica'),
-                                ),
-                              ),
-                            ),
-                        );
-                      }),
-  */
-
-
-
-
-
-                      _userstate.user.userProgression.stageshown > 1 
-                      && widget.guided != null && !widget.guided
-                      ?
-                      Container(
-                        margin: EdgeInsets.only(top: Configuration.verticalspacing*2),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('What stage have you reached ?',
-                              style: Configuration.text('small', Colors.black),
-                            ),
-                            // dropdown button with integers from one to ten
-                            Container(
-                              constraints: BoxConstraints(
-                                minWidth: 100,
-                                maxWidth: 100
-                              ),
-                              margin: EdgeInsets.only(right: Configuration.verticalspacing),
-                              child: DropdownButton<int>(
-                                isExpanded: true,
-                                value: m.stage,
-                                icon:  Icon(Icons.expand_more, color: Colors.black),
-                                iconSize: Configuration.smicon,
-                                elevation: 16,
-                                style: Configuration.text('small',Colors.black),
-                                underline: Container(
-                                  height: 2,
-                                  color: Colors.lightBlue,
-                                ),
-                                onChanged: (int newValue) {
-                                  m.stage = newValue;
-                                  setState((){});
-                                },
-                                items: <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                                  .map<DropdownMenuItem<int>>((int value) {
-                                    return DropdownMenuItem<int>(
-                                      value: value,
-                                      child: Text(value.toString()),
-                                    );
-                                  })
-                                  .toList(),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ) : Container(),
-                    
-                      SizedBox(height: Configuration.verticalspacing*2),
-
-                      Text('Add a note',
-                        style: Configuration.text('small', Colors.black),
-                      ),
-                      SizedBox(height: Configuration.verticalspacing/2),
-                      // a textfield and two buttons, one for sending and other for cancelling
-                      TextField(
-                        maxLines: 6,
-                        minLines: 3,
-                        
-                        textCapitalization: TextCapitalization.sentences,
-                        onChanged: (value) {
-                          m.text = value;
-                          setState((){});
-                        },
-                        style: Configuration.text('small', Colors.black, font:'Helvetica'),
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          alignLabelWithHint: true,
-
-                          hintMaxLines: 3,
-                          errorMaxLines: 3,
-                          
-                          hintText:'What went well, what went wrong, what you worked on this meditation, thoughts...' ,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                           //labelText: '',
-                        ),
-                      ),
-
-                      /* 
-                      _userstate.user.stagenumber  > 1 || true ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(height: Configuration.verticalspacing*2),
-                              Text('How much mind wandering you had?',
-                                style: Configuration.text('small', Colors.black),
-                              ),
-
-                              SizedBox(height: Configuration.verticalspacing),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  for(int i = 0; i < faces.length; i++)
-                                  IconButton(
-                                    iconSize: Configuration.medicon,
-                                    icon: Icon(faces[i], color: m.mindWandering != null && i == m.mindWandering ? Configuration.maincolor : Colors.grey,),
-                                    onPressed: () {
-                                      m.mindWandering = i;
-                                      //_userstate.addMood(i);
-                                      setState((){});
-                                    },
-                                  )
-                                ],
-                              ),
-
-                              // the  same  with  forgetting
-                              Text('How much you forgot the breath?',
-                                style: Configuration.text('small', Colors.black),
-                              ),
-
-                              SizedBox(height: Configuration.verticalspacing),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  for(int i = 0; i < faces.length; i++)
-                                  IconButton(
-                                    iconSize: Configuration.medicon,
-                                    icon: Icon(faces[i], color: m.forgetting != null && i == m.forgetting ? Configuration.maincolor : Colors.grey,),
-                                    onPressed: () {
-                                      m.forgetting = i;
-                                      //_userstate.addMood(i);
-                                      setState((){});
-                                    },
-                                  )
-                                ],
-                              ),
-                            
-                          ],
-                        ):Container(),*/
-
-                      ],
-                    ),
-                  ),
-                ),
-
-               
-                
-                SizedBox(height: Configuration.verticalspacing),
-                
-
-
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-                  child: BaseButton(
-                    border: true,
-                    textcolor: Colors.red,
-                    color: Colors.white,
-                    bordercolor: Colors.red,
-                    text: 'Cancel',
-                    onPressed: ()=>{
-                      Navigator.pop(context)
-                    },
-                  ),
-                ),
-                SizedBox(height: Configuration.verticalspacing),
-
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
-                  child: BaseButton(
-                    text: 'Add',
-                    onPressed: m.feelings == null || m.feelings.isEmpty 
-                    ? null 
-                    : (){
-                      _userstate.addReport(report: m);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-                SizedBox(height: Configuration.verticalspacing * 4)
-              ],
+                ],
+              ),
             ),
+
+            
+            Container(
+              height: Configuration.verticalspacing*3,
+            ),
+            SizedBox(height: Configuration.verticalspacing),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+              child: BaseButton(
+                border: true,
+                textcolor: Colors.red,
+                color: Colors.red,
+                bordercolor: Colors.red,
+                text: 'Cancel',
+                onPressed: ()=>{
+                  Navigator.pop(context)
+                },
+              ),
+            ),
+            SizedBox(height: Configuration.verticalspacing),
+
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal:Configuration.smpadding),
+              child: BaseButton(
+                text: 'Add',
+                onPressed: (){
+
+                  m.metrics = m.metrics.where((element) => element.value != null).toList();
+                  
+                  _userstate.addReport(report: m);
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+            SizedBox(height: Configuration.verticalspacing * 4)
+          ],
+        ),
       ),
     );
   }
 }
-
 
 
 Widget containerGradient({child}){
@@ -727,7 +982,6 @@ Widget containerGradient({child}){
   );
 }
 
-
 class PreMeditationScreen extends StatefulWidget {
   Meditation meditation;
 
@@ -738,7 +992,6 @@ class PreMeditationScreen extends StatefulWidget {
   @override
   State<PreMeditationScreen> createState() => _PreMeditationScreenState();
 }
-
 
 class _PreMeditationScreenState extends State<PreMeditationScreen> {
   bool finished = false;
@@ -777,7 +1030,11 @@ class _PreMeditationScreenState extends State<PreMeditationScreen> {
   }
 
   List<Widget> getContent(index) {
-    List<Widget> l = mapToWidget(widget.meditation.content[index.toString()]);
+    List<Widget> l = mapToWidget(
+      widget.meditation.content is List ?
+      widget.meditation.content[index] :
+      widget.meditation.content[index.toString()]
+    );
 
     return l;
   }
@@ -801,66 +1058,70 @@ class _PreMeditationScreenState extends State<PreMeditationScreen> {
         child: Stack(
           children: [
             CarouselSlider.builder(
-              itemCount: widget.meditation.content.entries.length,
+              itemCount:widget.meditation.content.length,
               itemBuilder: (context, index,o) {
                 return Container(
                   width: Configuration.width,
                   height: Configuration.height,
-                  padding: EdgeInsets.all(Configuration.medpadding),
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: getContent(index))
-                  );
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  child: ListView(
+                    
+                    children: getContent(index))
+                );
               },
               options: CarouselOptions(
-                    scrollPhysics: ClampingScrollPhysics(),
-                      height: Configuration.height,
-                      viewportFraction: 1,
-                      initialPage: 0,
-                      enableInfiniteScroll: false,
-                      reverse: false,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          _index = index;
-                        });
-                      })),
-          Align(
-          alignment: Alignment.bottomCenter,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              _index == widget.meditation.content.length -1 ? 
-              BaseButton(
-              margin:true,
-              text:'Start Timer',
-              onPressed: () {
-                // SE PODRÍA HACER EL START CUANDO SE ABRE LA VENTANA DE COUNTDOWN
-                //_meditationstate.startMeditation(_userstate.user, _userstate.data);
-                Navigator.pushReplacement(
-                  context, 
-                  PageRouteBuilder(
-                      pageBuilder: (context, animation1, animation2){
-                        // HAY QUE VER SI 
-                        return CountDownScreen(
-                          content: widget.meditation,
-                          then: widget.then,
-                        );
-                      },
-                      transitionDuration: Duration.zero,
-                      reverseTransitionDuration: Duration.zero,
-                  ),
-                );
-              }): Container(),
+              scrollPhysics: ClampingScrollPhysics(),
+                height: Configuration.height,
+                viewportFraction: 1,
+                initialPage: 0,
+                enableInfiniteScroll: false,
+                reverse: false,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _index = index;
+                  });
+                })
+            ),
 
-              CarouselBalls(
-                activecolor: Colors.white,
-                items: widget.meditation.content.entries.length,
-                index: _index,
-                key:Key(_index.toString())),
-              SizedBox(height: Configuration.verticalspacing*2)
-            ],
-          ),
-        )
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _index == widget.meditation.content.length -1 ? 
+                  BaseButton(
+                  margin:true,
+                  text:'Start Timer',
+                  textcolor: Colors.white,
+                  filled: true,
+                  onPressed: () {
+                    // SE PODRÍA HACER EL START CUANDO SE ABRE LA VENTANA DE COUNTDOWN
+                    //_meditationstate.startMeditation(_userstate.user, _userstate.data);
+                    Navigator.pushReplacement(
+                      context, 
+                      PageRouteBuilder(
+                          pageBuilder: (context, animation1, animation2){
+                            // HAY QUE VER SI 
+                            return CountDownScreen(
+                              content: widget.meditation,
+                              then: widget.then,
+                            );
+                          },
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero,
+                      ),
+                    );
+                  }): Container(),
+
+                  CarouselBalls(
+                    activecolor: Colors.white,
+                    items: widget.meditation.content.length,
+                    index: _index,
+                    key:Key(_index.toString())),
+                  SizedBox(height: Configuration.verticalspacing*2)
+                ],
+              ),
+            )
         ])
       )
     );
@@ -885,6 +1146,7 @@ class CountDownScreen extends StatefulWidget {
   State<CountDownScreen> createState() => _CountDownScreenState();
 }
 
+// ESTO ES PARA RECORDINGS Y MEDITATIONS!!
 class _CountDownScreenState extends State<CountDownScreen> {
   bool pausedCount = false;
   bool loaded = false;
@@ -919,6 +1181,8 @@ class _CountDownScreenState extends State<CountDownScreen> {
   bool delaying = false;
   bool entered = false;
 
+  Duration timeMeditated = new Duration(seconds: 0);
+
   bool hasFinishedEarly = false;
 
   bool loadedFile = true;
@@ -931,19 +1195,19 @@ class _CountDownScreenState extends State<CountDownScreen> {
   void finishMeditation(){
     // GUARDAMOS TAMBIEN LA MEDITACIÓN !!
     Duration getDuration(Meditation m){
-
       return m.duration;
     }
 
+    // time meditated ??
     if(isUnlimited(widget.content) || hasFinishedEarly){
-      changeDuration(widget.content, position);  
-    }else{
+      changeDuration(widget.content, timeMeditated);  
+    }else {
       changeDuration(widget.content, totalDuration);
     }
 
     _userstate.finishMeditation(m: widget.content, earlyFinish: hasFinishedEarly);
 
-    _meditationstate.selmeditation= new Meditation(
+    _meditationstate.selmeditation = new Meditation(
       duration: getDuration(widget.content),
       meditationSettings: _userstate.user.settings.meditation,
       report: null
@@ -964,12 +1228,10 @@ class _CountDownScreenState extends State<CountDownScreen> {
   }
 
   void startMeditation(Meditation m){
-    try{
+    try {
       if(totalDuration  == null || totalDuration.inMinutes == 0) totalDuration = m.duration;
 
       position = new Duration(seconds: 0);
-
-      //showNotification();
       loaded = true;
 
       if(m.meditationSettings.ambientsound != null){
@@ -981,11 +1243,11 @@ class _CountDownScreenState extends State<CountDownScreen> {
         ).then((e)=>{});
       }
      
-
+      // el bellPlayer tiene que tener también la campana de final y principio
       if(bellPlayer != null ){
-        // el bellPlayer tiene que tener también la campana de final y principio
         bellPlayer.setVolume(m.meditationSettings.bellsvolume / 100 );
       }
+
 
       if(m.meditationSettings.addSixStepPreparation){
         sixStepPreparationPlayer.open(
@@ -1005,7 +1267,7 @@ class _CountDownScreenState extends State<CountDownScreen> {
             }
           });
         }));
-      }else {
+      } else {
          if(m.meditationSettings.startingBell != 'None'){
           bellPlayer.open(
             Audio(bells.firstWhere((element) => element.name == m.meditationSettings.startingBell).sound),
@@ -1018,6 +1280,8 @@ class _CountDownScreenState extends State<CountDownScreen> {
       new Timer.periodic(Duration(seconds: 1), (timer){
         t = timer;
 
+        timeMeditated += new Duration(seconds: 1);
+
         if(!pausedCount){
           position += new Duration(seconds: 1);
 
@@ -1025,7 +1289,7 @@ class _CountDownScreenState extends State<CountDownScreen> {
             t.cancel();
             finishMeditation();
           }else {
-            if(m.meditationSettings  != null 
+            if(m.meditationSettings != null 
               && m.meditationSettings.bells != null  
               && m.meditationSettings.bells.length > 0 
               && bellPosition < m.meditationSettings.bells.length
@@ -1094,7 +1358,9 @@ class _CountDownScreenState extends State<CountDownScreen> {
     super.dispose();
     disposed = true;
 
-    if(audioPlayer != null && audioPlayer.player != null){
+    print('DISPOSING HIJODEPUTA');
+
+    if(audioPlayer != null){
       audioPlayer.stop();
     }
     
@@ -1137,7 +1403,17 @@ class _CountDownScreenState extends State<CountDownScreen> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
       SystemUiOverlay.top
     ]);
-    
+
+    /* WidgetsBinding.instance.addObserver(LifecycleEventHandler(
+      detachedCallBack: () async {
+        print('DETACHED HEHEHEHE');
+        if(audioPlayer != null){
+          audioPlayer.stop();   
+        }
+      },
+      resumeCallBack: () async {
+      })); */
+      
     // quitar wakelock en el futuro !!
     Wakelock.enable();
     
@@ -1172,24 +1448,14 @@ class _CountDownScreenState extends State<CountDownScreen> {
             audioPlayer.player.playlistFinished.listen((finished) {
               if(!disposed && !entered && finished ) {
                 entered  = true;
-                if(widget.content.isMeditation()){ 
-
-                }else {
+                if(!widget.content.isMeditation()){ 
                   Navigator.pop(context);
                 }
                 audioPlayer.stop();
               }
             });
 
-            if(_userstate.user.contentDone.length > 0){ 
-              DoneContent content = _userstate.user.contentDone.firstWhere((element) => element.cod == widget.content.cod,
-              orElse: (){});
-
-              if(content !=null && content.done.inMinutes < totalDuration.inMinutes){
-                audioPlayer.player.seek(content.done);
-              }
-            }
-
+            
             // PILLAR CUANDO ACABA MEJOR !!!!!       
             // SOLO SI ES RECORDING CAMBIAMOS LA POSICIÓN 
             if(widget.content.isRecording()){
@@ -1209,11 +1475,23 @@ class _CountDownScreenState extends State<CountDownScreen> {
               setState(() {});
             }
 
+            if(_userstate.user.contentDone.length > 0){ 
+              DoneContent content = _userstate.user.contentDone.firstWhere((element) => element.cod == widget.content.cod,
+              orElse: (){});
+
+              if(content != null && content.done.inMinutes < totalDuration.inMinutes){
+                audioPlayer.player.seek(content.done, force: true);
+                position =  content.done;
+                setState(() {});
+              }
+            }
+
+
             loaded = true;
             setState(() {});
 
           });
-      }else{
+      }else {
         
         if(widget.content.isMeditation()){
           startMeditation(widget.content);
@@ -1226,7 +1504,6 @@ class _CountDownScreenState extends State<CountDownScreen> {
         title: 'Error',
         text: 'There was an error loading the content. Please try again later'
       );
-      print(e);
     }
   }
 
@@ -1240,7 +1517,7 @@ class _CountDownScreenState extends State<CountDownScreen> {
 
   dynamic exit(context,{nopop = false}){
     bool pop = true;
-    bool meditationCounts = widget.content.isMeditation() && (isUnlimited(widget.content) || this.position.inMinutes >= 5);
+    bool meditationCounts = this.timeMeditated.inMinutes >= 5;
 
     /*
     PARA EL FUTURO !! HAY QUE PAUSAR LA MEDITACIÓN
@@ -1370,11 +1647,12 @@ class _CountDownScreenState extends State<CountDownScreen> {
                     Column(
                       children: [
                         Text(getMinutes(position) +  ':' +  getSeconds(position),
-                          style: Configuration.text('small', Colors.white,spacing: 2)),
+                          style: Configuration.text('small', Colors.white,spacing: 2)
+                        ),
 
                         SizedBox(height: Configuration.verticalspacing),
                       ],
-                    ):
+                    ) :
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children:[
@@ -1435,7 +1713,7 @@ class _CountDownScreenState extends State<CountDownScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [ 
-                          widget.content.isMeditation() && isFreeMeditation(widget.content) ? Container(): 
+                          widget.content.isMeditation() ? Container(): 
                           secondaryButton(
                             Icons.replay_30, 
                             (){
@@ -1484,7 +1762,8 @@ class _CountDownScreenState extends State<CountDownScreen> {
                           ),
       
       
-                          widget.content.isMeditation() && isFreeMeditation(widget.content) ? Container(): 
+                          widget.content.isMeditation() ? 
+                          Container(): 
                           secondaryButton(
                             Icons.forward_30, 
                             (){
@@ -1539,16 +1818,15 @@ class _CountDownScreenState extends State<CountDownScreen> {
                     ),
 
 
-                    widget.content.isMeditation() && isUnlimited(widget.content) ?
+                    widget.content.isMeditation() && isUnlimited(widget.content) && position.inMinutes >= 1 ?
                     Container(
                       margin: EdgeInsets.only(top:Configuration.verticalspacing*2),
                       child: BaseButton(
                         text: 'End meditation',
-                        color: Colors.transparent,
-                        onPressed: position.inMinutes >= 1
-                        ? (){
+                        color: Colors.red,
+                        onPressed: (){
                           finishMeditation();
-                        } : null,
+                        },
                         border: true,
                         bordercolor: Colors.red,
                         textcolor: Colors.red,
@@ -1568,7 +1846,7 @@ class _CountDownScreenState extends State<CountDownScreen> {
                   tap();
                 },
                 child: Container(
-                  decoration: BoxDecoration(color:Colors.black.withOpacity(0.99))
+                  decoration: BoxDecoration(color:Colors.black)
                 ),
               ),
             ) : Container(),
@@ -1648,7 +1926,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
         elevation: 0,
         leading: CloseButton(
           onPressed: (){
-             showAlertDialog(
+              showAlertDialog(
               context:context,
               title: 'Are you sure you want to exit?',
               text: 'This meditation will not count',

@@ -1,16 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/network/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
-import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/action_entity.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -18,22 +15,20 @@ import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/retreat_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
-import 'package:meditation_app/presentation/pages/main.dart';
 
 class UserRepositoryImpl implements UserRepository {
   UserRemoteDataSource remoteDataSource;
   UserLocalDataSource localDataSource;
   NetworkInfo networkInfo;
 
-  UserRepositoryImpl({@required this.remoteDataSource,@required this.localDataSource,@required this.networkInfo});
-
+  UserRepositoryImpl({@required this.remoteDataSource, @required this.localDataSource, @required this.networkInfo});
 
   //Primero miramos si el usuario esta en la cache y si no esta y estamos conectados, comprobamos en la base de datos
   @override
   Future<Either<Failure, User>> loginUser({var usuario}) async {
     if (await networkInfo.isConnected) {
       try {
-        final newUser = await remoteDataSource.loginUser(usuario: usuario);
+        final newUser = await remoteDataSource.loginRegister(usuario: usuario);
 
         if(newUser != null){
           localDataSource.cacheUser(newUser);
@@ -54,9 +49,11 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, User>> islogged() async {
     if (await networkInfo.isConnected) {
       try {
+        // El usuario ahora se cachea solo con firebase
         //final cod = await localDataSource.getUser();
         final user = await remoteDataSource.loginUser();
-        print({'GOT USER', user});
+        
+        if(user == null){ return Left(ServerFailure(error:'User not logged in'));}
         
         final cachedUser = await localDataSource.getCachedUser();
         final meditations = await localDataSource.getCachedMeditations();
@@ -77,13 +74,11 @@ class UserRepositoryImpl implements UserRepository {
         if(cachedUser == null){
           localDataSource.cacheUser(user);
         }
-       
 
         return Right(user);
       } on ServerException catch(e) {
         return Left(ServerFailure(error: e.error));
       } on Exception {
-        print('EXCEPTION');
         return Left(ServerFailure(error: 'Server error'));
       }
     } else {  
@@ -91,9 +86,11 @@ class UserRepositoryImpl implements UserRepository {
       try {
         final user = await localDataSource.getCachedUser();
         return Right(user);
-      } on ServerException catch(e) {
-        return Left(ServerFailure(error: e.error));
+      } on Exception catch(e) {
+        return Left(ConnectionFailure());
       }
+
+      return Left(ConnectionFailure());
     } 
   }
 
@@ -108,7 +105,7 @@ class UserRepositoryImpl implements UserRepository {
         return Left(ServerFailure(error: 'An error occured at login. Try again please'));
       }
     } else {
-        return Left(ConnectionFailure());
+      return Left(ConnectionFailure());
     }
   }
 
@@ -193,10 +190,10 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<Either<Failure,List<Request>>> getRequests({String coduser}) async{
+  Future<Either<Failure,List<Request>>> getRequests() async{
     if (await networkInfo.isConnected) {
       try{
-        List<Request> requests = await remoteDataSource.getRequests(coduser: coduser);
+        List<Request> requests = await remoteDataSource.getRequests();
 
         if(requests != null) {
           return Right(requests);
@@ -436,33 +433,22 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-  /*
   @override
-  Future<Either<Failure, List<Chat>>> getMessages({User user}) async {
-    if (await networkInfo.isConnected) {
+  Future<Either<Failure, void>> deleteUser({User user}) async{
+     if (await networkInfo.isConnected) {
       try {
-        return Right(await remoteDataSource.getChats(user:user));
-      } on Exception {
-        return Left(ServerFailure());
+        await remoteDataSource.deleteUser(user:user);
+        return Right(null);
+      }  on ServerException catch(e) {
+        return Left(ServerFailure(error: e.error));
+      }  on Exception {
+        return Left(ServerFailure(error: 'Server error'));
       }
     } else {
       return Left(ConnectionFailure());
     }
-  }*/
+  }
 
-  /*
-  @override
-  Future<Either<Failure, Chat>> getChat({User sender, String receiver}) async{
-    if (await networkInfo.isConnected) {
-      try {
-        return Right(await remoteDataSource.getChat(sender:sender,receiver:receiver));
-      } on Exception {
-        return Left(ServerFailure());
-      }
-    } else {
-      return Left(ConnectionFailure());
-    }
-  }*/
 
   @override
   Future<Either<Failure, Stream<List<Message>>>> startConversation({User sender, String receiver}) async{
@@ -502,7 +488,7 @@ class UserRepositoryImpl implements UserRepository {
       return Left(ServerFailure());
     }
   }*/
-
+  /*
   @override
   Future<Either<Failure, List<Retreat>>> getRetreats() {
     // TODO: implement getRetreats
@@ -513,7 +499,7 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, Retreat>> joinRetreat(String cod) {
     // TODO: implement joinRetreat
     throw UnimplementedError();
-  }
+  }*/
   
   @override
   Future<Either<Failure, List<Request>>> getStageRequests() async{
@@ -533,7 +519,7 @@ class UserRepositoryImpl implements UserRepository {
     try {
       if(await networkInfo.isConnected){
         await remoteDataSource.addMeditationReport(m: m, report:report, user: user);
-      }else{
+      } else {
         await localDataSource.addMeditationReport(m, report);
       }
       return Right(null);
@@ -588,15 +574,14 @@ class UserRepositoryImpl implements UserRepository {
       } on Exception {
         return Left(ServerFailure());
       }
-    }else{
+    } else {
       return Left(ConnectionFailure());
     }
   }
   
   @override
   Future<Either<Failure, List<Request>>> getFeed() async {
-
-     if(await networkInfo.isConnected){
+    if(await networkInfo.isConnected){
       try {
         final content = await remoteDataSource.getFeed();
         return Right(content);
@@ -605,9 +590,9 @@ class UserRepositoryImpl implements UserRepository {
       } on Exception {
         return Left(ServerFailure());
       }
-    }else{
+    } else {
       return Left(ConnectionFailure());
     }
-
   }
+
 }

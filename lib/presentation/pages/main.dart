@@ -3,34 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:meditation_app/login_injection_container.dart' as di;
 import 'package:meditation_app/presentation/mobx/actions/game_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
-import 'package:meditation_app/presentation/mobx/actions/messages_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
 import 'package:meditation_app/presentation/pages/layout.dart';
-import 'package:meditation_app/presentation/pages/leaderboard.dart';
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
-import 'package:meditation_app/presentation/pages/messages_screen.dart';
-import 'package:meditation_app/presentation/pages/path.dart';
-import 'package:meditation_app/presentation/pages/objectives_screen.dart';
-import 'package:meditation_app/presentation/pages/practical_path.dart';
-import 'package:meditation_app/presentation/pages/profile_widget.dart';
+import 'package:meditation_app/presentation/pages/leaderboard_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/stage_screen.dart';
+import 'package:meditation_app/presentation/pages/milestone_screen.dart';
+import 'package:meditation_app/presentation/pages/path_screen.dart';
+import 'package:meditation_app/presentation/pages/profile_screen.dart';
 import 'package:meditation_app/presentation/pages/requests_screen.dart';
-import 'package:meditation_app/presentation/pages/retreat_screen.dart';
 import 'package:meditation_app/presentation/pages/settings_widget.dart';
 import 'package:meditation_app/presentation/pages/teachers_screen.dart';
-import 'package:meditation_app/presentation/pages/welcome/carrousel_intro.dart';
 import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 import 'package:meditation_app/presentation/pages/welcome/login_widget.dart';
-import 'package:meditation_app/presentation/pages/welcome/register_widget.dart';
-import 'package:meditation_app/presentation/pages/welcome/set_user_data.dart';
 import 'package:meditation_app/presentation/pages/welcome/welcome_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 import '../../login_injection_container.dart';
-import 'game_screen.dart';
+import 'mainpages/game_screen.dart';
+import 'welcome/carrousel_intro.dart';
 
 //final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -77,10 +72,33 @@ class MyApp extends StatelessWidget {
           Provider<ProfileState>(create: (context) => sl<ProfileState>()),
           Provider<LoginState>(create: (context) => sl<LoginState>()),
           //METER REQUEST SOLO EN LA DE REQUESTS
-          Provider<RequestState>(create: (context) => sl<RequestState>()),
-          Provider<MessagesState>(create: (context) => sl<MessagesState>())
+          Provider<RequestState>(create: (context) => sl<RequestState>())
         ],
         child: MaterialApp(
+          builder: (context, child) {
+            // Retrieve the MediaQueryData from the current context.
+            final mediaQueryData = MediaQuery.of(context);
+
+            // Calculate the scaled text factor using the clamp function to ensure it stays within a specified range.
+            final scale = mediaQueryData.textScaleFactor.clamp(
+              1.0, // Minimum scale factor allowed.
+              1.2, // Maximum scale factor allowed.
+            );
+
+            print({'MEDIAQUERY', mediaQueryData});
+
+            // Create a new MediaQueryData with the updated text scaling factor.
+            // This will override the existing text scaling factor in the MediaQuery.
+            // This ensures that text within this subtree is scaled according to the calculated scale factor.
+            return MediaQuery(
+              // Copy the original MediaQueryData and replace the textScaler with the calculated scale.
+              data: mediaQueryData.copyWith(
+                textScaleFactor: scale,
+              ),
+              // Pass the original child widget to maintain the widget hierarchy.
+              child: child,
+            );
+          },
           theme: ThemeData(
             pageTransitionsTheme: PageTransitionsTheme(
                 builders: {
@@ -93,32 +111,25 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',
             routes: <String, WidgetBuilder>{
-              '/welcome': (BuildContext context) => WelcomeWidget(),
               '/loading': (BuildContext context) => Loading(),
+              '/welcome':(context) => WelcomeWidget(),
               '/login': (BuildContext context) => LoginWidget(),
-              '/register': (BuildContext context) => RegisterWidget(),
               '/profile': (BuildContext context) => ProfileScreen(),
-              '/imagepath': (BuildContext context) => ImagePath(),
+              '/stage': (BuildContext context) => StageScreen(),
+              '/meditation': (BuildContext context) => MeditationWrapperScreen(),
+              '/path': (BuildContext context)  => ImagePath(),
               '/countdown': (BuildContext context) => Countdown(),
-              '/setdata': (BuildContext context) => SetUserData(),
-              '/leaderboard': (BuildContext context) => LeaderBoard(),
+              '/milestone': (BuildContext context) => MilestoneScreen(),
               '/main': (BuildContext context) => Layout(),
               '/requests': (BuildContext context) => Requests(),
-              '/selectusername': (BuildContext context) => SetUserData(),
+              '/carousel': (BuildContext context) => CarrouselIntro(),
               '/settings': (BuildContext context) => Settings(),
+              '/register': (BuildContext context) => RegisterScreen(),
               '/gamestarted': (BuildContext context) => GameStarted(),
-              '/teachers': (BuildContext context) => TeachersScreen(),
-              '/carousel':(BuildContext context)=> CarrouselIntro(),
-             // '/addcontent':(BuildContext context)=> AddContent(),
-              '/messages':(BuildContext context) => MessagesScreen(),
-              '/chat':(BuildContext context) => ChatScreen(),
-              '/progress':(BuildContext context) => ProgressScreen(),
               '/requestview': (BuildContext context) => RequestView(),
-              '/messageusers': (BuildContext context) => NewMessageScreen(),
               '/sendcomment':(BuildContext  context)=> SendComment(),
-              '/retreats':(BuildContext context)=> RetreatScreen(),
-              '/techniques': (BuildContext context)=> PracticalPath(),
-              //'/discussion':(BuildContext context)=> DiscussionScreen(),
+              '/leaderboard': (BuildContext context) => LeaderBoard(),
+              '/teachers':(BuildContext  context)=> TeachersScreen(),
               '/mymeditations':(context)=> MyMeditations()
           })
         );

@@ -1,8 +1,10 @@
 
 import 'package:dartz/dartz.dart';
 import 'package:meditation_app/core/error/failures.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/error_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialogs.dart';
 import 'package:meditation_app/presentation/pages/main.dart';
+
+import '../../pages/commonWidget/dialogs.dart';
 
 
 void foldResult({Either<Failure,dynamic> result, dynamic onSuccess}){

@@ -52,10 +52,9 @@ abstract class _LoginState with Store {
   @observable
   bool startedgooglelogin= false;
   @observable 
-  bool  startedfacelogin = false;
+  bool startedioslogin = false;
   @observable 
   bool startedmaillogin = false;
-
 
   FirebaseAuth auth = FirebaseAuth.instance;
   final googleSignin = GoogleSignIn();
@@ -64,7 +63,6 @@ abstract class _LoginState with Store {
 
   @action
   Future startlogin(context,{username, password, type, token, mail, isTablet = false, register = false}) async {
-    startedlogin = true;
     FocusScopeNode currentFocus = FocusScope.of(context);
     String errormsg;
     var user;
@@ -75,27 +73,30 @@ abstract class _LoginState with Store {
 
     //PASAR TODO ESTO AL SERVER !!!! :(
     try {
-      if(type == 'mail'){
-          startedmaillogin = true;
-          if(formKey.currentState.validate()){
-            if(register){
-              user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-              email: mail,
+      if(type == 'mail') {
+        startedmaillogin = true;
+        startedlogin = true;
+
+        if(formKey.currentState.validate()){
+          if(register){
+            user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: mail, 
               password: password,
-            );    
-            }else{
-              user = await auth.signInWithEmailAndPassword(email: username, password: password);
-            }
+            );
+          } else {
+            user = await auth.signInWithEmailAndPassword(email: username, password: password);
           }
-      } else if(type =='google'){
-          startedgooglelogin = true;
-          //hay que desconectar !!
-          //googleSignin.disconnect();
-          GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
+        }
+
+      } else if(type == 'google') {
+        startedgooglelogin = true;
+        //hay que desconectar !!
+        //googleSignin.disconnect();
+        GoogleSignInAccount googleSignInAccount = await googleSignin.signIn();
 
         if (googleSignInAccount != null) {
+
           GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-          
           AuthCredential credential = GoogleAuthProvider.credential(
             idToken: googleSignInAuthentication.idToken,
             accessToken: googleSignInAuthentication.accessToken
@@ -103,13 +104,14 @@ abstract class _LoginState with Store {
 
           user = await auth.signInWithCredential(credential);
         }
-      } else if(type=='apple'){
+      } else if(type == 'apple') {
+        startedioslogin = true;
+        
         AuthorizationCredentialAppleID appleCredential = await SignInWithApple.getAppleIDCredential(
           scopes: [
             AppleIDAuthorizationScopes.email,
             AppleIDAuthorizationScopes.fullName,
           ],
-          
         );
 
         final credential = OAuthProvider("apple.com").credential(
@@ -118,37 +120,19 @@ abstract class _LoginState with Store {
         );
 
         user = await auth.signInWithCredential(credential);
-     
-      } else {
-        startedfacelogin = true;
-        final facebookAuthCred = FacebookAuthProvider.credential(token);
-        user = await auth.signInWithCredential(facebookAuthCred);
-      }
+      } 
 
       if(user != null) {
-        if(register){
-          
-          var register = await repository.registerUser(usuario: user.user);
+        startedlogin = true;
 
-          register.fold(
-            (Failure failure) => errormsg = _mapFailureToMessage(failure), 
-            // SOLO eN EL CASO DE QUE SE REGISTRE CON MAIL
-            (dynamic u) {
-              user.user.sendEmailVerification();
-              loggeduser = u;
-            }
-          );
-        }else {
-          log = await repository.loginUser(usuario: user.user);
+        log = await repository.loginUser(usuario: user.user);
 
-          log.fold(
-            (Failure f) => errormsg = _mapFailureToMessage(f), 
-            (dynamic u) => loggeduser = u
-          );
-        }
+        log.fold(
+          (Failure f) => errormsg = _mapFailureToMessage(f), 
+          (dynamic u) => loggeduser = u
+        );
       }
     }on PlatformException catch (e) {
-      print(e);
       errormsg = 'Could not connect to the server';
     }on FirebaseAuthException catch (e) {
       // simply passing error code as a message
@@ -159,13 +143,11 @@ abstract class _LoginState with Store {
        errormsg = switchExceptions(e.code);
       }
     }on Exception catch (e){
-      print(e.toString());
-
       errormsg ='Could not connect to the server';
     }
 
     startedlogin = false;
-    startedfacelogin = false;
+    startedioslogin = false;
     startedgooglelogin = false;
     startedmaillogin = false;
 
@@ -191,8 +173,6 @@ abstract class _LoginState with Store {
       //habra que hacer la versión tablet de esto !!
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-
-          
           duration: Duration(seconds: 5),
           behavior: isTablet ? SnackBarBehavior.floating : SnackBarBehavior.fixed,
           content: Container(

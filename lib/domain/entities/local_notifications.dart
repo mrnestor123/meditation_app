@@ -16,6 +16,7 @@ import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 
 // HABRÁ QUE CREAR OTRO CANAL PARA LAS NOTIFICACIONES DE FIREBASE !!!!
+// ESTE TAMPOCO LO DEJARÍA EN ENTIDADES !!!!
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
   'meditation_channel', // id
   'Meditation Notifications  ', // title

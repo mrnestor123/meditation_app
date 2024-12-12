@@ -1,4 +1,5 @@
 
+// ESTO NO DEBERÍA ESTAR EN PRESENTATION ??
 
 bool isAudio(String path){
   return path.toLowerCase().contains(RegExp('aud|m4a|mp3'));

@@ -8,50 +8,68 @@ import '../../../domain/entities/stage_entity.dart';
 class BaseButton extends StatelessWidget {
   dynamic onPressed;
   String text;
-  bool justpressed = false;
-  bool margin;
   Color color;
   Color textcolor,  bordercolor;
-  bool noelevation, border;
+  bool border, filled, justpressed=false, margin;
   double aspectRatio;
   double width;
 
   Widget child;
 
-  BaseButton({this.onPressed,this.child, this.text,this.bordercolor, this.width, this.aspectRatio, this.margin= false, this.color, this.textcolor,this.border = false, this.noelevation = false});
+  BaseButton({
+    this.onPressed,
+    this.child, 
+    this.text,
+    this.bordercolor, 
+    this.width, 
+    this.aspectRatio, 
+    this.margin= false, 
+    this.color, 
+    this.textcolor,
+    this.border = false,
+    this.filled = false
+  });
   
   @override
   Widget build(BuildContext context) {
+    width= width != null ? width:  Configuration.width*0.9;
+
     return Container(
-      width: width !=  null ?  width: Configuration.width*0.9,
-      margin: EdgeInsets.only(bottom: margin ? Configuration.verticalspacing * 1.5 : 0),
-      child: AspectRatio(
-        aspectRatio:aspectRatio != null ? aspectRatio: Configuration.buttonRatio,
-        child: ElevatedButton(
-        onPressed: onPressed != null ? () async {
-          if(!justpressed){
-            onPressed();
-            justpressed = true;
-            Future.delayed(Duration(seconds: 1),()=> justpressed = false);
-          }
-        } : null,
-        style: ElevatedButton.styleFrom(
-          elevation: noelevation ? 0.0 : 2.0,
-          primary: color != null ? color: Configuration.maincolor,
-          shape: RoundedRectangleBorder(
-            side:border ? BorderSide(color: bordercolor != null  ? bordercolor :Colors.grey) :  BorderSide.none ,
-            borderRadius: BorderRadius.circular(Configuration.borderRadius)
-          )
-        ),
-        child: this.child != null ?
-          this.child :
-          Text(
-            text != null ? text : 'Start',
-            textAlign: TextAlign.center,
-            style: Configuration.text('subtitle',textcolor != null ? textcolor : Colors.white),
-          ),
-          ),
+      constraints: BoxConstraints(
+        minHeight: width/Configuration.buttonRatio,
+        minWidth: width
       ),
+      margin: EdgeInsets.only(
+        bottom: margin ? Configuration.verticalspacing * 1.5 : 0, 
+        left: margin ? Configuration.verticalspacing * 1.5 : 0,
+        right: margin ? Configuration.verticalspacing * 1.5 : 0
+      ),
+      child:OutlinedButton(
+      onPressed: onPressed != null ? () async {
+        if(!justpressed){
+          onPressed();
+          justpressed = true;
+          Future.delayed(Duration(seconds: 1),()=> justpressed = false);
+        }
+      } : null,
+      style:filled ? 
+      ElevatedButton.styleFrom(
+        side: BorderSide(color:  color != null ? color:  Configuration.maincolor, width: 2),
+        backgroundColor: color != null ? color : Configuration.maincolor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius)
+      )) :
+       OutlinedButton.styleFrom(
+        side: BorderSide(color:  color != null ? color:  Configuration.maincolor, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Configuration.borderRadius))
+      ),
+      child: this.child != null ?
+        this.child :
+        Text(
+          text != null ? text : 'Start',
+          textAlign: TextAlign.center,
+          style: Configuration.text('medium',textcolor != null ? textcolor : color != null ? color : Configuration.maincolor),
+        ),
+        ),
     );
   }
 }

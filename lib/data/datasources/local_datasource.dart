@@ -44,12 +44,13 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   //Añadimos el usuario a la cache con su nombre de usuario.
   @override
   Future<void> cacheUser(UserModel userToCache) async {
+    if(userToCache != null){
+      // SOLO GUARDAMOS EL ID DEL USUARIO
+      sharedPreferences.setString(CACHED_USER, json.encode(userToCache.coduser));
 
-    // SOLO GUARDAMOS EL  ID DEL USUARIO
-    sharedPreferences.setString(CACHED_USER, json.encode(userToCache.coduser));
-
-    // LOS GUARDAMOS ASI !!!
-    saveUser(userToCache);
+      // LOS GUARDAMOS ASI !!!
+      saveUser(userToCache);
+    }
   }
 
   @override
@@ -67,10 +68,11 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
   @override
   Future<UserModel> getCachedUser() async {
     final jsonUser = sharedPreferences.getString(QUICK_USER);
-    
+
+    print(jsonUser);
     if (jsonUser != null) {
       return Future.value(UserModel.fromJson(json.decode(jsonUser),true));
-    }
+    }else throw CacheException();
   }
 
   @override

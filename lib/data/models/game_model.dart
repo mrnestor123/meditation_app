@@ -2,37 +2,28 @@
 
 import 'dart:convert';
 
-import 'package:meditation_app/domain/entities/game_entity.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 
 class GameModel extends Game {
-  GameModel(
-      {String title,
-      String cod,
-      String video,
-      image,
-      String description,
-      text,
-      type,
-      int stagenumber,
-      int position})
-      : super(
-            title: title,
-            cod: cod,
-            video:video,
-            image: image,
-            description: description,
-            type: type,
-            stagenumber: stagenumber,
-            position: position);
+  GameModel({ String title, String cod, String video,image,
+      String description, text, type, int stagenumber, int position
+    }): super(
+      title: title,
+      cod: cod,
+      video:video,
+      image: image,
+      description: description,
+      type: type,
+      stagenumber: stagenumber,
+      position: position
+    );
 
   factory GameModel.fromRawJson(String str) => GameModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-
   // hay que hacer aqui lo del content tambien;;;
   factory GameModel.fromJson(Map<String, dynamic> json) { 
-    
     GameModel g = GameModel(
       cod: json["cod"] == null ? json['codlesson'] : json["cod"],
       position: json['position'] == null ? null : json['position'],

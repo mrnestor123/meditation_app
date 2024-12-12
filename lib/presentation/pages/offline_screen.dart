@@ -4,11 +4,35 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/meditation_screen.dart';
+import 'package:provider/provider.dart';
 
-class OfflinePage extends StatelessWidget {
+import '../../domain/entities/user_entity.dart';
+import '../mobx/actions/user_state.dart';
+
+class OfflinePage extends StatefulWidget {
   const OfflinePage({Key key}) : super(key: key);
 
+  @override
+  State<OfflinePage> createState() => _OfflinePageState();
+}
+
+class _OfflinePageState extends State<OfflinePage> {
+  
+
+  @override 
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    final _userstate = Provider.of<UserState>(context);
+
+    if(_userstate.user == null){
+      _userstate.user = new User();
+    }
+    
+  }
+  
+  
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +56,7 @@ class OfflinePage extends StatelessWidget {
               height:AppBar().preferredSize.height * 0.8
             ),
             SizedBox(width: Configuration.verticalspacing),
-            Text('Inside', 
+            Text('TenStages', 
               style: Configuration.text('subtitle',Colors.black)
             ),
           ],

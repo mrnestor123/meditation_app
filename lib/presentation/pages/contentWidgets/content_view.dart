@@ -2,6 +2,7 @@
 // WIDGET COMÚN DE VISTA DE CONTENIDO
 // SE PODRÁN VER LECCIONES Y MEDITACIONES, Y EDITAR 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,382 +10,44 @@ import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/alert_dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/category_chip.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/circular_progress.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/created_by.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialogs.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/start_button.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/meditation_screens.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/meditation_widgets.dart';
-import 'package:meditation_app/presentation/pages/learn_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:wakelock/wakelock.dart';
 
-import '../../../domain/entities/lesson_entity.dart';
+import '../../../domain/entities/stage_entity.dart';
 import '../commonWidget/back_button.dart';
+import '../commonWidget/carousel_balls.dart';
+import '../commonWidget/html_towidget.dart';
 import '../commonWidget/profile_widget.dart';
-
-/*
-class ContentShow extends StatefulWidget {
-  Content content;
-  Meditation m;
-  Lesson l;
-
-  //NO ESTOY MUY SEGURO DE ESTO !!!
-  ContentShow({this.content, this.m, this.l}) : super();
-
-  @override
-  _ContentShowState createState() => _ContentShowState();
-}
-
-/*
-  SE PODRÁ VER MEDITACIONES,LECCIONES Y EDITARLAS
-*/
-class _ContentShowState extends State<ContentShow> {
-
-  bool started = false;
-
-  bool isMeditation;
-
-  String type;
-  AssetsAudioPlayer player = new AssetsAudioPlayer();
-  VideoPlayerController controller;
-  bool initialized = false;
-
-  String text = '';
-
-  MeditationState _meditationstate;
-
-
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-
-    if(widget.content.isMeditation()){
-      isMeditation = true;
-      text = 'This meditation will not count';
-      type = 'Meditation';
-    }else{
-      text = "This lesson will not count as a read one";
-      isMeditation = false;
-      type = 'Lesson';
-    }
-  }
-
-  Widget portada({Content c}) {
-    return Column(children: [
-      widget.content.image != null && widget.content.image.isNotEmpty ?
-      Image.network(
-          widget.content.image,
-          width: Configuration.width,
-          height: Configuration.height*0.6,
-          fit: BoxFit.cover,
-      ) : Container(color: Configuration.lightgrey, height: Configuration.height * 0.6),
-      Expanded(
-        child: Container(
-          width: Configuration.width,
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                  child: Padding(
-                  padding: EdgeInsets.only(
-                      left: Configuration.smpadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(height: Configuration.verticalspacing*2),
-                      Text(widget.content.title,textAlign: TextAlign.left,
-                        style: Configuration.text('smallmedium', Colors.black)),
-                      SizedBox(height: Configuration.verticalspacing),
-                      Text(widget.content.description,
-                        style:Configuration.text('small',Colors.grey)
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    BaseButton(
-                      margin:true,
-                      text:'Start ' + type,
-                      onPressed: () async{
-                        print('QUE P ASA AQUI');
-                        if(c.isMeditation()){
-                          //_meditationstate.selectMeditation(c);
-                        }
-
-                        if(c.isLesson()){
-                          print('CHANGING SYSTEMCHROME');
-
-                          SystemChrome.setEnabledSystemUIMode(
-                            SystemUiMode.immersive
-                          );
-                        }
-                        setState(() => started = true);
-                      } 
-                    ),
-                    SizedBox(height: Configuration.verticalspacing*1.5)
-                  ],
-                )
-              )
-            ],
-          ),
-        ),
-      )
-    ]);
-  }
-
-  Widget meditation(Content c){
-    
-    Widget finishedScreen(){
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(child: Text('The meditation has ended', style: Configuration.text('small',Colors.black))),
-          SizedBox(height: Configuration.verticalspacing),
-          Text('Thank you for helping make this app better',style: Configuration.text('small',Colors.black))
-        ],
-      );
-    }
-
-    List<Widget> mapToWidget(map){  
-     List<Widget> l = new List.empty(growable: true);
-     l.add(SizedBox(height: 30));
-      
-      if (map['title'] != null) {
-        l.add(Center(child: Text(map['title'],style: Configuration.text('medium', Colors.white))));
-        
-        l.add(SizedBox(height:15));
-      }
-
-      if (map['image'] != null) {
-        l.add(ClipRRect(
-          borderRadius: BorderRadius.circular(8.0),
-          child: Image(image: CachedNetworkImageProvider( map['image']), width: Configuration.width*0.6)));
-      }
-
-      if (map['text'] != null) {
-        l.add(SizedBox(height:15));
-        l.add(Text(map['text'],
-            style: Configuration.text('small', Colors.white,font:'Helvetica')));
-      }
-
-      if(map['html'] != null){
-        l.add(SizedBox(height: 15));
-        l.add(Center(child: Html(data: map['html'],
-        style: {
-          "body": Style(color: Colors.white,fontSize: FontSize(18)),
-          "li": Style(margin: EdgeInsets.symmetric(vertical: 10.0)),
-          "h2":Style(textAlign: TextAlign.center)
-        })));
-      }
-
-    return l;
-    
-  }
-
-    Widget slider(){
-      return Slider(
-        activeColor: Configuration.maincolor,
-        inactiveColor: Colors.white,
-        min: 0.0,
-        max: _meditationstate.totalduration.inSeconds.toDouble(),
-        onChanged: (a)=> null, 
-        value: _meditationstate.totalduration.inSeconds - _meditationstate.duration.inSeconds.toDouble() ,
-        label:  _meditationstate.duration.inHours > 0
-              ? _meditationstate.duration.toString().substring(0, 7)
-              : _meditationstate.duration.toString().substring(2, 7)
-      );
-    }
-
-    Widget pauseButton(){
-      return  FloatingActionButton(
-      backgroundColor: Colors.white,
-      onPressed: () => setState(()=> _meditationstate.state == 'started' ? _meditationstate.pause() :  _meditationstate.startTimer()),
-      child: Icon(_meditationstate.state == 'started' ?  Icons.pause  : Icons.play_arrow, color: Colors.black)
-      );           
-    }
-
-    Widget freeMeditation(){
-      return Center(
-        child: Container(
-          height: Configuration.blockSizeHorizontal * 60,
-          width: Configuration.blockSizeHorizontal * 60,
-          decoration: BoxDecoration(color: Configuration.grey, borderRadius: BorderRadius.circular(12.0)),
-          child: Center(
-            child:GestureDetector(
-              onDoubleTap: (){ _meditationstate.finishMeditation();}, 
-              child:Text('free meditation', style:Configuration.text('smallmedium', Colors.white))
-            )
-          ),
-        ),
-      );
-    }
-
-    Widget guidedMeditation(){
-      return Align(
-        alignment:Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.all(Configuration.smpadding),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: 
-               _meditationstate.currentsentence != null ?  
-                mapToWidget(_meditationstate.currentsentence)
-                : 
-               [
-                 ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Image(image: CachedNetworkImageProvider(_meditationstate.selmeditation.image),
-                    height: Configuration.height*0.35,
-                    width: Configuration.height*0.35
-                    ),
-                  ),
-                SizedBox(height: Configuration.blockSizeVertical*3),
-                GestureDetector(
-                  onDoubleTap: (){
-                    _meditationstate.finishMeditation();
-                  }, 
-                  child: Text(_meditationstate.selmeditation.title,style: Configuration.text('smallmedium',Colors.white))
-                )
-              ],
-          ),
-        ),
-      );
-    }
-
-    Widget video(){
-      return Container(
-          //height: showfullscreen ? Configuration.height : Configuration.width / controller.value.aspectRatio,
-         // width:!showfullscreen ? Configuration.width : Configuration.height * controller.value.aspectRatio,
-         // ESTO ESTA BIEN ???
-          height: (Configuration.width *0.9) / _meditationstate.videocontroller.value.aspectRatio,
-          width: (Configuration.height * 0.9) *  _meditationstate.videocontroller.value.aspectRatio,
-          child: VideoPlayer(_meditationstate.videocontroller)
-      );
-    }
-
-    Widget meditating(){
-      return Stack(
-        children: [
-          Align(
-            alignment: Alignment.center,
-            child: _meditationstate.hasVideo && _meditationstate.videocontroller.value.duration.inSeconds > 0 ? 
-              video() :
-              AspectRatio(
-                aspectRatio:1,
-                child: Container(
-                  margin:EdgeInsets.all(Configuration.smpadding),
-                  width: Configuration.width*0.6,
-                  decoration: BoxDecoration(
-                    borderRadius:BorderRadius.circular(Configuration.borderRadius),
-                    color:Colors.grey
-                  ),
-                ),
-            )
-          ),
-
-          Positioned(
-            bottom: 20,
-            right:10,
-            left:10,
-            child: Column(
-            children: [
-              pauseButton(),
-              SizedBox(height:Configuration.verticalspacing),
-              slider()
-            ]),
-          ),
-        /*
-        _meditationstate.shadow ? 
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () {
-              _meditationstate.light();
-            },
-            child: Container(
-              decoration: BoxDecoration(color:Colors.black.withOpacity(0.9))
-            ),
-          ),
-        ): Container(), 
-
-        _meditationstate.selmeditation != null ? guidedMeditation(): freeMeditation()
-        */
-
-      ]);
-
-
-    }
-
-    return Observer(builder: (context) { 
-      return _meditationstate.state == 'finished' ? finishedScreen() : meditating();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    _meditationstate = Provider.of<MeditationState>(context);
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar:AppBar(
-        // ESTO HABRÁ QUE HACERLO PARA LOS DOS
-        leading: Container(
-          padding: EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: Configuration.lightgrey,
-          ),
-          child: CloseButton(
-              color: Colors.black,
-              onPressed: () { 
-                if(_meditationstate.state != 'finished') {
-                  showAlertDialog(
-                    title: 'Are you sure you want to exit ?',
-                    context: context,
-                    text: text
-                  );
-              }else{ 
-                Navigator.pop(context);
-              }}
-            ),
-        ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-      ),
-      body:!started ? portada(c:widget.content): 
-        widget.content.isMeditation() ? meditation(widget.content):
-        Container()
-    );
-  }
-}
-*/
+import '../commonWidget/time_chip.dart';
 
 
 // IR SIEMPRE A CONTENTFRONTPAGE AUNQUE SEA RECORDING
 class ContentFrontPage extends StatefulWidget {
   Content content;
+  Stage stage;
   dynamic then;
+  List<Content> path;
 
-  ContentFrontPage({this.content,this.then}) : super();
+  ContentFrontPage({this.content,this.then, this.stage, this.path}) : super();
 
   @override
   State<ContentFrontPage> createState() => _ContentFrontPageState();
 }
 
-class _ContentFrontPageState extends State<ContentFrontPage> {
+class _ContentFrontPageState extends State<ContentFrontPage> {  
   
   checkMedhasPreText(Meditation m){
-    return m.content.entries != null && m.content.entries.length > 0;
+    return m.content != null && m.content.length > 0;
   }
 
   bool hasBells(Meditation m){
@@ -395,11 +58,14 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
     return f.total;
   }
 
+  int getPages(Lesson l){
+    return l.text.length;
+  }
+
+
   void cacheImages(Lesson lesson){
-    print('CACHING LESSON IMAGES');
     lesson.text.forEach((slide) {
       if (slide['image'] != '') {
-        print({'CACHING',slide['image']});
         precacheImage(new CachedNetworkImageProvider(slide['image']), context);
       }
     });
@@ -413,18 +79,16 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final  _meditationstate = Provider.of<MeditationState>(context);
   
     return Scaffold(
       extendBodyBehindAppBar: false,
-      appBar:AppBar(
+      // Status bar brightness (optional)
+      appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle(
-          // Status bar color
           statusBarColor: Colors.white, 
-          // Status bar brightness (optional)
           statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
           statusBarBrightness: Brightness.light, // For iOS (dark icons)
         ),
@@ -455,8 +119,8 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                     height: Configuration.height * 0.4,
                     fit: BoxFit.contain,
                   ),
-                ),
-              ),
+                )
+              )
             ],
           )
         : Container(
@@ -490,8 +154,61 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                       textAlign: TextAlign.left,
                       style: Configuration.text('small',Colors.black,font: 'Helvetica'),
                     ),
-
                     SizedBox(height: Configuration.verticalspacing),
+                    
+                    Row(
+                      children: [
+                          widget.content.isLesson() ? 
+                          Chip(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                              side: BorderSide(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                            avatar: Icon(Icons.book, color: Colors.black),
+                            label: Text(
+                              getPages(widget.content).toString() + ' pages',
+                              style: TextStyle(
+                                color:  Colors.black,
+                              ),
+                            ),
+                          ) : Container(),
+
+
+                          widget.content.category!= null && widget.content.category.isNotEmpty ? 
+                          Container(
+                            margin: EdgeInsets.only(
+                              left: Configuration.verticalspacing
+                            ),
+                            child: Chip(
+                              
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                                side: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              ),
+                              avatar: Icon(
+                                widget.content.getCategoryIcon(), 
+                                color: Colors.black
+                              ),
+                              label: Text(
+                                widget.content.category,
+                                style: TextStyle(
+                                  color:  Colors.black,
+                                ),
+                              ),
+                            ),
+                          ) : Container(), 
+                      ],
+                    ),
+                   
+                    
 
                     widget.content.isMeditation() || widget.content.createdBy != null ?
                     Column(
@@ -501,28 +218,12 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            TimeChip(c:widget.content),
+                           widget.content.isMeditation() ? TimeChip(c:widget.content):  Container(),
                             SizedBox(width: Configuration.verticalspacing*2),
-                            widget.content.createdBy != null ? 
-                              Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: Configuration.width*0.6
-                                ),
-                                child: GestureDetector(
-                                  onTap: ()=>{
-                                    showUserProfile(usercod: widget.content.createdBy['coduser'], isTeacher: true)
-                                  },
-                                  child: Chip(
-                                    padding: EdgeInsets.all(Configuration.tinpadding),
-                                    backgroundColor: Colors.lightBlue,
-                                    avatar: ProfileCircle(
-                                      userImage: widget.content.createdBy['image'], 
-                                      width: Configuration.verticalspacing*4, 
-                                      bordercolor: Colors.white),
-                                    label: Text('Created by ' + widget.content.createdBy['nombre'], style: Configuration.text('small', Colors.white),),
-                                  )
-                                ),
-                              ) : Container(),
+                            
+                            widget.content.createdBy != null && widget.content.createdBy['nombre'] != null 
+                            ? createdByChip(widget.content.createdBy)
+                            : Container(),
                           ],
                         ),
                       ],
@@ -568,9 +269,7 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                                   }).then((value) => setState((){}))
                               }, child: Text('Add Interval Bells', style: Configuration.text('small',Colors.lightBlue))
                               ),
-                            ),
-
-
+                            )
                           ],
                         ),
                       ],
@@ -586,9 +285,10 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                 mainAxisSize:MainAxisSize.min,
                 children: [
                   BaseButton(
+                    filled: true,
                     margin: true,
+                    textcolor: Colors.white,
                     text: 'Start ' + (
-
                       widget.content.isVideo() ? 'Video' :  
                       widget.content.isMeditation() ? 'Meditation' : 
                       'Lesson'
@@ -628,8 +328,12 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                                   content: widget.content,
                                 );
                               // FALTA HACER UNA PARA ARTICULOS
-                              }else{
-                                return LessonView(lesson: widget.content);
+                              }else  {
+                                return LessonView(
+                                  lesson: widget.content, 
+                                  stage: widget.stage,
+                                  path: widget.path
+                                );
                               }
                             },
                             transitionDuration: Duration.zero,
@@ -871,7 +575,7 @@ class _VideoScreenState extends State<VideoScreen> {
                   child: BaseButton(
                     text: 'Finish',
                     color: Colors.white,
-                    textcolor: Colors.black,
+                    textcolor: Colors.white,
                     onPressed: (){
                       finish();
                       Navigator.pop(context);
@@ -904,3 +608,469 @@ class _VideoScreenState extends State<VideoScreen> {
 
 
 
+
+
+// esto porque esta aqui???
+class LessonView extends StatefulWidget {
+  Lesson lesson;
+  NetworkImage slider;
+  Stage stage;
+  List<Content> path;
+
+  LessonView({ this.lesson, this.stage, this.slider, this.path });
+
+  @override
+  _LessonViewState createState() => _LessonViewState();
+}
+
+
+class _LessonViewState extends State<LessonView> {
+  int _index = -1;
+  var _userstate;
+  Map<int, NetworkImage> textimages = new Map();
+  var reachedend = false;
+  Map<dynamic, dynamic> slide = new Map();
+  bool pushedDialog = false;
+  bool hideBalls = false;  
+  CarouselController controller = new CarouselController();
+  ScrollController scrollController = new ScrollController();
+
+
+  // AQUÍ HABRÍA QUE PONER VISTA LECCIÓN ???
+  Widget vistaLeccion() {
+    return CarouselSlider.builder(
+      carouselController: controller,
+      itemCount: widget.lesson.text.length,
+      itemBuilder: (context, index, page) {
+        var slide = widget.lesson.text[index];
+       
+        return Container(
+          width: Configuration.width,
+          constraints: BoxConstraints(
+            minHeight: Configuration.height
+          ),
+          color: Configuration.lightgrey,
+          child: ListView(
+            controller: scrollController,
+            physics: ClampingScrollPhysics(),
+            shrinkWrap: true,
+            padding: EdgeInsets.only(top: 0.0),
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: slide["image"] != '' && slide["image"] != null
+                  ? Container(
+                    decoration: BoxDecoration(
+                      color: slide['imagecolor'] != null ?
+                      Color(int.parse(('0xff${slide['imagecolor'].substring(1,7)}'))) : 
+                      Colors.white
+                    ),
+                    width: Configuration.width,
+                    child: Center(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: Configuration.width  >  500 ?  
+                          Configuration.width * 0.5 : 
+                          Configuration.width * 0.9
+                        ),
+                        child: CachedNetworkImage(
+                          imageUrl: slide["image"],
+                          fit: BoxFit.contain
+                        ),
+                      ),
+                    ),
+                  )
+                  : Container(),
+              ),
+
+              Center(
+                child: Container(
+                  width: Configuration.width,
+                  padding: EdgeInsets.all(Configuration.smpadding),
+                  child: htmlToWidget(
+                    slide["text"],
+                    align: TextAlign.justify
+                  )),
+              ),
+              
+              SizedBox(height: Configuration.verticalspacing*6),
+            ],
+          ),
+        );
+      },
+      options: CarouselOptions(
+        scrollPhysics: ClampingScrollPhysics(),
+        height: Configuration.height,
+        viewportFraction: 1,
+        initialPage: 0,
+        enableInfiniteScroll: false,
+        reverse: false,
+        onPageChanged: (index, reason) {
+          setState(() {
+            slide = widget.lesson.text[index];
+            _index = index;
+            
+            if (_index == widget.lesson.text.length - 1  &&  !reachedend) {
+              Future.delayed(
+                Duration(seconds: 3),
+                () => setState(() => reachedend = true)
+              );
+            }
+          });
+        })
+    );
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    _index = 0;
+    slide = widget.lesson.text[0];
+  }
+
+  Widget nextLessonWidget(){
+    Content nextLesson = widget.path != null && widget.path.length > widget.lesson.position + 1 ? widget.path[widget.lesson.position+1]: 
+    widget.stage != null &&  widget.stage.path.length > widget.lesson.position + 1 ? widget.stage.path[widget.lesson.position+1] : 
+    null;
+
+    Widget closeLessonButton(){
+      return OutlinedButton(
+        onPressed: (){
+          _userstate.takeLesson(widget.lesson);
+          Navigator.pop(context);
+        },
+        style: OutlinedButton.styleFrom(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Configuration.borderRadius),
+          ),
+          side: BorderSide(
+            color: Colors.red,
+            width: 2
+          )
+        ),
+        child: Text('End',
+          style: Configuration.text('tiny',Colors.red)
+        )
+      );
+    }
+    
+    return Container(
+      width: Configuration.width,
+      child: Material(
+          elevation: 2,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: Colors.grey.withOpacity(0.5),
+                  width: 2
+                )
+              ),
+            ),
+            margin: EdgeInsets.only(bottom: Configuration.verticalspacing*2),
+            padding: EdgeInsets.all(Configuration.smpadding),
+            child: nextLesson == null ? 
+            Row(
+              children: [
+                Icon(Icons.check, color: Colors.green),
+                SizedBox(width: Configuration.verticalspacing),
+                Flexible(
+                  flex: 2,
+                  child: Text('You have finished the lessons in this stage',
+                    style: Configuration.text('small',Colors.black)
+                  ),
+                ),
+                
+                closeLessonButton()
+              ],
+            ) :
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: Configuration.width*0.2,
+                  child: Image.network(
+                    nextLesson.image,
+                    fit: BoxFit.contain,
+                  )
+                ),
+                
+                Container(
+                  width: Configuration.width*0.5,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Next lesson',
+                        style: Configuration.text('small',Colors.black, font: 'Helvetica')
+                      ),
+
+                      SizedBox(height: Configuration.verticalspacing),
+                
+                      Text(nextLesson.title,
+                        style: Configuration.text('small',Colors.black)
+                      )
+                    ],
+                  ),
+                ),
+    
+                Column(
+                  children: [
+                    
+                    OutlinedButton(
+                      onPressed: (){
+                        int count = 0;
+                        _userstate.takeLesson(widget.lesson);
+
+                        if(nextLesson.isLesson()){
+                         Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context){
+                              return LessonView(
+                                lesson: nextLesson,
+                                path: widget.path,
+                                stage: widget.stage,
+                                slider: widget.slider
+                              );
+                            }),
+                            (route) => route.isFirst
+                          );
+                        } else {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context){
+                              return VideoScreen(
+                                video: nextLesson,
+                              );
+                            }),
+                            (route) => route.isFirst
+                          );
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                        ),
+                        side: BorderSide(
+                          color: Colors.green,
+                          width: 2
+                        )
+                      ),
+                      child: Text('Next',
+                        style: Configuration.text('tiny',Colors.green)
+                      )
+                    ),
+
+                    // CLOSE 
+                    closeLessonButton()
+
+                  ],
+                )
+                
+              ],
+            ),
+          ), 
+      ),
+    );
+}
+  
+  
+  @override
+  void didChangeDependencies() {
+    if(widget.lesson.text.length == 1){
+      scrollController.addListener(() {
+        if (scrollController.position.atEdge) {
+          if(!reachedend){
+            Future.delayed(
+              Duration(seconds: 3),
+              () => setState(() => reachedend = true)
+            );
+          }
+        }
+      });
+    }
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _userstate = Provider.of<UserState>(context);
+    
+    return Scaffold(
+      extendBody: false,
+      appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: pushedDialog ?  Colors.black.withOpacity(0.01) : Configuration.lightgrey, 
+          // Status bar brightness (optional)
+          statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
+          statusBarBrightness: Brightness.light, // For iOS (dark icons)
+        ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Text(
+                widget.lesson.title,
+                maxLines:2,
+                style: Configuration.text('subtitle', Colors.black),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          slide['help'] != null ?
+          IconButton(
+            icon: Icon(Icons.info),
+            iconSize: Configuration.smicon,
+            color: Colors.lightBlue,
+            onPressed: () {
+              setState(() {
+                pushedDialog =true;
+              });
+
+              showInfoDialog(
+                key: Key(_index.toString()),
+                type: 'info',
+                html: slide['help'],
+              ).then((d)=>{
+                setState(() {
+                  pushedDialog =false;
+                })
+              });
+            },
+          ) : Container()
+        ],
+        leading: ButtonClose(
+          color: Colors.black,
+          onPressed: () => showAlertDialog(
+            title: 'Are you sure you want to exit ?',
+            context: context,
+            text: "This lesson will not be saved"
+        )),
+        backgroundColor: Configuration.lightgrey,
+        elevation: 0,
+      ),
+      extendBodyBehindAppBar: false,
+      body: WillPopScope(
+        onWillPop: () {
+          bool pop= true;
+
+
+          showAlertDialog(
+            title: 'Are you sure you want to exit ?',
+            context: context,
+            text: "This lesson will not be saved",
+
+            onNo: ()=> pop = false,
+          );
+          
+          
+          return Future.value(pop);
+        },
+        child: Stack(children: [
+          vistaLeccion(),
+          
+          widget.lesson.text.length > 1 ? 
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Configuration.lightgrey,
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.withOpacity(0.5),
+                    width: 1
+                  )
+                ),
+              ),
+              child: Container(
+                margin: EdgeInsets.only(left:15, right:15, bottom: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // ARROWS FOR LEFT RIGHT AND SKIP
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          iconSize: Configuration.smicon,
+                          color: _index == 0 ? Colors.grey : Colors.black,
+                          onPressed: () {
+                            if(_index > 0){
+                              setState(() {
+                                controller.jumpToPage(--_index);
+                              });
+                            }
+                          },
+                        ),
+              
+              
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          iconSize: Configuration.smicon,
+                          color: _index < widget.lesson.text.length - 1 ? Colors.black : Colors.grey,
+                          onPressed: () {
+                            if( _index < widget.lesson.text.length - 1){
+                              setState(() {
+                                controller.jumpToPage(++_index);
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                      
+                    IconButton(
+                      icon: Icon(Icons.skip_next),
+                      iconSize: Configuration.smicon,
+                      color: Colors.black,
+                      onPressed: () {
+                        setState(() {
+                          controller.jumpToPage(widget.lesson.text.length - 1);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ): Container(),
+
+          widget.lesson.text.length  >  1 ? 
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                margin: EdgeInsets.all(15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CarouselBalls(
+                      activecolor: Colors.black,
+                      index:_index,
+                      items:widget.lesson.text.length,
+                    ),
+                    SizedBox(height: Configuration.verticalspacing)
+                  ],
+                ),
+              ),
+            ) :  Container(),
+        
+        
+          Positioned(
+            bottom: 0,
+            right: 0,
+            left: 0,
+            child: AnimatedSlide(
+              offset: reachedend ? Offset(0, 0): Offset(0,1),
+              duration: Duration(milliseconds: 500),
+              child: nextLessonWidget())
+          )
+        ]),
+      )
+    );
+  }
+}

@@ -104,21 +104,22 @@ class Request {
     data['coduser'] = this.coduser;
     data['state'] = this.state;
     data['image'] = this.image;
-    data['date'] = this.date.toIso8601String();
+    data['date'] = this.date.millisecondsSinceEpoch;
     data['stagenumber'] = this.stagenumber;
     
     if (this.comments != null) {
       data['shortComments'] = this.comments.map((v) => v.cod).toList();
-    }else{
+    } else {
       data['shortComments'] = [];
     }
     
     data['commentaries'] = this.comentaries;
 
     data['points'] = this.points;
+
     if (this.votes != null) {
       data['votes'] = this.votes;
-    }else{
+    } else {
       data['votes'] = {};
     }
 
@@ -276,6 +277,8 @@ class Comment{
 
     return data;
   }
+
+
 }
 
 

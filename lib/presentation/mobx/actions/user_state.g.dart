@@ -235,13 +235,6 @@ mixin _$UserState on _UserState, Store {
         .run(() => super.uploadFile(image: image, audio: audio, video: video));
   }
 
-  final _$updateStageAsyncAction = AsyncAction('_UserState.updateStage');
-
-  @override
-  Future<dynamic> updateStage() {
-    return _$updateStageAsyncAction.run(() => super.updateStage());
-  }
-
   final _$connectAsyncAction = AsyncAction('_UserState.connect');
 
   @override

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/entities/game_entity.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:meditation_app/domain/repositories/user_repository.dart';
 import 'package:mobx/mobx.dart';

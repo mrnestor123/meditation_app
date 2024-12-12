@@ -80,8 +80,7 @@ class RadialPainter extends CustomPainter {
   double progressInDegrees, width;
   final Color progressColor, progressBackgroundColor;
 
-  RadialPainter(this.progressInDegrees, this.progressColor,
-      this.progressBackgroundColor, this.width);
+  RadialPainter(this.progressInDegrees, this.progressColor, this.progressBackgroundColor, this.width);
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -1,6 +1,7 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:uuid/uuid.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
@@ -22,7 +23,6 @@ List<String> moods =  [
   'Very Good'
 ];
 
-
 //HAY QUE CREAR CLASE GUIDEDMEDITATION
 class Meditation extends FileContent {
   String coduser, notes;
@@ -30,56 +30,56 @@ class Meditation extends FileContent {
   DateTime day;
 
   //PORQUE SE LLAMA CONTENT MAL NOMBRE !!!
-  Map<dynamic, dynamic> content;
+  dynamic content;
   Map<dynamic,dynamic> followalong;
 
   MeditationReport report;
-
   MeditationSettings meditationSettings = new MeditationSettings();
 
   //for referencing the user.
   //final String userId;
-  Meditation(
-      {
-      @required this.duration,
-      this.day,
-      this.coduser,
-      this.content,
-      this.followalong,
-      cod,
-      type = 'meditation-practice',
-      stagenumber,
-      description,
-      image,
-      title,
-      file = '',
-      position,
-      this.meditationSettings,
-      createdBy,
-      notes,
-      isNew,
-      total,
-      report
-      })
+  Meditation({
+    @required this.duration,
+    this.day,
+    this.coduser,
+    this.content,
+    this.followalong,
+    cod,
+    type = 'meditation-practice',
+    stagenumber,
+    description,
+    image,
+    title,
+    file = '',
+    position,
+    group,
+    this.meditationSettings,
+    createdBy,
+    notes,
+    isNew,
+    total,
+    report
+  })
   : super(
-      cod: cod,
-      total: total,
-      isNew: isNew,
-      description: description,
-      image: image,
-      title: title,
-      createdBy: createdBy,
-      stagenumber: stagenumber,
-      position: position,
-      file:file,
-      type: type
-    ) {
-      day == null ? day = DateTime.now() : null;
-      meditationSettings == null ? meditationSettings = new MeditationSettings() : null;
-    }
+    cod: cod,
+    group:group,
+    total: total,
+    isNew: isNew,
+    description: description,
+    image: image,
+    title: title,
+    createdBy: createdBy,
+    stagenumber: stagenumber,
+    position: position,
+    file:file,
+    type: type
+  ) {
+    day == null ? day = DateTime.now() : null;
+    meditationSettings == null ? meditationSettings = new MeditationSettings() : null;
+  }
+
 
   void setDay(DateTime d) => this.day = d;
-
 
   factory Meditation.fromContent(FileContent c){
     Duration d;
@@ -142,6 +142,7 @@ List<IntervalBell> ambientSounds = [
   IntervalBell(sound: 'assets/ambient_sounds/rain.mp3',name: 'Rain', image:'assets/ambient_sounds/rain.jpg'),
   IntervalBell(sound: 'assets/ambient_sounds/thunderStorm.m4a',name: 'Thunder Storm', image:'assets/ambient_sounds/thunder.jpg'),
 ];
+
 
 class MeditationPreset {
   int duration;
@@ -214,11 +215,16 @@ class MeditationSettings{
   
   List<IntervalBell> bells = new List.empty(growable: true);
   
+  List<Metric> metrics = new List.empty(growable: true);
+
+  String metricsType;
+
+  
   MeditationSettings({
     this.warmuptime = 0, this.ambientvolume = 100,
-    this.startingBell  = 'None', this.endingBell = 'Gong',
+    this.startingBell  = 'None', this.endingBell = 'Gong', this.metricsType='basic',
     this.isUnlimited=false, this.bellsvolume= 100, 
-    this.ambientsound, this.addSixStepPreparation = false
+    this.metrics, this.ambientsound, this.addSixStepPreparation = false
   });
 
 
@@ -232,6 +238,8 @@ class MeditationSettings{
       'startingBell':startingBell,
       'endingBell':endingBell,
       'addSixStepPreparation':addSixStepPreparation,
+      "metrics": metrics != null && metrics.length > 0 ? metrics.map((m)=> m.toJson()).toList() : null,
+      'metricsType':metricsType,
       'bells': bells.length > 0 ? bells.map((bell)=> bell.toJson()).toList() : null
     };
   }
@@ -245,24 +253,26 @@ class MeditationSettings{
       ambientvolume:json['bellsvolume']!= null ? json['bellsvolume'].toDouble(): 100,
       startingBell: json['startingBell'] != null ? json['startingBell'] : 'None',
       endingBell: json['endingBell'] != null ? json['endingBell'] : 'Gong',
-
-
+      metricsType: json['metricsType'] != null ? json['metricsType'] : 'basic',
       bellsvolume:json['bellsvolume']!= null ? json['bellsvolume'].toDouble(): 100,
     );
+
+    if(json['metrics'] != null && json['metrics'].length > 0){
+      for(var metric in json['metrics']){
+        m.metrics.add(Metric.fromJson(metric));
+      }
+    }
 
     if(json['bells'] != null && json['bells'].length > 0){
       for(var bell in json['bells']){
         m.bells.add(IntervalBell.fromJson(bell));
       }
     }
-      
 
     return m;
+  
   }
-
-
 }
-
 
 
 // CAMBIAR INTERVALBELL POR SOUND !!!
@@ -297,59 +307,223 @@ class IntervalBell{
 }
 
 
-class MeditationReport{
 
+// TYPES CAN BE 
+// TEXT, NUMERIC, PERCENTAGE
+class Metric {
+  dynamic value;
+  String name, type;
+
+  IconData icon;
+
+  Metric({this.value, this.name, this.type = 'text', this.icon});
+
+  // to json
+  Map<String,dynamic> toJson(){
+    return {
+      'value':value,
+      'name':name
+    };
+  }
+
+  factory Metric.fromJson(json){
+
+    if(json['type']== 'numeric'){
+      return NumericMetric.fromJson(json);
+    }else {
+      return TextMetric.fromJson(json);
+    }
+  }
+}
+
+
+
+class NumericMetric extends Metric{
+  // value debería de ser int
+  //de 1 a 10, de 0 a 100 
+  int max, min, step;
+
+  NumericMetric({this.max=10, this.min=1, this.step=1, value, name, type='numeric', icon})
+  : super( value: value, type:type,  icon:icon, name: name );
+
+  // to json
+  Map<String,dynamic> toJson(){
+    return {
+      'value':value,
+      'name':name,
+      'max':max,
+      'min':min,
+      'step':step
+    };
+  }
+
+  factory NumericMetric.fromJson(json){
+    return NumericMetric(
+      value: json['value'],
+      name: json['name'],
+      max: json['max'],
+      min: json['min'],
+      step: json['step']
+    );
+  }
+}
+
+
+
+// a list  of options to choose from
+class OptionsMetric extends Metric {
+
+  List<String> options;
+
+  OptionsMetric({name, value, type = 'options', icon, this.options})
+    : super(value: value, name: name, type: type, icon: icon);
+
+  // to json
+  Map<String,dynamic> toJson(){
+    return {
+      'value':value,
+      'name':name,
+      'options':options,
+      'type':type,
+    };
+  }
+
+  factory OptionsMetric.fromJson(json){
+    return OptionsMetric(
+      value: json['value'],
+      name: json['name'],
+      type: json['type'],
+    );
+  }
+
+}
+
+
+class Item {
+  String header, description;
+
+  Item({this.header, this.description});
+
+  Map<String,dynamic> toJson(){
+    return {
+      'header':header,
+      'description':description
+    };
+  }
+
+  factory Item.fromJson(json){
+    return Item(
+      header: json['header'],
+      description: json['description']
+    );
+  }
+
+}
+
+
+class TextMetric extends Metric {
+
+  String hint;
+
+  // VALUE IS A TEXT HERE
+  TextMetric({name, value, type = 'text', icon, hint}): super(value: value, name: name, type: type, icon: icon);
+
+  // to json
+  Map<String,dynamic> toJson(){
+    return {
+      'value':value,
+      'name':name,
+      'hint':hint,
+      'type':type,
+    };
+  }
+
+  factory TextMetric.fromJson(json){
+    return TextMetric(
+      value: json['value'],
+      name: json['name'],
+      hint: json['hint']
+    );
+  }
+
+}
+
+
+
+class MeditationReport {
   String text; 
-  int mindWandering, forgetting, overallSatisfaction, stage;
+  int stage, mentalState, effort;
 
   List<String> feelings = new List.empty(growable: true);
   List<String> distractions = new  List.empty(growable: true);
+  List<Metric> metrics = new List.empty(growable: true);
+  
+  dynamic overallSatisfaction;
 
   MeditationReport({
     this.text = '', 
-    this.mindWandering, 
-    this.forgetting, 
-    this.overallSatisfaction,
+    this.effort,
     this.stage,
     this.feelings,
-    this.distractions
+    this.mentalState =0,
+    this.metrics,
+    this.overallSatisfaction
   });
-
-
 
   Map<String,dynamic> toJson(){
     Map<String,dynamic> json = new Map();
 
-    json['feelings'] = feelings;
+    if(stage != null){
+      this.metrics.add(NumericMetric(name: 'Stage', value: stage, type:'numeric', icon:  Icons.terrain ));
+    }
 
     if(text != null && text != ''){
-      json['text'] = text;
+      this.metrics.add(TextMetric(name: 'Notes', value: text, icon: Icons.note));
     }
 
-    if(stage != null){
-      json['stage'] = stage;
+    if(this.metrics != null && this.metrics.length > 0){
+      json['metrics'] = this.metrics.map((m)=> m.toJson()).toList();
     }
-
-    if(distractions!= null && distractions.length > 0){
-      json['distractions'] = distractions;
-    }
-
+       
     return json;
   }
 
 
   factory MeditationReport.fromJson(json){
-    return MeditationReport(
-      text: json['notes'] != null ?  json['notes'] : json['text'],
-      mindWandering: json['mindWandering'],
-      forgetting: json['forgetting'],
-      feelings: json['feelings'] != null ? json['feelings'].cast<String>() : null,
+    MeditationReport m = new  MeditationReport();  
 
+    m.metrics  = new List.empty(growable: true);
 
-      stage: json['stage'],
-      overallSatisfaction: json['overallSatisfaction'],
-    );
+    if(json['text'] != null && json['text'] != ''){
+      m.metrics.add(
+        TextMetric(name: 'Notes', value: json['text'], icon: Icons.note)
+      );
+    }
+
+    if(json['notes']!= null  && json['notes'] != ''){
+      m.metrics.add(
+        TextMetric(name: 'Notes', value: json['notes'], icon: Icons.note)
+      );
+    }
+
+    if(json['stage'] != null){
+      m.metrics.add(
+        NumericMetric(name: 'Stage', value: json['stage'], icon: Icons.terrain)
+      );
+    }
+     
+    if(json['metrics'] != null){
+      if(json['metrics'] is Map){
+        m.metrics.add(Metric.fromJson(json['metrics']));
+      } else {
+        for(var metric in json['metrics']){
+          m.metrics.add(Metric.fromJson(metric));
+        }
+      }
+    }
+
+    return m;
   }
-
-
 }
+
+

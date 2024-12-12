@@ -4,9 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
-
-import '../../domain/entities/content_entity.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'helpers.dart';
 
 class LessonModel extends Lesson {
@@ -20,14 +18,18 @@ class LessonModel extends Lesson {
       type,
       int stagenumber,
       createdBy,
+      group,
       file,
       blocked,
       isNew,
-      int position
+      int position,
+      String category
     })
     : super(
       title: title,
+      category: category,
       cod: cod,
+      group:group,
       createdBy:createdBy,
       image: image,
       description: description,
@@ -48,7 +50,7 @@ class LessonModel extends Lesson {
   @override
   factory LessonModel.fromJson(Map<String, dynamic> json) {
    // LessonModel model = Content.fromJson(json);
-    LessonModel model =  medorLessfromJson(json, false);
+    LessonModel model = medorLessfromJson(json, false);
     return model;
   }
 

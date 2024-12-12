@@ -3,7 +3,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
-import 'package:meditation_app/domain/entities/lesson_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
 import 'package:meditation_app/domain/entities/notification_entity.dart';
@@ -27,7 +26,6 @@ abstract class UserRepository {
 
   Future<Either<Failure, User>> updateUser({User user,DataBase d, String type, dynamic toAdd,  DoneContent done});
 
-
   Future<Either<Failure, void>> setUserName({String username, String coduser});
 
   Future<Either<Failure,String>> uploadFile({dynamic image,dynamic audio, dynamic video, User u});
@@ -35,7 +33,7 @@ abstract class UserRepository {
   Future<Either<Failure, void>> cacheMeditation({Meditation m, User u});
 
 
-  Future<Either<Failure,List<Request>>> getRequests({String coduser});
+  Future<Either<Failure,List<Request>>> getRequests();
 
   Future<Either<Failure,void>> updateRequest(Request r,[List<Notify> n, Comment c]);
 
@@ -56,45 +54,24 @@ abstract class UserRepository {
 
   Future<Either<Failure,void>> updateMessage({Message message});
 
- // Future<Either<Failure,void>> uploadContent({Content c});
-
-  //DEVUELVE UN OBJETO CON MEDITATIONS, LESSONS, ETC
-
- // Future<Either<Failure, void>> follow({User u, User followed, bool follows});
-
-  //Future<Either<Failure, void>> takeLesson({User u, Lesson l});
+  Future<Either<Failure,void>> deleteUser({User user});
 
   Future<Either<Failure, void>> addAction({UserAction a});
 
-
-
   Future<Either<Failure, List<Request>>> getFeed();
 
-  // PARA FUTURO !!!
- // Future<Either<Failure, void>> viewMessages({List<Message> messages});
+  Future<Either<Failure, Stream<List<Message>>>> startConversation({User sender, String receiver});
 
-  //Future<Either<Failure, List<Chat>>> getMessages({User user});
+ // Future<Either<Failure, List<Retreat>>> getRetreats();
 
+//  Future<Either<Failure, Retreat>> joinRetreat(String cod);
 
-  //Future<Either<Failure, Chat>> getChat({User sender, String receiver});
+  Future<Either<Failure, List<Request>>> getStageRequests();
 
-  Future<Either<Failure,Stream<List<Message>>>> startConversation({User sender, String receiver});
+  Future<Either<Failure, void >> addMeditationReport({Meditation m, MeditationReport report, User user});
 
+  Future<Either<Failure, void>> sendQuestion({String question, String coduser});
 
-
-  //Future<Either<Failure,void>> createRetreat({Retreat r});
-
-  Future<Either<Failure, List<Retreat>>> getRetreats();
-
-  Future<Either<Failure, Retreat>> joinRetreat(String cod);
-
-  Future<Either<Failure,List<Request>>> getStageRequests();
-
-  Future<Either<Failure,void >> addMeditationReport({Meditation m, MeditationReport report, User user});
-
-
-  Future<Either<Failure,void>> sendQuestion({String question, String coduser});
-
-  Future<Either<Failure,Content>> getContent(String cod);
+  Future<Either<Failure, Content>> getContent(String cod);
 
 }

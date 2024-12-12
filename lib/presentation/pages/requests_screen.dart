@@ -11,7 +11,7 @@ import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/presentation/mobx/actions/requests_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/date_tostring.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/dialogs.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/user_bottom_dialog.dart';

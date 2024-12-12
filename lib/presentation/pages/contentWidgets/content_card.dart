@@ -2,20 +2,20 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/bottom_sheet_modal.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/dialog.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/created_by.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/html_towidget.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/meditation_modal.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/content_view.dart';
 import 'package:meditation_app/presentation/pages/contentWidgets/meditation_screens.dart';
 import 'package:meditation_app/presentation/pages/main.dart';
 import 'package:provider/provider.dart';
 
 import '../../../domain/entities/content_entity.dart';
+import '../../../domain/entities/stage_entity.dart';
 import '../../mobx/actions/user_state.dart';
+import '../commonWidget/time_chip.dart';
 import '../config/configuration.dart';
 
-void selectContent ({Content content, dynamic then}) {
+void selectContent({Content content, dynamic then, Stage stage, List<Content> path}) {
 
   if(content.isTechnique()){
     // modal bottom sheet 
@@ -82,8 +82,6 @@ void selectContent ({Content content, dynamic then}) {
                     ),
                   ),
                   SizedBox(height: Configuration.verticalspacing),
-        
-        
                 ],
               ),
             )
@@ -112,6 +110,8 @@ void selectContent ({Content content, dynamic then}) {
           builder: (context){
             return ContentFrontPage(
               content:content,
+              stage: stage,
+              path:path,
               then: then,
             );
           }
@@ -122,180 +122,241 @@ void selectContent ({Content content, dynamic then}) {
 }
 
 
+
+
+
+
 class ContentCard extends StatelessWidget {
   Content content, unlocksContent;
   dynamic onPressed,then;
   bool blocked,seen;
 
+  List<Content> path; 
   String title;
 
 
-  IconData getIcon(String category){
 
-    if(category == 'mind'){
-      return Icons.psychology;
-    }else if(category == 'philosophy'){
-      return Icons.abc;
-    }else if(category == 'meditation'){
-      return Icons.self_improvement;
-    }
-  }
-  
-  ContentCard({this.content,this.then, this.title, this.onPressed, this.blocked = false, this.unlocksContent, this.seen = false ,key}):super(key:key);
+
+
+  ContentCard({this.content,this.then, this.path, this.title, this.onPressed, this.blocked = false, this.unlocksContent, this.seen = false ,key}):super(key:key);
 
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
-    seen = _userstate.user.contentDone.any((element) => element.cod  == content.cod);
+    seen = _userstate.user.contentDone.any((element) => element.cod == content.cod);
 
     return AspectRatio(
       aspectRatio: Configuration.lessonratio,
       child: Container(
-        margin: EdgeInsets.only(top:Configuration.verticalspacing),
-        child: ElevatedButton(
-          onPressed: (){
-            if(!blocked){
-              selectContent(content: content, then:then);
-            } 
-          },
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.all(0),
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Configuration.borderRadius / 3)),
-              minimumSize: Size(double.infinity, double.infinity)
-            ),
-          child: LayoutBuilder(
-            builder: (context, BoxConstraints constraints) {
-              return Stack(
-                children: [
-                  
-                  content.image != null && content.image.isNotEmpty
-                  ? Align(
-                      alignment: Alignment.centerRight,
-                      child: AspectRatio(
-                        aspectRatio: 0.9,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.horizontal(
-                            right: Radius.circular(
-                              Configuration.borderRadius / 3)
-                            ),
-                          child: CachedNetworkImage(
-                            imageUrl: content.image,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: Colors.white,
-                            ),
-                            errorWidget: (context, url, error) =>
-                              Icon(Icons.error),
+          width: Configuration.width,
+          margin: EdgeInsets.only(top:Configuration.verticalspacing),
+          child: ElevatedButton(
+            onPressed: (){
+              if(!blocked){
+                selectContent(content: content, then:then, path:path);
+              } 
+            },
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.all(0),
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Configuration.borderRadius / 3)),
+                minimumSize: Size(double.infinity, double.infinity)
+              ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: content.image != null && content.image != '' ?
+                    Container(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+                        child: CachedNetworkImage(
+                          imageUrl: content.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white,
                           ),
-                        )),
-                    )
-                  : Container(),
-
-                  Positioned(
-                      top: 15,
-                      left: 15,
-                      child: Row(
-                        children: [
-                          content.category != null ?
-                          Chip(
-                            backgroundColor: Colors.lightBlue,
-                            avatar: Icon(getIcon(content.category), color: Colors.white, size: Configuration.smicon),
-                            label: Text(
-                              content.category.substring(0,1).toUpperCase() +
-                              content.category.substring(1), 
-                              style: Configuration.text('tiny',Colors.white
-                            ))
-                          ) 
-                          : Icon(
-                            content.getIcon(),
-                            color: Colors.black, 
-                          ),
-
-                          SizedBox(width: Configuration.verticalspacing),
-
-                          content.isRecording() || content.isVideo() || content.isMeditation() ?
-                          TimeChip(c:content, seen: seen) : 
-                          seen ? Icon(Icons.visibility, color: Colors.grey,size: Configuration.smicon) : Container(),
-
-                          content.isNew != null && content.isNew ?
-                          Container(
-                            margin: EdgeInsets.only(left: Configuration.blockSizeHorizontal * 1),
-                            child: Chip(
-                              backgroundColor: Colors.lightBlue,
-                              label: Text('New', style: Configuration.text('tiny',Colors.white))
-                            ),
-                          ) : Container(),
-                        ],
-                      )),
-                  
-                  
-                  Positioned(
-                    left: 15,
-                    bottom: 15,
-                    child: Container(
-                      width: Configuration.width * 0.5,
-                      child: Text(
-                        content.title,
-                        overflow: TextOverflow.clip,
-                        style: Configuration.text(
-                          "h3",
-                          blocked ? Colors.grey : Colors.black,
+                          errorWidget: (context, url, error) =>
+                            Icon(Icons.error),
                         ),
                       ),
-                    )
-                  ),
+                    ): Container(),
+                ),
 
-                  Positioned(
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                    top: 0,
-                    child: AnimatedContainer(
-                      padding: EdgeInsets.all(0),
-                      key: Key(content.cod),
-                      duration: Duration(seconds: 2),
-                      child: blocked
-                          ? Center(
-                              child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(Icons.lock, size: Configuration.smicon),
-                                SizedBox(height: 10),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
-                                  child: Text(
-                                    _userstate.user.stagenumber < content.stagenumber && content.position == 0 ? 
-                                    "Unlocked when you reach stage " + (_userstate.user.stagenumber+1).toString() :
-                                    'Unlocked after ' + 
-                                      (  unlocksContent.type == 'meditation-practice' ? 'doing ' 
-                                        : unlocksContent.type == 'video' ? 'watching '
-                                        : 'reading '
-                                      ) + unlocksContent.title,
-                                      style: Configuration.text('tiny', Colors.white),
-                                      textAlign: TextAlign.center),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(Configuration.smpadding),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              content.category != null ?
+                              Chip(
+                                backgroundColor: Colors.lightBlue,
+                                avatar: Icon(content.getCategoryIcon(), color: Colors.white, size: Configuration.smicon),
+                                label: Text(
+                                  content.category.substring(0,1).toUpperCase() +
+                                  content.category.substring(1), 
+                                  textScaleFactor: 1,
+                                  style: Configuration.text('tiny',Colors.white)
+                                )
+                              )
+                              : Icon(
+                                content.getIcon(),
+                                color: Colors.black, 
+                              ), 
+    
+                              SizedBox(width: Configuration.verticalspacing),
+    
+    
+                              content.isRecording() || content.isVideo() || content.isMeditation() ?
+                              TimeChip(c:content, seen: seen , transparent:false, isSmall: true) : 
+                              seen ? Icon(Icons.visibility, color: Colors.grey,size: Configuration.smicon) : Container(),
+                    
+    
+                              SizedBox(width: Configuration.verticalspacing),
+    
+                              /*                              
+                              content.isNew != null && content.isNew ?
+                              Container(
+                                margin: EdgeInsets.only(left: Configuration.blockSizeHorizontal * 1),
+                                child: Chip(
+                                  backgroundColor: Colors.lightBlue,
+                                  label: Text('New', style: Configuration.text('tiny',Colors.white))
                                 ),
-                              ],
-                            ))
-                          : Container(),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              Configuration.borderRadius / 3),
-                          color: blocked
-                              ? Colors.grey.withOpacity(0.8)
-                              : Colors.transparent),
-                      curve: Curves.fastOutSlowIn,
+                              ) : Container(),
+                              */
+
+                              content.createdBy != null ?
+                              Container(
+                                margin: EdgeInsets.only(left: Configuration.blockSizeHorizontal * 1),
+                                child: doneChip(
+                                  content.createdBy,
+                                  small: true
+                                )
+                              ) : Container(),
+
+                            ],
+                          ),
+                    
+                          
+                    
+                          
+                    
+                        ],
+                      ),
                     ),
+    
+    
+                    Container(
+                      width: Configuration.width*0.7,
+                      padding: EdgeInsets.only(left:Configuration.smpadding, right: Configuration.smpadding, bottom: Configuration.smpadding),
+child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Container(
+                              constraints: BoxConstraints(
+                                maxWidth: Configuration.width * 0.5,
+                                maxHeight: Configuration.height * 0.1,
+                              ),
+                              child: Text(
+                                content.title,
+                                textScaleFactor: 1,
+                                overflow: TextOverflow.fade,
+                                style: Configuration.text(
+                                  "small",
+                                  blocked ? Colors.grey : Colors.black,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+    
+                  ],
+                ),
+              
+                /*
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  top: 0,
+                  child: AnimatedContainer(
+                    padding: EdgeInsets.all(0),
+                    key: Key(content.cod),
+                    duration: Duration(seconds: 2),
+                    child: blocked
+                        ? Center(
+                            child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock, size: Configuration.smicon),
+                              SizedBox(height: 10),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: Configuration.smpadding),
+                                child: Text(
+                                  _userstate.user.stagenumber < content.stagenumber && content.position == 0 ? 
+                                  "Unlocked when you reach stage " + (_userstate.user.stagenumber+1).toString() :
+                                  'Unlocked after ' + 
+                                    (  unlocksContent.type == 'meditation-practice' ? 'doing ' 
+                                      : unlocksContent.type == 'video' ? 'watching '
+                                      : 'reading '
+                                    ) + unlocksContent.title,
+                                    style: Configuration.text('tiny', Colors.white),
+                                    textAlign: TextAlign.center),
+                              ),
+                            ],
+                          ))
+                        : Container(),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                            Configuration.borderRadius / 3),
+                        color: blocked
+                            ? Colors.grey.withOpacity(0.8)
+                            : Colors.transparent),
+                    curve: Curves.fastOutSlowIn,
                   ),
-                ],
-              );
-            }
+                ),
+
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: content.image != null && content.image != '' ?
+                    Container(
+                      height:  Configuration.height * 0.09,
+                      width:  Configuration.height * 0.09,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(Configuration.borderRadius/3),
+                        child: CachedNetworkImage(
+                          imageUrl: content.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            color: Colors.white,
+                          ),
+                          errorWidget: (context, url, error) =>
+                            Icon(Icons.error),
+                        ),
+                      ),
+                    ): Container(),
+                )*/
+              ],
+            ),
           ),
         ),
-      ),
     );
    }
 }
@@ -304,54 +365,73 @@ class ContentCard extends StatelessWidget {
 
 
 // HAY QUE AÑADIR AQUI EL WIDGET DE  CUADRADO !!
-
 class ContentSquare extends StatelessWidget {
   Content content;
-  bool blocked;
+  Stage stage;
+  bool blocked, seen;
+  Function then;
 
-  ContentSquare({ this.content,this.blocked }) : super();
+  ContentSquare({ this.content,this.blocked = false, this.then, this.stage}) : super();
 
   @override
   Widget build(BuildContext context) {
     final _userstate = Provider.of<UserState>(context);
     blocked = _userstate.user.isContentBlocked(content);
+    seen = _userstate.user.contentDone.any((element) => element.cod == content.cod);
 
 
-    return GestureDetector(
-      onTap: () {
-        // DEBERÍAMOS BLOQUEAR ?
-        if(!blocked){
-          selectContent(content: content);
-        }
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          border:Border.all(color: Colors.grey, width: 1),
-          borderRadius: BorderRadius.circular(12.0),
+    return AspectRatio(
+      aspectRatio: 1,
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.all(0),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Configuration.borderRadius/2)),
+            minimumSize: Size(double.infinity, double.infinity)
         ),
+        onPressed: () {
+          // DEBERÍAMOS BLOQUEAR ?
+          if(!blocked){
+            selectContent(content: content, then: then, stage: stage);
+          }
+        },
         child: Stack(
           children: [
-            
             Positioned.fill(child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
               child: Container(color: Colors.white))
             ),
-
+        
             Positioned.fill(child:ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(Configuration.borderRadius/2),
               child: content.image != null && content.image != '' ? 
-              Image(
-                fit: BoxFit.cover,
-                image: CachedNetworkImageProvider(content.image)
+              CachedNetworkImage(
+                fit: BoxFit.contain,
+                imageUrl: content.image
               ) : Container(),
             )),
+
+            Positioned(
+              top: 10,
+              left: 5,
+              child: Row(
+                children: [
+                  content.isMeditation() ?
+                  TimeChip(c:content, seen: seen , transparent:false, isSmall: true) : 
+                  seen ? Icon(Icons.visibility_sharp, color: Colors.lightBlue,size: Configuration.smicon) : 
+                  Container(),
+                ],
+              )
+            ),
               
             Positioned(
               bottom: 0,
               left: 0,
               right: 0,
               child: Container(
-                height: 50,
+                height: 56,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                     bottomRight: Radius.circular(12.0),
@@ -368,7 +448,7 @@ class ContentSquare extends StatelessWidget {
                 )
               )
             ),
-
+        
             Positioned.fill(
               child: AnimatedContainer(
                 padding: EdgeInsets.all(0),
@@ -392,7 +472,7 @@ class ContentSquare extends StatelessWidget {
                 ): Container(), 
               ),
             ),
-
+        
             /*
             rightlabel != null ?
             Align(
@@ -403,8 +483,8 @@ class ContentSquare extends StatelessWidget {
               ),
             ): Container(),*/
           ],
-        ),
-      )
+        )
+      ),
     );
   }
 }

@@ -7,28 +7,26 @@ import '../config/configuration.dart';
 class CarouselBalls extends StatelessWidget {
   int index = 0;
   int items ;
-  Color activecolor;
+  Color activecolor, inactivecolor;
 
   bool showNext;
   dynamic onNext;
 
-  CarouselBalls({this.index, this.items = 0, this.activecolor = Colors.white, Key key, this.showNext = false, this.onNext}): super(key:key);
+  CarouselBalls({this.index, this.items = 0, this.inactivecolor, this.activecolor = Colors.white, Key key, this.showNext = false, this.onNext}): super(key:key);
 
   List<Widget> getBalls() {
       List<Widget> res = new List.empty(growable: true);
       
       for(int i = 0; i < items; i++){
          res.add(Container(
-          
           width: Configuration.safeBlockHorizontal * 3,
           height: Configuration.safeBlockHorizontal * 3,
           margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
           decoration: BoxDecoration(
-            
             shape: BoxShape.circle,
             color: i == index
               ? activecolor
-              : Color.fromRGBO(0, 0, 0, 0.3),
+              : inactivecolor,
           ),
         ));
       }
@@ -40,6 +38,11 @@ class CarouselBalls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    if(inactivecolor == null){
+      inactivecolor = Color.fromRGBO(0, 0, 0, 0.3);
+    }
+
     return Stack(
       children: [
          Align(
@@ -47,7 +50,9 @@ class CarouselBalls extends StatelessWidget {
            child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: getBalls(),
+            children: items > 8 ?  
+              [Text('${index+1}/${items}', style: Configuration.text('small', Colors.black))] :
+             getBalls(),
             ),
          ),
         
@@ -60,7 +65,7 @@ class CarouselBalls extends StatelessWidget {
                 onTap:()=>{
                   onNext(index)
                 }, 
-                child: Text((index +1) == items ? 'Finish': 'Next', style: Configuration.text('smallmedium', Colors.white))
+                child: Text((index +1) == items ? 'Finish': 'Next', style: Configuration.text('subtitle', Colors.white))
               ),
             ),
           ) : Container()

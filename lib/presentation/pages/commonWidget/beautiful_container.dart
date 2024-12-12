@@ -1,96 +1,114 @@
 
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/created_by.dart';
+import 'package:meditation_app/presentation/pages/commonWidget/profile_widget.dart';
 
 import '../config/configuration.dart';
 
+// PASAR AQUÍ SECTION EN VEZ DE TITULO Y SUBTITULO
 class BeautifulContainer extends StatelessWidget {
   
   BeautifulContainer({
     Key key,
     this.title,
+    this.createdBy,
     this.subtitle,
     this.image,
     this.onPressed,
-    this.color
+    this.color,
+    this.minHeight
   }) : super(key: key);
 
   dynamic onPressed;
   String title, subtitle, image;
   Color color;
+  Map createdBy;
+
+  double minHeight, minWidth;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
+
+      
       style: OutlinedButton.styleFrom(
         padding: EdgeInsets.all(0),
         backgroundColor: Colors.white,
-        side: BorderSide(
-          color:Colors.grey.withOpacity(0.5),
-        ),
+        side: BorderSide(color:Colors.grey.withOpacity(0.5)),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(Configuration.borderRadius/2)
         )
       ),
-      onPressed: () {
-        showDialog(
-          context: context, 
-          builder: (context){
-            return Container(
-              color: Colors.white,
-              padding: EdgeInsets.all(Configuration.smpadding),
-              child: Text('A TEXT'),
-            );
-          }
-        );
-       // Navigator.pushNamed(context, '/learn');
-      },
-      child: Column(
+      onPressed: () { 
+        onPressed();
+       },
+      child: Stack(
         children: [
-          
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
+          createdBy != null ?
+          Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              padding: EdgeInsets.only(left:Configuration.verticalspacing,top: Configuration.verticalspacing),
+              child: doneChip(createdBy)
+            )
+          ): Container(),
+
+          Column(
             children: [
               Container(
-                margin: EdgeInsets.only(left: Configuration.verticalspacing),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                constraints: BoxConstraints(
+                  minHeight: minHeight ?? Configuration.width*0.3,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(subtitle, style: Configuration.text('small',Colors.black, font: 'Helvetica')),
-                    Text(title, style: Configuration.text('subtitle',Colors.black)),
-                    SizedBox(height: Configuration.verticalspacing)
+                    Container(
+
+                      constraints: BoxConstraints(
+                        maxWidth: Configuration.width*0.5
+                      ),
+                      margin: EdgeInsets.only(
+                        left: Configuration.verticalspacing,
+                        bottom: Configuration.verticalspacing  
+                      ),
+                      child: Text(
+                        title, 
+                        textScaleFactor: 1,
+                        style: Configuration.text('subtitle',Colors.black)
+                      )
+                    ),
+                    
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(Configuration.borderRadius/2)
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: image,
+                        width: minHeight ?? Configuration.width*0.3,
+                        height: minHeight ?? Configuration.width*0.3,
+                        fit: BoxFit.cover 
+                      ),
+                    )
                   ],
                 ),
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  bottomRight: Radius.circular(Configuration.borderRadius/2),
-                  topLeft: Radius.circular(Configuration.borderRadius/2)
-                ),
-                child: Image.asset(
-                  image,
-                  width: Configuration.width*0.3,
-                  height: Configuration.width*0.3,
-                  fit: BoxFit.cover 
-                ),
+
+              Container(
+                width: Configuration.width,
+                height: Configuration.verticalspacing,
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(Configuration.borderRadius),
+                    bottomRight: Radius.circular(Configuration.borderRadius)
+                  )
+                )
               )
             ],
           ),
-
-
-          Container(
-            width: Configuration.width,
-            height: Configuration.verticalspacing,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(Configuration.borderRadius),
-                bottomRight: Radius.circular(Configuration.borderRadius)
-              )
-            ),
-          )
         ],
       ),
     );

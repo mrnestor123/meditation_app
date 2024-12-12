@@ -34,12 +34,19 @@ abstract class _RequestState with Store {
   String errorMessage;
 
   @observable
-  bool gettingrequests= false;
+  bool gettingrequests = false;
 
   @observable 
   String selectedfilter = 'Date';
 
   List<String> filters = ['Date','Votes'];
+
+  @observable
+  List<Request> feed = new List.empty(growable: true);
+
+  int newMessages = 0;
+  bool requestedNewMessages = false;
+
 
   _RequestState({this.repository});
 
@@ -67,10 +74,10 @@ abstract class _RequestState with Store {
 
   //HACER UN REQUEST STATE ???????
   @action 
-  Future getRequests({String coduser}) async{
+  Future getRequests() async{
     requests.clear();
     gettingrequests = true;
-    Either<Failure, List<Request>> res = await repository.getRequests(coduser: coduser);
+    Either<Failure, List<Request>> res = await repository.getRequests();
 
     foldResult(
       result: res,
@@ -81,6 +88,7 @@ abstract class _RequestState with Store {
       },
     );
   }
+
 
   Future updateRequest(Request r, bool like, [Comment comment, User u]) async{
     Comment c;
@@ -230,6 +238,8 @@ abstract class _RequestState with Store {
   }
 
   Future uploadToFeed({Request r}) async {
+    feed.add(r);
+    feed.sort((a,b)=>b.date.compareTo(a.date));
 
     Either<Failure,void> res = await repository.uploadRequest(r);
 
@@ -240,6 +250,49 @@ abstract class _RequestState with Store {
         print('bien');
       },   
     );
+  }
+
+
+  // LO HACEMOS CADA VEZ ??
+  @action
+  Future getFeed() async {
+    if(feed.isEmpty){ 
+      gettingrequests = true;
+
+      Either<Failure, List<Request>> query = await repository.getFeed();
+      gettingrequests = false;
+
+      foldResult(
+        result: query,
+        onSuccess: (requests) {
+          feed = requests;
+          feed.sort((a,b)=>b.date.compareTo(a.date));
+        },
+      );
+      
+      return feed;
+    }else {
+      gettingrequests = true;
+      requestedNewMessages = true;
+      Either<Failure, List<Request>> query = await repository.getFeed();
+      newMessages = 0;
+      // WE COMPARE BOTH LISTS TO SEE WHETHER THERE ARE MORE REQUESTS
+      // IN THE DATABASE
+      foldResult(
+        result: query,
+        onSuccess: (requests) {
+          if(requests.length > feed.length){
+            feed = requests;
+
+            newMessages = requests.length - feed.length;
+          }
+        },
+      );
+      
+      gettingrequests = false;
+
+      return feed;
+    }
   }
 
   void viewNotification(Notify n){

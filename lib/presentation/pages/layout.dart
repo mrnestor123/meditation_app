@@ -7,33 +7,26 @@ import 'package:meditation_app/presentation/mobx/actions/meditation_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/profile_state.dart';
 import 'package:meditation_app/presentation/mobx/actions/user_state.dart';
 import 'package:meditation_app/presentation/mobx/login_register/login_state.dart';
-import 'package:meditation_app/presentation/pages/commonWidget/progress_dialog.dart';
-import 'package:meditation_app/presentation/pages/courses_screen.dart';
-import 'package:meditation_app/presentation/pages/meditation_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/game_screen.dart';
 import 'package:meditation_app/presentation/pages/config/configuration.dart';
-import 'package:meditation_app/presentation/pages/learn_screen.dart';
-import 'package:meditation_app/presentation/pages/main_screen.dart';
-import 'package:meditation_app/presentation/pages/messages_screen.dart';
-import 'package:meditation_app/presentation/pages/objectives_screen.dart';
-import 'package:meditation_app/presentation/pages/explore_screen.dart';
-import 'package:meditation_app/presentation/pages/talking_monk.dart';
-import 'package:meditation_app/presentation/pages/teachers_screen.dart';
+import 'package:meditation_app/presentation/pages/mainpages/social_screen.dart';
+import 'package:meditation_app/presentation/pages/more_screen.dart';
+import 'package:meditation_app/presentation/pages/welcome/loading_widget.dart';
 
 import 'package:provider/provider.dart';
 
 import 'commonWidget/profile_widget.dart';
+import 'mainpages/explore_screen.dart';
+import 'mainpages/home_screen.dart';
+import 'mainpages/meditation_screen.dart';
+import 'mainpages/stage_screen.dart';
 
 class Layout extends StatelessWidget {
   Layout();
 
   @override
   Widget build(BuildContext context) {
-    //cambiar por orientation builder
-       // if (orientation == Orientation.portrait) {
-      return MobileLayout();
-       // } else {
-         // return TabletLayout();
-        //}
+    return MobileLayout();
   }
 }
 
@@ -50,17 +43,19 @@ class _MobileLayoutState extends State<MobileLayout> {
   PageController _c;
   UserState _userstate;
   bool gotData = false;
+  int currentVersion = 8;
 
-
+  int gamespage = 3;
 
   @override
   void initState() {
     _c = new PageController(
       initialPage: currentindex,
     );
-    
+
     super.initState();
   }
+  
   
   @override
   void didChangeDependencies(){
@@ -73,24 +68,35 @@ class _MobileLayoutState extends State<MobileLayout> {
     }
     
     if(_userstate.gettingData != null){
-      _userstate.gettingData.whenComplete(() => setState(()=> gotData = true));
-    }else{
+      _userstate.gettingData.whenComplete(() => setState((){gotData = true; checkUpdate();}));
+    } else {
       _userstate.getData();
-      _userstate.gettingData.whenComplete(() => setState(()=> gotData = true));
+      _userstate.gettingData.whenComplete(() => setState((){gotData = true; checkUpdate();}));
     }
   }
 
+
+  void checkUpdate(){
+    if(
+      _userstate.data != null  && _userstate.data.settings != null && _userstate.data.settings.requiredUpdate != null && 
+      _userstate.data.settings.requiredUpdate && _userstate.data.settings.version > currentVersion
+    ){
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => UpdatePage()),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     DateTime currentBackPressTime;
-
     _userstate = Provider.of<UserState>(context);
     MeditationState _meditationstate = Provider.of<MeditationState>(context);
-    ProfileState _profilestate = Provider.of<ProfileState>(context);
-
+    
     Widget chiporText(String text, bool chip, int page){
       Widget g;
-
 
       if (chip){
         g = Chip(
@@ -98,7 +104,7 @@ class _MobileLayoutState extends State<MobileLayout> {
           label: Text(text, style: Configuration.text('tiny', Colors.black))
         );
       } else {
-        g =Chip(
+        g = Chip(
           padding: EdgeInsets.all(Configuration.tinpadding),
           label: Text(text, style: Configuration.text('tiny', Colors.black)), 
           backgroundColor: Colors.white, 
@@ -124,25 +130,19 @@ class _MobileLayoutState extends State<MobileLayout> {
         ),
         
         BottomNavigationBarItem(
-          icon: Icon(Icons.explore,size: Configuration.smicon),
-          label: 'Explore',
+          icon: Icon(Icons.landscape,size: Configuration.smicon),
+          label: 'Stages',
         ),
         
-        /*
         BottomNavigationBarItem(
-          icon: Icon(Icons.explore,size: Configuration.smicon),
           label: 'Explore',
-        ),*/
-
+          icon: Icon(Icons.explore, size: Configuration.smicon),
+        ),
+        
         BottomNavigationBarItem(
           label: 'Timer',
           icon: Icon(Icons.timer, size: Configuration.smicon),
-        ),
-
-        BottomNavigationBarItem(
-          label: 'Games',
-          icon: Icon(Icons.gamepad, size: Configuration.smicon),
-        ),
+        )
       ];
     }
 
@@ -152,8 +152,9 @@ class _MobileLayoutState extends State<MobileLayout> {
           Scaffold(
             resizeToAvoidBottomInset: false,
             extendBodyBehindAppBar: false,
+            
             appBar: AppBar(
-              systemOverlayStyle: SystemUiOverlayStyle(
+                systemOverlayStyle: SystemUiOverlayStyle(
                 // Status bar color
                 statusBarColor: Colors.transparent, 
                 statusBarIconBrightness: Brightness.dark, // For Android (dark icons)
@@ -163,47 +164,46 @@ class _MobileLayoutState extends State<MobileLayout> {
               toolbarHeight: Configuration.width > 500 ? 80 : 50,
               backgroundColor: Configuration.white,
               bottom: PreferredSize(
-                  child: Container(
+                  child: currentindex == gamespage ?
+                    Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // HACEN FALTA 3 OBSERVERS ???
+                            Observer(builder: (BuildContext context) {  
+                              return chiporText('Timer', _meditationstate.currentpage == 0, 0);
+                            }),
+
+                            Observer(builder: (BuildContext context) {  
+                              return chiporText('Games', _meditationstate.currentpage == 1, 1);
+                            }),
+                          ],
+                        ),
+                        SizedBox(height: Configuration.verticalspacing/2),
+                        Container(
+                          color: Colors.grey,
+                          height: 1.0,
+                        )
+                      ]
+                    ) :
+                    Container(
                       color: Colors.grey,
                       height: 1.0,
                     ),
                   preferredSize: //Size.fromHeight(4.0)
-                  currentindex == 2 ? Size.fromHeight(60) : Size.fromHeight(4.0)
+                  currentindex == gamespage ? Size.fromHeight(60) : Size.fromHeight(4.0)
                 ),
-              leadingWidth: Configuration.width*0.5,
-              leading: Container(
-                margin: EdgeInsets.only(
-                  left: Configuration.smpadding
-                ),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: (){
-                        this._c.jumpToPage(0);
-                      },
-                      child: Text(
-                        'Inside',
-                        style: Configuration.text('subtitle', Colors.black),
-                        textAlign: TextAlign.left,
-                      )
-                    ),
-                  ],
-                ),
+              //leadingWidth: Configuration.width*0.5,
+              //centerTitle: true,
+              title:Text(
+                'TenStages',
+                style: Configuration.text('subtitle', Colors.black),
+                textAlign: TextAlign.center,
               ),
               automaticallyImplyLeading: false,
               actions: [
-                /*IconButton(
-                  color: Colors.black,
-                  onPressed: ()=>{
-                    Navigator.pushNamed(context, '/retreats').then((value) => setState((){}))
-                  }, icon: Icon(Icons.self_improvement, size: Configuration.smicon)
-                )*/
-                /*
-                SizedBox(width: Configuration.verticalspacing),
-
-                //MessagesIcon(),
-                SizedBox(width: Configuration.verticalspacing),
-                
                 Stack(
                   alignment:Alignment.center,
                   children: [
@@ -213,7 +213,7 @@ class _MobileLayoutState extends State<MobileLayout> {
                       onPressed: ()=> Navigator.pushNamed(context, '/requests').then((value) => setState((){})),
                     ),
                     
-                    _userstate.user.notifications != null &&  _userstate.user.notifications.length > 0 && _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
+                    _userstate.user.notifications.where((element) => element.seen != null && !element.seen).length > 0 ?
                     Positioned(
                       top: 2,
                       right: 5,
@@ -225,12 +225,9 @@ class _MobileLayoutState extends State<MobileLayout> {
                         ),
                         child: Text(_userstate.user.notifications.where((element) => !element.seen).length.toString(),style: Configuration.text('tiny', Colors.white))
                     )) : Container()
-                    
                   ],
                 ),
-                */
                 SizedBox(width: Configuration.verticalspacing),
-              
                 Container(
                   margin:EdgeInsets.only(
                     right: Configuration.width > 500 ? Configuration.tinpadding : 0,
@@ -241,9 +238,11 @@ class _MobileLayoutState extends State<MobileLayout> {
                     userImage: _userstate.user.image, 
                     onTap: ()=>  Navigator.pushNamed(context, '/profile').then((value) => setState(()=>{}))
                   ),
-                ),
+                )
               ],
             ),
+            
+            
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -259,10 +258,11 @@ class _MobileLayoutState extends State<MobileLayout> {
                 currentIndex: currentindex,
                 selectedItemColor: Configuration.maincolor,
                 onTap: (int index) {
-                  {
-                    this._c.jumpToPage(index);
+                  if(!gotData){
+                    return;
                   }
-                },
+                  this._c.jumpToPage(index);
+                }
               ),
             ),
             body: WillPopScope(
@@ -286,12 +286,11 @@ class _MobileLayoutState extends State<MobileLayout> {
               child: Container(
                 padding:  EdgeInsets.only(top:0),
                 color: Configuration.lightgrey,
-                child:  !gotData ?
+                child: !gotData ?
                   Center(
                   child: CircularProgressIndicator(
                     color: Configuration.maincolor,
                   )) :
-                
                  PageView(
                   physics: NeverScrollableScrollPhysics(),
                   controller: _c,
@@ -300,36 +299,11 @@ class _MobileLayoutState extends State<MobileLayout> {
                       currentindex = newPage;
                     });
                   },
-                  children: [MainScreen(), LearnScreen(), MeditationScreen(), GameScreen()],
-                  //MeditationScreen()
+                  children: [ MainScreen(), StageScreen(), ExploreScreen(),  MeditationScreen()],
                 ),
               ),
             ),
           ),
-
-          /*
-          Positioned.fill(
-            child: TalkingMonk()
-          ) */
-          
-          /*
-          , ViewCourses()
-          HAY QUE HACER QUE ESTO APAREZCA EN EL MOMENTO EN QUE SE SUBE DE ETAPA !!!
-          Observer(builder: (context){
-            bool showModal = _userstate.user.stageupdated != null && _userstate.user.stageupdated;
-
-              return Positioned.fill(
-                child: AnimatedOpacity(duration: Duration(seconds: 1),
-                opacity: showModal ?  1: 0,
-                child: showModal ? stageUpdated(
-                  s:_userstate.user.stage, 
-                  userstate:_userstate,
-                  close:(){
-                    setState(() {});
-                  }
-                ):Container())
-              );
-            })*/
         ],
       ),
     );
@@ -355,92 +329,3 @@ Future checkPop( context){
   }
   return Future.value(true);
 }
-
-
-
-/*
-class TabletLayout extends StatefulWidget {
-  @override
-  _TabletLayoutState createState() => _TabletLayoutState();
-}
-
-class _TabletLayoutState extends State<TabletLayout> {
-  Widget child;
-  int currentindex = 0;
-  PageController _c;
-  UserState _userstate;
-
-  @override
-  void initState() {
-    _c = new PageController(
-      initialPage: currentindex,
-    );
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    _userstate = Provider.of<UserState>(context);
-    final _loginstate = Provider.of<LoginState>(context);
-
-    if(_userstate.user==null && _loginstate.loggeduser != null){
-      _userstate.setUser(_loginstate.loggeduser);
-    }
-    Configuration().init(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      body: Row(children: [
-        NavigationRail(
-          onDestinationSelected: (int index) {
-            setState(()  {
-              this._c.jumpToPage(index);
-              currentindex = index;
-            });
-          },
-          minWidth: Configuration.width*0.1,
-          labelType: NavigationRailLabelType.selected,
-          destinations: <NavigationRailDestination>[
-              NavigationRailDestination(
-                icon: Icon(Icons.home, size: Configuration.smpadding),
-                selectedIcon:Icon(Icons.home, color: Configuration.maincolor, size: Configuration.smpadding), 
-                label: Text('Home', style: Configuration.tabletText('verytiny', Colors.black)),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.book, size: Configuration.smpadding),
-                selectedIcon:Icon(Icons.book, color: Configuration.maincolor, size: Configuration.smpadding), 
-                label: Text('Learn',  style: Configuration.tabletText('verytiny', Colors.black)),
-              ),
-              NavigationRailDestination(
-                  icon: Icon(Icons.self_improvement, size: Configuration.smpadding),
-                  selectedIcon:Icon(Icons.self_improvement, color: Configuration.maincolor, size: Configuration.smpadding), 
-                  label:Text('Practice', style: Configuration.tabletText('verytiny', Colors.black))
-              ),
-              NavigationRailDestination(
-                  icon: Icon(Icons.terrain, size: Configuration.smpadding),
-                  selectedIcon:Icon(Icons.terrain, color: Configuration.maincolor, size: Configuration.smpadding), 
-                  label:Text('Path', style: Configuration.tabletText('verytiny', Colors.black))
-              ),
-              NavigationRailDestination(
-                  icon: Icon(Icons.person, size: Configuration.smpadding),
-                  selectedIcon:Icon(Icons.person, color: Configuration.maincolor, size: Configuration.smpadding), 
-                  label:Text('Profile', style: Configuration.tabletText('verytiny', Colors.black))
-              ),
-            ], 
-        selectedIndex: currentindex),  
-        Expanded(
-          child: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _c,
-          children: [TabletMainScreen(), LearnScreen(), TabletMeditationScreen(), TabletPathScreen(), TabletProfileScreen()],
-        ))
-      ])
-    );
-  }
-  
-}
-*/

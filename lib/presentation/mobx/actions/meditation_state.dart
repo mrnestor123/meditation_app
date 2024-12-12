@@ -40,7 +40,7 @@ abstract class _MeditationState with Store {
   Content content;
 
   @observable
-  int currentpage = 1;
+  int currentpage = 0;
 
   PageController practice = new PageController(initialPage: 0);
 
@@ -128,7 +128,7 @@ abstract class _MeditationState with Store {
   void switchpage(int index, [avoidjump]) {
     currentpage = index;
     
-    if(avoidjump == null || !avoidjump ){
+    if(avoidjump == null || !avoidjump && practice != null){
       practice.jumpToPage(index);
     }
   }
@@ -338,6 +338,8 @@ abstract class _MeditationState with Store {
       aux.sort((a,b)=> a.playAt - b.playAt);
       
       selmeditation.meditationSettings.bells = aux;
+    }else{
+      selmeditation.meditationSettings.bells = new List.empty(growable: true);
     }
 
     // PARA EL MODELO ANTERIOR 

@@ -2,36 +2,38 @@ import 'dart:convert';
 import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
 import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/mission_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:mobx/mobx.dart';
 
 class StageModel extends Stage {
-
+  
   StageModel({
-      int stagenumber,
-      userscount,
-      description,
-      image,
-      String goals,
-      String obstacles,
-      String skills,
-      String mastery,
-      String longimage,
-      String shortimage,
-      String longdescription,
-      practiceSummary,
-      shorttext,
-      whenToAdvance,
-      stobjectives
-    })
-      : super(
+    int stagenumber,
+    userscount,
+    description,
+    image,
+    String goals,
+    String obstacles,
+    String skills,
+    String mastery,
+    String longimage,
+    String shortimage,
+    String longdescription,
+    String title,
+    practiceSummary,
+    shorttext,
+    whenToAdvance,
+    blocked,
+    prevmilestone,
+    stobjectives
+  }): super(
     stagenumber: stagenumber,
     userscount: userscount,
     description: description,
     practiceSummary: practiceSummary,
     whenToAdvance: whenToAdvance,
+    title: title,
     image: image,
     goals: goals,
     obstacles: obstacles,
@@ -40,8 +42,9 @@ class StageModel extends Stage {
     longimage: longimage,
     shorttext: shorttext,
     longdescription: longdescription,
-    stobjectives: stobjectives,
-    shortimage: shortimage
+    shortimage: shortimage,
+    prevmilestone: prevmilestone,
+    blocked: blocked
   );
 
   factory StageModel.fromRawJson(String str) =>
@@ -60,12 +63,14 @@ class StageModel extends Stage {
       shortimage: json["shortimage"] == null ? null : json["shortimage"],
       longdescription: json['longdescription'] == null ? null : json['longdescription'],
       obstacles: json["obstacles"] == null ? null : json["obstacles"],
-      stobjectives: json['objectives'] == null ? StageObjectives.empty(): StageObjectives.fromJson(json['objectives']),
       skills: json["skills"] == null ? null : json["skills"],
+      title: json['title'] != null ? json['title']: 'Stage ${json["stagenumber"].toString()}',
+      blocked: json["blocked"] == null ? false : json["blocked"],
       shorttext: json['shorttext'] == null ? null : json['shorttext'],
       practiceSummary: json['practiceSummary'] == null ? null : json['practiceSummary'],
       whenToAdvance: json['whenToAdvance'] == null ? null : json['whenToAdvance'],
-      mastery: json["mastery"] == null ? null : json["mastery"]
+      mastery: json["mastery"] == null ? null : json["mastery"],
+      prevmilestone: json["prevmilestone"] == null ? 0 : json["prevmilestone"],
     );
 
     if(json['lessons'] != null){
@@ -99,7 +104,6 @@ class StageModel extends Stage {
     "goals": goals == null ? null : goals,
     "obstacles": obstacles == null ? null : obstacles,
     "skills": skills == null ? null : skills,
-    'objectives': stobjectives == null? null : stobjectives.toJson(),
     "mastery": mastery == null ? null : mastery,
     "path": path == null ? null : path
   };
