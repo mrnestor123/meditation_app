@@ -215,7 +215,7 @@ class DataBase {
       d.milestones.forEach((element) {
         metricNames[element.name] = element.title;
       });
-    }else{
+    } else {
       d.milestones = allMilestones;
     }
 

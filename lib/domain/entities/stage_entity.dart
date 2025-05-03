@@ -8,7 +8,7 @@ import 'meditation_entity.dart';
 class Stage {
   int stagenumber, userscount, percentage, prevmilestone;
   String description, image, goals, obstacles, skills, title,
-    mastery, longimage,  shortimage, shorttext, 
+    mastery, longimage,  shortimage, shorttext, layout,
     longdescription, practiceSummary, whenToAdvance;
 
   bool blocked;
@@ -28,6 +28,7 @@ class Stage {
     @required this.image,
     this.longimage,
     this.goals,
+    this.layout,
     this.blocked = false,
     this.prevmilestone = 0,
     this.obstacles,

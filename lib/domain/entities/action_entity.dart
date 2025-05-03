@@ -1,4 +1,3 @@
-
 // Para las acciones que hace el usuario
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/userData.dart';

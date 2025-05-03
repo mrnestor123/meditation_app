@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
@@ -10,7 +9,6 @@ import 'package:meditation_app/domain/entities/request_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 import '../entities/action_entity.dart';
-import '../entities/retreat_entity.dart';
 
 abstract class UserRepository {
   //Use Case for login users

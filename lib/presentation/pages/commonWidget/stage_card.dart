@@ -37,7 +37,7 @@ class _StageCardState extends State<StageCard> {
   Widget build(BuildContext context) {
     // HACER ESTO UNA VEZ???
     widget.stage.checkPercentage(widget.user);
-    bool blocked = widget.stage.blocked && !widget.user.isAdmin();
+    bool blocked = widget.stage.blocked && !widget.user.isAdmin() && !widget.user.isTeacher();
 
     return Stack(
       children: [
@@ -163,9 +163,9 @@ class _StageCardState extends State<StageCard> {
                         Text (widget.stage.title, 
                           style: Configuration.text('subtitle', Colors.black)
                         ),
-                        SizedBox(height: Configuration.verticalspacing),
+                        SizedBox(height: Configuration.verticalspacing/2),
                         Text(widget.stage.description, 
-                          style: Configuration.text('small',Colors.grey)
+                          style: Configuration.text('small',Colors.black, font:'Helvetica')
                         )
                       ],
                     ),

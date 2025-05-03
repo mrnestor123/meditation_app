@@ -1,11 +1,14 @@
 // GUARDAR EN BASE DE DATOS EN EL FUTURO !!!
+import 'package:meditation_app/domain/entities/technique_entity.dart';
+
 class Milestone {
-  String title, description, objectivesHint, name; 
+  String title, description, objectivesHint, name, practiceSummary; 
   int lastStage, firstStage, passedPercentage, position;
   bool blocked;
   
   List<Metrics> metrics = new List.empty(growable: true);
   List<Objective> objectives = new List.empty(growable: true);
+  List<Technique> techniques = new List.empty(growable: true);
 
   Milestone({
     this.title,
@@ -15,6 +18,7 @@ class Milestone {
     this.passedPercentage,
     this.lastStage, 
     this.objectivesHint, 
+    this.practiceSummary,
     this.firstStage, 
     this.objectives, 
     this.blocked = false,
@@ -31,11 +35,14 @@ class Milestone {
     lastStage = json['endingStage'] is String ? int.parse(json['endingStage']) : json['endingStage'];
     firstStage = json['startingStage'] is String ? int.parse(json['startingStage']) : json['startingStage'];
     blocked = json['blocked'] ?? false;
+    practiceSummary = json['practiceSummary'] != null ? json['practiceSummary']: '';
     objectivesHint = json['objectivesHint'];
     objectives = json['objectives'] != null ? 
       (json['objectives'] as List).map((i) => Objective.fromJson(i)).toList() : 
       new List.empty(growable: true);
     metrics = json['metrics'];
+
+
   }
 }
 
@@ -52,11 +59,12 @@ var objectivetypes = [
   'streak',
   'totaltime',
   'meditationtime',
-  'metric'
+  'metric',
+  'days'
 ];
 
-
 class Objective {
+  
   String type, reportType, title, description, hint, name, metricName;
 
   bool passed;
@@ -85,7 +93,9 @@ class Objective {
     description = json['description'];
     hint = json['hint'];
     completed = json['completed'];
-    toComplete = json['toComplete'] is String ? int.parse(json['toComplete']) : json['toComplete'];
+    toComplete = json['toComplete'] is String 
+      ? int.parse(json['toComplete']) 
+      : json['toComplete'];
     metricValue = json['metricValue'];
   }
 

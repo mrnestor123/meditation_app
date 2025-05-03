@@ -1,10 +1,7 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/domain/entities/stats_entity.dart';
+import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/presentation/pages/commonWidget/file_helpers.dart';
 import 'package:uuid/uuid.dart';
-import 'package:meditation_app/domain/entities/content_entity.dart';
 
 
 List<IconData> faces = [
@@ -129,11 +126,12 @@ class Meditation extends FileContent {
 
 
 // HAY QUE HACER ESTO !!!!!!!
-class GuidedMeditation extends Meditation{
+class GuidedMeditation extends Meditation {
   
 
 
 }
+
 
 // ESTO DEBERÍA SER CONSTANTE EN TODOS !!
 List<IntervalBell> ambientSounds = [
@@ -204,7 +202,7 @@ class MeditationPreset {
 }
 
 
-class MeditationSettings{
+class MeditationSettings {
   double warmuptime, ambientvolume, bellsvolume;
   IntervalBell ambientsound;
 
@@ -276,7 +274,7 @@ class MeditationSettings{
 
 
 // CAMBIAR INTERVALBELL POR SOUND !!!
-class IntervalBell{
+class IntervalBell {
   // DE MOMENTO SIEMPRE ES EL MISMO
   String sound; 
   int playAt;
@@ -305,8 +303,6 @@ class IntervalBell{
     );
   }
 }
-
-
 
 // TYPES CAN BE 
 // TEXT, NUMERIC, PERCENTAGE
@@ -369,7 +365,6 @@ class NumericMetric extends Metric{
 }
 
 
-
 // a list  of options to choose from
 class OptionsMetric extends Metric {
 
@@ -399,6 +394,7 @@ class OptionsMetric extends Metric {
 }
 
 
+
 class Item {
   String header, description;
 
@@ -419,6 +415,8 @@ class Item {
   }
 
 }
+
+
 
 
 class TextMetric extends Metric {

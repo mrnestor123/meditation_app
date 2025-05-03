@@ -24,8 +24,7 @@ Content medorLessfromJson(json, [bool isMeditation = false]){
       type: json['type'],
       file: json['file'] == null ? '' : json['file'],
       content: json['text'] != null ? Map.fromIterable(json['text'], key: (v) => v[0], value: (v) => v[1]):
-      json['content'] == null ? {} : 
-      json['content'],
+      json['content'] == null ? {} : json['content'],
       total: json['duration'] != null 
       ? json['duration'] is String ? Duration(minutes: int.parse(json['duration'])) 
       : Duration(minutes: json['duration'])
@@ -41,6 +40,7 @@ Content medorLessfromJson(json, [bool isMeditation = false]){
     return LessonModel(
       cod: json['cod'],
       group:json['group'],
+      tmi: json['tmi'],
       category:json['category'],
       stagenumber: json['stagenumber'] == null || json['stagenumber'] is String  ? null : json['stagenumber'],
       title: json['title'],

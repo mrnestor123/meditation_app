@@ -12,12 +12,12 @@ import 'package:uuid/uuid.dart';
 class Content {
   String cod, title, description, image, type, category, group;
   int stagenumber, position;
-  bool blocked, isNew;
+  bool blocked, isNew, tmi;
   Map<String,dynamic> createdBy = new Map<String,dynamic>();
 
   Content({cod, @required this.stagenumber,this.isNew = false, this.title,
     this.createdBy, this.description, this.image, this.type, this.position = 0, this.blocked,
-    this.category, this.group
+    this.category, this.group, this.tmi
   }) {
     if (cod == null) {
       var uuid = Uuid();
@@ -109,7 +109,8 @@ class Content {
       image: json['image'],
       type: json['type'],
       position: json['position'],
-      category: json['category']
+      category: json['category'],
+      tmi: json['tmi'] !=null ? json['tmi'] : false
     );
   }
 }
@@ -286,12 +287,14 @@ class Lesson extends Content {
     isNew,
     category,
     group,
+    tmi,
     @required description,
     @required this.text
   }) : 
   super(
     isNew:isNew,
     group: group,
+    tmi: tmi,
     category: category,
     cod: cod,
     title: title,

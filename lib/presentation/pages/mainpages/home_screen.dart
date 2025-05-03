@@ -55,7 +55,8 @@ class _MainScreenState extends State<MainScreen> {
         if(_userstate.user.settings.seenIntroCarousel == null || _userstate.user.settings.seenIntroCarousel == false){
           //_userstate.user.settings.seenIntroCarousel = true;
         
-          checkUpdates();
+          
+          //checkUpdates();
         }
       });
     }
@@ -74,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
       child: child
     );
   }
+
 
   Widget milestoneView(){
     Milestone m = _userstate.data.milestones[_userstate.user.milestonenumber-1];
@@ -97,8 +99,8 @@ class _MainScreenState extends State<MainScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Milestone ${m.position}', 
-                      style: Configuration.text('smallmedium',Colors.black),
-                      textAlign: TextAlign.center
+                      style: Configuration.text('small',Colors.black),
+                      textAlign: TextAlign.center,
                     ),
               
                     SizedBox(height: Configuration.verticalspacing/2),
@@ -147,6 +149,7 @@ class _MainScreenState extends State<MainScreen> {
       ],
     );
   }
+
 
   Widget quickStart(){
 

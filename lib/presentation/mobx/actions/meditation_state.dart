@@ -313,9 +313,8 @@ abstract class _MeditationState with Store {
 
 
   List<IntervalBell> createIntervalBells(){
-
+    
     if(bells.length > 0){
-     
       List<IntervalBell> aux = new List.empty(growable: true);
       for(IntervalBell b in bells){
         if(b.repeat){

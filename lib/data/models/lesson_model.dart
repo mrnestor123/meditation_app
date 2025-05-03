@@ -22,12 +22,14 @@ class LessonModel extends Lesson {
       file,
       blocked,
       isNew,
+      tmi,
       int position,
       String category
     })
     : super(
       title: title,
       category: category,
+      tmi: tmi,
       cod: cod,
       group:group,
       createdBy:createdBy,

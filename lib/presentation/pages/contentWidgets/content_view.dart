@@ -62,7 +62,6 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
     return l.text.length;
   }
 
-
   void cacheImages(Lesson lesson){
     lesson.text.forEach((slide) {
       if (slide['image'] != '') {
@@ -168,7 +167,7 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                                 width: 1,
                               ),
                             ),
-                            avatar: Icon(Icons.book, color: Colors.black),
+                            //avatar: Icon(Icons.book, color: Colors.black),
                             label: Text(
                               getPages(widget.content).toString() + ' pages',
                               style: TextStyle(
@@ -204,7 +203,37 @@ class _ContentFrontPageState extends State<ContentFrontPage> {
                                 ),
                               ),
                             ),
-                          ) : Container(), 
+                          ) : Container(),
+
+
+                          widget.content.tmi != null ?
+                           Container(
+                            margin: EdgeInsets.only(
+                              left: Configuration.verticalspacing
+                            ),
+                            child: Chip(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Configuration.borderRadius),
+                                side: BorderSide(
+                                  color: Colors.grey,
+                                  width: 1,
+                                ),
+                              ),
+                              avatar: Icon(
+                                Icons.book_sharp, 
+                                color: Colors.black
+                              ),
+                              label: Text(
+                                "TMI",
+                                style: TextStyle(
+                                  color:  Colors.black,
+                                ),
+                              ),
+                            ),
+                          ) : Container(),
+
+
                       ],
                     ),
                    

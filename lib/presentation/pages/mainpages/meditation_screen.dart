@@ -21,6 +21,7 @@ import 'package:meditation_app/presentation/pages/contentWidgets/meditation_scre
 import 'package:meditation_app/presentation/pages/mainpages/game_screen.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/entities/milestone_entity.dart';
 import '../../../domain/entities/technique_entity.dart';
 import '../commonWidget/horizontal_picker.dart';
 import '../commonWidget/page_title.dart';
@@ -1093,6 +1094,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
   void startMeditation(){
     //ESTO LO PODRÍAMOS HACER EN OTRO SITIO !!!
     _meditationstate.createIntervalBells();
+    
     // METER ESTO DENTRO !!!
     if(_meditationstate.selmeditation.meditationSettings.warmuptime > 0){
       Navigator.push(
@@ -1716,9 +1718,8 @@ class _CountdownState extends State<Countdown> {
     _userstate = Provider.of<UserState>(context);
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
-
     _meditationstate.shadow = false;
+
 
     if(_meditationstate.state == _meditationstate.warmup){
       _meditationstate.startWarmup();
@@ -1735,9 +1736,6 @@ class _CountdownState extends State<Countdown> {
         });
       }
     }
-
-
-   
   }
 
   dynamic exit(context,{nopop = false}){
@@ -1879,7 +1877,7 @@ class _PracticeSummaryState extends State<PracticeSummary> {
 
   List<Stage> stageSummaries =  new List.empty(growable: true);
 
-  List<Technique>  techniques = new List.empty(growable: true);
+  List<Technique> techniques = new List.empty(growable: true);
 
   List<Technique> distractions = new List.empty(growable: true);
 
@@ -1892,7 +1890,6 @@ class _PracticeSummaryState extends State<PracticeSummary> {
     techniques.sort((a,b) => a.startingStage == b.startingStage ? 
       a.position.compareTo(b.position) : 
       a.startingStage.compareTo(b.startingStage)
-      
     );
 
     distractions.sort((a,b) => a.startingStage == b.startingStage   
@@ -1906,6 +1903,8 @@ class _PracticeSummaryState extends State<PracticeSummary> {
 
     bool changedState = false;
     int lastStage = null;
+
+    Milestone m = _userstate.data.milestones[_userstate.user.milestonenumber-1];
 
     Widget containerTitle(String title){
       return Container(
@@ -1934,7 +1933,8 @@ class _PracticeSummaryState extends State<PracticeSummary> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          color: Configuration.lightgrey
+          /*gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
@@ -1942,248 +1942,264 @@ class _PracticeSummaryState extends State<PracticeSummary> {
               Colors.black.withOpacity(0.8),
               Configuration.maincolor,
             ],
-          ),
+          ),*/
         ),
         child: ListView(
           physics: ClampingScrollPhysics(),
           children: [
+            /*
+            Container(
+              padding: EdgeInsets.all(Configuration.smpadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
 
+                  Material(
+                    elevation: 2,
+                    borderRadius: BorderRadius.circular(
+                      Configuration.borderRadius/3
+                    ),
+                    child: Container(
+                      padding: EdgeInsets.all(
+                        Configuration.smpadding
+                      ),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255,236,225,197),
+                        borderRadius: BorderRadius.circular(
+                          Configuration.borderRadius/3
+                        )
+                      ),
+
+                      child: Text('Meditation is only improved with a calm and relaxed attitude.\n\nUse your heart, we are not machines',
+                      textAlign: TextAlign.center,
+                        style: Configuration.text('smallmedium',Colors.black),
+                      ),
+                    )
+                  ),
+
+                ],
+              ),
+            ),
+            */
+
+            Text('First Milestone',
+              style: Configuration.text('small',Colors.black)
+            ),
+            SizedBox(height: Configuration.verticalspacing*1.5),
+            Text(m.title,
+              style: Configuration.text('small',Colors.black)
+            ),
             
-              Container(
-                padding: EdgeInsets.all(Configuration.smpadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+            SizedBox(height: Configuration.verticalspacing*2),
+            m.practiceSummary != null && m.practiceSummary.isNotEmpty ?
+            htmlToWidget(
+              m.practiceSummary
+            ): Container(),
 
-                    Material(
-                      elevation: 2,
-                      borderRadius: BorderRadius.circular(
-                        Configuration.borderRadius/3
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.all(
-                          Configuration.smpadding
-                        ),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255,236,225,197),
-                          borderRadius: BorderRadius.circular(
-                            Configuration.borderRadius/3
-                          )
-                        ),
+            SizedBox(height: Configuration.verticalspacing),
 
-                        child: Text('Meditation is only improved with a calm and relaxed attitude.\n\nUse your heart, we are not machines',
-                        textAlign: TextAlign.center,
-                          style: Configuration.text('smallmedium',Colors.black),
-                        ),
-                      )
-                    ),
+            m.techniques.length > 0 ?
+              Text('Techniques')
+            : Container()
 
-                  ],
-                ),
+            /*
+            Container(
+              padding: EdgeInsets.all(
+                Configuration.smpadding
               ),
-              
-              SizedBox(height: Configuration.verticalspacing*1.5),
-
-              
-              Container(
-                padding: EdgeInsets.all(
-                  Configuration.smpadding
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                  horizontal: BorderSide(
+                    color: Colors.black,
+                    width: 1
+                  )
                 ),
-                decoration: BoxDecoration(
-                  border: Border.symmetric(
-                    horizontal: BorderSide(
-                      color: Colors.black,
-                      width: 1
+                color: Color.fromARGB(255,236,225,197),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.self_improvement,
+                    color: Colors.black,
+                    size: Configuration.smicon,
+                  ),
+                  SizedBox(width: Configuration.verticalspacing),
+
+                  Text(
+                    'Meditation techniques'.toUpperCase(),
+                    style: Configuration.text('smallmedium',Colors.black),
+                  ),
+                ],
+              ),
+            ),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Configuration.lightgrey
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Text('''Work through the steps but don't overemphasize it, the most important thing is to be relaxed and aware. Whenever you find tension, remember to relax.\n\nStart your practice always with the first step and then gradually build up your practice. Some techniques can be mixed''',
+                      style: Configuration.text('small',Colors.black, font:'Helvetica'),
+                      textAlign: TextAlign.justify
+                    ),
+                  ),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: techniques.length,
+                    itemBuilder: ((context, index){
+                      bool changedStage = lastStage != techniques[index].startingStage;
+                      lastStage = techniques[index].startingStage;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          changedStage ? 
+                            containerTitle(
+                              lastStage == 0 ? "Preliminary techniques" :
+                              'Stage ' + lastStage.toString()
+                            ) 
+                            : Container(),
+
+                          ListTile(
+                            onTap:() {
+                              selectContent(content:techniques[index]);
+                            },
+                            //IMAGE OF THE TECHNIQUE
+                            leading: Container(
+                              height: Configuration.verticalspacing*4,
+                              width: Configuration.verticalspacing*4,
+                              decoration:  BoxDecoration(
+                                shape: BoxShape.circle,
+                              ),
+                              child:techniques[index].image != null && techniques[index].image.isNotEmpty ? 
+                              CachedNetworkImage(
+                                imageUrl: techniques[index].image,
+                                fit: BoxFit.cover
+                              ): Container(),
+                            ),
+                            title: Text(techniques[index].title, style: Configuration.text('smallmedium',Colors.black)),
+                            subtitle: Text(techniques[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
+                            trailing: Icon(
+                              Icons.info,
+                              color:Colors.black,
+                              size: Configuration.smicon
+                            ),
+
+                          ),
+                        ],
+                      );
+                    })
+                  ),
+                ],
+              ),
+            ),
+            
+
+            // DISTRACTIONS  !!!
+            Container(
+              padding: EdgeInsets.all(
+                Configuration.smpadding
+              ),
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                  horizontal: BorderSide(
+                    color: Colors.black,
+                    width: 1
+                  )
+                ),
+                color: Color.fromARGB(255,236,225,197),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.psychology,
+                    color: Colors.black,
+                    size: Configuration.smicon,
+                  ),
+                  SizedBox(width: Configuration.verticalspacing),
+
+                  Text(
+                    'Distractions'.toUpperCase(),
+                    style: Configuration.text('smallmedium',Colors.black),
+                  ),
+                ],
+              ),
+              ),
+              // SAME AS TECHNIQUES
+
+
+            Container(
+              decoration: BoxDecoration(
+                color: Configuration.lightgrey
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(Configuration.smpadding),
+                    child: Text('''Distractions are part of the practice. The most important skill to build, is to learn to accept this fact and enjoy the moment we wake up. The more you enjoy this, the sooner you'll realize next time. Smile. \n\n All distractions follow the same path, in reverse order, starting from the upper stage to the lowest one. ''', 
+                      textAlign: TextAlign.justify,
+                      style: Configuration.text('small', Colors.black, font: 'Helvetica'),
                     )
                   ),
-                  color: Color.fromARGB(255,236,225,197),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.self_improvement,
-                      color: Colors.black,
-                      size: Configuration.smicon,
-                    ),
-                    SizedBox(width: Configuration.verticalspacing),
 
-                    Text(
-                      'Meditation techniques'.toUpperCase(),
-                      style: Configuration.text('smallmedium',Colors.black),
-                    ),
-                  ],
-                ),
-              ),
+                  //listview with distractions
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Configuration.lightgrey
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(Configuration.smpadding),
-                      child: Text('''Work through the steps but don't overemphasize it, the most important thing is to be relaxed and aware. Whenever you find tension, remember to relax.\n\nStart your practice always with the first step and then gradually build up your practice. Some techniques can be mixed''',
-                        style: Configuration.text('small',Colors.black, font:'Helvetica'),
-                        textAlign: TextAlign.justify
-                      ),
-                    ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: techniques.length,
-                      itemBuilder: ((context, index){
-                        bool changedStage = lastStage != techniques[index].startingStage;
-                        lastStage = techniques[index].startingStage;
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: distractions.length,
+                    itemBuilder: ((context, index){
+                      bool changedStage = lastStage != distractions[index].startingStage;
+                      lastStage = distractions[index].startingStage;
 
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            changedStage ? 
-                              containerTitle(
-                                lastStage == 0 ? "Preliminary techniques" :
-                                'Stage ' + lastStage.toString()
-                              ) 
-                              : Container(),
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          changedStage ? 
+                            containerTitle(
+                              lastStage == 0 ? "Preliminary distractions" :
+                              'Stage ' + lastStage.toString()
+                            ) 
+                            : Container(),
 
-                            ListTile(
-                              onTap:() {
-                                selectContent(content:techniques[index]);
-                              },
-                              //IMAGE OF THE TECHNIQUE
-                              leading: Container(
-                                height: Configuration.verticalspacing*4,
-                                width: Configuration.verticalspacing*4,
-                                decoration:  BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                                child:techniques[index].image != null && techniques[index].image.isNotEmpty ? 
-                                CachedNetworkImage(
-                                  imageUrl: techniques[index].image,
-                                  fit: BoxFit.cover
-                                ): Container(),
+                          ListTile(
+                            onTap:() {
+                              selectContent(content:distractions[index]);
+                            },
+                            //IMAGE OF THE TECHNIQUE
+                            leading: Container(
+                              height: Configuration.verticalspacing*4,
+                              width: Configuration.verticalspacing*4,
+                              decoration:  BoxDecoration(
+                                shape: BoxShape.circle,
                               ),
-                              title: Text(techniques[index].title, style: Configuration.text('smallmedium',Colors.black)),
-                              subtitle: Text(techniques[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
-                              trailing: Icon(
-                                Icons.info,
-                                color:Colors.black,
-                                size: Configuration.smicon
-                              ),
-
+                              child:distractions[index].image != null && distractions[index].image.isNotEmpty ? 
+                              CachedNetworkImage(
+                                imageUrl: distractions[index].image,
+                                fit: BoxFit.cover
+                              ): Container(),
                             ),
-                          ],
-                        );
-                      })
-                    ),
-                  ],
-                ),
-              ),
-              
+                            title: Text(distractions[index].title, style: Configuration.text('smallmedium',Colors.black)),
+                            subtitle: Text(distractions[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
+                            trailing: Icon(
+                              Icons.info,
+                              color:Colors.black,
+                              size: Configuration.smicon
+                            ),
 
-              // DISTRACTIONS  !!!
-              Container(
-                padding: EdgeInsets.all(
-                  Configuration.smpadding
-                ),
-                decoration: BoxDecoration(
-                  border: Border.symmetric(
-                    horizontal: BorderSide(
-                      color: Colors.black,
-                      width: 1
-                    )
+                          ),
+                        ],
+                      );
+                    })
                   ),
-                  color: Color.fromARGB(255,236,225,197),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.psychology,
-                      color: Colors.black,
-                      size: Configuration.smicon,
-                    ),
-                    SizedBox(width: Configuration.verticalspacing),
-
-                    Text(
-                      'Distractions'.toUpperCase(),
-                      style: Configuration.text('smallmedium',Colors.black),
-                    ),
-                  ],
-                ),
-                ),
-                // SAME AS TECHNIQUES
-
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Configuration.lightgrey
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(Configuration.smpadding),
-                      child: Text('''Distractions are part of the practice. The most important skill to build, is to learn to accept this fact and enjoy the moment we wake up. The more you enjoy this, the sooner you'll realize next time. Smile. \n\n All distractions follow the same path, in reverse order, starting from the upper stage to the lowest one. ''', 
-                        textAlign: TextAlign.justify,
-                        style: Configuration.text('small', Colors.black, font: 'Helvetica'),
-                      )
-                    ),
-
-                    //listview with distractions
-
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: distractions.length,
-                      itemBuilder: ((context, index){
-                        bool changedStage = lastStage != distractions[index].startingStage;
-                        lastStage = distractions[index].startingStage;
-
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            changedStage ? 
-                              containerTitle(
-                                lastStage == 0 ? "Preliminary distractions" :
-                                'Stage ' + lastStage.toString()
-                              ) 
-                              : Container(),
-
-                            ListTile(
-                              onTap:() {
-                                selectContent(content:distractions[index]);
-                              },
-                              //IMAGE OF THE TECHNIQUE
-                              leading: Container(
-                                height: Configuration.verticalspacing*4,
-                                width: Configuration.verticalspacing*4,
-                                decoration:  BoxDecoration(
-                                  shape: BoxShape.circle,
-                                ),
-                                child:distractions[index].image != null && distractions[index].image.isNotEmpty ? 
-                                CachedNetworkImage(
-                                  imageUrl: distractions[index].image,
-                                  fit: BoxFit.cover
-                                ): Container(),
-                              ),
-                              title: Text(distractions[index].title, style: Configuration.text('smallmedium',Colors.black)),
-                              subtitle: Text(distractions[index].shortDescription, style: Configuration.text('small',Colors.black,font: 'Helvetica')),
-                              trailing: Icon(
-                                Icons.info,
-                                color:Colors.black,
-                                size: Configuration.smicon
-                              ),
-
-                            ),
-                          ],
-                        );
-                      })
-                    ),
-                    
-                  ]
-                )
-              ),    
-                     
-      
-
+                  
+                ]
+              )
+            ),    
+                */ 
           ],
         ),
       ),

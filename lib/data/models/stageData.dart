@@ -21,6 +21,7 @@ class StageModel extends Stage {
     String shortimage,
     String longdescription,
     String title,
+    String layout,
     practiceSummary,
     shorttext,
     whenToAdvance,
@@ -30,6 +31,7 @@ class StageModel extends Stage {
   }): super(
     stagenumber: stagenumber,
     userscount: userscount,
+    layout: layout,
     description: description,
     practiceSummary: practiceSummary,
     whenToAdvance: whenToAdvance,
@@ -48,7 +50,7 @@ class StageModel extends Stage {
   );
 
   factory StageModel.fromRawJson(String str) =>
-      StageModel.fromJson(json.decode(str));
+    StageModel.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
@@ -59,6 +61,7 @@ class StageModel extends Stage {
       userscount: json['userscount'] == null ? null : json['userscount'],
       longimage: json['longimage']== null ? null : json['longimage'],
       image: json["image"] == null ? null : json["image"],
+      layout: json["layout"] == null ?  null : json["layout"],
       goals: json["goals"] == null ? null : json["goals"],
       shortimage: json["shortimage"] == null ? null : json["shortimage"],
       longdescription: json['longdescription'] == null ? null : json['longdescription'],

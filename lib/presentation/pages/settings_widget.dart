@@ -96,7 +96,7 @@ class SettingsMenu extends StatelessWidget {
             text: 'GENERAL',
             isTitle: true
           ),       
-                
+          /*      
           containerSettings(
             text:'Stage Progression',
             onPressed:()=>{
@@ -120,7 +120,7 @@ class SettingsMenu extends StatelessWidget {
               )))
             }
           ),
-          
+          */
           containerSettings(
             text: 'Ask a teacher',
             onPressed: ()=>{

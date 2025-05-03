@@ -7,8 +7,9 @@ import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_settings_entity.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
-import 'meditation_entity.dart';
 import 'action_entity.dart';
+import 'meditation_entity.dart';
+
 
 // MIRAR DE REFACTORIZAR ESTA CLASE !!!!!
 // HAY QUE CREAR SUBCLASES,
@@ -461,16 +462,21 @@ class User {
 
       // we check milestone objectives
       if(!offline){
-        for(Objective o in milestone.objectives){
-          if(o.type == 'timeMetric' && o.metricValue <= m.duration.inMinutes){
-            if(this.userStats.metricsPassed[o.name] == null){
-              this.userStats.metricsPassed[o.name] = 0;
-            }
 
-            this.userStats.metricsPassed[o.name] += 1;
+        if(milestone != null && milestone.objectives!= null && milestone.objectives.length > 0){ 
+          for(Objective o in milestone.objectives){
+            if(o.type == 'timeMetric' && o.metricValue <= m.duration.inMinutes){
+              if(this.userStats.metricsPassed[o.name] == null){
+                this.userStats.metricsPassed[o.name] = 0;
+              }
+
+              this.userStats.metricsPassed[o.name] += 1;
+            }
           }
         }
       }
+
+
     }
 
     if(m.title == null ){
@@ -534,16 +540,6 @@ class Meditator extends User{
 class Admin extends User {
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -628,3 +624,5 @@ class UserProgression {
   }
   
 }
+
+
