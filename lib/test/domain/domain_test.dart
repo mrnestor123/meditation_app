@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/meditation_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/lesson_entity.dart';

@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meditation_app/core/error/exception.dart';
-import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/data/models/user_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/database_entity.dart';
 import 'package:meditation_app/domain/entities/message.dart';
@@ -29,7 +29,8 @@ abstract class UserRemoteDataSource {
 
   /*
   * 
-  * USER CONTROLLER !!!
+  * User
+  *
   **/
   Future<UserModel> loginUser({User usuario, String coduser });
 
@@ -43,23 +44,31 @@ abstract class UserRemoteDataSource {
 
   Future updateUser({UserModel user, DataBase data, dynamic toAdd, String type,  DoneContent done});
   
-  //We get all the users data
+  /*
+  *
+  * DATABASE
+  */
   Future<DataBase> getData();
 
   Future getActions(UserModel u);
 
   Future uploadFile({XFile image,FilePickerResult audio, XFile video, UserModel u});
 
+  /*
+  *
+  *
+  * REQUESTS
+  *
+  */ 
   Future <List<Request>> getRequests();
 
   Future updateRequest(Request r, [List<Notify> n, Comment c]);
-  
-
-  Future updateNotification(Notify n);
 
   Future uploadRequest(Request r);
 
   Future<Request> getRequest(String cod);
+
+  Future updateNotification(Notify n);
 
   Future <List<UserModel>> getTeachers();
 
@@ -79,6 +88,7 @@ abstract class UserRemoteDataSource {
 
   Future deleteUser({UserModel user});
 }
+
 
 // QUITAR ESTO PARA EL FUTURO
 class MyHttpOverrides extends HttpOverrides{
@@ -607,7 +617,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
         
       return UserModel.fromJson(res, true);
     } catch(e){
-      print(e);
       throw ServerException(error: e is ServerException ? e.toString(): 'Server error');
     }
   }

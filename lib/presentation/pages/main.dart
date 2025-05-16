@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
         providers: [
           Provider<UserState>(create: (context) => sl<UserState>()),
           Provider<MeditationState>(create: (context) => sl<MeditationState>()),
-          //METER  GAME DENTRO DE GAME NO EN EL GLOBAL
+          // METER GAME DENTRO DE GAME NO EN EL GLOBAL
           Provider<GameState>(create: (context) => sl<GameState>()),
           Provider<ProfileState>(create: (context) => sl<ProfileState>()),
           Provider<LoginState>(create: (context) => sl<LoginState>()),
@@ -84,9 +84,7 @@ class MyApp extends StatelessWidget {
               1.0, // Minimum scale factor allowed.
               1.2, // Maximum scale factor allowed.
             );
-
-            print({'MEDIAQUERY', mediaQueryData});
-
+            
             // Create a new MediaQueryData with the updated text scaling factor.
             // This will override the existing text scaling factor in the MediaQuery.
             // This ensures that text within this subtree is scaled according to the calculated scale factor.
@@ -101,12 +99,11 @@ class MyApp extends StatelessWidget {
           },
           theme: ThemeData(
             pageTransitionsTheme: PageTransitionsTheme(
-                builders: {
-                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
-                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                },
-              ),
-            ),
+              builders: {
+                TargetPlatform.android: ZoomPageTransitionsBuilder(),
+                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              },
+            )),
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             initialRoute: '/loading',

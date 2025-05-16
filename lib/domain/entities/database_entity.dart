@@ -4,9 +4,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/game_model.dart';
-import 'package:meditation_app/data/models/helpers.dart';
-import 'package:meditation_app/data/models/stageData.dart';
-import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/data/models/stage_model.dart';
+import 'package:meditation_app/data/models/user_model.dart';
 import 'package:meditation_app/domain/entities/course_entity.dart';
 import 'package:meditation_app/domain/entities/milestone_entity.dart';
 import 'package:meditation_app/domain/entities/request_entity.dart';
@@ -16,7 +15,8 @@ import 'package:meditation_app/domain/entities/version_entity.dart';
 import 'package:mobx/mobx.dart';
 
 
-import '../../data/models/meditationData.dart';
+import '../../data/models/content_model.dart';
+import '../../data/models/meditation_model.dart';
 import 'content_entity.dart';
 import 'meditation_entity.dart';
 
@@ -439,16 +439,16 @@ class AppSettings {
     IntroSlide(
       title: "Welcome to TenStages",
       description: 
-      """<p>We'd like to warn you before you enter, this is not your regular meditation app. This is not a quick fix, nor any stress-releasing app. </p> 
-      <p>It is for those who are curious enough to look within and be honest with themselves. For those that want to go deep, for those that want to really understand themselves.</p>""",
+      """<p>We'd like to warn you before you enter: this is not your regular meditation app. This is not a quick fix, nor is it just another stress-relief app. </p> 
+      <p>It is for those who are curious enough to look within and be honest with themselves. For those that want to go deep, for those who truly want to do the work.</p>""",
       image: AssetImage("assets/carousel1.png")
     ),
 
     IntroSlide(
       image: AssetImage("assets/carousel2.png"),
       description: """
-      <p> Our content has been deeply inspired by the work of John Yates, the book <i>The Mind Illuminated</i>. </p>
-      <p> It creates a meditative path that combines psychology and neuroscience with buddhist and eastern wisdom.  </p>
+      <p> Our content has been deeply inspired by the work of John Yates, particularly the book <i>The Mind Illuminated</i>. </p>
+      <p> It presents a meditative path that combines psychology and neuroscience with Buddhism and Eastern wisdom.  </p>
       <p> Filling the gaps between science and spirituality. </p>
       """,
       title: 'Backed by science'
@@ -456,8 +456,8 @@ class AppSettings {
     
     IntroSlide(
       description: """
-      <p> On this path, we divide our content into ten different stages, where in each one you'll practice new meditation techniques and learn more information about the mind. </p>
-      <p> Be aware that this path is not about going or reaching anywhere, it is a path inside.</p>\n
+      <p>On this path, we divide our content into ten distinct stages, with each one introducing new meditation techniques and offering more insights about the mind. </p>
+      <p> Be aware that this path is not about going anywhere or reaching any particular destination, it is a journey inward.</p>\n
       """,
       image: AssetImage("assets/carousel3.png"),
       title: 'Progressive guidance'
@@ -467,8 +467,8 @@ class AppSettings {
       image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/the-mind-illuminated-32dee.appspot.com/o/stage%201%2FD0E50587-688B-4F94-8051-D180A388FE47.png?alt=media&token=17cab94e-2971-4f2e-9baf-08beb1db6043'),
       title: 'Find a community',
       description: """
-        <p>And if you feel lost or in doubt. Feel free to share and clear your doubts with the community. </p>
-        <p>Check in and talk with a teacher or share your thoughts with other like-minded people. </p>
+        <p>If you feel lost or in doubt, feel free to share and clarify your concerns with the community. </p>
+        <p>Check in, talk with a teacher, or share your thoughts with like-minded individuals.</p>
         <p> We are here to support you. </p>
       """
     ),

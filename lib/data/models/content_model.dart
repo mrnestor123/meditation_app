@@ -1,8 +1,9 @@
 
 
+// TODOS LOS JSON DE MODELO DE LECCIONES, MEDITACIONES Y DEMÁS !!
 import 'dart:convert';
 
-import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/meditation_model.dart';
 import 'package:meditation_app/domain/entities/technique_entity.dart';
 
 import '../../domain/entities/content_entity.dart';
@@ -57,11 +58,12 @@ Content medorLessfromJson(json, [bool isMeditation = false]){
 }
 
 bool isJsonString(str) {
-    try {
-     json.decode(str);
-    } catch (e) {
-      return false;
-    }
-    return true;
+  try {
+    json.decode(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
+
 

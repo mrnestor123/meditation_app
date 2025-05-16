@@ -5,7 +5,7 @@ import 'package:meditation_app/core/error/failures.dart';
 import 'package:meditation_app/core/platform/network_info.dart';
 import 'package:meditation_app/data/datasources/local_datasource.dart';
 import 'package:meditation_app/data/datasources/remote_data_source.dart';
-import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/data/models/user_model.dart';
 import 'package:meditation_app/data/repositories/user_repository.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 import 'package:mockito/mockito.dart';

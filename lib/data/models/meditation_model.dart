@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
 
 import '../../domain/entities/content_entity.dart';
-import 'helpers.dart';
+import 'content_model.dart';
 
 class MeditationModel extends Meditation {
 

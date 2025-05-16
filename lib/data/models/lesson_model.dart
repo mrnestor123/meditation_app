@@ -5,7 +5,9 @@
 import 'dart:convert';
 
 import 'package:meditation_app/domain/entities/content_entity.dart';
-import 'helpers.dart';
+import 'content_model.dart';
+
+
 
 class LessonModel extends Lesson {
   LessonModel(

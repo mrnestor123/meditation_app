@@ -241,7 +241,6 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-
   @override
   Future<Either<Failure, List<User>>> getUsers(User u) async {
     if (await networkInfo.isConnected) {
@@ -465,8 +464,6 @@ class UserRepositoryImpl implements UserRepository {
     }
   }
 
-
-  
 
   @override
   Future<Either<Failure, void>> cacheMeditation({Meditation m, User  u}) async {

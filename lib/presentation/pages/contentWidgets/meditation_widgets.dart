@@ -202,6 +202,7 @@ Widget secondaryButton(IconData icon, onPressed, tag){
   }
 
 
+
 void wantToExitDialog(context){
   showAlertDialog(
     context:context,
@@ -217,8 +218,6 @@ void wantToExitDialog(context){
     }
   );
 }
-
-
 
 
 class IntervalBells extends StatefulWidget {

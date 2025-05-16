@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:meditation_app/data/models/game_model.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
+import 'package:meditation_app/data/models/meditation_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:mobx/mobx.dart';

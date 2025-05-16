@@ -5,11 +5,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:meditation_app/data/models/lesson_model.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/stageData.dart';
+import 'package:meditation_app/data/models/meditation_model.dart';
+import 'package:meditation_app/data/models/stage_model.dart';
 import 'package:meditation_app/domain/entities/content_entity.dart';
 import 'package:meditation_app/domain/entities/meditation_entity.dart';
-import 'package:meditation_app/domain/entities/notification_entity.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:meditation_app/domain/entities/stats_entity.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
@@ -194,11 +193,12 @@ class UserModel extends User {
   }
 
   Map<String, dynamic> toJson() => {
+    // only add non null fields
     "coduser": coduser == null ? null : coduser,
     "role": role == null ? null : role,
     "stagenumber": stagenumber == null ? 1 : stagenumber,
     "nombre": nombre == null ? null : nombre,
-    "username": nombre == null ? null :  nombre,
+    "userName": nombre == null ? null :  nombre,
     'stats': userStats == null ? null : userStats.toJson(),
     'image': image == null ? '' : image,
     "userProgression": userProgression == null ? null : userProgression.toJson(),
@@ -212,21 +212,39 @@ class UserModel extends User {
   Map<String, dynamic> updateFields(){
     Map<String,dynamic>  json = new Map();
 
+    if(stagenumber != null){
+      json["stagenumber"] = stagenumber;
+    }
+
+    
     json["stagenumber"] = stagenumber == null ? 1 : stagenumber;
 
-    json["nombre"] = nombre == null ? null : nombre;
+    
+    if(userStats != null){
+      json['stats'] = userStats == null ? null : userStats.toJson();
+    }
+    
 
+    if(image != null){
+      json['image'] = image == null ? '' : image;
+    }
+    
 
-    json['stats'] = userStats == null ? null : userStats.toJson();
+    if(userProgression != null){
+      json["userProgression"] = userProgression == null ? null : userProgression.toJson();
+    }
 
-    json['image'] = image == null ? '' : image;
+    
+    if(settings != null){
+      json["settings"] = settings == null ? null : settings.toJson();
+    }
+    
 
-    json["userProgression"] = userProgression == null ? null : userProgression.toJson();
-
-    json['settings'] = settings == null ? null : settings.toJson();
-
-    json['version'] = version;
-
+    if(version != null){
+      json['version'] = version == null ? 0 : version;
+    }
+    
+    
     json['milestonenumber'] = milestonenumber == null ? 1 : milestonenumber;
 
     if(teacherInfo != null){

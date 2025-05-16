@@ -392,7 +392,9 @@ class User {
     // PORQUE HAY ONLYACTIONS, ES  NECESARIO ???
     if(!onlyActions){
       m.coduser = this.coduser;
-      m.day = DateTime.now().subtract(m.duration);
+      if(m.day == null){
+        m.day =  DateTime.now().subtract(m.duration);
+      }
       
       // esto en offline no funcionará 
       if(!earlyFinish && m.stagenumber != null && !totalMeditations.contains(m)){
@@ -462,7 +464,6 @@ class User {
 
       // we check milestone objectives
       if(!offline){
-
         if(milestone != null && milestone.objectives!= null && milestone.objectives.length > 0){ 
           for(Objective o in milestone.objectives){
             if(o.type == 'timeMetric' && o.metricValue <= m.duration.inMinutes){
@@ -475,16 +476,13 @@ class User {
           }
         }
       }
-
-
     }
 
     if(m.title == null ){
       setAction('meditation', attribute: [m.duration.inMinutes]);
-    }else{
+    } else {
       setAction("guided_meditation", attribute: [m.title, m.duration.inMinutes]);
     }
-
    
     //  PORQUE DEVOLVEMOS ALGO ???
     return false;
@@ -547,7 +545,7 @@ class TeacherInfo {
   // INFORMACIÓN DEL PROFESOR !!!!
   String description, website, location, teachinghours;
 
-  TeacherInfo({this.description,this.website,this.location,this.teachinghours});
+  TeacherInfo({this.description, this.website, this.location, this.teachinghours});
 
   Map<String,dynamic> toJson(){
     return {
@@ -569,6 +567,8 @@ class TeacherInfo {
   }
 
 }
+
+
 
 class UserProgression {
   // MÁXIMO 10 !!!

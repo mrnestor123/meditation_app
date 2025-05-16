@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/meditationData.dart';
-import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/data/models/meditation_model.dart';
+import 'package:meditation_app/data/models/user_model.dart';
 import 'package:meditation_app/domain/entities/stage_entity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

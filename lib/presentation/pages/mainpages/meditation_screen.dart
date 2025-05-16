@@ -1072,7 +1072,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
     _meditationstate = Provider.of<MeditationState>(context);
     _meditationstate.practice = PageController(initialPage: _meditationstate.currentpage);
 
-    _meditationstate.selmeditation  = new Meditation(
+    _meditationstate.selmeditation = new Meditation(
       duration: Duration(minutes: 
         _userstate.user.settings.lastMeditDuration != null 
         && _userstate.user.settings.lastMeditDuration > 0
@@ -1083,7 +1083,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
     );
     selectedstage = _userstate.user.stagenumber;
     
-    print('DIDCHANGEDEPENDENCIES');
+    
   }
 
   @override
@@ -1094,7 +1094,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
   void startMeditation(){
     //ESTO LO PODRÍAMOS HACER EN OTRO SITIO !!!
     _meditationstate.createIntervalBells();
-    
+    _meditationstate.selmeditation.day = DateTime.now();
+
     // METER ESTO DENTRO !!!
     if(_meditationstate.selmeditation.meditationSettings.warmuptime > 0){
       Navigator.push(

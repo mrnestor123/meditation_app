@@ -87,7 +87,7 @@ class _WelcomeWidgetState extends State<WelcomeWidget> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(Configuration.borderRadius),
                   ),
-                  padding: EdgeInsets.all(Configuration.smpadding),
+                  padding: EdgeInsets.all(Configuration.medpadding),
                   child: Text('A journey inside yourself',
                     textAlign: TextAlign.center,
                     style: Configuration.text('title', Color.fromRGBO(102,102,102,1))

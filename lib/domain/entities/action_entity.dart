@@ -1,7 +1,8 @@
-// Para las acciones que hace el usuario
+
 import 'package:flutter/material.dart';
-import 'package:meditation_app/data/models/userData.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
+
+import '../../data/models/user_model.dart';
 
 class UserAction {
   IconData icono;

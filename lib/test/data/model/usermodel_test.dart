@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meditation_app/data/models/userData.dart';
+import 'package:meditation_app/data/models/user_model.dart';
 import 'package:meditation_app/domain/entities/user_entity.dart';
 
 void main() {

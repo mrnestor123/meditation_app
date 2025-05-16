@@ -80,12 +80,11 @@ class UserSettings {
 }
 
 
-
-
 class MeditSettings {
   String finishgong;
   String alertgong;
 }
+
 
 class StageSettings {
   String progression;
